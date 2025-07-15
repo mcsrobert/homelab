@@ -1,0 +1,10 @@
+# Trash
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode
+
+# Sops
+.decrypted~*
+*.agekey
