@@ -1,0 +1,31 @@
+---
+version: '3'
+
+env:
+  # KUBECONFIG: '{{.ROOT_DIR}}/kubeconfig'
+  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.agekey'
+
+includes:
+  bootstrap: bootstrap/
+
+
+tasks:
+
+  install_deps:
+    desc: Install dependencies with Brew
+    cmds:
+      - brew install {{.DEPS}} {{.CLI_ARGS}}
+    preconditions:
+      - sh: command -v brew
+        msg: |
+          Homebrew is not installed. Using MacOS, Linux or WSL?
+          Head over to https://brew.sh to get up and running.
+    vars:
+      DEPS: >-
+        age
+        fluxcd/tap/flux
+        helm
+        helmfile
+        kubernetes-cli
+        kustomize
+        sops
