@@ -1,7 +1,7 @@
 ---
 instance:
-  cluster:
-    networkPolicy: false
+  # cluster:
+  #   networkPolicy: false
   components:
     - source-controller
     - kustomize-controller
