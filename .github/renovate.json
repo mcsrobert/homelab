@@ -4,9 +4,9 @@
     "config:recommended"
   ],
   "flux": {
-    "managerFilePatterns": ["/\\.yaml$/"]
+    "managerFilePatterns": ["/\\.ya?ml$/"]
   },
   "helm-values": {
-    "managerFilePatterns": ["/\\.yaml$/"]
+    "managerFilePatterns": ["/\\.ya?ml$/"]
   }
 }
