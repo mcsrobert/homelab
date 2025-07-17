@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: apps/flux-system/flux-operator/app
+  path: /apps/flux-system/flux-operator/app
   prune: false
   sourceRef:
     kind: GitRepository
@@ -30,7 +30,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: apps/flux-system/flux-operator/instance
+  path: /apps/flux-system/flux-operator/instance
   prune: false
   sourceRef:
     kind: GitRepository

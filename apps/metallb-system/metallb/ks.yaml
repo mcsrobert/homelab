@@ -6,7 +6,7 @@ metadata:
   name: metallb
   namespace: flux-system
 spec:
-  path: apps/metallb-system/metallb/app
+  path: /apps/metallb-system/metallb/app
   prune: false
   sourceRef:
     kind: GitRepository

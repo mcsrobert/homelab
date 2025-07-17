@@ -6,7 +6,7 @@ metadata:
   name: node-feature-discovery
   namespace: flux-system
 spec:
-  path: apps/node-feature-discovery/node-feature-discovery/app
+  path: /apps/node-feature-discovery/node-feature-discovery/app
   prune: false
   sourceRef:
     kind: GitRepository
@@ -21,7 +21,7 @@ spec:
 #   name: node-feature-discovery-config
 #   namespace: flux-system
 # spec:
-#   path: apps/node-feature-discovery/node-feature-discovery/config
+#   path: /apps/node-feature-discovery/node-feature-discovery/config
 #   prune: false
 #   dependsOn:
 #     - name: node-feature-discovery
