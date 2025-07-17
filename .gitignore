@@ -5,6 +5,9 @@ Thumbs.db
 # Editors
 .vscode
 
+# Kubernetes
+kubeconfig
+
 # Sops
 .decrypted~*
 *.agekey

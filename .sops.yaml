@@ -1,0 +1,8 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/chri11g6/sops-schema/refs/heads/master/sops.schema.json
+creation_rules:
+
+  - path_regex: .*\.sops\.ya?ml$
+    encrypted_regex: "^(data|stringData)$"
+    age: >-
+      age1hw68rfze8hyfdhg3g4pn4jakf8klvs9a24fa439h6f00wx29vccqm5jz0k
