@@ -11,4 +11,4 @@ instance:
     kind: GitRepository
     url: https://github.com/mcsrobert/homelab
     ref: refs/heads/main
-    path: cluster
+    path: /cluster
