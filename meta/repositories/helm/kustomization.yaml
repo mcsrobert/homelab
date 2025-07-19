@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - controlplaneio.yaml
   - jetstack.yaml
+  - longhorn.yaml
   - metallb.yaml
   - node-feature-discovery.yaml
   - prometheus-community.yaml
