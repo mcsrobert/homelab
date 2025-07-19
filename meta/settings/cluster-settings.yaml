@@ -6,4 +6,6 @@ metadata:
   name: cluster-settings
   namespace: flux-system
 data:
-  TIMEZONE: Europe/Amsterdam
+  TIME_ZONE: Europe/Amsterdam
+  SERVICE_CIDR: 10.43.0.0/16
+  CLUSTER_CIDR: 10.42.0.0/16
