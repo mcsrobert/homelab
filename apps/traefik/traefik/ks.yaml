@@ -8,6 +8,9 @@ metadata:
 spec:
   path: /apps/traefik/traefik/app
   prune: false
+  dependsOn:
+    - name: prometheus-operator-crds
+    - name: metallb
   sourceRef:
     kind: GitRepository
     name: flux-system
