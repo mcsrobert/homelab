@@ -32,6 +32,8 @@ spec:
       app.kubernetes.io/name: *app
   path: /apps/flux-system/flux-operator/instance
   prune: false
+  dependsOn:
+    - name: flux-operator
   sourceRef:
     kind: GitRepository
     name: flux-system
