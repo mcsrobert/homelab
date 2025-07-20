@@ -10,4 +10,4 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - "longhorn.${SECRET_DOMAIN}"
+    - longhorn.${SECRET_DOMAIN}
