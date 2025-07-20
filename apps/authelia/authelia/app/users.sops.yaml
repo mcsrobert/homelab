@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.1-standalone/secret-v1.json
+apiVersion: v1
+kind: Secret
+metadata:
+  name: authelia-users
+  namespace: authelia
+type: Opaque
+stringData:
+  users_database.yml: ENC[AES256_GCM,data:d2d3NE0Td27IkEtTrrSTxiawVe7mqqFY3tlo+wleKpL7KdGt5RlYalYKzXdtFNdWU+dA+aMGELwXTRkA3Ho3eN7Acx+uBFw/hPmRiL7OWP4t9DcHFJvt7OnqjcFlJI5ienGIMuIWeWcFu6m161ZTsQpntI57TJymMkliVuC526m8E4gSJPGnXfiFxTpNOcSJyCPG/2ID+hAc4tf04BBOiJV/pZqunrdIqdOVljxm8WRzyY9UdoPnLDkB9ii8Hkw+gDIm3QAK8IcvO4WlTe2E7VSjorDjV6/QZoodxUDA269QOlUrTY0CoGNyi/psuhUcQkbMNaQ2N19SmE2W8sZBLr5gWLCAWj+OPNTjcSUB6CCLUhRPIt4eExHq7UBrzs9kG7NszUDwTbvCH75YkD3KazQUGt7d4RMvFS2PgEbk8pl9NT9e3hmvSgvo+FSdEMXgRRwOnHRxBNdXshDEkFkhiAxkp0Us+GkP8aHVc1kXJYUpg6YzDbRaU9cLyrd6lMvXkG20YOdC7B1yD4EzTuuoIk8lHZ+NrcXIS6bsGXQX2AfqSaPvA0gjlkKdJzieYX1X680t1/NhkIT17vJ9frqkDgAeKtOwLa6GKZXkDvzuAlU47eb3v+8DbDS9IayozIAuKmL7koGzjXG5Ji1maUpF/x+HvzK8EOLB1CKiEz1yON9Jt8E36895NvhvobKGSpyDa/y8t27BpcN0fTwbNofcqA==,iv:bEFNarxZeUSovjfklJhXOgRTWESboZxxT9i6PXtxlGo=,tag:q9GfAZ+pfVVKbdFxqqJZrw==,type:str]
+sops:
+  age:
+    - recipient: age1hw68rfze8hyfdhg3g4pn4jakf8klvs9a24fa439h6f00wx29vccqm5jz0k
+      enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA3bjZiOCtLVU81d0Y1WnN0
+        ZktJUlY0S2pUWC9DMmxub1pRak1LN08vVlN3CkI4R2FPdlBUeWl0QVhkQ0tvQmFS
+        NW4zQ1gzZGxoQmZPNFNVSTFJR2xXOFUKLS0tIEs1czJSeHhCTG9oN1RWaitvODVy
+        cy8vVllmK3k5ZS9NaGg2YU80WnFYMjAKG/kj6Mv7/UYVKW7hrZD1NWtKuKrSgrq8
+        Iz+wQ8I2DM3hCRd26CG+OuAUwUPWb2PyPKrJFm0SvmW5tGymKHNGPg==
+        -----END AGE ENCRYPTED FILE-----
+  lastmodified: "2025-07-20T21:31:47Z"
+  mac: ENC[AES256_GCM,data:z1BX7i8TpcYIiP8BSyTgNEaQbYl0IC118aJa7DhFMULNP+j5KVux9MUHSnBlAGMB+mh5i1SmJDCFb9s+rSGrJgednrT3PTwIBdfSfL0r4OA230rKQiBD4E4I3bVH0xgD2v8IS27PQiFCoMnVG3ZgRFozYwyP5xS/9fjBGWAmUA8=,iv:11G+55IOtDAgBep4Fmd3G5uN+Xn8A2utFnU4yxn00Ks=,tag:6fjZjWLJiK6ESzjFVzd6hA==,type:str]
+  encrypted_regex: ^(data|stringData)$
+  version: 3.10.2
