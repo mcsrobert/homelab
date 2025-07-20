@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authelia
+  namespace: authelia
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: authelia
+      version: 0.10.41
+      sourceRef:
+        kind: HelmRepository
+        name: authelia
+        namespace: flux-system
+  values:
+    configMap:
+      access_control:
+        default_policy: deny
+        rules:
+          - domain: "*.${SECRET_DOMAIN}"
+            policy: one_factor
+
+      session:
+        cookies:
+          - domain: ${SECRET_DOMAIN}
+            subdomain: authelia
+
+      authentication_backend:
+        file:
+          enabled: true
+        password_change:
+          disable: true
+        password_reset:
+          disable: true
+
+      notifier:
+        filesystem:
+          enabled: true
+
+      storage:
+        local:
+          enabled: true
+
+      identity_validation:
+        reset_password:
+          secret:
+            disabled: true
+
+      telemetry:
+        metrics:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+
+    secret:
+      existingSecret: authelia-secrets
+
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: Authelia
+        gethomepage.dev/description: Open-source authentication and authorization server
+        gethomepage.dev/group: Security
+        gethomepage.dev/icon: authelia
+      className: traefik
+      tls:
+        enabled: true
+      traefikCRD:
+        enabled: true
+        disableIngressRoute: true
+
+    pod:
+      # should be automatically set with a template based
+      # on the config, but there seems to be a bug so that
+      # without this we get a DaemonSet with 3 replicas
+      kind: StatefulSet
+
+      extraVolumeMounts:
+        - name: users-database
+          mountPath: /config/users_database.yml
+          subPath: users_database.yml
+          readOnly: true
+
+      extraVolumes:
+        - name: users-database
+          secret:
+            secretName: authelia-users
+            items:
+            - key: users_database.yml
+              path: users_database.yml
