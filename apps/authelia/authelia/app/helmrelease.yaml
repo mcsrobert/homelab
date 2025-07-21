@@ -65,6 +65,14 @@ spec:
       existingSecret: authelia-secrets
 
     pod:
+
+      resources:
+        requests:
+          cpu: 50m
+          memory: 100Mi
+        limits:
+          memory: 1Gi  # needed for argon2
+
       # should be automatically set with a template based
       # on the config, but there seems to be a bug so that
       # without this we get a DaemonSet with 3 replicas
