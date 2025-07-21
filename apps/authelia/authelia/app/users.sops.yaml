@@ -1,4 +1,3 @@
----
 # yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.1-standalone/secret-v1.json
 apiVersion: v1
 kind: Secret
@@ -7,7 +6,7 @@ metadata:
   namespace: authelia
 type: Opaque
 stringData:
-  users_database.yml: ENC[AES256_GCM,data:d2d3NE0Td27IkEtTrrSTxiawVe7mqqFY3tlo+wleKpL7KdGt5RlYalYKzXdtFNdWU+dA+aMGELwXTRkA3Ho3eN7Acx+uBFw/hPmRiL7OWP4t9DcHFJvt7OnqjcFlJI5ienGIMuIWeWcFu6m161ZTsQpntI57TJymMkliVuC526m8E4gSJPGnXfiFxTpNOcSJyCPG/2ID+hAc4tf04BBOiJV/pZqunrdIqdOVljxm8WRzyY9UdoPnLDkB9ii8Hkw+gDIm3QAK8IcvO4WlTe2E7VSjorDjV6/QZoodxUDA269QOlUrTY0CoGNyi/psuhUcQkbMNaQ2N19SmE2W8sZBLr5gWLCAWj+OPNTjcSUB6CCLUhRPIt4eExHq7UBrzs9kG7NszUDwTbvCH75YkD3KazQUGt7d4RMvFS2PgEbk8pl9NT9e3hmvSgvo+FSdEMXgRRwOnHRxBNdXshDEkFkhiAxkp0Us+GkP8aHVc1kXJYUpg6YzDbRaU9cLyrd6lMvXkG20YOdC7B1yD4EzTuuoIk8lHZ+NrcXIS6bsGXQX2AfqSaPvA0gjlkKdJzieYX1X680t1/NhkIT17vJ9frqkDgAeKtOwLa6GKZXkDvzuAlU47eb3v+8DbDS9IayozIAuKmL7koGzjXG5Ji1maUpF/x+HvzK8EOLB1CKiEz1yON9Jt8E36895NvhvobKGSpyDa/y8t27BpcN0fTwbNofcqA==,iv:bEFNarxZeUSovjfklJhXOgRTWESboZxxT9i6PXtxlGo=,tag:q9GfAZ+pfVVKbdFxqqJZrw==,type:str]
+  users_database.yml: ENC[AES256_GCM,data:hWpA6R78ns8xORyJtu/PH2SG5qS76P7g5wlsPLEA4H/chQPU/7D/RaqHh2Cl7JILWt46b2zRLiwPcxoOSUGgLe3RVTEX0dwswTBR6pTiDdYoDrufK/C5F3ai7T0m0oTHUMb9SoI2h6CbRRXcbPNI0F8Z0WRlZkI2oxHoePBvr/3WHEiTgpq4XxzKbeINK7OnMP9Ug5TVhDPGJeRb29VMlOVlYIeWj/XgVcoEthdCWOaDPyF1uF8lN39NVsm6n6+xfYkleRmOuEg7SQ5QJKPNN+/dgiNi8eW023O9y9kMS9AOJXwwnQLU3XIUI4QiuX6oFVPvHe7kWXc0SJQSZnC8boeizy/ZqER+/fbfdykQBZ67nzlQadRj5zdeCUI4yFXSKdsfoFDsdWbd4cTqUrdAQ610SETi8/YAemNYAmX4BtU3GUhX7pArn6t3Wx053rYnRsJDxvzjAIU7inPqXLaHMIPMufczocFgrURIgw7S13tFiZ1q7kJ9wT4RcTDFNqhRd+BF2xApGiDQjEsD5e8+zMakCXJDB3DdZnBuhEmZdkR4Q1kBqtsNXfSZDgRI8YpGwcIAzT5h88NxBfv/r2pCBPvlPzNm1ZZNPy7lQh75jRLIPuyOVv8uBQefZ+BpQiuJDNTl9e6OO0coLYmvl6CRBb+Rh9LYsqX5Il/HjDUlvuaGg5pZ7a1ejAZjNGwMM4S7xhmf/Zd6pBqFC4P57dc7yno1mGxh,iv:kfsoG94wK0Np5iAxgwFbOI0OB1QadnXFi0KRNeYoFwU=,tag:XaLQx/IdOqdVRB/2GzI85g==,type:str]
 sops:
   age:
     - recipient: age1hw68rfze8hyfdhg3g4pn4jakf8klvs9a24fa439h6f00wx29vccqm5jz0k
@@ -19,7 +18,7 @@ sops:
         cy8vVllmK3k5ZS9NaGg2YU80WnFYMjAKG/kj6Mv7/UYVKW7hrZD1NWtKuKrSgrq8
         Iz+wQ8I2DM3hCRd26CG+OuAUwUPWb2PyPKrJFm0SvmW5tGymKHNGPg==
         -----END AGE ENCRYPTED FILE-----
-  lastmodified: "2025-07-20T21:31:47Z"
-  mac: ENC[AES256_GCM,data:z1BX7i8TpcYIiP8BSyTgNEaQbYl0IC118aJa7DhFMULNP+j5KVux9MUHSnBlAGMB+mh5i1SmJDCFb9s+rSGrJgednrT3PTwIBdfSfL0r4OA230rKQiBD4E4I3bVH0xgD2v8IS27PQiFCoMnVG3ZgRFozYwyP5xS/9fjBGWAmUA8=,iv:11G+55IOtDAgBep4Fmd3G5uN+Xn8A2utFnU4yxn00Ks=,tag:6fjZjWLJiK6ESzjFVzd6hA==,type:str]
+  lastmodified: "2025-07-21T12:46:11Z"
+  mac: ENC[AES256_GCM,data:FmG4fww+N8Cc55KDjpmxE9zAuSDZvCAw5itlmzAxbLOWzTwnOciqpVEq3AHij7XMkUrvqU8V0lviUW6iPcCyfmFOojQStPMjDHOLJa6MyaC7cwAE6io0YS1P/9Egy5yYCtZvXGwoAX+KQVyJpnNKdFsvQ0jdlxWUsIEr4yomyQQ=,iv:jtbJeXFAiZxX3C9Mg8uSwB9gjh7+77/CjM37zImK4uo=,tag:oTamM7Fk3WMha5QygFsQfg==,type:str]
   encrypted_regex: ^(data|stringData)$
   version: 3.10.2
