@@ -21,8 +21,8 @@ spec:
     crds: CreateReplace
   values:
 
-    ingress:
-      enabled: false  # done via Kustomization
+    defaultSettings:
+      backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
 
     csi:
       attacherReplicaCount: 1
@@ -33,8 +33,21 @@ spec:
     longhornUI:
       replicas: 1
 
-    defaultSettings:
-      backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        traefik.ingress.kubernetes.io/router.middlewares: authelia-forwardauth-authelia@kubernetescrd
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: Longhorn
+        gethomepage.dev/icon: longhorn
+        gethomepage.dev/description: Distributed, highly available Kubernetes storage
+        gethomepage.dev/group: Infrastructure
+        gethomepage.dev/pod-selector: ""
+      host: longhorn.${SECRET_DOMAIN}
+      tls: true
+      tlsSecret: longhorn-tls
 
     metrics:
       serviceMonitor:

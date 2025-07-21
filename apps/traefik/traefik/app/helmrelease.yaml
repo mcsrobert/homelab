@@ -49,7 +49,7 @@ spec:
 
     providers:
       kubernetesCRD:
-        allowCrossNamespace: true  # needed to redirect to Authentik
+        allowCrossNamespace: true  # needed for ForwardAuth middleware
 
     metrics:
       prometheus:
