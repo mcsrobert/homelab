@@ -12,6 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   path: /apps/flux-system/flux-operator/app
   prune: false
+  dependsOn:
+    - name: prometheus-operator-crds
   sourceRef:
     kind: GitRepository
     name: flux-system
