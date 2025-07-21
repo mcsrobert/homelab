@@ -28,6 +28,12 @@ spec:
           - domain: ${SECRET_DOMAIN}
             subdomain: authelia
 
+      server:
+        endpoints:
+          authz:
+            forward-auth:
+              implementation: 'ForwardAuth'
+
       authentication_backend:
         file:
           enabled: true
@@ -58,22 +64,6 @@ spec:
     secret:
       existingSecret: authelia-secrets
 
-    ingress:
-      enabled: true
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/name: Authelia
-        gethomepage.dev/description: Open-source authentication and authorization server
-        gethomepage.dev/group: Security
-        gethomepage.dev/icon: authelia
-      className: traefik
-      tls:
-        enabled: true
-      traefikCRD:
-        enabled: true
-        disableIngressRoute: true
-
     pod:
       # should be automatically set with a template based
       # on the config, but there seems to be a bug so that
@@ -91,5 +81,21 @@ spec:
           secret:
             secretName: authelia-users
             items:
-            - key: users_database.yml
-              path: users_database.yml
+              - key: users_database.yml
+                path: users_database.yml
+
+    ingress:
+      enabled: true
+      className: traefik
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: Authelia
+        gethomepage.dev/icon: authelia
+        gethomepage.dev/description: Open-source authentication and authorization server
+        gethomepage.dev/group: Security
+      tls:
+        enabled: true
+      traefikCRD:
+        enabled: true
+        disableIngressRoute: true
