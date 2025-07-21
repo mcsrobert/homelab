@@ -10,4 +10,5 @@ resources:
   - metallb.yaml
   - node-feature-discovery.yaml
   - prometheus-community.yaml
+  - stakater.yaml
   - traefik.yaml
