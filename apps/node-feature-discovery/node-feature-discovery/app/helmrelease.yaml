@@ -20,13 +20,13 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-    # master:
-    #   resources:
-    #     requests:
-    #       cpu: 21m
-    #       memory: 51Mi
-    #     limits:
-    #       memory: 51Mi
+    master:
+      resources:
+        requests:
+          cpu: 15m
+          memory: 64Mi
+        limits:
+          memory: 64Mi
 
     worker:
       config:
@@ -36,9 +36,17 @@ spec:
           usb:
             deviceClassWhitelist: ["02"]
 
-      # resources:
-      #   requests:
-      #     cpu: 5m
-      #     memory: 48Mi
-      #   limits:
-      #     memory: 48Mi
+      resources:
+        requests:
+          cpu: 5m
+          memory: 48Mi
+        limits:
+          memory: 48Mi
+
+    gc:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 48Mi
+        limits:
+          memory: 48Mi
