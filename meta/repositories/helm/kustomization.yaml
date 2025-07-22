@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - aenix-io.yaml
   - authelia.yaml
+  - bjw-s.yaml
   - controlplaneio.yaml
   - jetstack.yaml
   - longhorn.yaml
