@@ -38,7 +38,7 @@ spec:
               - name: BOOTSTRAP_ROLES
                 value: dns;api;monitoring
               - name: INSTANCE_IP
-                value: &ip 192.168.178.249
+                value: &ip ${DNS_IP}
               - name: INSTANCE_LISTEN
                 value: 0.0.0.0
             probes:
@@ -48,14 +48,14 @@ spec:
                 spec:
                   httpGet:
                     path: /healthz/live
-                    port: http-metrics
+                    port: 8009
               readiness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /healthz/ready
-                    port: http-metrics
+                    port: 8009
 
     service:
       app:
@@ -67,25 +67,43 @@ spec:
       dns:
         type: LoadBalancer
         loadBalancerIP: *ip
+        # externalTrafficPolicy: Local
+        # allocateLoadBalancerNodePorts: false
         ports: &dns_ports
           dns-tcp:
             port: 53
             protocol: TCP
-          dns-ucp:
+          dns-udp:
             port: 53
             protocol: UDP
 
       dns-ipv6:
         enabled: false
         type: LoadBalancer
-        loadBalancerIP: 2a02:a468:1acb:1:8::df30
+        loadBalancerIP: "${DNS_IPv6}"
         ports: *dns_ports
 
-      metrics:
-        type: ClusterIP
-        ports:
-          http-metrics:
-            port: 8009
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Gravity
+          gethomepage.dev/icon: gravity
+          gethomepage.dev/description: DNS with ad-blocking through Blocky
+          gethomepage.dev/group: Network
+        hosts:
+          - host: &domain gravity.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *domain
+            secretName: gravity-tls
 
     persistence:
       data:
