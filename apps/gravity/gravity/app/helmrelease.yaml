@@ -31,11 +31,11 @@ spec:
                 - path: /data
 
         pod:
-          # securityContext:
-          #   runAsUser: 1000
-          #   runAsGroup: 1000
-          #   fsGroup: 1000
-          #   fsGroupChangePolicy: OnRootMismatch
+          securityContext:
+            runAsUser: 65532
+            runAsGroup: 65532
+            fsGroup: 65532
+            fsGroupChangePolicy: OnRootMismatch
 
           topologySpreadConstraints:
             - maxSkew: 1
