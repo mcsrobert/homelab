@@ -3,9 +3,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: aenix-io
+  name: mojo2600-pihole-kubernetes
   namespace: flux-system
 spec:
   interval: 1h
-  type: oci
-  url: oci://ghcr.io/aenix-io/charts
+  url: https://mojo2600.github.io/pihole-kubernetes/
