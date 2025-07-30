@@ -10,14 +10,12 @@ spec:
   chart:
     spec:
       chart: pihole
-      version: 2.27.0
+      version: 2.31.0
       sourceRef:
         kind: HelmRepository
         name: mojo2600-pihole-kubernetes
         namespace: flux-system
   values:
-
-    ### Pihole specific config ###
 
     # Use sidecar as upstream
     DNS1: "127.0.0.1#5053"
@@ -26,12 +24,8 @@ spec:
     # See: https://github.com/pi-hole/docker-pi-hole?tab=readme-ov-file#environment-variables
     extraEnvVars:
       TZ: ${TIME_ZONE}
-      FTLCONF_LOCAL_IPV4: ${DNS_IP}
-      DHCP_ACTIVE: false
-      REV_SERVER: true
-      REV_SERVER_DOMAIN: fritz.box
-      REV_SERVER_TARGET: 192.168.178.1
-      REV_SERVER_CIDR: 192.168.178.0/24
+      FTLCONF_dhcp_active: false
+      FTLCONF_dns_revServers: "true,192.168.178.0/24,192.168.178.1#53,fritz.box"
 
     admin:
       existingSecret: pihole-admin
@@ -54,9 +48,12 @@ spec:
         - "address=/*.${SECRET_DOMAIN}/${PROXY_IPv6}"
       customSettings:
         - local=/${SECRET_DOMAIN}/
+        - except-interface=nonexisting
 
     doh:
       enabled: true
+      repository: crazymax/cloudflared
+      tag: 2025.6.1
       envVars:
         TZ: ${TIME_ZONE}
         TUNNEL_DNS_UPSTREAM: https://dns.quad9.net/dns-query
@@ -69,6 +66,9 @@ spec:
         enabled: true
       sidecar:
         enabled: true
+        image:
+          repository: ekofr/pihole-exporter
+          tag: v1.0.0
 
     replicaCount: 3
 
@@ -103,9 +103,13 @@ spec:
       enabled: true
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-prod
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: Pi-Hole
+        gethomepage.dev/icon: pi-hole
+        gethomepage.dev/description: Network-wide ad blocking with local DNS
+        gethomepage.dev/group: Network
       hosts:
         - &domain pihole.${SECRET_DOMAIN}
-      path: /
       tls:
         - hosts:
             - *domain
