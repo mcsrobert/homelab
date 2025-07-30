@@ -1,0 +1,112 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app pihole
+  namespace: pihole
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: pihole
+      version: 2.27.0
+      sourceRef:
+        kind: HelmRepository
+        name: mojo2600-pihole-kubernetes
+        namespace: flux-system
+  values:
+
+    ### Pihole specific config ###
+
+    # Use sidecar as upstream
+    DNS1: "127.0.0.1#5053"
+    DNS2: ""
+
+    # See: https://github.com/pi-hole/docker-pi-hole?tab=readme-ov-file#environment-variables
+    extraEnvVars:
+      TZ: ${TIME_ZONE}
+      FTLCONF_LOCAL_IPV4: ${DNS_IP}
+      DHCP_ACTIVE: false
+      REV_SERVER: true
+      REV_SERVER_DOMAIN: fritz.box
+      REV_SERVER_TARGET: 192.168.178.1
+      REV_SERVER_CIDR: 192.168.178.0/24
+
+    admin:
+      existingSecret: pihole-admin
+
+    adlists:
+      # Spam / Malware
+      - https://raw.githubusercontent.com/FiltersHeroes/KADhosts/master/KADhosts.txt
+      # Ads
+      - https://big.oisd.nl
+      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt
+      - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus;showintro=0
+
+    blacklist:
+      # Weird domain from TV
+      - 225e51b9e76cd2d77f1853b2209115e7f4ff987f045d88c753af4ced57d1d05.us-east-1.prod.service.minerva.devices.a2z.com
+
+    dnsmasq:
+      customDnsEntries:
+        - "address=/*.${SECRET_DOMAIN}/${PROXY_IP}"
+        - "address=/*.${SECRET_DOMAIN}/${PROXY_IPv6}"
+      customSettings:
+        - local=/${SECRET_DOMAIN}/
+
+    doh:
+      enabled: true
+      envVars:
+        TZ: ${TIME_ZONE}
+        TUNNEL_DNS_UPSTREAM: https://dns.quad9.net/dns-query
+      monitoring:
+        podMonitor:
+          enabled: true
+
+    monitoring:
+      podMonitor:
+        enabled: true
+      sidecar:
+        enabled: true
+
+    replicaCount: 3
+
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: *app
+
+    dualStack:
+      enabled: true
+
+    serviceDhcp:
+      enabled: false
+
+    serviceDns:
+      type: LoadBalancer
+      loadBalancerIP: ${DNS_IP}
+      loadBalancerIPv6: ${DNS_IPv6}
+      annotations:
+        metallb.universe.tf/allow-shared-ip: *app
+
+    serviceWeb:
+      https:
+        enabled: false  # handled through ingress
+      annotations:
+        traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - &domain pihole.${SECRET_DOMAIN}
+      path: /
+      tls:
+        - hosts:
+            - *domain
+          secretName: pihole-tls
