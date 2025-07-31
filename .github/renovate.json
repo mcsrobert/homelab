@@ -8,5 +8,14 @@
   },
   "helm-values": {
     "managerFilePatterns": ["/\\.ya?ml$/"]
-  }
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.ya?ml$"],
+      "matchStrings": [
+        "# renovate: docker\\n\\s+repository: (?<depName>[\\w./-]+)\\n\\s+tag: (?<currentValue>[\\w.-]+)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
 }

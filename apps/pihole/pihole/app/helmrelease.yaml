@@ -52,6 +52,7 @@ spec:
 
     doh:
       enabled: true
+      # renovate: docker
       repository: crazymax/cloudflared
       tag: 2025.6.1
       envVars:
