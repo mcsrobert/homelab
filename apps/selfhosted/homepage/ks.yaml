@@ -11,6 +11,7 @@ spec:
   dependsOn:
     - name: traefik
     - name: cert-manager
+    - name: reloader
   sourceRef:
     kind: GitRepository
     name: flux-system
