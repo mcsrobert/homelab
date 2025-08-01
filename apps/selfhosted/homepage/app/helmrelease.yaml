@@ -60,7 +60,7 @@ spec:
       app:
         className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-prod
+          cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: *domain
             paths:
