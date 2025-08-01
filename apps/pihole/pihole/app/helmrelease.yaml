@@ -103,7 +103,7 @@ spec:
     ingress:
       enabled: true
       annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+        cert-manager.io/cluster-issuer: letsencrypt-production
         gethomepage.dev/enabled: "true"
         gethomepage.dev/name: Pi-Hole
         gethomepage.dev/icon: pi-hole
