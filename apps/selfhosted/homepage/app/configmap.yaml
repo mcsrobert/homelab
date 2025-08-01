@@ -5,22 +5,26 @@ kind: ConfigMap
 metadata:
   name: homepage-config
 data:
+  bookmarks.yaml: |
+    - Developer:
+        - Github:
+            - abbr: GH
+              href: https://github.com/mcsrobert/homelab
+        - Asus RT-AX86S:
+            - abbr: RT
+              href: https://asus-wifi-router.fritz.box:8443
+  custom.css: |
+    .information-widget-longhorn-node {
+        margin-left: 1rem; /* Equivalent to ml-4 */ !important
+    }
+  custom.js: ""
+  docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
   settings.yaml: |
     providers:
       longhorn:
         url: http://longhorn-frontend.longhorn-system.svc.cluster.local
-  custom.css: |
-    .information-widget-longhorn-node {
-        margin-left: 1rem; /* Equivalent to ml-4 */ !important
-    }
-  custom.js: ""
-  bookmarks.yaml: |
-    - Developer:
-        - Github:
-            - abbr: GH
-              href: https://github.com/mcsrobert/homelab
   services.yaml: |
     - Smart Home:
         - Home Assistant:
@@ -95,23 +99,20 @@ data:
             icon: traefik-proxy
             namespace: traefik
             app: traefik
+    - Observability:
         - Prometheus:
             description: Metrics and time-series database
             icon: prometheus
-            namespace: monitoring
+            namespace: observability
             app: prometheus
     - Network:
         - FRITZ!Box 5590:
-            href: http://fritz.box/
+            href: http://fritz.box
             description: Fiber modem and WiFi 6 router
             icon: avm-fritzbox
             widget:
               type: fritzbox
-              url: http://fritz.box
-        - Asus RT-AX86S:
-            href: https://asus-wifi-router.fritz.box:8443
-            description: Wi-Fi 6 gaming router
-            icon: asus-router
+              url: http://192.168.178.1
         - Tailscale:
             href: https://login.tailscale.com/admin/machines
             description: Zero-config VPN with WireGuard.
@@ -137,4 +138,3 @@ data:
         total: true
         labels: true
         nodes: true
-  # docker.yaml: ""
