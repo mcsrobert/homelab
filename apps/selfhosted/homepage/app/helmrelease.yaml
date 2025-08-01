@@ -59,6 +59,8 @@ spec:
     ingress:
       app:
         className: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
         hosts:
           - host: *domain
             paths:
@@ -69,6 +71,7 @@ spec:
         tls:
           - hosts:
               - *domain
+            secretName: homepage-tls
 
     persistence:
       config:
