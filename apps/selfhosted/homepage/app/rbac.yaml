@@ -3,10 +3,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: &app homepage
-  labels:
-    app.kubernetes.io/instance: *app
-    app.kubernetes.io/name: *app
+  name: homepage
 rules:
   - apiGroups:
       - ""
@@ -52,9 +49,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: &app homepage
-  labels:
-    app.kubernetes.io/instance: *app
-    app.kubernetes.io/name: *app
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
