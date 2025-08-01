@@ -9,6 +9,7 @@ spec:
   path: /apps/authelia/authelia/app
   prune: true
   dependsOn:
+    - name: prometheus-operator-crds
     - name: cert-manager
     - name: traefik
   sourceRef:

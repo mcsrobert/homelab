@@ -8,10 +8,10 @@ metadata:
 spec:
   path: /apps/kube-system/reloader/app
   prune: true
-  dependsOn:
-    - name: prometheus-operator-crds
   sourceRef:
     kind: GitRepository
     name: flux-system
   interval: 30m
   timeout: 5m
+  dependsOn:
+    - name: prometheus-operator-crds

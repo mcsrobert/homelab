@@ -9,6 +9,7 @@ spec:
   path: /apps/pihole/pihole/app
   prune: false
   dependsOn:
+    - name: prometheus-operator-crds
     - name: cert-manager
     - name: traefik
     - name: metallb
