@@ -13,10 +13,10 @@ spec:
     - name: traefik
     - name: cert-manager
     - name: reloader
-  path: /apps/selfhosted/homepage/app
+  path: /apps/default/homepage/app
   interval: 30m
   prune: true
-  targetNamespace: selfhosted
+  targetNamespace: default
   sourceRef:
     kind: GitRepository
     name: flux-system
