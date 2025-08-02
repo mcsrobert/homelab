@@ -48,7 +48,7 @@ spec:
         - "address=/*.${SECRET_DOMAIN}/${PROXY_IPv6}"
       customSettings:
         - local=/${SECRET_DOMAIN}/
-        - except-interface=nonexisting
+        - except-interface=nonexisting  # https://docs.pi-hole.net/ftldns/interfaces/
 
     doh:
       enabled: true
