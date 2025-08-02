@@ -21,6 +21,7 @@ data:
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
+  proxmox.yaml: ""
   settings.yaml: |
     providers:
       longhorn:
@@ -78,16 +79,6 @@ data:
             icon: vaultwarden-light
             namespace: vaultwarden
             app: vaultwarden
-        # - Authentik:
-        #     href: https://{{ domains.authentik }}/
-        #     description: Self-hosted authentication, SSO, and access control.
-        #     icon: authentik
-        #     namespace: authentik
-        #     app: authentik
-        #     widget:
-        #       type: authentik
-        #       url: https://{{ domains.authentik }}/
-        #       key: {{ secrets.authentik.token }}
     - Infrastructure:
         - MetalLB:
             description: Bare-metal load-balancing for Kubernetes
