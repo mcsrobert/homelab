@@ -46,9 +46,9 @@ spec:
           - &grafana_domain grafana.${SECRET_DOMAIN}
         path: /
         tls:
-          - secretName: grafana-tls
-            hosts:
+          - hosts:
               - *grafana_domain
+            secretName: grafana-tls
 
       # Required to add additional dashboards via config
       # TODO: move to Grafana Operator and deploy dashboards as CRDs
@@ -79,6 +79,23 @@ spec:
             datasource:
               - name: DS_PROMETHEUS
                 value: Prometheus
+          blocky:
+            gnetId: 13768
+            revision: 6
+            datasource:
+              - name: DS_PROMETHEUS
+                value: Prometheus
+              - name: VAR_BLOCKY_URL
+                value: 'https:\/\/blocky.${SECRET_DOMAIN}'
+          cert-manager:
+            url: https://gitlab.com/uneeq-oss/cert-manager-mixin/-/raw/master/dashboards/cert-manager.json
+            datasource: Prometheus
+          flux-cluster:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
+            datasource: Prometheus
+          flux-control-plane:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
+            datasource: Prometheus
 
     prometheus:
       prometheusSpec:
