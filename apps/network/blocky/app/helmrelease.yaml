@@ -61,10 +61,6 @@ spec:
                 spec:
                   tcpSocket:
                     port: 53
-              #     exec:
-              #       command:
-              #         - /app/blocky
-              #         - healthcheck
                   initialDelaySeconds: 15
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -88,6 +84,7 @@ spec:
           dns-udp:
             port: 53
             protocol: UDP
+
     serviceMonitor:
       main:
         serviceName: *app
@@ -96,6 +93,30 @@ spec:
             path: /metrics
             port: http
             scrapeTimeout: 10s
+
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          traefik.ingress.kubernetes.io/router.middlewares: security-forwardauth-authelia@kubernetescrd
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Blocky
+          gethomepage.dev/icon: blocky
+          gethomepage.dev/description: DNS proxy and ad-blocker written in Go
+          gethomepage.dev/group: Network
+        hosts:
+          - host: &domain blocky.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *domain
+            secretName: blocky-tls
+
     persistence:
       config:
         type: configMap
