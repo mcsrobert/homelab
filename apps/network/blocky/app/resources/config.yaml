@@ -1,0 +1,34 @@
+---
+upstreams:
+  groups:
+    default:
+      - tcp-tls:dns.quad9.net
+      - tcp-tls:1dot1dot1dot1.cloudflare-dns.com
+bootstrapDns: tcp+udp:1.1.1.1
+conditional:
+  fallbackUpstream: false
+  mapping:
+    fritz.box: 192.168.178.1
+    178.168.192.in-addr.arpa: 192.168.178.1
+clientLookup:
+  upstream: 192.168.178.1
+blocking:
+  blackLists:
+    ads:
+      - https://big.oisd.nl
+      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/doh.txt
+      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.medium.txt
+      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt
+      - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus;showintro=0
+  clientGroupsBlock:
+    default:
+      - ads
+caching:
+  cacheTimeNegative: 30s
+# redis:
+#   address: dragonfly.database.svc.cluster.local:6379
+#   database: 1
+prometheus:
+  enable: true
+ports:
+  http: 4000
