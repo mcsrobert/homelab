@@ -78,8 +78,6 @@ spec:
     ingress:
       app:
         className: traefik
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
           - host: *domain
             paths:

@@ -77,7 +77,6 @@ spec:
       app:
         className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Vaultwarden
           gethomepage.dev/icon: vaultwarden-light
