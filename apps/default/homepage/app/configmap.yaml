@@ -72,13 +72,6 @@ data:
             icon: stirling-pdf
             namespace: stirling-pdf
             app: stirling-pdf-chart
-    - Security:
-        - Vaultwarden:
-            href: https://vault.${SECRET_DOMAIN}/
-            description: Lightweight, self-hosted password manager
-            icon: vaultwarden-light
-            namespace: vaultwarden
-            app: vaultwarden
     - Infrastructure:
         - MetalLB:
             description: Bare-metal load-balancing for Kubernetes
