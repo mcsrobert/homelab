@@ -6,13 +6,13 @@ metadata:
   name: traefik
   namespace: flux-system
 spec:
-  path: /apps/traefik/traefik/app
-  prune: false
   dependsOn:
     - name: prometheus-operator-crds
     - name: metallb
+  path: /apps/network/traefik/app
+  interval: 15m
+  prune: false
+  targetNamespace: network
   sourceRef:
     kind: GitRepository
     name: flux-system
-  interval: 15m
-  timeout: 5m
