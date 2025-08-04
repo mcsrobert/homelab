@@ -78,6 +78,11 @@ spec:
         className: traefik
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Vaultwarden
+          gethomepage.dev/icon: vaultwarden-light
+          gethomepage.dev/description: Lightweight, self-hosted password manager
+          gethomepage.dev/group: Security
         hosts:
           - host: &domain vault.${SECRET_DOMAIN}
             paths:
