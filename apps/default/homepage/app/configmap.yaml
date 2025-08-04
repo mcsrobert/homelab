@@ -78,11 +78,6 @@ data:
             icon: metallb
             namespace: metallb-system
             app: metallb
-        - Traefik:
-            description: Modern reverse proxy for applications
-            icon: traefik-proxy
-            namespace: traefik
-            app: traefik
     - Observability:
         - Prometheus:
             description: Metrics and time-series database
@@ -97,6 +92,11 @@ data:
             widget:
               type: fritzbox
               url: http://192.168.178.1
+        - Traefik:
+            description: Modern reverse proxy for applications
+            icon: traefik-proxy
+            namespace: network
+            app: traefik
         - Tailscale:
             href: https://login.tailscale.com/admin/machines
             description: Zero-config VPN with WireGuard.
