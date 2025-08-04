@@ -17,7 +17,7 @@ spec:
   values:
     controllers:
       blocky:
-        replicas: 1
+        replicas: 3
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -76,7 +76,8 @@ spec:
         controller: *app
         type: LoadBalancer
         annotations:
-          metallb.io/loadBalancerIPs: 192.168.178.249
+          metallb.io/loadBalancerIPs: "${DNS_IP},${DNS_IPv6}"
+        ipFamilyPolicy: RequireDualStack
         ports:
           dns-tcp:
             port: 53
