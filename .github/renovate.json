@@ -9,7 +9,7 @@
   "helm-values": {
     "managerFilePatterns": ["/\\.ya?ml$/"]
   },
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["\\.ya?ml$"],
       "matchStrings": [
