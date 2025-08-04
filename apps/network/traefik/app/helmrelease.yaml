@@ -52,5 +52,21 @@ spec:
 
     metrics:
       prometheus:
+        addServicesLabels: true
         serviceMonitor:
           enabled: true
+
+    ingressRoute:
+      dashboard:
+        enabled: true
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+        middlewares:
+          - name: forwardauth-authelia
+            namespace: security
+        entryPoints:
+          - websecure
+        tls:
+          - hosts:
+              - traefik.${SECRET_DOMAIN}
+            secretName: traefik-tls
