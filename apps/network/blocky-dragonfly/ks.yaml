@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: blocky-dragonfly
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: dragonfly-operator
+  path: /apps/network/blocky-dragonfly/dragonfly
+  interval: 15m
+  prune: true
+  targetNamespace: &namespace network
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: dragonfly-blocky
+      namespace: *namespace

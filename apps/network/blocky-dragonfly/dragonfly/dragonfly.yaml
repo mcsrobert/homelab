@@ -1,0 +1,27 @@
+---
+apiVersion: dragonflydb.io/v1alpha1
+kind: Dragonfly
+metadata:
+  name: blocky-dragonfly
+  labels:
+    app.kubernetes.io/name: dragonfly
+    app.kubernetes.io/instance: blocky-dragonfly
+spec:
+  replicas: 2
+  resources: {}
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+    # requests:
+    #   cpu: 500m
+    #   memory: 500Mi
+    # limits:
+    #   cpu: 600m
+    #   memory: 750Mi
+  image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.32.0
