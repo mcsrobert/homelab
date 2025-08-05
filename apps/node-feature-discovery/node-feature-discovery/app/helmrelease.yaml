@@ -19,6 +19,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
+  # See: https://github.com/kubernetes-sigs/node-feature-discovery/blob/master/deployment/helm/node-feature-discovery/values.yaml
   values:
     master:
       resources:
@@ -50,4 +51,4 @@ spec:
           memory: 64Mi
 
     prometheus:
-      enable: false
+      enable: true
