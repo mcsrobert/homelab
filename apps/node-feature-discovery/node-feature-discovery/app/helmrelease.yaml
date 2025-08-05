@@ -26,12 +26,10 @@ spec:
           cpu: 15m
           memory: 64Mi
         limits:
-          memory: 64Mi
+          memory: 128Mi
 
     worker:
       config:
-        core:
-          sources: ["custom", "pci", "usb"]
         sources:
           usb:
             deviceClassWhitelist: ["02"]
@@ -39,14 +37,17 @@ spec:
       resources:
         requests:
           cpu: 5m
-          memory: 48Mi
+          memory: 32Mi
         limits:
-          memory: 48Mi
+          memory: 64Mi
 
     gc:
       resources:
         requests:
           cpu: 5m
-          memory: 48Mi
+          memory: 32Mi
         limits:
-          memory: 48Mi
+          memory: 64Mi
+
+    prometheus:
+      enable: false
