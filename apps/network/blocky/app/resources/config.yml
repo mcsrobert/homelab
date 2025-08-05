@@ -17,16 +17,22 @@ blocking:
     ads:
       - https://big.oisd.nl
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt
+    malware:
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/doh.txt
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.medium.txt
   clientGroupsBlock:
     default:
       - ads
+      - malware
 customDNS:
   mapping:
     ${SECRET_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
 caching:
-  cacheTimeNegative: 30s
+  maxItemsCount: 10_000
+  minTime: 30s
+  maxTime: 300s
+  cacheTimeNegative: 60s
+  # prefetching: true
 # redis:
 #   address: dragonfly.database.svc.cluster.local:6379
 #   database: 1
