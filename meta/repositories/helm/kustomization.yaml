@@ -6,6 +6,7 @@ resources:
   - authelia.yaml
   - bjw-s.yaml
   - controlplaneio.yaml
+  - dragonfly-operator.yaml
   - jetstack.yaml
   - longhorn.yaml
   - metallb.yaml
