@@ -6,6 +6,8 @@ metadata:
   name: node-feature-discovery
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: prometheus-operator-crds
   path: /apps/node-feature-discovery/node-feature-discovery/app
   prune: false
   sourceRef:
