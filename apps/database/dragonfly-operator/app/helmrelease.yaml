@@ -3,21 +3,29 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: flux-operator
+  name: dragonfly-operator
 spec:
   interval: 30m
   chart:
     spec:
-      chart: flux-operator
-      version: 0.26.0
+      chart: dragonfly-operator
+      version: v1.1.11
       sourceRef:
         kind: HelmRepository
-        name: controlplaneio
+        name: dragonfly-operator
         namespace: flux-system
   install:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  valuesFrom:
-    - kind: ConfigMap
-      name: flux-operator-helm-values
+  values:
+    manager:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 64Mi
+        requests:
+          cpu: 10m
+          memory: 32Mi
+    serviceMonitor:
+      enabled: true
