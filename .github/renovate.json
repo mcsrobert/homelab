@@ -4,14 +4,21 @@
     "config:recommended"
   ],
   "flux": {
-    "managerFilePatterns": ["/\\.ya?ml$/"]
+    "managerFilePatterns": [
+      "/\\.ya?ml$/"
+    ]
   },
   "helm-values": {
-    "managerFilePatterns": ["/\\.ya?ml$/"]
+    "managerFilePatterns": [
+      "/\\.ya?ml$/"
+    ]
   },
   "customManagers": [
     {
-      "fileMatch": ["\\.ya?ml$"],
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/\\.ya?ml$/"
+      ],
       "matchStrings": [
         "# renovate: docker\\n\\s+repository: (?<depName>[\\w./-]+)\\n\\s+tag: (?<currentValue>[\\w.-]+)"
       ],
