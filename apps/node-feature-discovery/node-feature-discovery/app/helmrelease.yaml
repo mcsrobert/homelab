@@ -34,6 +34,7 @@ spec:
         sources:
           usb:
             deviceClassWhitelist: ["02"]
+            deviceLabelFields: ["class", "vendor", "device"]
 
       resources:
         requests:
