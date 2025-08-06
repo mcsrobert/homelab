@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/name: dragonfly
     app.kubernetes.io/instance: blocky-dragonfly
 spec:
+  image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.32.0
   replicas: 2
   resources: {}
     # requests:
@@ -15,13 +16,13 @@ spec:
     # limits:
     #   cpu: 600m
     #   memory: 750Mi
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #         - matchExpressions:
-  #             - key: kubernetes.io/arch
-  #               operator: In
-  #               values:
-  #                 - amd64
-  image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.32.0
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          # Do not schedule on the Raspberry Pi 4
+          # See: https://github.com/dragonflydb/dragonfly/issues/777
+          - matchExpressions:
+              - key: feature.node.kubernetes.io/cpu-model.id
+                operator: NotIn
+                values: ["53379"]
