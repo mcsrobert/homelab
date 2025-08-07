@@ -19,12 +19,12 @@ spec:
       access_control:
         default_policy: deny
         rules:
-          - domain: "*.${SECRET_DOMAIN}"
+          - domain: "*.${CLUSTER_DOMAIN}"
             policy: one_factor
 
       session:
         cookies:
-          - domain: ${SECRET_DOMAIN}
+          - domain: ${CLUSTER_DOMAIN}
             subdomain: authelia
 
       server:

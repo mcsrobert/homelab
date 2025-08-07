@@ -29,7 +29,7 @@ data:
   services.yaml: |
     - Smart Home:
         - Home Assistant:
-            href: https://ha.${SECRET_DOMAIN}/
+            href: https://ha.${CLUSTER_DOMAIN}/
             description: Local smart home control and automation.
             icon: home-assistant
             namespace: ha-mqtt
@@ -40,7 +40,7 @@ data:
             namespace: ha-mqtt
             app: mosquitto
         - ZigBee2MQTT:
-            href: https://z2m.${SECRET_DOMAIN}/
+            href: https://z2m.${CLUSTER_DOMAIN}/
             description: Bridge Zigbee devices to MQTT.
             icon: zigbee2mqtt
             namespace: ha-mqtt
@@ -52,14 +52,14 @@ data:
             app: ring-mqtt
     # - Media:
     #     - Jellyfin:
-    #         href: https://jellyfin.${SECRET_DOMAIN}/
+    #         href: https://jellyfin.${CLUSTER_DOMAIN}/
     #         description: Self-hosted media center for streaming movies, shows, music.
     #         icon: jellyfin
     #         namespace: jellyfin
     #         app: jellyfin
     #         {# widget:
     #           type: jellyfin
-    #           url: https://jellyfin.${SECRET_DOMAIN}
+    #           url: https://jellyfin.${CLUSTER_DOMAIN}
     #           key: {{ secrets.jellyfin.token }}
     #           enableBlocks: true
     #           enableNowPlaying: true
@@ -67,7 +67,7 @@ data:
     #           showEpisodeNumber: true #}
     - Administration:
         - Stirling-PDF:
-            href: https://pdf.${SECRET_DOMAIN}/
+            href: https://pdf.${CLUSTER_DOMAIN}/
             description: Self-hosted PDF conversion and editing tools
             icon: stirling-pdf
             namespace: stirling-pdf
