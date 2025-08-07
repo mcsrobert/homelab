@@ -32,10 +32,10 @@ caching:
   minTime: 30s
   maxTime: 300s
   cacheTimeNegative: 60s
-  # prefetching: true
-# redis:
-#   address: dragonfly.database.svc.cluster.local:6379
-#   database: 1
+  prefetching: true
+redis:
+  address: blocky-dragonfly:6379
+  database: 1
 prometheus:
   enable: true
 ports:
