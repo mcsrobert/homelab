@@ -45,7 +45,7 @@ spec:
               limits:
                 memory: 256Mi
             env:
-              HOMEPAGE_ALLOWED_HOSTS: &domain homepage.${SECRET_DOMAIN}
+              HOMEPAGE_ALLOWED_HOSTS: &domain homepage.${CLUSTER_DOMAIN}
               LOG_TARGETS: stdout
               TZ: ${TIME_ZONE}
             # envFrom:

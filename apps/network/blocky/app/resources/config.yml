@@ -26,7 +26,7 @@ blocking:
       - malware
 customDNS:
   mapping:
-    ${SECRET_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
+    ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
 caching:
   maxItemsCount: 10_000
   minTime: 30s

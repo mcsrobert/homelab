@@ -106,7 +106,7 @@ spec:
           gethomepage.dev/description: DNS proxy and ad-blocker written in Go
           gethomepage.dev/group: Network
         hosts:
-          - host: &domain blocky.${SECRET_DOMAIN}
+          - host: &domain blocky.${CLUSTER_DOMAIN}
             paths:
               - path: /
                 service:

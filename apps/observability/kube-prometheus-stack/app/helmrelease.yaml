@@ -42,7 +42,7 @@ spec:
           gethomepage.dev/group: Observability
           gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
         hosts:
-          - &grafana_domain grafana.${SECRET_DOMAIN}
+          - &grafana_domain grafana.${CLUSTER_DOMAIN}
         path: /
         tls:
           - hosts:
@@ -85,7 +85,7 @@ spec:
               - name: DS_PROMETHEUS
                 value: Prometheus
               - name: VAR_BLOCKY_URL
-                value: 'https:\/\/blocky.${SECRET_DOMAIN}'
+                value: 'https:\/\/blocky.${CLUSTER_DOMAIN}'
           cert-manager:
             url: https://gitlab.com/uneeq-oss/cert-manager-mixin/-/raw/master/dashboards/cert-manager.json
             datasource:

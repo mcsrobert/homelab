@@ -34,7 +34,7 @@ spec:
               repository: ghcr.io/dani-garcia/vaultwarden
               tag: 1.34.3
             env:
-              DOMAIN: https://vault.${SECRET_DOMAIN}
+              DOMAIN: https://vault.${CLUSTER_DOMAIN}
               TZ: ${TIME_ZONE}
               SIGNUPS_ALLOWED: false
               WEBSOCKET_ENABLED: true
@@ -83,7 +83,7 @@ spec:
           gethomepage.dev/description: Lightweight, self-hosted password manager
           gethomepage.dev/group: Security
         hosts:
-          - host: &domain vault.${SECRET_DOMAIN}
+          - host: &domain vault.${CLUSTER_DOMAIN}
             paths:
               - path: /
                 service:

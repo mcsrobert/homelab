@@ -44,7 +44,7 @@ spec:
         gethomepage.dev/description: Distributed, highly available Kubernetes storage
         gethomepage.dev/group: Infrastructure
         gethomepage.dev/pod-selector: ""
-      host: longhorn.${SECRET_DOMAIN}
+      host: longhorn.${CLUSTER_DOMAIN}
       tls: true
       tlsSecret: longhorn-tls
 
