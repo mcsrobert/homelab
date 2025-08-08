@@ -43,9 +43,10 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 128Mi
+                memory: 100Mi
               limits:
-                memory: 512Mi
+                cpu: 200m
+                memory: 2Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -61,7 +62,7 @@ spec:
                 spec:
                   tcpSocket:
                     port: 53
-                  initialDelaySeconds: 15
+                  initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3

@@ -13,13 +13,12 @@ conditional:
 clientLookup:
   upstream: 192.168.178.1
 blocking:
-  blackLists:
+  denylists:
     ads:
-      - https://big.oisd.nl/domainswild
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt
     malware:
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/doh.txt
-      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.medium.txt
+      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.txt
   clientGroupsBlock:
     default:
       - ads
@@ -29,11 +28,11 @@ customDNS:
     ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
 caching:
   maxItemsCount: 10_000
-  minTime: 30s
-  maxTime: 300s
+  minTime: 60s
+  maxTime: 600s
   cacheTimeNegative: 60s
 redis:
-  address: blocky-dragonfly:6379
+  address: blocky-dragonfly:6379/1
 prometheus:
   enable: true
 ports:
