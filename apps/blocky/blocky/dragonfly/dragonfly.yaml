@@ -10,13 +10,13 @@ metadata:
 spec:
   image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.32.0
   replicas: 2
-  resources: {}
-    # requests:
-    #   cpu: 500m
-    #   memory: 500Mi
-    # limits:
-    #   cpu: 600m
-    #   memory: 750Mi
+  # resources:
+  #   requests:
+  #     cpu: 50m
+  #     memory: 25Mi
+  #   limits:
+  #     cpu: 500m
+  #     memory: 50Mi
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

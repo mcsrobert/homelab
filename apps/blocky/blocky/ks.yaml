@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: blocky
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: prometheus-operator-crds
+    - name: metallb
+    - name: blocky-dragonfly
+  path: /apps/blocky/blocky/app
+  interval: 30m
+  prune: true
+  targetNamespace: blocky
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: blocky-dragonfly
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: dragonfly-operator
+  path: /apps/blocky/blocky/dragonfly
+  interval: 30m
+  prune: true
+  targetNamespace: &namespace blocky
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: blocky-dragonfly
+      namespace: *namespace
