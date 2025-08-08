@@ -2,9 +2,14 @@
 upstreams:
   groups:
     default:
-      - tcp-tls:dns.quad9.net
-      - tcp-tls:1dot1dot1dot1.cloudflare-dns.com
-bootstrapDns: tcp+udp:9.9.9.9
+      - &quad9_dot tcp-tls:dns.quad9.net
+bootstrapDns:
+  - upstream: *quad9_dot
+    ips:
+      - 9.9.9.9
+      - 149.112.112.112
+      - 2620:fe::fe
+      - 2620:fe::9
 conditional:
   fallbackUpstream: false
   mapping:

@@ -40,13 +40,13 @@ spec:
             image:
               repository: ghcr.io/0xerr0r/blocky
               tag: v0.26.2
-            resources:
-              requests:
-                cpu: 10m
-                memory: 100Mi
-              limits:
-                cpu: 200m
-                memory: 2Gi
+            # resources:
+            #   requests:
+            #     cpu: 10m
+            #     memory: 128Mi
+            #   limits:
+            #     cpu: 200m
+            #     memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
