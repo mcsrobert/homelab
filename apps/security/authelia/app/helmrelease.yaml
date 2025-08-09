@@ -98,6 +98,7 @@ spec:
       enabled: true
       className: traefik
       annotations:
+        kubernetes.io/tls-acme: "true"
         gethomepage.dev/enabled: "true"
         gethomepage.dev/name: Authelia
         gethomepage.dev/icon: authelia

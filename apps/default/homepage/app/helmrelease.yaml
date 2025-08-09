@@ -78,6 +78,8 @@ spec:
     ingress:
       app:
         className: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
         hosts:
           - host: *domain
             paths:
