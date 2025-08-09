@@ -35,6 +35,7 @@ spec:
         enabled: true
         ingressClassName: traefik
         annotations:
+          kubernetes.io/tls-acme: "true"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Grafana
           gethomepage.dev/icon: grafana
