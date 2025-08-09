@@ -22,9 +22,12 @@ spec:
   values:
     crds:
       enabled: true
-    extraArgs:
-      - --dns01-recursive-nameservers-only
-      - --dns01-recursive-nameservers=1.1.1.1:53,1.0.0.1:53
+    dns01RecursiveNameserversOnly: true
+    dns01RecursiveNameservers: https://1.1.1.1/dns-query,https://1.0.0.1/dns-query
     ingressShim:
       defaultIssuerName: letsencrypt-production
       defaultIssuerKind: ClusterIssuer
+    prometheus:
+      enabled: true
+      servicemonitor:
+        enabled: true
