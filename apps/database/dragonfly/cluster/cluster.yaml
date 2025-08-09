@@ -3,20 +3,35 @@
 apiVersion: dragonflydb.io/v1alpha1
 kind: Dragonfly
 metadata:
-  name: blocky-dragonfly
+  name: &app dragonfly
   labels:
-    app.kubernetes.io/name: dragonfly
-    app.kubernetes.io/instance: blocky-dragonfly
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
 spec:
   image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.32.0
   replicas: 2
-  # resources:
-  #   requests:
-  #     cpu: 50m
-  #     memory: 25Mi
-  #   limits:
-  #     cpu: 500m
-  #     memory: 50Mi
+  env:
+    - name: MAX_MEMORY
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+          divisor: 1Mi
+  args:
+    - --maxmemory=$(MAX_MEMORY)Mi
+    - --proactor_threads=2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: *app
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

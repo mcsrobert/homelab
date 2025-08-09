@@ -2,9 +2,9 @@
 upstreams:
   groups:
     default:
-      - &quad9_dot tcp-tls:dns.quad9.net
+      - &quad9_tls tcp-tls:dns.quad9.net
 bootstrapDns:
-  - upstream: *quad9_dot
+  - upstream: *quad9_tls
     ips:
       - 9.9.9.9
       - 149.112.112.112
@@ -33,11 +33,12 @@ customDNS:
     ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
 caching:
   maxItemsCount: 10_000
-  minTime: 60s
-  maxTime: 600s
-  cacheTimeNegative: 60s
+  minTime: 15m
+  maxTime: 4h
+  prefetching: true
+  cacheTimeNegative: 15s
 redis:
-  address: blocky-dragonfly:6379/1
+  address: dragonfly.database.svc.cluster.local:6379/1
 prometheus:
   enable: true
 ports:
