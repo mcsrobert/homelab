@@ -106,6 +106,9 @@ spec:
             datasource:
               - name: DS_PROMETHEUS
                 value: Prometheus
+          dragonfly:
+            url: https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/refs/heads/main/monitoring/grafana-dashboard.json
+
 
     prometheus:
       prometheusSpec:
