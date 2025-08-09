@@ -86,7 +86,7 @@ spec:
               - name: DS_PROMETHEUS
                 value: Prometheus
               - name: VAR_BLOCKY_URL
-                value: https://blocky.${CLUSTER_DOMAIN}
+                value: http://blocky-app.blocky.svc.cluster.local
           cert-manager:
             url: https://gitlab.com/uneeq-oss/cert-manager-mixin/-/raw/master/dashboards/cert-manager.json
             datasource:
