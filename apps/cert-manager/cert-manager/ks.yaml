@@ -7,12 +7,14 @@ metadata:
   namespace: flux-system
 spec:
   path: /apps/cert-manager/cert-manager/app
-  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: cert-manager
   interval: 15m
   timeout: 5m
+  wait: true
+  prune: true
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -21,12 +23,12 @@ metadata:
   name: cert-manager-issuers
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: cert-manager
   path: /apps/cert-manager/cert-manager/issuers
-  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: cert-manager
   interval: 15m
-  timeout: 5m
-  dependsOn:
-    - name: cert-manager
+  prune: true

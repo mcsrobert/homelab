@@ -6,12 +6,14 @@ metadata:
   name: metallb
   namespace: flux-system
 spec:
-  path: /apps/metallb-system/metallb/app
-  prune: false
   dependsOn:
     - name: prometheus-operator-crds
+  path: /apps/metallb-system/metallb/app
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: metallb-system
   interval: 15m
   timeout: 5m
+  wait: true
+  prune: false

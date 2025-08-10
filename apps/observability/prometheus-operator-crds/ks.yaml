@@ -7,9 +7,8 @@ metadata:
   namespace: flux-system
 spec:
   path: /apps/observability/prometheus-operator-crds/app
-  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system
   interval: 15m
-  timeout: 5m
+  prune: true

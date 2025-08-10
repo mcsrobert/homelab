@@ -9,10 +9,11 @@ spec:
   dependsOn:
     - name: prometheus-operator-crds
   path: /apps/node-feature-discovery/node-feature-discovery/app
-  interval: 30m
-  prune: true
-  wait: true
-  targetNamespace: node-feature-discovery
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: node-feature-discovery
+  interval: 30m
+  timeout: 5m
+  wait: true
+  prune: true

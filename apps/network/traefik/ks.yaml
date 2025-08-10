@@ -10,9 +10,11 @@ spec:
     - name: prometheus-operator-crds
     - name: metallb
   path: /apps/network/traefik/app
-  interval: 15m
-  prune: false
-  targetNamespace: network
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: network
+  interval: 15m
+  timeout: 5m
+  wait: true
+  prune: false

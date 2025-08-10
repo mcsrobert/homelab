@@ -10,9 +10,11 @@ spec:
     - name: prometheus-operator-crds
     - name: cert-manager
   path: /apps/database/emqx-operator/app
-  interval: 30m
-  prune: true
-  targetNamespace: database
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: database
+  interval: 30m
+  timeout: 5m
+  wait: true
+  prune: true

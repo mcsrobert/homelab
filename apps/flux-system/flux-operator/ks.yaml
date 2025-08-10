@@ -6,20 +6,20 @@ metadata:
   name: &app flux-operator
   namespace: flux-system
 spec:
-  targetNamespace: flux-system
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  path: /apps/flux-system/flux-operator/app
-  prune: false
   dependsOn:
     - name: prometheus-operator-crds
+  path: /apps/flux-system/flux-operator/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  wait: false
+  targetNamespace: flux-system
   interval: 30m
   timeout: 5m
+  wait: true
+  prune: false
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -28,17 +28,15 @@ metadata:
   name: &app flux-instance
   namespace: flux-system
 spec:
-  targetNamespace: flux-system
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  path: /apps/flux-system/flux-operator/instance
-  prune: false
   dependsOn:
     - name: flux-operator
+  path: /apps/flux-system/flux-operator/instance
   sourceRef:
     kind: GitRepository
     name: flux-system
-  wait: false
+  targetNamespace: flux-system
   interval: 30m
-  timeout: 5m
+  prune: true
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app

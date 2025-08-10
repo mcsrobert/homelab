@@ -4,7 +4,6 @@ apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
   name: snapshot
-  namespace: longhorn-system
 spec:
   cron: "*/15 * * * *"
   task: "snapshot"
@@ -18,7 +17,6 @@ apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
   name: backup
-  namespace: longhorn-system
 spec:
   cron: "0 0 * * *"
   task: "backup"
