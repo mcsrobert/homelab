@@ -6,12 +6,14 @@ metadata:
   name: reloader
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: prometheus-operator-crds
   path: /apps/kube-system/reloader/app
-  prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: kube-system
   interval: 30m
   timeout: 5m
-  dependsOn:
-    - name: prometheus-operator-crds
+  wait: true
+  prune: true

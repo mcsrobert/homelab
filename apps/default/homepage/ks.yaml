@@ -3,20 +3,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app homepage
+  name: homepage
   namespace: flux-system
 spec:
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
   dependsOn:
     - name: traefik
     - name: cert-manager
     - name: reloader
   path: /apps/default/homepage/app
-  interval: 30m
-  prune: true
-  targetNamespace: default
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: default
+  interval: 30m
+  timeout: 5m
+  wait: true
+  prune: true

@@ -7,7 +7,6 @@ metadata:
   namespace: flux-system
 spec:
   path: /apps/observability/kube-prometheus-stack/app
-  prune: false
   dependsOn:
     - name: prometheus-operator-crds
     # TODO: when grafana is seperate app, move these deps
@@ -18,3 +17,5 @@ spec:
     name: flux-system
   interval: 30m
   timeout: 5m
+  wait: true
+  prune: true

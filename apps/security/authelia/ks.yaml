@@ -11,9 +11,11 @@ spec:
     - name: cert-manager
     - name: traefik
   path: /apps/security/authelia/app
-  interval: 15m
-  prune: true
-  targetNamespace: security
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: security
+  interval: 15m
+  timeout: 5m
+  wait: true
+  prune: true
