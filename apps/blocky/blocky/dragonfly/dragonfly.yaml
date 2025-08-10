@@ -3,7 +3,7 @@
 apiVersion: dragonflydb.io/v1alpha1
 kind: Dragonfly
 metadata:
-  name: &app dragonfly
+  name: &app blocky-dragonfly
   labels:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
@@ -21,10 +21,10 @@ spec:
     - --proactor_threads=2
   resources:
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 25m
+      memory: 32Mi
     limits:
-      memory: 512Mi
+      memory: 512Mi  # minimum 256Mi per core
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
