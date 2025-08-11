@@ -8,7 +8,8 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-    - name: cert-manager
+    - name: cert-manager-issuers
+    - name: external-secrets-stores
     - name: traefik
   path: /apps/security/authelia/app
   sourceRef:

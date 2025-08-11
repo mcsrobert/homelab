@@ -8,6 +8,7 @@ resources:
   - controlplaneio.yaml
   - dragonfly-operator.yaml
   - emqx.yaml
+  - external-secrets.yaml
   - jetstack.yaml
   - longhorn.yaml
   - metallb.yaml
