@@ -61,7 +61,7 @@ spec:
             enabled: true
 
     secret:
-      existingSecret: authelia-secrets
+      existingSecret: authelia-secret
 
     pod:
 
