@@ -20,4 +20,4 @@ spec:
       reloadStrategy: annotations
       podMonitor:
         enabled: true
-        namespace: kube-system
+        namespace: "{{ .Release.Namespace }}"
