@@ -19,6 +19,7 @@ spec:
       homepage:
         annotations:
           reloader.stakater.com/auto: "true"
+          reloader.stakater.com/rollout-strategy: restart
         pod:
           securityContext:
             runAsNonRoot: true
