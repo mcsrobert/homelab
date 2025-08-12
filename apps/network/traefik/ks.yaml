@@ -8,7 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-    - name: metallb
+    - name: metallb-pools
   path: /apps/network/traefik/app
   sourceRef:
     kind: GitRepository

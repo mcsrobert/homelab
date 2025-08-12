@@ -8,7 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-    - name: metallb
+    - name: metallb-pools
     - name: external-secrets
     - name: blocky-dragonfly
   path: /apps/blocky/blocky/app
