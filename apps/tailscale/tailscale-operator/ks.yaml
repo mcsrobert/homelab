@@ -36,7 +36,11 @@ spec:
   interval: 30m
   timeout: 5m
   healthChecks:
-    - apiVersion: tailscale.com/v1alpha1
-      kind: Connector
-      name: home-lan
+    # - apiVersion: tailscale.com/v1alpha1
+    #   kind: Connector
+    #   name: home-lan
+    #   namespace: *namespace
+    - apiVersion: v1
+      kind: StatefulSet
+      name: ts-home-lan-sqfcc
       namespace: *namespace
