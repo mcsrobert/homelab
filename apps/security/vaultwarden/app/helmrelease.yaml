@@ -41,7 +41,7 @@ spec:
               WEBSOCKET_ENABLED: true
             envFrom:
               - secretRef:
-                  name: vaultwarden-secrets
+                  name: vaultwarden-secret
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -64,9 +64,9 @@ spec:
             resources:
               requests:
                 cpu: 100m
-                memory: 256Mi
+                memory: 128Mi
               limits:
-                memory: 2Gi
+                memory: 1Gi  # needed for argon2
     service:
       app:
         controller: *app
