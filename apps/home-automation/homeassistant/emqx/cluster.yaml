@@ -34,6 +34,12 @@ spec:
         reloader.stakater.com/rollout-strategy: restart
     spec:
       replicas: 1
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
       envFrom:
         - secretRef:
             name: homeassistant-emqx-secret
