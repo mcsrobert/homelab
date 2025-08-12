@@ -13,10 +13,10 @@ spec:
     kind: GitRepository
     name: flux-system
   targetNamespace: tailscale
+  prune: true
   interval: 30m
   timeout: 5m
   wait: true
-  prune: true
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -31,6 +31,12 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: tailscale
-  interval: 30m
+  targetNamespace: &namespace tailscale
   prune: true
+  interval: 30m
+  timeout: 5m
+  healthChecks:
+    - apiVersion: tailscale.com/v1alpha1
+      kind: Connector
+      name: home-lan
+      namespace: *namespace
