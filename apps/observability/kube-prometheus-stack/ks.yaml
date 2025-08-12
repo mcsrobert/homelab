@@ -6,15 +6,17 @@ metadata:
   name: kube-prometheus-stack
   namespace: flux-system
 spec:
-  path: /apps/observability/kube-prometheus-stack/app
   dependsOn:
     - name: prometheus-operator-crds
     # TODO: when grafana is seperate app, move these deps
     - name: cert-manager
     - name: traefik
+    - name: external-secrets
+  path: /apps/observability/kube-prometheus-stack/app
   sourceRef:
     kind: GitRepository
     name: flux-system
+  targetNamespace: observability
   interval: 30m
   timeout: 5m
   wait: true
