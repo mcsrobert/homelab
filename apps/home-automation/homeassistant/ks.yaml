@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: homeassistant-emqx
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: emqx-operator
+  path: /apps/home-automation/homeassistant/emqx
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  targetNamespace: &namespace home-automation
+  prune: true
+  interval: 15m
+  timeout: 5m
+  healthChecks:
+    - apiVersion: apps.emqx.io/v2beta1
+      kind: EMQX
+      name: homeassistant-emqx
+      namespace: *namespace
