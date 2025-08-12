@@ -25,6 +25,7 @@ metadata:
 spec:
   dependsOn:
     - name: cert-manager
+    - name: external-secrets
   path: /apps/cert-manager/cert-manager/issuers
   sourceRef:
     kind: GitRepository
