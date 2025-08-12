@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/tailscale.com/connector_v1alpha1.json
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: home-lan
+spec:
+  hostname: tailscale-home-lan
+  subnetRouter:
+    advertiseRoutes:
+      - ${LAN_CIDR}
+  tags:
+    - tag:k8s
+    - tag:home-lan

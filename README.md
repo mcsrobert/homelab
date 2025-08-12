@@ -9,6 +9,7 @@ This repo contains my IaC homelab, which is managed with Flux and Renovate.
 | [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr |
 | [Let's Encrypt](https://letsencrypt.org/) | Certificates | Free |
 | [Doppler](https://www.doppler.com/) | External Secrets | Free |
+| [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free |
 
 ## Hardware
