@@ -22,13 +22,13 @@ spec:
       key: password
   args:
     - --maxmemory=$(MAX_MEMORY)Mi
-    - --proactor_threads=2
+    - --proactor_threads=1
   resources:
     requests:
-      cpu: 25m
+      cpu: 100m
       memory: 32Mi
     limits:
-      memory: 512Mi  # minimum 256Mi per core
+      memory: 256Mi  # minimum 256Mi per core
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
