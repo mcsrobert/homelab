@@ -11,9 +11,6 @@ parameters:
   recurringJobs: |
     [
       {
-        "name":"snapshot",
-        "isGroup":true
-      }, {
         "name":"backup",
         "isGroup":true
       }
