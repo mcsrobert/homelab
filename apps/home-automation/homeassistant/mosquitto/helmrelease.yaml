@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app mosquitto
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      mosquitto:
+        containers:
+          app:
+            image:
+              repository: public.ecr.aws/docker/library/eclipse-mosquitto
+              tag: 2.0.22
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 8Mi
+              limits:
+                memory: 16Mi
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: &port 1883
+                  initialDelaySeconds: 3
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        # type: LoadBalancer
+        # annotations:
+        #   metallb.io/loadBalancerIPs: 192.168.42.129
+        ports:
+          mqtt:
+            port: *port
+    configMaps:
+      config:
+        data:
+          mosquitto.conf: |
+            listener 1883
+            protocol mqtt
+
+            # listener 9001
+            # protocol websockets
+
+            persistence true
+            persistence_location /mosquitto/data
+            autosave_interval 60
+
+            allow_anonymous false
+            password_file /mosquitto/config/passwd
+
+    persistence:
+      cache:
+        existingClaim: mosquitto-data
+        advancedMounts:
+          mosquitto:
+            app:
+              - path: /mosquitto/data
+      config:
+        type: configMap
+        name: mosquitto
+        advancedMounts:
+          mosquitto:
+            app:
+              - path: /mosquitto/config/mosquitto.conf
+                subPath: mosquitto.conf
+      passwd:
+        type: secret
+        name: mosquitto-passwd
+        defaultMode: 0700
+        advancedMounts:
+          mosquitto:
+            app:
+              - path: /mosquitto/config/passwd
+                subPath: passwd
