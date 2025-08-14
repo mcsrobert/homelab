@@ -7,7 +7,6 @@ resources:
   - bjw-s.yaml
   - controlplaneio.yaml
   - dragonfly-operator.yaml
-  - emqx.yaml
   - external-secrets.yaml
   - jetstack.yaml
   - longhorn.yaml
