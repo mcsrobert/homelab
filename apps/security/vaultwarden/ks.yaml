@@ -7,9 +7,9 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cert-manager
+    - name: cert-manager-issuers
     - name: traefik
-    - name: longhorn
+    - name: longhorn-storage
     - name: external-secrets
   path: /apps/security/vaultwarden/app
   sourceRef:
