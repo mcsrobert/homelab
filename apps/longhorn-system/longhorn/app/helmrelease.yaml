@@ -36,6 +36,7 @@ spec:
       enabled: true
       ingressClassName: traefik
       annotations:
+        kubernetes.io/tls-acme: "true"
         traefik.ingress.kubernetes.io/router.middlewares: security-forwardauth-authelia@kubernetescrd
         gethomepage.dev/enabled: "true"
         gethomepage.dev/name: Longhorn
