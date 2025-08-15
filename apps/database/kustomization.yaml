@@ -5,4 +5,3 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - dragonfly-operator/ks.yaml
-  - emqx-operator/ks.yaml
