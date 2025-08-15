@@ -25,31 +25,25 @@ spec:
       resources:
         requests:
           cpu: 15m
-          memory: 32Mi
-        limits:
           memory: 64Mi
+        limits:
+          memory: 128Mi
 
     worker:
-      config:
-        sources:
-          usb:
-            deviceClassWhitelist: ["02"]
-            deviceLabelFields: ["class", "vendor", "device"]
-
       resources:
         requests:
           cpu: 5m
-          memory: 16Mi
-        limits:
           memory: 32Mi
+        limits:
+          memory: 64Mi
 
     gc:
       resources:
         requests:
           cpu: 5m
-          memory: 16Mi
-        limits:
           memory: 32Mi
+        limits:
+          memory: 64Mi
 
     prometheus:
       enable: true
