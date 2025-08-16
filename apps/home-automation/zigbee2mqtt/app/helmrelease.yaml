@@ -121,7 +121,7 @@ spec:
           gethomepage.dev/description: Bridge Zigbee devices to MQTT
           gethomepage.dev/group: Home Automation
         hosts:
-          - host: &domain zigbee2mqtt.${CLUSTER_DOMAIN}
+          - host: &host zigbee2mqtt.${CLUSTER_DOMAIN}
             paths:
               - path: /
                 service:
@@ -129,5 +129,5 @@ spec:
                   port: http
         tls:
           - hosts:
-              - *domain
+              - *host
             secretName: zigbee2mqtt-tls

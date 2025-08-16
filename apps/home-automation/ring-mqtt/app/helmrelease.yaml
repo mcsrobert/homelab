@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app ring-mqtt
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      ring-mqtt:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            fsGroup: 65534
+            runAsUser: 65534
+            runAsGroup: 65534
+            runAsNonRoot: true
+        containers:
+          app:
+            env:
+              # See: https://github.com/just-containers/s6-overlay/issues/600
+              S6_READ_ONLY_ROOT: 1
+              S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES: 1
+            image:
+              repository: tsightler/ring-mqtt
+              tag: 5.8.1
+            ports:
+              - name: rtsp
+                containerPort: &port 8554
+                protocol: TCP
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    persistence:
+      data:
+        existingClaim: ring-mqtt-data
+      config:
+        type: secret
+        name: ring-mqtt-config
+        globalMounts:
+          - path: /data/config.json
+            subPath: config.json
+            readOnly: true
+      run:
+        type: emptyDir
+
+    # ingress:
+    #   app:
+    #     enabled: true
+    #     className: traefik
+    #     annotations:
+    #       cert-manager.io/cluster-issuer: letsencrypt-production
+    #       traefik.ingress.kubernetes.io/router.middlewares: traefik-ingress-sso@kubernetescrd
+    #       traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    #       traefik.ingress.kubernetes.io/affinity: "true"
+    #       traefik.ingress.kubernetes.io/router.tls: "true"
+    #       gethomepage.dev/enabled: "true"
+    #       gethomepage.dev/description: Govee to MQTT bridge for Home Assistant
+    #       gethomepage.dev/group: Home Automation
+    #       gethomepage.dev/icon: mqtt
+    #       gethomepage.dev/name: ring-mqtt
+    #       gethomepage.dev/weight: "3" # optional
+    #     hosts:
+    #       - host: &host ring-mqtt.techtales.io
+    #         paths:
+    #           - path: /
+    #             service:
+    #               identifier: app
+    #               port: rtsp
+    #     tls:
+    #       - hosts:
+    #           - *host
+    #         secretName: ring-mqtt-tls
