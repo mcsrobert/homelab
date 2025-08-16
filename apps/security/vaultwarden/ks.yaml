@@ -10,7 +10,7 @@ spec:
     - name: cert-manager-issuers
     - name: traefik
     - name: longhorn-storage
-    - name: external-secrets
+    - name: external-secrets-stores
   path: /apps/security/vaultwarden/app
   sourceRef:
     kind: GitRepository
