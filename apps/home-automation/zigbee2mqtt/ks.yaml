@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: authelia
     - name: cert-manager-issuers
-    - name: external-secrets
+    - name: external-secrets-stores
     - name: longhorn-storage
     - name: node-feature-discovery
     - name: traefik

@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: prometheus-operator-crds
     - name: metallb-pools
-    - name: external-secrets
+    - name: external-secrets-stores
     - name: blocky-dragonfly
   path: /apps/blocky/blocky/app
   sourceRef:
@@ -30,7 +30,7 @@ metadata:
 spec:
   dependsOn:
     - name: dragonfly-operator
-    - name: external-secrets
+    - name: external-secrets-stores
   path: /apps/blocky/blocky/dragonfly
   sourceRef:
     kind: GitRepository

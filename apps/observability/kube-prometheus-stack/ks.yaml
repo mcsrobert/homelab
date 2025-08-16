@@ -11,7 +11,7 @@ spec:
     # TODO: when grafana is seperate app, move these deps
     - name: cert-manager
     - name: traefik
-    - name: external-secrets
+    - name: external-secrets-stores
   path: /apps/observability/kube-prometheus-stack/app
   sourceRef:
     kind: GitRepository
