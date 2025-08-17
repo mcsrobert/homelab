@@ -27,3 +27,4 @@ The cluster is running [k3s](https://k3s.io/) on the following nodes:
  - [cbirkenbeul/homelab](https://github.com/cbirkenbeul/homelab)
  - [bjw-s/home-ops](https://github.com/bjw-s/home-ops)
  - [mapanare-labs/home-ops](https://gitlab.com/mapanare-labs/mapanarenet/home-ops)
+ - [tyriis/home-ops](https://github.com/tyriis/home-ops)
