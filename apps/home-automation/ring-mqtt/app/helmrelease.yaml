@@ -19,12 +19,6 @@ spec:
       ring-mqtt:
         annotations:
           reloader.stakater.com/auto: "true"
-        pod:
-          securityContext:
-            fsGroup: 65534
-            runAsUser: 65534
-            runAsGroup: 65534
-            runAsNonRoot: true
         containers:
           app:
             env:
@@ -51,6 +45,13 @@ spec:
               capabilities:
                 drop:
                   - ALL
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+            fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: *app
