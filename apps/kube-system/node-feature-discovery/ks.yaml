@@ -8,11 +8,11 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-  path: /apps/node-feature-discovery/node-feature-discovery/app
+  path: /apps/kube-system/node-feature-discovery/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: node-feature-discovery
+  targetNamespace: kube-system
   interval: 30m
   timeout: 5m
   wait: true
