@@ -3,10 +3,10 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: homeassistant
+  name: home-assistant
   namespace: flux-system
 spec:
-  path: /apps/home-automation/homeassistant/app
+  path: /apps/home-automation/home-assistant/app
   sourceRef:
     kind: GitRepository
     name: flux-system
