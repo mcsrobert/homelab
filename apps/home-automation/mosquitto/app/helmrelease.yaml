@@ -22,18 +22,6 @@ spec:
             image:
               repository: public.ecr.aws/docker/library/eclipse-mosquitto
               tag: 2.0.22
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-            resources:
-              requests:
-                cpu: 10m
-                memory: 8Mi
-              limits:
-                memory: 16Mi
             probes:
               liveness: &probes
                 enabled: true
@@ -41,17 +29,29 @@ spec:
                 spec:
                   tcpSocket:
                     port: &port 1883
-                  initialDelaySeconds: 3
+                  initialDelaySeconds: 1
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 8Mi
+              limits:
+                memory: 16Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
