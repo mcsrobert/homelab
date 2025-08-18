@@ -44,20 +44,17 @@ spec:
               Z2M_WATCHDOG: default
               ZIGBEE2MQTT_CONFIG_ADVANCED_CHANNEL: 11
               ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: *secret
-                    key: zigbee_network_key
+                secretKeyRef:
+                  name: *secret
+                  key: zigbee_network_key
               ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID:
-                valueFrom:
-                  secretKeyRef:
-                    name: *secret
-                    key: zigbee_pan_id
+                secretKeyRef:
+                  name: *secret
+                  key: zigbee_pan_id
               ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID:
-                valueFrom:
-                  secretKeyRef:
-                    name: *secret
-                    key: zigbee_ext_pan_id
+                secretKeyRef:
+                  name: *secret
+                  key: zigbee_ext_pan_id
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
               ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee2mqtt.${CLUSTER_DOMAIN}
@@ -65,15 +62,13 @@ spec:
               ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto:1883
               ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
               ZIGBEE2MQTT_CONFIG_MQTT_USER:
-                valueFrom:
-                  secretKeyRef:
-                    name: *secret
-                    key: mqtt_user
+                secretKeyRef:
+                  name: *secret
+                  key: mqtt_user
               ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD:
-                valueFrom:
-                  secretKeyRef:
-                    name: *secret
-                    key: mqtt_password
+                secretKeyRef:
+                  name: *secret
+                  key: mqtt_password
               ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: false
               ZIGBEE2MQTT_CONFIG_SERIAL_PORT: &serial_path /dev/ttyACM0
             resources:
