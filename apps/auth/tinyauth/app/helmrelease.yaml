@@ -1,0 +1,99 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tinyauth
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      tinyauth:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/steveiliop56/tinyauth
+              tag: v3.6.2@sha256:6fb523a7bda58f1e6072c3a1c4bc0186ae0c45e79802ca6ac7d21136775807f3
+            env:
+              TZ: ${TIME_ZONE}
+              APP_URL: https://tinyauth.${CLUSTER_DOMAIN}
+              COOKIE_SECURE: true
+              DISABLE_CONTINUE: true
+              SECRET:
+                secretKeyRef:
+                  name: tinyauth-secret
+                  key: secret
+              USERS:
+                secretKeyRef:
+                  name: tinyauth-secret
+                  key: users
+              # GENERIC_NAME: Pocket-ID
+              # GENERIC_AUTH_URL: https://id.${CLUSTER_DOMAIN}/authorize
+              # GENERIC_TOKEN_URL: https://id.${CLUSTER_DOMAIN}/api/oidc/token
+              # GENERIC_USER_URL: https://id.${CLUSTER_DOMAIN}/api/oidc/userinfo
+              # GENERIC_SCOPES: openid email profile groups
+              SESSION_EXPIRY: 604800
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/healthcheck
+                    port: &port 3000
+                  initialDelaySeconds: 1
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          # traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+          traefik.ingress.kubernetes.io/router.middlewares: "networking-traefik-middleware-chain-no-auth@kubernetescrd"
+        hosts:
+          - host: &host tinyauth.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+            secretName: tinyauth-tls
