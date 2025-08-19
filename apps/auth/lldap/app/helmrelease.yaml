@@ -25,33 +25,25 @@ spec:
             image:
               repository: ghcr.io/lldap/lldap
               tag: v0.6.2-alpine-rootless
-            probes:
-              startup:
-                enabled: true
-              liveness:
-                enabled: true
-              readiness:
-                enabled: true
             env:
               TZ: ${TIME_ZONE}
-              LLDAP_JWT_SECRET:
-                secretKeyRef:
-                  name: lldap-secret
-                  key: jwt_secret
-              LLDAP_KEY_SEED:
-                secretKeyRef:
-                  name: lldap-secret
-                  key: key_seed
-              LLDAP_LDAP_BASE_DN:
-                secretKeyRef:
-                  name: lldap-secret
-                  key: ldap_base_dn
-              LLDAP_LDAP_USER_PASS:
-                secretKeyRef:
-                  name: lldap-secret
-                  key: ldap_user_pass
               UID: 65534
               GID: 65534
+            envFrom:
+              - secretRef:
+                  name: lldap-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                spec:
+                  initialDelaySeconds: 1
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 5m
+                memory: 4Mi
+              limits:
+                memory: 128Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -70,8 +62,8 @@ spec:
         controller: lldap
         ports:
           ldap:
-            port: 3890
-            targetPort: 389
+            port: 389
+            targetPort: 3890
             protocol: TCP
             primary: true
           http:

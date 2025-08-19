@@ -1,0 +1,119 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pocket-id
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 4.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      pocket-id:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/pocket-id/pocket-id
+              tag: v1.7.0@sha256:b3ef0b22402b34815a7aeba800ca642baa8eafdd887677b884a1e5a8c81558aa
+            env:
+              TZ: ${TIME_ZONE}
+              ANALYTICS_DISABLED: true
+              UI_CONFIG_DISABLED: true
+              APP_URL: https://id.${CLUSTER_DOMAIN}
+              TRUST_PROXY: true
+              SESSION_DURATION: 43800
+              EMAILS_VERIFIED: true
+              KEYS_STORAGE: database
+              GEOLITE_DB_PATH: /app/data/GeoLite2-City.mmdb
+              UPLOAD_PATH: /app/data/uploads
+              LDAP_ENABLED: true
+              LDAP_URL: ldap://lldap
+              LDAP_ATTRIBUTE_USER_USERNAME: uid
+              LDAP_ATTRIBUTE_USER_UNIQUE_IDENTIFIER: uuid
+              LDAP_ATTRIBUTE_USER_FIRST_NAME: firstname
+              LDAP_ATTRIBUTE_USER_LAST_NAME: lastname
+              LDAP_ATTRIBUTE_USER_EMAIL: mail
+              LDAP_ATTRIBUTE_USER_PROFILE_PICTURE: avatar
+              LDAP_ATTRIBUTE_GROUP_NAME: displayname
+              LDAP_ATTRIBUTE_GROUP_UNIQUE_IDENTIFIER: uuid
+              LDAP_ATTRIBUTE_ADMIN_GROUP: id_admin
+              # LDAP_USER_GROUP_SEARCH_FILTER: (&(objectClass=group)(cn=id_*))
+              # LDAP_USER_SEARCH_FILTER: "{{ .AD_SEARCH_FILTER }}"
+              # SMTP_FROM: pocket-id@${CLUSTER_DOMAIN}
+              # SMTP_HOST: smtp-relay.networking.svc.cluster.local
+              # SMTP_PORT: 2525
+            envFrom:
+              - secretRef:
+                  name: pocket-id-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: &port 1411
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    persistence:
+      data:
+        existingClaim: pocket-id-data
+        globalMounts:
+          - path: /app/data
+      tmpfs:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Pocket ID
+          gethomepage.dev/icon: pocket-id-light
+          gethomepage.dev/description: OIDC provider that authenticates with passkeys
+          gethomepage.dev/group: Auth
+        hosts:
+          - host: &host id.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+            secretName: pocket-id-tls
