@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: *app
     app.kubernetes.io/instance: *app
 spec:
-  image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.32.0
+  image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.33.0@sha256:7eb3bb6c85757bbdb05a7ef5281db5089f8c5a024182f9205f10dfe99128b4d0
   replicas: 2
   env:
     - name: MAX_MEMORY
