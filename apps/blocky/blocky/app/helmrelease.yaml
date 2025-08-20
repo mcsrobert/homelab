@@ -23,12 +23,6 @@ spec:
           reloader.stakater.com/auto: "true"
           reloader.stakater.com/rollout-strategy: restart
         pod:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534
-            runAsGroup: 65534
-            seccompProfile:
-              type: RuntimeDefault
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
@@ -41,6 +35,18 @@ spec:
             image:
               repository: ghcr.io/0xerr0r/blocky
               tag: v0.26.2
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: 53
+                  initialDelaySeconds: 20
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
             resources:
               requests:
                 cpu: 10m
@@ -55,18 +61,15 @@ spec:
                   - NET_BIND_SERVICE
                 drop:
                   - ALL
-            probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  tcpSocket:
-                    port: 53
-                  initialDelaySeconds: 20
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
-              readiness: *probes
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
     service:
       app:
         controller: *app
@@ -86,7 +89,6 @@ spec:
           dns-udp:
             port: 53
             protocol: UDP
-
     serviceMonitor:
       main:
         serviceName: *app
@@ -95,7 +97,6 @@ spec:
             path: /metrics
             port: http
             scrapeTimeout: 10s
-
     ingress:
       app:
         className: traefik
@@ -118,7 +119,6 @@ spec:
           - hosts:
               - *domain
             secretName: blocky-tls
-
     persistence:
       config:
         type: secret
