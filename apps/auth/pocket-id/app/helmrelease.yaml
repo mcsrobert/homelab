@@ -35,7 +35,7 @@ spec:
               KEYS_STORAGE: database
               GEOLITE_DB_PATH: /app/data/GeoLite2-City.mmdb
               UPLOAD_PATH: /app/data/uploads
-              LDAP_ENABLED: true
+              LDAP_ENABLED: false
               LDAP_URL: ldap://lldap
               LDAP_ATTRIBUTE_USER_USERNAME: uid
               LDAP_ATTRIBUTE_USER_UNIQUE_IDENTIFIER: uuid
