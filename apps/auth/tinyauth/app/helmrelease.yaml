@@ -29,20 +29,16 @@ spec:
               APP_URL: https://tinyauth.${CLUSTER_DOMAIN}
               COOKIE_SECURE: true
               DISABLE_CONTINUE: true
-              SECRET:
-                secretKeyRef:
+              GENERIC_NAME: Pocket ID
+              GENERIC_AUTH_URL: https://id.${CLUSTER_DOMAIN}/authorize
+              GENERIC_TOKEN_URL: https://id.${CLUSTER_DOMAIN}/api/oidc/token
+              GENERIC_USER_URL: https://id.${CLUSTER_DOMAIN}/api/oidc/userinfo
+              GENERIC_SCOPES: openid email profile groups
+              OAUTH_AUTO_REDIRECT: generic
+              SESSION_EXPIRY: 10080
+            envFrom:
+              - secretRef:
                   name: tinyauth-secret
-                  key: secret
-              USERS:
-                secretKeyRef:
-                  name: tinyauth-secret
-                  key: users
-              # GENERIC_NAME: Pocket-ID
-              # GENERIC_AUTH_URL: https://id.${CLUSTER_DOMAIN}/authorize
-              # GENERIC_TOKEN_URL: https://id.${CLUSTER_DOMAIN}/api/oidc/token
-              # GENERIC_USER_URL: https://id.${CLUSTER_DOMAIN}/api/oidc/userinfo
-              # GENERIC_SCOPES: openid email profile groups
-              SESSION_EXPIRY: 604800
             probes:
               liveness: &probes
                 enabled: true
@@ -82,8 +78,12 @@ spec:
       app:
         className: traefik
         annotations:
-          # traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-          traefik.ingress.kubernetes.io/router.middlewares: "networking-traefik-middleware-chain-no-auth@kubernetescrd"
+          kubernetes.io/tls-acme: "true"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: TinyAuth
+          gethomepage.dev/icon: tinyauth
+          gethomepage.dev/description: Authentication middleware that adds a simple login screen or OAuth
+          gethomepage.dev/group: Auth
         hosts:
           - host: &host tinyauth.${CLUSTER_DOMAIN}
             paths:
