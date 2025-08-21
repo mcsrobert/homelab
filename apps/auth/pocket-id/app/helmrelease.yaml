@@ -30,7 +30,7 @@ spec:
               UI_CONFIG_DISABLED: true
               APP_URL: https://id.${CLUSTER_DOMAIN}
               TRUST_PROXY: true
-              SESSION_DURATION: 43800
+              SESSION_DURATION: 10080
               EMAILS_VERIFIED: true
               KEYS_STORAGE: database
               GEOLITE_DB_PATH: /app/data/GeoLite2-City.mmdb
