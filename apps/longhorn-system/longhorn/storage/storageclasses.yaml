@@ -8,7 +8,7 @@ provisioner: driver.longhorn.io
 allowVolumeExpansion: true
 parameters:
   numberOfReplicas: "3"
-  recurringJobs: |
+  recurringJobSelector: |
     [
       {
         "name":"backup",
