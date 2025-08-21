@@ -82,7 +82,7 @@ spec:
           gethomepage.dev/name: Vaultwarden
           gethomepage.dev/icon: vaultwarden-light
           gethomepage.dev/description: Lightweight, self-hosted password manager
-          gethomepage.dev/group: Security
+          gethomepage.dev/group: Apps
         hosts:
           - host: &domain vault.${CLUSTER_DOMAIN}
             paths:

@@ -11,11 +11,11 @@ spec:
     - name: cert-manager-issuers
     - name: external-secrets-stores
     - name: traefik
-  path: /apps/security/authelia/app
+  path: /apps/auth/authelia/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: security
+  targetNamespace: auth
   interval: 15m
   timeout: 5m
   wait: true

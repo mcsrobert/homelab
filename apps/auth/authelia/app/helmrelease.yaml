@@ -104,7 +104,7 @@ spec:
         gethomepage.dev/name: Authelia
         gethomepage.dev/icon: authelia
         gethomepage.dev/description: Open-source authentication and authorization server
-        gethomepage.dev/group: Security
+        gethomepage.dev/group: Auth
       tls:
         enabled: true
       traefikCRD:

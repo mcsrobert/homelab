@@ -11,11 +11,11 @@ spec:
     - name: traefik
     - name: longhorn-storage
     - name: external-secrets-stores
-  path: /apps/security/vaultwarden/app
+  path: /apps/default/vaultwarden/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: security
+  targetNamespace: default
   interval: 30m
   timeout: 5m
   wait: true
