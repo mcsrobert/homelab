@@ -19,13 +19,6 @@ spec:
       home-assistant:
         annotations:
           reloader.stakater.com/auto: "true"
-        pod:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534
-            runAsGroup: 65534
-            fsGroup: 65534
-            fsGroupChangePolicy: OnRootMismatch
         containers:
           app:
             image:
@@ -39,7 +32,7 @@ spec:
                 memory: 750Mi
               limits:
                 memory: 1.5Gi
-            securityContext:
+            securityContext: &containerSecurity
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
@@ -73,6 +66,16 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
+            securityContext: *containerSecurity
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
     service:
       app:
         primary: true
@@ -84,21 +87,10 @@ spec:
           code-server:
             port: 12321
     persistence:
-      # venv:
-      #   existingClaim: home-assistant-venv
-      #   advancedMounts:
-      #     home-assistant:
-      #       app:
-      #         - path: /venv
-      #           subPath: hass-venv
       config:
         existingClaim: home-assistant-config
-        advancedMounts:
-          home-assistant:
-            app:
-              - path: /config
-            code-server:
-              - path: /config
+        globalMounts:
+          - path: /config
       tmpfs:
         type: emptyDir
         advancedMounts:
