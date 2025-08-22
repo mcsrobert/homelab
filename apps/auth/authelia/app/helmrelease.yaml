@@ -14,7 +14,19 @@ spec:
         kind: HelmRepository
         name: authelia
         namespace: flux-system
+  valuesFrom:
+    - kind: Secret
+      name: &secret authelia-secret
+      valuesKey: authentication.ldap.base_dn
+      targetPath: configMap.authentication_backend.ldap.base_dn
+    - kind: Secret
+      name: *secret
+      valuesKey: authentication.ldap.user
+      targetPath: configMap.authentication_backend.ldap.user
   values:
+    secret:
+      existingSecret: *secret
+
     configMap:
       access_control:
         default_policy: deny
@@ -31,13 +43,18 @@ spec:
         endpoints:
           authz:
             forward-auth:
-              implementation: 'ForwardAuth'
+              implementation: ForwardAuth
 
       authentication_backend:
-        file:
+        ldap:
           enabled: true
-        password_change:
-          disable: true
+          implementation: lldap
+          address: ldap://lldap
+          # base_dn: <set by valuesFrom>
+          # user: <set by valuesFrom>
+          users_filter: '(&(objectClass=person)(firstname=*)({username_attribute}={input}))'
+          groups_filter: '(&(objectClass=groupOfUniqueNames)(cn=id_*))'
+
         password_reset:
           disable: true
 
@@ -60,18 +77,7 @@ spec:
           serviceMonitor:
             enabled: true
 
-    secret:
-      existingSecret: authelia-secret
-
     pod:
-
-      resources:
-        requests:
-          cpu: 50m
-          memory: 100Mi
-        limits:
-          memory: 1Gi  # needed for argon2
-
       # should be automatically set with a template based
       # on the config, but there seems to be a bug so that
       # without this we get a DaemonSet with 3 replicas
@@ -81,19 +87,12 @@ spec:
         reloader.stakater.com/auto: "true"
         reloader.stakater.com/rollout-strategy: restart
 
-      extraVolumeMounts:
-        - name: users-database
-          mountPath: /config/users_database.yml
-          subPath: users_database.yml
-          readOnly: true
-
-      extraVolumes:
-        - name: users-database
-          secret:
-            secretName: authelia-users
-            items:
-              - key: users_database.yml
-                path: users_database.yml
+      resources:
+        requests:
+          cpu: 50m
+          memory: 100Mi
+        limits:
+          memory: 1Gi  # needed for argon2
 
     ingress:
       enabled: true
