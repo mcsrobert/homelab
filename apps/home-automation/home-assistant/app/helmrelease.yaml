@@ -103,3 +103,47 @@ spec:
                 subPath: code-server-tmp
               - path: /nonexistent
                 subPath: nonexistent
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Home Assistant
+          gethomepage.dev/icon: home-assistant
+          gethomepage.dev/description: Local smart home control and automation
+          gethomepage.dev/group: Home Automation
+        hosts:
+          - host: &host homeassistant.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+          - host: ha.${CLUSTER_DOMAIN}  # TODO: remove alias
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+              - ha.${CLUSTER_DOMAIN}  # TODO: remove alias
+            secretName: home-assistant-tls
+      code-server:
+        className: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          traefik.ingress.kubernetes.io/router.middlewares: auth-forwardauth-authelia@kubernetescrd
+        hosts:
+          - host: &host code.homeassistant.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: code-server
+                  port: code-server
+        tls:
+          - hosts:
+              - *host
+            secretName: code-server-tls
