@@ -8,7 +8,6 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-    - name: snapshot-controller
   path: /apps/longhorn-system/longhorn/app
   sourceRef:
     kind: GitRepository
