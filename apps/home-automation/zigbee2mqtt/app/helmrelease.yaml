@@ -72,11 +72,21 @@ spec:
               limits:
                 memory: 256Mi
             securityContext:
-              allowPrivilegeEscalation: false
+              # TODO: look into a ser2net sidecar to reduce attack surface.
+              # WARNING: Runing privileged is not great. Would love to run it with
+              # less permissions but cannot figure it out; without it, I keep getting:
+              # Error: Operation not permitted, cannot open /dev/ttyACM0'
+              # I've tried:
+              #  - capabilities:
+              #      add:
+              #        - SYS_RAWIO
+              #        - SYS_ADMIN
+              #      drop:
+              #        - ALL
+              #  - runAsGroup: 20
+              privileged: true
+              # allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -84,6 +94,10 @@ spec:
         runAsGroup: 65534
         fsGroup: 65534
         fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [20]  # dialout
+        seccompProfile:
+          type: RuntimeDefault
+
     service:
       app:
         ports:
@@ -110,7 +124,7 @@ spec:
         className: traefik
         annotations:
           kubernetes.io/tls-acme: "true"
-          traefik.ingress.kubernetes.io/router.middlewares: security-forwardauth-authelia@kubernetescrd
+          traefik.ingress.kubernetes.io/router.middlewares: auth-forwardauth-authelia@kubernetescrd
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Zigbee2MQTT
           gethomepage.dev/icon: zigbee2mqtt
