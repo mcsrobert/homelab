@@ -6,13 +6,10 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: authelia
-    - name: cert-manager-issuers
     - name: external-secrets-stores
     - name: longhorn-storage
     - name: mosquitto
     - name: node-feature-discovery
-    - name: traefik
   path: /apps/home-automation/zigbee2mqtt/app
   sourceRef:
     kind: GitRepository
@@ -22,4 +19,3 @@ spec:
   interval: 15m
   timeout: 5m
   wait: true
-  suspend: true
