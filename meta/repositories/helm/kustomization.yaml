@@ -12,6 +12,7 @@ resources:
   - longhorn.yaml
   - metallb.yaml
   - node-feature-discovery.yaml
+  - piraeus.yaml
   - prometheus-community.yaml
   - stakater.yaml
   - tailscale.yaml
