@@ -27,44 +27,6 @@ data:
       longhorn:
         url: http://longhorn-frontend.longhorn-system.svc.cluster.local
   services.yaml: |
-    - Smart Home:
-        - Home Assistant:
-            href: https://ha.${CLUSTER_DOMAIN}/
-            description: Local smart home control and automation.
-            icon: home-assistant
-            namespace: ha-mqtt
-            app: homeassistant
-        - Mosquitto:
-            description: Lightweight MQTT Server.
-            icon: mosquitto
-            namespace: ha-mqtt
-            app: mosquitto
-        - ZigBee2MQTT:
-            href: https://z2m.${CLUSTER_DOMAIN}/
-            description: Bridge Zigbee devices to MQTT.
-            icon: zigbee2mqtt
-            namespace: ha-mqtt
-            app: zigbee2mqtt
-        - Ring-MQTT:
-            description: Bridge the Ring API to MQTT.
-            icon: si-ring
-            namespace: ha-mqtt
-            app: ring-mqtt
-    # - Media:
-    #     - Jellyfin:
-    #         href: https://jellyfin.${CLUSTER_DOMAIN}/
-    #         description: Self-hosted media center for streaming movies, shows, music.
-    #         icon: jellyfin
-    #         namespace: jellyfin
-    #         app: jellyfin
-    #         {# widget:
-    #           type: jellyfin
-    #           url: https://jellyfin.${CLUSTER_DOMAIN}
-    #           key: {{ secrets.jellyfin.token }}
-    #           enableBlocks: true
-    #           enableNowPlaying: true
-    #           enableUser: true
-    #           showEpisodeNumber: true #}
     - Administration:
         - Stirling-PDF:
             href: https://pdf.${CLUSTER_DOMAIN}/
