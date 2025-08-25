@@ -14,15 +14,15 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-  valuesFrom:  # avoids hardcoding the USB device serial number
+  valuesFrom:  # keep USB device serial number private
     - kind: Secret
-      name: &secret zigbee2mqtt-secret
-      valuesKey: zigbee_serial_path
-      targetPath: persistence.serial.hostPath
+      name: &secret zigbee2mqtt-serial
+      valuesKey: ZIGBEE2MQTT_SERIAL_ID
+      targetPath: controllers.zigbee2mqtt.pod.nodeSelector.feature\.node\.kubernetes\.io/conbee2-adapter
     - kind: Secret
       name: *secret
-      valuesKey: zigbee_serial_id
-      targetPath: controllers.zigbee2mqtt.pod.nodeSelector.feature\.node\.kubernetes\.io/conbee2-adapter
+      valuesKey: ZIGBEE2MQTT_SERIAL_PATH
+      targetPath: persistence.serial.hostPath
   values:
     controllers:
       zigbee2mqtt:
@@ -37,34 +37,18 @@ spec:
               TZ: ${TIME_ZONE}
               Z2M_WATCHDOG: default
               ZIGBEE2MQTT_CONFIG_ADVANCED_CHANNEL: 11
-              ZIGBEE2MQTT_CONFIG_ADVANCED_NETWORK_KEY:
-                secretKeyRef:
-                  name: *secret
-                  key: zigbee_network_key
-              ZIGBEE2MQTT_CONFIG_ADVANCED_PAN_ID:
-                secretKeyRef:
-                  name: *secret
-                  key: zigbee_pan_id
-              ZIGBEE2MQTT_CONFIG_ADVANCED_EXT_PAN_ID:
-                secretKeyRef:
-                  name: *secret
-                  key: zigbee_ext_pan_id
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_LEVEL: info
               ZIGBEE2MQTT_CONFIG_ADVANCED_LOG_OUTPUT: '["console"]'
               ZIGBEE2MQTT_CONFIG_FRONTEND_URL: https://zigbee2mqtt.${CLUSTER_DOMAIN}
               ZIGBEE2MQTT_CONFIG_MQTT_REJECT_UNAUTHORIZED: true
               ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto:1883
               ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
-              ZIGBEE2MQTT_CONFIG_MQTT_USER:
-                secretKeyRef:
-                  name: *secret
-                  key: mqtt_user
-              ZIGBEE2MQTT_CONFIG_MQTT_PASSWORD:
-                secretKeyRef:
-                  name: *secret
-                  key: mqtt_password
               ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: false
+              ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: deconz
               ZIGBEE2MQTT_CONFIG_SERIAL_PORT: &serial_path /dev/ttyACM0
+            envFrom:
+              - secretRef:
+                  name: zigbee2mqtt-secret
             resources:
               requests:
                 cpu: 50m
@@ -97,7 +81,6 @@ spec:
         supplementalGroups: [20]  # dialout
         seccompProfile:
           type: RuntimeDefault
-
     service:
       app:
         ports:
@@ -106,19 +89,18 @@ spec:
     persistence:
       data:
         existingClaim: zigbee2mqtt-data
-        globalMounts:
-          - path: /app/data
+        advancedMounts:
+          zigbee2mqtt:
+            app:
+              - path: /app/data
       serial:
         type: hostPath
         # hostPath: <set by valuesFrom>
         hostPathType: CharDevice
-        globalMounts:
-          - path: *serial_path
-      udev:
-        type: hostPath
-        hostPath: /run/udev
-        globalMounts:
-          - readOnly: true
+        advancedMounts:
+          zigbee2mqtt:
+            app:
+              - path: *serial_path
     ingress:
       app:
         className: traefik

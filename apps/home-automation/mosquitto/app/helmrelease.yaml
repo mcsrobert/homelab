@@ -57,9 +57,6 @@ spec:
           type: RuntimeDefault
     service:
       app:
-        # type: LoadBalancer
-        # annotations:
-        #   metallb.io/loadBalancerIPs: 192.168.42.129
         ports:
           mqtt:
             port: *port
@@ -79,7 +76,6 @@ spec:
 
             allow_anonymous false
             password_file /mosquitto/config/passwd
-
     persistence:
       cache:
         existingClaim: mosquitto-data
