@@ -28,10 +28,10 @@ spec:
               VENV_FOLDER: /config/.venv
             resources:
               requests:
-                cpu: 50m
-                memory: 750Mi
+                cpu: 100m
+                memory: 500Mi
               limits:
-                memory: 1.5Gi
+                memory: 1Gi
             securityContext: &containerSecurity
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -113,14 +113,9 @@ spec:
           gethomepage.dev/icon: home-assistant
           gethomepage.dev/description: Local smart home control and automation
           gethomepage.dev/group: Home Automation
+          gethomepage.dev/app: home-assistant
         hosts:
           - host: &host homeassistant.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-          - host: ha.${CLUSTER_DOMAIN}  # TODO: remove alias
             paths:
               - path: /
                 service:
@@ -129,7 +124,6 @@ spec:
         tls:
           - hosts:
               - *host
-              - ha.${CLUSTER_DOMAIN}  # TODO: remove alias
             secretName: home-assistant-tls
       code-server:
         className: traefik
