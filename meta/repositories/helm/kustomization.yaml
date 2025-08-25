@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - authelia.yaml
   - bjw-s.yaml
+  - cloudnative-pg.yaml
   - controlplaneio.yaml
   - dragonfly-operator.yaml
   - external-secrets.yaml
