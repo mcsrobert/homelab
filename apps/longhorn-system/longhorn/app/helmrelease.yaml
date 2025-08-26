@@ -20,7 +20,7 @@ spec:
     crds: CreateReplace
   values:
 
-    defaultSettings:
+    defaultBackupStore:
       backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
 
     csi:
