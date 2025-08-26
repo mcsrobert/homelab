@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: immich-cloudnative-pg
+spec:
+  instances: 1
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.2@sha256:4a6f5ca2212018322823a92250230d471e2fa33c287ed8b400bd58a3cc3a4e6b
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 10Gi
+    storageClass: longhorn-backup-high-io
+  # enableSuperuserAccess: true
+  # superuserSecret:
+  #   name: cloudnative-pg-secret
+  postgresql:
+    shared_preload_libraries: ['vchord.so']
+    parameters:
+      max_connections: '400'
+      shared_buffers: 512MB
+  resources:
+    requests:
+      cpu: 500m
+    limits:
+      memory: 4Gi
+  monitoring:
+    enablePodMonitor: true

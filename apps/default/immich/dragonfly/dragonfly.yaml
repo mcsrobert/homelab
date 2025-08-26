@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/dragonflydb.io/dragonfly_v1alpha1.json
+apiVersion: dragonflydb.io/v1alpha1
+kind: Dragonfly
+metadata:
+  name: &app immich-dragonfly
+  labels:
+    app.kubernetes.io/name: *app
+    app.kubernetes.io/instance: *app
+spec:
+  image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.33.1@sha256:de1a932e51bf50d96bb8bee1b5bde96b429de38e3cab369238aeec3a93f5fdba
+  replicas: 1
+  env:
+    - name: MAX_MEMORY
+      valueFrom:
+        resourceFieldRef:
+          resource: limits.memory
+          divisor: 1Mi
+  args:
+    - --maxmemory=$(MAX_MEMORY)Mi
+    - --proactor_threads=1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 32Mi
+    limits:
+      memory: 256Mi  # min 256Mi per proactor_thread
+  authentication:
+    passwordFromSecret:
+      name: immich-dragonfly-secret
+      key: password
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          # Do not schedule on the Raspberry Pi 4
+          # See: https://github.com/dragonflydb/dragonfly/issues/777
+          - matchExpressions:
+              - key: feature.node.kubernetes.io/cpu-model.id
+                operator: NotIn
+                values: ['53379']
+  # topologySpreadConstraints:
+  #   - maxSkew: 1
+  #     topologyKey: kubernetes.io/hostname
+  #     whenUnsatisfiable: DoNotSchedule
+  #     labelSelector:
+  #       matchLabels:
+  #         app.kubernetes.io/name: *app
