@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich-server
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      version: 4.2.0
+  values:
+    controllers:
+      immich-server:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/immich-app/immich-server
+              tag: v1.139.3
+            env:
+              DB_USERNAME:
+                secretKeyRef:
+                  name: immich-cloudnative-pg-app
+                  key: username
+              DB_PASSWORD:
+                secretKeyRef:
+                  name: immich-cloudnative-pg-app
+                  key: password
+              REDIS_PASSWORD:
+                secretKeyRef:
+                  name: immich-dragonfly-secret
+                  key: password
+            envFrom:
+              - configMapRef:
+                  name: immich-configmap
+              - secretRef:
+                  name: immich-secret
+    service:
+      app:
+        controller: immich-server
+        ports:
+          http:
+            port: 2283
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Immich
+          gethomepage.dev/icon: immich
+          gethomepage.dev/description: High performance self-hosted photo and video management solution
+          gethomepage.dev/group: Media
+        hosts:
+          - host: &host immich.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+            secretName: immich-tls
+    persistence:
+      library:
+        existingClaim: immich-library
+        advancedMounts:
+          immich-server:
+            app:
+              - path: /usr/src/app/upload
