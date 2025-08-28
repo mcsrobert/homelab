@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -8,122 +8,112 @@ spec:
   interval: 30m
   chart:
     spec:
-      chart: authelia
-      version: 0.10.42
+      chart: app-template
       sourceRef:
         kind: HelmRepository
-        name: authelia
+        name: bjw-s
         namespace: flux-system
+      version: 4.2.0
   values:
-    secret:
-      existingSecret: authelia-secret
-
-    configMap:
-      access_control:
-        default_policy: deny
-        rules:
-          - domain: "*.${CLUSTER_DOMAIN}"
-            policy: one_factor
-
-      session:
-        cookies:
-          - domain: ${CLUSTER_DOMAIN}
-            subdomain: authelia
-
-      server:
+    controllers:
+      authelia:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/authelia/authelia
+              tag: 4.39.6
+            envFrom:
+              - secretRef:
+                  name: authelia-secret
+            env:
+              X_AUTHELIA_CONFIG: /config/configuration.yaml
+              X_AUTHELIA_CONFIG_FILTERS: template
+            probes:
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            resources:
+              requests:
+                cpu: 50m
+                memory: 50Mi
+              limits:
+                memory: 500Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    service:
+      app:
+        controller: authelia
+        ports:
+          http:
+            port: 9091
+            protocol: HTTP
+          metrics:
+            port: 9959
+            protocol: HTTP
+    serviceMonitor:
+      app:
+        serviceName: authelia
         endpoints:
-          authz:
-            forward-auth:
-              implementation: ForwardAuth
-
-      authentication_backend:
-        ldap:
-          enabled: true
-          implementation: lldap
-          address: ldap://lldap
-          base_dn: ${LDAP_BASE_DN}
-          user: uid=authelia,ou=people,${LDAP_BASE_DN}
-          users_filter: '(&(objectClass=person)(firstname=*)({username_attribute}={input}))'
-          groups_filter: '(&(objectClass=groupOfUniqueNames)(cn=id_*))'
-
-        password_reset:
-          disable: true
-
-      # identity_providers:
-      #   oidc:
-      #     ## The other portions of the mandatory OpenID Connect 1.0 configuration go here.
-      #     ## See: https://www.authelia.com/c/oidc
-      #     clients:
-      #       - client_id: immich
-      #         client_name: immich
-      #         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
-      #         public: false
-      #         authorization_policy: two_factor
-      #         require_pkce: false
-      #         pkce_challenge_method: ''
-      #         redirect_uris:
-      #           - app.immich:///oauth-callback
-      #           - https://immich.${CLUSTER_DOMAIN}/auth/login
-      #           - https://immich.${CLUSTER_DOMAIN}/user-settings
-      #         scopes:
-      #           - openid
-      #           - profile
-      #           - email
-      #         response_types:
-      #           - code
-      #         grant_types:
-      #           - authorization_code
-      #         access_token_signed_response_alg: none
-      #         userinfo_signed_response_alg: none
-      #         token_endpoint_auth_method: client_secret_post
-
-      notifier:
-        filesystem:
-          enabled: true
-
-      storage:
-        local:
-          enabled: true
-
-      identity_validation:
-        reset_password:
-          secret:
-            disabled: true
-
-      telemetry:
-        metrics:
-          enabled: true
-          serviceMonitor:
-            enabled: true
-
-    pod:
-      # should be automatically set with a template based
-      # on the config, but there seems to be a bug so that
-      # without this we get a DaemonSet with 3 replicas
-      kind: StatefulSet
-
-      annotations:
-        reloader.stakater.com/auto: "true"
-
-      resources:
-        requests:
-          cpu: 50m
-          memory: 100Mi
-        limits:
-          memory: 1Gi  # needed for argon2
-
+          - port: metrics
+            path: /metrics
+    persistence:
+      data:
+        type: emptyDir
+      config:
+        type: configMap
+        name: authelia-config
+        globalMounts:
+          - path: /config/configuration.yaml
+            subPath: configuration.yaml
+      secret-files:
+        type: secret
+        name: authelia-secret-files
+        globalMounts:
+          - path: /secrets
+      oidc-cert:
+        type: secret
+        name: authelia-oidc-tls
+        globalMounts:
+          - path: /secrets/oidc
     ingress:
-      enabled: true
-      className: traefik
-      annotations:
-        kubernetes.io/tls-acme: "true"
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/name: Authelia
-        gethomepage.dev/icon: authelia
-        gethomepage.dev/description: Open-source authentication and authorization server
-        gethomepage.dev/group: Auth
-      tls:
-        enabled: true
-      traefikCRD:
-        enabled: true
-        disableIngressRoute: true
+      app:
+        className: traefik
+        annotations:
+          kubernetes.io/tls-acme: "true"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Authelia
+          gethomepage.dev/icon: authelia
+          gethomepage.dev/description: Open-source authentication and authorization server
+          gethomepage.dev/group: Auth
+        hosts:
+          - host: &host authelia.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+            secretName: authelia-tls
