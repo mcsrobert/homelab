@@ -19,6 +19,8 @@ spec:
   args:
     - --maxmemory=$(MAX_MEMORY)Mi
     - --proactor_threads=1
+    # https://github.com/immich-app/immich/issues/2542#issuecomment-2564396901
+    - --default_lua_flags=allow-undeclared-keys
   resources:
     requests:
       cpu: 100m
