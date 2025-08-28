@@ -10,3 +10,4 @@ data:
   LAN_CIDR: 192.168.178.0/24
   CLUSTER_CIDR: 10.42.0.0/16
   SERVICE_CIDR: 10.43.0.0/16
+  LDAP_BASE_DN: dc=home,dc=cluster

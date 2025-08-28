@@ -14,18 +14,9 @@ spec:
         kind: HelmRepository
         name: authelia
         namespace: flux-system
-  valuesFrom:
-    - kind: Secret
-      name: &secret authelia-secret
-      valuesKey: authentication.ldap.base_dn
-      targetPath: configMap.authentication_backend.ldap.base_dn
-    - kind: Secret
-      name: *secret
-      valuesKey: authentication.ldap.user
-      targetPath: configMap.authentication_backend.ldap.user
   values:
     secret:
-      existingSecret: *secret
+      existingSecret: authelia-secret
 
     configMap:
       access_control:
@@ -50,13 +41,41 @@ spec:
           enabled: true
           implementation: lldap
           address: ldap://lldap
-          # base_dn: <set by valuesFrom>
-          # user: <set by valuesFrom>
+          base_dn: ${LDAP_BASE_DN}
+          user: uid=authelia,ou=people,${LDAP_BASE_DN}
           users_filter: '(&(objectClass=person)(firstname=*)({username_attribute}={input}))'
           groups_filter: '(&(objectClass=groupOfUniqueNames)(cn=id_*))'
 
         password_reset:
           disable: true
+
+      # identity_providers:
+      #   oidc:
+      #     ## The other portions of the mandatory OpenID Connect 1.0 configuration go here.
+      #     ## See: https://www.authelia.com/c/oidc
+      #     clients:
+      #       - client_id: immich
+      #         client_name: immich
+      #         client_secret: '$pbkdf2-sha512$310000$c8p78n7pUMln0jzvd4aK4Q$JNRBzwAo0ek5qKn50cFzzvE9RXV88h1wJn5KGiHrD0YKtZaR/nCb2CJPOsKaPK0hjf.9yHxzQGZziziccp6Yng'  # The digest of 'insecure_secret'.
+      #         public: false
+      #         authorization_policy: two_factor
+      #         require_pkce: false
+      #         pkce_challenge_method: ''
+      #         redirect_uris:
+      #           - app.immich:///oauth-callback
+      #           - https://immich.${CLUSTER_DOMAIN}/auth/login
+      #           - https://immich.${CLUSTER_DOMAIN}/user-settings
+      #         scopes:
+      #           - openid
+      #           - profile
+      #           - email
+      #         response_types:
+      #           - code
+      #         grant_types:
+      #           - authorization_code
+      #         access_token_signed_response_alg: none
+      #         userinfo_signed_response_alg: none
+      #         token_endpoint_auth_method: client_secret_post
 
       notifier:
         filesystem:
@@ -85,7 +104,6 @@ spec:
 
       annotations:
         reloader.stakater.com/auto: "true"
-        reloader.stakater.com/rollout-strategy: restart
 
       resources:
         requests:

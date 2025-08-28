@@ -29,6 +29,7 @@ spec:
               TZ: ${TIME_ZONE}
               UID: 65534
               GID: 65534
+              LLDAP_LDAP_BASE_DN: ${LDAP_BASE_DN}
             envFrom:
               - secretRef:
                   name: lldap-secret
