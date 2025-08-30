@@ -106,7 +106,7 @@ spec:
         className: traefik
         annotations:
           kubernetes.io/tls-acme: "true"
-          traefik.ingress.kubernetes.io/router.middlewares: auth-forwardauth-authelia@kubernetescrd
+          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Zigbee2MQTT
           gethomepage.dev/icon: zigbee2mqtt
