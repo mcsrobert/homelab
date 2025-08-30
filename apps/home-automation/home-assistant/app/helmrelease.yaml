@@ -129,7 +129,7 @@ spec:
         className: traefik
         annotations:
           kubernetes.io/tls-acme: "true"
-          traefik.ingress.kubernetes.io/router.middlewares: auth-forwardauth-authelia@kubernetescrd
+          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
         hosts:
           - host: &host code.homeassistant.${CLUSTER_DOMAIN}
             paths:

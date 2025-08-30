@@ -1,6 +1,8 @@
 ---
 access_control:
+
   default_policy: deny
+
   rules:
     - domain: "*.${CLUSTER_DOMAIN}"
       policy: one_factor

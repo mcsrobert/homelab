@@ -32,3 +32,4 @@ The cluster is running [k3s](https://k3s.io/) on the following nodes:
  - [mapanare-labs/home-ops](https://gitlab.com/mapanare-labs/mapanarenet/home-ops)
  - [tyriis/home-ops](https://github.com/tyriis/home-ops)
  - [drag0n141/home-ops](https://github.com/drag0n141/home-ops)
+ - [budimanjojo/home-cluster](https://github.com/budimanjojo/home-cluster)
