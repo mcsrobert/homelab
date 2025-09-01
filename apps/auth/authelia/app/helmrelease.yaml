@@ -79,7 +79,7 @@ spec:
             path: /metrics
     persistence:
       data:
-        type: emptyDir
+        existingClaim: authelia-data
       config:
         type: configMap
         name: authelia-config
@@ -100,7 +100,7 @@ spec:
       app:
         className: traefik
         annotations:
-          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Authelia
           gethomepage.dev/icon: authelia

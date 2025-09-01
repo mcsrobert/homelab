@@ -13,6 +13,8 @@ session:
       authelia_url: https://authelia.${CLUSTER_DOMAIN}
 
 server:
+  # Disabled due to read-only filesystem, see:
+  # https://www.authelia.com/configuration/miscellaneous/server/#disable_healthcheck
   disable_healthcheck: true
   endpoints:
     authz:
