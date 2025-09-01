@@ -107,7 +107,7 @@ spec:
       app:
         className: traefik
         annotations:
-          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant
@@ -128,7 +128,7 @@ spec:
       code-server:
         className: traefik
         annotations:
-          kubernetes.io/tls-acme: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-production
           traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
         hosts:
           - host: &host code.homeassistant.${CLUSTER_DOMAIN}
