@@ -14,4 +14,56 @@ spec:
         name: bjw-s
         namespace: flux-system
       version: 4.2.0
-  values: {}
+  values:
+    controllers:
+      immich-machine-learning:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        strategy: RollingUpdate
+        containers:
+          main:
+            image:
+              repository: ghcr.io/immich-app/immich-machine-learning
+              tag: v1.140.1
+            resources:
+              requests:
+                cpu: 15m
+                memory: 250Mi
+              limits:
+                memory: 4000Mi
+            probes:
+              startup:
+                enabled: true
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+            env:
+              DB_USERNAME:
+                secretKeyRef:
+                  name: immich-cloudnative-pg-app
+                  key: username
+              DB_PASSWORD:
+                secretKeyRef:
+                  name: immich-cloudnative-pg-app
+                  key: password
+            envFrom:
+              - secretRef:
+                  name: immich-secret
+              - configMapRef:
+                  name: immich-config
+              - configMapRef:
+                  name: immich-machine-learning-config
+    service:
+      main:
+        controller: *app
+        ports:
+          http:
+            port: 3003
+    persistence:
+      library:
+        existingClaim: immich-library
+        globalMounts:
+          - path: /usr/src/app/upload
+      cache:
+        type: emptyDir

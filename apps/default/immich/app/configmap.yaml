@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: immich-configmap
+  name: immich-config
 data:
   TZ: ${TIME_ZONE}
   UPLOAD_LOCATION: /usr/src/app/upload
