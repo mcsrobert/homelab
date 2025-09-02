@@ -39,7 +39,7 @@ spec:
                   key: password
             envFrom:
               - configMapRef:
-                  name: immich-configmap
+                  name: immich-config
               - secretRef:
                   name: immich-secret
     service:
