@@ -27,13 +27,6 @@ data:
       longhorn:
         url: http://longhorn-frontend.longhorn-system.svc.cluster.local
   services.yaml: |
-    - Administration:
-        - Stirling-PDF:
-            href: https://pdf.${CLUSTER_DOMAIN}/
-            description: Self-hosted PDF conversion and editing tools
-            icon: stirling-pdf
-            namespace: stirling-pdf
-            app: stirling-pdf-chart
     - Infrastructure:
         - MetalLB:
             description: Bare-metal load-balancing for Kubernetes
@@ -57,7 +50,7 @@ data:
         - Traefik:
             description: Modern reverse proxy for applications
             icon: traefik-proxy
-            namespace: network
+            namespace: traefik
             app: traefik
         - Tailscale:
             href: https://login.tailscale.com/admin/machines
