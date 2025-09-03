@@ -19,9 +19,11 @@ spec:
       immich-machine-learning:
         annotations:
           reloader.stakater.com/auto: "true"
-        strategy: RollingUpdate
+        pod:
+          nodeSelector:
+            feature.node.kubernetes.io/cpu-model.id: "53328"
         containers:
-          main:
+          app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
               tag: v1.140.1
@@ -55,7 +57,7 @@ spec:
               - configMapRef:
                   name: immich-machine-learning-config
     service:
-      main:
+      app:
         controller: *app
         ports:
           http:
