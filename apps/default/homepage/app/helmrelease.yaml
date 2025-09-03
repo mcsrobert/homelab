@@ -74,7 +74,6 @@ spec:
         ports:
           http:
             port: *port
-
     ingress:
       app:
         className: traefik
@@ -91,34 +90,14 @@ spec:
           - hosts:
               - *host
             secretName: homepage-tls
-
     persistence:
       config:
         type: configMap
         name: homepage-config
         globalMounts:
-          - path: /app/config/bookmarks.yaml
-            subPath: bookmarks.yaml
-          - path: /app/config/custom.css
-            subPath: custom.css
-          - path: /app/config/custom.js
-            subPath: custom.js
-          - path: /app/config/docker.yaml
-            subPath: docker.yaml
-          - path: /app/config/kubernetes.yaml
-            subPath: kubernetes.yaml
-          - path: /app/config/proxmox.yaml
-            subPath: proxmox.yaml
-          - path: /app/config/services.yaml
-            subPath: services.yaml
-          - path: /app/config/settings.yaml
-            subPath: settings.yaml
-          - path: /app/config/widgets.yaml
-            subPath: widgets.yaml
-
+          - path: /app/config
     serviceAccount:
       homepage: {}
-
     rbac:
       bindings:
         homepage:
