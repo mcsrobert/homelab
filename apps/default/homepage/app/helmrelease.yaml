@@ -19,26 +19,13 @@ spec:
       homepage:
         annotations:
           reloader.stakater.com/auto: "true"
-          reloader.stakater.com/rollout-strategy: restart
-        pod:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            fsGroup: 1000
-            fsGroupChangePolicy: OnRootMismatch
-            seccompProfile:
-              type: RuntimeDefault
+        serviceAccount:
+          identifier: homepage
         containers:
           app:
             image:
               repository: ghcr.io/gethomepage/homepage
               tag: v1.4.6@sha256:a1a578fdcfc72754985c3b3b26e4f398a6a782e354d10cf2b156ecbf06d252e9
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities:
-                drop:
-                  - ALL
             resources:
               requests:
                 cpu: 100m
@@ -46,7 +33,7 @@ spec:
               limits:
                 memory: 256Mi
             env:
-              HOMEPAGE_ALLOWED_HOSTS: &domain homepage.${CLUSTER_DOMAIN}
+              HOMEPAGE_ALLOWED_HOSTS: &host homepage.${CLUSTER_DOMAIN}
               LOG_TARGETS: stdout
               TZ: ${TIME_ZONE}
             # envFrom:
@@ -62,13 +49,25 @@ spec:
                     path: /api/healthcheck
                     httpHeaders:
                       - name: Host
-                        value: *domain
+                        value: *host
                   initialDelaySeconds: 0
               readiness: *probes
               startup: *probes
-        serviceAccount:
-          identifier: homepage
-
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
     service:
       app:
         controller: *app
@@ -82,7 +81,7 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
         hosts:
-          - host: *domain
+          - host: *host
             paths:
               - path: /
                 service:
@@ -90,7 +89,7 @@ spec:
                   port: http
         tls:
           - hosts:
-              - *domain
+              - *host
             secretName: homepage-tls
 
     persistence:
