@@ -2,14 +2,15 @@
 
 This repo contains my IaC homelab, which is managed with Flux and Renovate.
 
-My goal is to run various applications I use on a low power Kubernetes cluster
-so that I can continue to learn about Kubernetes and GitOps.
+My goal is to run various applications I use, such as Home Assistant and
+Immich, on a low power Kubernetes cluster. I want to deliver stable, fast and
+secure applications, while continuing to learn about Kubernetes and GitOps.
 
 ## Cloud Dependencies
 
 | Service | Use | Cost | Notes |
 | ------- | --- | ---- | ----- |
-| [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | Have used DuckDNS but had [issues](https://www.reddit.com/r/selfhosted/comments/164nc4x/duckdns_servers_are_having_issues_lately/) at scale |
+| [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | Have used DuckDNS but [had issues](https://www.reddit.com/r/selfhosted/comments/164nc4x/duckdns_servers_are_having_issues_lately/) at scale |
 | [Let's Encrypt](https://letsencrypt.org/) | Certificates | Free | |
 | [Doppler](https://www.doppler.com/) | External Secrets | Free | |
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
