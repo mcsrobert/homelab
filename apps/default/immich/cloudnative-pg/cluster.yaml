@@ -11,18 +11,16 @@ spec:
   storage:
     size: 10Gi
     storageClass: longhorn-backup-high-io
-  # enableSuperuserAccess: true
-  # superuserSecret:
-  #   name: cloudnative-pg-secret
   postgresql:
-    shared_preload_libraries: ['vchord.so']
+    shared_preload_libraries:
+      - vchord.so
     parameters:
       max_connections: '400'
       shared_buffers: 512MB
   resources:
     requests:
-      cpu: 500m
+      cpu: 50m
     limits:
-      memory: 4Gi
+      memory: 1Gi
   monitoring:
     enablePodMonitor: true
