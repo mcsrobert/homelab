@@ -74,9 +74,9 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        fsGroup: 65534
+        runAsUser: 12001
+        runAsGroup: 12001
+        fsGroup: 12001
         fsGroupChangePolicy: OnRootMismatch
         supplementalGroups: [20]  # dialout
         seccompProfile:
