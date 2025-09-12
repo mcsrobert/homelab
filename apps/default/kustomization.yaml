@@ -6,4 +6,5 @@ resources:
   - namespace.yaml
   - homepage/ks.yaml
   - immich/ks.yaml
+  - smtp-relay/ks.yaml
   - vaultwarden/ks.yaml
