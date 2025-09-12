@@ -24,12 +24,14 @@ spec:
         containers:
           app:
             image:
-              repository: juanluisbaptiste/postfix
-              tag: 1.8
+              repository: ghcr.io/foxcpp/maddy
+              tag: 0.8.1
             env:
-              SMTP_SERVER: send.simplemailservice.eu
-              SERVER_HOSTNAME: smtp.${CLUSTER_DOMAIN}
-              DEBUG: "yes"
+              TZ: ${TIME_ZONE}
+              SMTP_RELAY_SMTP_PORT: &port 2525
+              SMTP_RELAY_METRICS_PORT: &metricsPort 9000
+              SMTP_RELAY_SERVER: send.simplemailservice.eu
+              SMTP_RELAY_SERVER_PORT: 465
             envFrom:
               - secretRef:
                   name: smtp-relay-secret
@@ -45,6 +47,7 @@ spec:
                 memory: 128M
             securityContext:
               allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
@@ -68,6 +71,24 @@ spec:
       app:
         ports:
           smtp:
-            port: 25
+            port: *port
             protocol: TCP
             primary: true
+          metrics:
+            port: *metricsPort
+            protocol: HTTP
+    serviceMonitor:
+      app:
+        endpoints:
+          - port: metrics
+    persistence:
+      config:
+        type: configMap
+        name: smtp-relay-config
+        globalMounts:
+          - path: /data/maddy.conf
+            subPath: maddy.conf
+      tmpfs:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
