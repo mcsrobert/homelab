@@ -6,6 +6,8 @@ access_control:
   rules:
     - domain: "*.${CLUSTER_DOMAIN}"
       policy: one_factor
+      subject:
+        - group:id_admin
 
 session:
   cookies:
