@@ -47,14 +47,17 @@ spec:
               - none
               - --disable-telemetry
               - --disable-update-check
+              - --config
+              - /config/.code-server/config
               - --user-data-dir
-              - /config/.code-server
+              - /config/.code-server/user-data
               - --extensions-dir
-              - /config/.code-server
+              - /config/.code-server/extensions
               - --port
               - "12321"
               - /config
             env:
+              HOME: /config/.code-server
               HASS_SERVER: http://localhost:8123
               HASS_TOKEN:
                 secretKeyRef:
