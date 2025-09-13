@@ -13,16 +13,17 @@
       "/\\.ya?ml$/"
     ]
   },
-  "customManagers": [
+  "packageRules": [
     {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/\\.ya?ml$/"
+      "description": ["OCI Helm charts don't have a digest and break Renovate"],
+      "matchDatasources": ["docker"],
+      "matchDepNames": [
+        "ghcr.io/bjw-s-labs/helm/app-template",
+        "ghcr.io/controlplaneio-fluxcd/charts",
+        "ghcr.io/dragonflydb/dragonfly-operator/helm",
+        "ghcr.io/stakater/charts/reloader"
       ],
-      "matchStrings": [
-        "# renovate: docker\\n\\s+repository: (?<depName>[\\w./-]+)\\n\\s+tag: (?<currentValue>[\\w.-]+)"
-      ],
-      "datasourceTemplate": "docker"
+      "pinDigests": false
     }
   ]
 }
