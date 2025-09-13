@@ -19,7 +19,8 @@ spec:
   args:
     - --maxmemory=$(MAX_MEMORY)Mi
     - --proactor_threads=1
-    # https://github.com/immich-app/immich/issues/2542#issuecomment-2564396901
+    # Required to make Dragonfly work with Immich
+    # See: https://github.com/immich-app/immich/issues/2542#issuecomment-2564396901
     - --default_lua_flags=allow-undeclared-keys
   resources:
     requests:
@@ -41,10 +42,10 @@ spec:
               - key: feature.node.kubernetes.io/cpu-model.id
                 operator: NotIn
                 values: ['53379']
-  # topologySpreadConstraints:
-  #   - maxSkew: 1
-  #     topologyKey: kubernetes.io/hostname
-  #     whenUnsatisfiable: DoNotSchedule
-  #     labelSelector:
-  #       matchLabels:
-  #         app.kubernetes.io/name: *app
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: *app
