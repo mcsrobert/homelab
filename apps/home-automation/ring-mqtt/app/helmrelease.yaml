@@ -23,7 +23,7 @@ spec:
               S6_YES_I_WANT_A_WORLD_WRITABLE_RUN_BECAUSE_KUBERNETES: 1
             image:
               repository: tsightler/ring-mqtt
-              tag: 5.8.1
+              tag: 5.8.1@sha256:bb85fa851d22fc75a6738a231498d29c06b3134271adc20b4647c354d96e093d
             ports:
               - name: rtsp
                 containerPort: &port 8554
