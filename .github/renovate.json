@@ -13,6 +13,17 @@
       "/\\.ya?ml$/"
     ]
   },
+  "regexManagers": [
+    {
+      "fileMatch": ["(^|/)helmrelease.*\\.ya?ml$"],
+      "matchStrings": [
+        "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/values\\.schema\\.json"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
+      "versioningTemplate": "semver"
+    }
+  ],
   "packageRules": [
     {
       "description": ["OCI Helm charts don't have a digest and break Renovate"],
