@@ -13,9 +13,12 @@
       "/\\.ya?ml$/"
     ]
   },
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["(^|/)helmrelease.*\\.ya?ml$"],
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)helmrelease.*\\.ya?ml$/"
+      ],
       "matchStrings": [
         "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/values\\.schema\\.json"
       ],
@@ -26,8 +29,12 @@
   ],
   "packageRules": [
     {
-      "description": ["OCI Helm charts don't have a digest and break Renovate"],
-      "matchDatasources": ["docker"],
+      "description": [
+        "OCI Helm charts don't have a digest and break Renovate"
+      ],
+      "matchDatasources": [
+        "docker"
+      ],
       "matchDepNames": [
         "flux-instance",
         "flux-operator",
