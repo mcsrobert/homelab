@@ -20,8 +20,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/foxcpp/maddy
-              tag: 0.8.1
+              repository: ghcr.io/mcsrobert/maddy
+              tag: 0.8.1-hotfix1
             env:
               TZ: ${TIME_ZONE}
               SMTP_RELAY_SMTP_PORT: &port 2525
