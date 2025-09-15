@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/mcsrobert/maddy
-              tag: 0.8.1-hotfix1
+              tag: 0.8.1-hotfix1@sha256:3599e254228ad1807076dd88a6a85d13cd0aeaebfaa4ebd9842dd589ff33879b
             env:
               TZ: ${TIME_ZONE}
               SMTP_RELAY_SMTP_PORT: &port 2525

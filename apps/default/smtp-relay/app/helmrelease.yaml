@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: juanluisbaptiste/postfix
-              tag: 1.8
+              tag: 1.8@sha256:f150042d7669dcaf52fa16de0d124dc2d5a501c7ef56ff623efa92386924e4f2
             env:
               SMTP_SERVER: send.simplemailservice.eu
               SERVER_HOSTNAME: smtp.${CLUSTER_DOMAIN}
