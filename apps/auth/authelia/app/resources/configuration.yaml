@@ -1,8 +1,6 @@
 ---
 access_control:
-
   default_policy: deny
-
   rules:
     - domain: "*.${CLUSTER_DOMAIN}"
       policy: one_factor
@@ -15,7 +13,7 @@ session:
       authelia_url: https://authelia.${CLUSTER_DOMAIN}
 
 server:
-  # Disabled due to read-only filesystem, see:
+  # NOTE: Disabled due to read-only filesystem, see:
   # https://www.authelia.com/configuration/miscellaneous/server/#disable_healthcheck
   disable_healthcheck: true
   endpoints:
@@ -32,6 +30,11 @@ authentication_backend:
     users_filter: '(&(objectClass=person)(firstname=*)({username_attribute}={input}))'
     groups_filter: '(member={dn})'
     attributes:
+      # NOTE: picture would be great, but it doesn't work;
+      # Authelia wants a URL which LDAP doesn't offer, see:
+      # - https://github.com/authelia/authelia/blob/8eaf558152bc3e3009e24241fe2f7d6618bb16e4/internal/authentication/ldap_user_provider.go#L218
+      # - https://github.com/authelia/authelia/discussions/4812#discussioncomment-4756249
+      # picture: avatar
       extra:
         immich-quota:
           name: immich_quota
