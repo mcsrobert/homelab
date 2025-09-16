@@ -27,6 +27,11 @@
       "matchManagers": ["helm-values"],
       "matchDatasources": ["docker"],
       "pinDigests": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefixes": ["ghcr.io/immich-app/immich-"],
+      "groupName": "immich-stack"
     }
   ]
 }
