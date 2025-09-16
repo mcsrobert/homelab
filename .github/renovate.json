@@ -23,10 +23,10 @@
   ],
   "packageRules": [
     {
-      "description": ["OCI Helm charts don't have a digest and break Renovate"],
-      "matchManagers": ["flux", "helmfile", "regex"],
+      "description": ["Pin images defined in manifests"],
+      "matchManagers": ["helm-values"],
       "matchDatasources": ["docker"],
-      "pinDigests": false
+      "pinDigests": true
     }
   ]
 }
