@@ -11,27 +11,36 @@
   },
   "customManagers": [
     {
-      "customType": "regex",
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
       "managerFilePatterns": ["/(^|/)helmrelease.*\\.ya?ml$/"],
       "matchStrings": [
         "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/values\\.schema\\.json"
       ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
       "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
     {
-      "description": ["Pin images defined in manifests"],
       "matchManagers": ["helm-values"],
       "matchDatasources": ["docker"],
       "pinDigests": true
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackagePrefixes": ["ghcr.io/immich-app/immich-"],
-      "groupName": "immich-stack"
+      "matchPackagePatterns": ["immich-"],
+      "groupName": "Immich",
+      "group": {
+         "commitMessageTopic": "{{{groupName}}} group"
+      }
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["flux-operator", "flux-instance"],
+      "groupName": "Flux",
+      "group": {
+         "commitMessageTopic": "{{{groupName}}} group"
+      }
     }
   ]
 }
