@@ -15,7 +15,6 @@ spec:
       vaultwarden:
         annotations:
           reloader.stakater.com/auto: "true"
-          reloader.stakater.com/rollout-strategy: restart
         containers:
           app:
             image:
@@ -25,6 +24,13 @@ spec:
               DOMAIN: https://vault.${CLUSTER_DOMAIN}
               TZ: ${TIME_ZONE}
               SIGNUPS_ALLOWED: false
+              SMTP_HOST: maddy.default.svc.cluster.local
+              SMTP_PORT: 2525
+              SMTP_SECURITY: "off"
+              SMTP_TIMEOUT: 15
+              SMTP_FROM: no-reply@vault.${CLUSTER_DOMAIN}
+              SMTP_FROM_NAME: Vaultwarden
+              HELO_NAME: vault.${CLUSTER_DOMAIN}
               WEBSOCKET_ENABLED: true
             envFrom:
               - secretRef:
