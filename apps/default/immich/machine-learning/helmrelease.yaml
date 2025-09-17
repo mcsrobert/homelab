@@ -17,7 +17,7 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           nodeSelector:
-            feature.node.kubernetes.io/cpu-model.id: "53328"
+            feature.node.kubernetes.io/cpu-model.family: "79"
         containers:
           app:
             image:
