@@ -19,32 +19,31 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-    ipFamilyPolicy: RequireDualStack
 
     service:
-      externalIPs:
-        - "${PROXY_IP}"
-        - "${PROXY_IPv6}"
+      type: LoadBalancer
+      ipFamilyPolicy: RequireDualStack
+      annotations:
+        metallb.io/loadBalancerIPs: "${PROXY_IP},${PROXY_IPv6}"
+      spec:
+        externalTrafficPolicy: Local
 
     ports:
       web:
         port: 80
         expose:
           default: false
-        forwardedHeaders:
+        forwardedHeaders: &trustedIPs
           trustedIPs:
-            - "${CLUSTER_CIDR}"
-        proxyProtocol:
-          trustedIPs:
-            - "${CLUSTER_CIDR}"
+            - ${LAN_CIDR}
+            - ${LAN_CIDRv6}
+            - ${CLUSTER_CIDR}
+            - ${CLUSTER_CIDRv6}
+        # proxyProtocol: *trustedIPs
       websecure:
         port: 443
-        forwardedHeaders:
-          trustedIPs:
-            - "${CLUSTER_CIDR}"
-        proxyProtocol:
-          trustedIPs:
-            - "${CLUSTER_CIDR}"
+        forwardedHeaders: *trustedIPs
+        # proxyProtocol: *trustedIPs
 
     providers:
       kubernetesCRD:
