@@ -24,22 +24,23 @@ spec:
               tag: 0.8.1-hotfix1@sha256:3599e254228ad1807076dd88a6a85d13cd0aeaebfaa4ebd9842dd589ff33879b
             env:
               TZ: ${TIME_ZONE}
-              DEBUG: 'yes'
-              SMTP_HOSTNAME: maddy.${CLUSTER_DOMAIN}
               SMTP_PORT: &port 2525
-              SMTP_RELAY_SERVER: send.simplemailservice.eu
-              SMTP_RELAY_PORT: 465
               METRICS_PORT: &metricsPort 9000
             envFrom:
               - secretRef:
-                  name: maddy-secret
+                  name: simple-mail-service-secret
             probes:
-              startup:
+              startup: &probe
                 enabled: true
-              readiness:
-                enabled: true
-              liveness:
-                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /bin/sh
+                      - -c
+                      - "echo -e 'EHLO localhost\r\nQUIT\r\n' | nc -w 5 127.0.0.1 $SMTP_PORT"
+              readiness: *probe
+              liveness: *probe
             resources:
               requests:
                 cpu: 10m
