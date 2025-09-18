@@ -94,8 +94,11 @@ identity_providers:
           {{ fileContent "/secrets/oidc/tls.crt" | nindent 10 }}
 
 notifier:
-  filesystem:
-    filename: /data/notification.txt
+  smtp:
+    address: smtp://maddy.default.svc.cluster.local:2525
+    sender: Authelia <no-reply@mail.${CLUSTER_DOMAIN}>
+    disable_require_tls: true
+    disable_starttls: true
 
 storage:
   local:
