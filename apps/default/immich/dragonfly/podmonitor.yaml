@@ -3,11 +3,11 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-  name: blocky-dragonfly
+  name: immich-dragonfly
 spec:
   selector:
     matchLabels:
-      app: blocky-dragonfly
+      app: immich-dragonfly
   podTargetLabels:
     - app
   podMetricsEndpoints:
