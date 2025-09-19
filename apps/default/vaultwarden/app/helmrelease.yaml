@@ -79,6 +79,7 @@ spec:
         className: traefik
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
+          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Vaultwarden
           gethomepage.dev/icon: vaultwarden-light
