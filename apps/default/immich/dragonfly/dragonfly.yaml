@@ -24,7 +24,7 @@ spec:
     - --default_lua_flags=allow-undeclared-keys
   resources:
     requests:
-      cpu: 100m
+      cpu: 25m
       memory: 32Mi
     limits:
       memory: 256Mi  # min 256Mi per proactor_thread
