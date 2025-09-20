@@ -15,7 +15,7 @@ secure applications, while continuing to learn about Kubernetes and GitOps.
 | [Doppler](https://www.doppler.com/) | External Secrets | Free | |
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
-| [Simple Mail Service](https://simplemailservice.eu) | Sending emails | Free | |
+| [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
 
 ## Hardware
 
