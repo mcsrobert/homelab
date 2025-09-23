@@ -124,18 +124,24 @@ spec:
             secretName: qbittorrent-tls
 
     persistence:
+      tmp:
+        type: emptyDir
+      run:
+        type: emptyDir
       config:
         type: persistentVolumeClaim
         storageClass: longhorn-backup
         accessMode: ReadWriteOnce
         size: 512Mi
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /config
       downloads:
         type: nfs
         server: ${NAS_IP}
         path: /volume1/shared/Downloads
-        globalMounts:
-          - path: /config/Downloads
-      tmpfs:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
+        advancedMounts:
+          qbittorrent:
+            app:
+              - path: /config/Downloads
