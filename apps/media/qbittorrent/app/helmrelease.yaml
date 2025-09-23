@@ -11,18 +11,18 @@ spec:
     name: app-template
     namespace: flux-system
   values:
-    defaultPodOptions:
-      securityContext:
-        runAsUser: 13001
-        runAsGroup: 13001
-        fsGroup: 13001
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
     controllers:
       qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsUser: 13001
+            runAsGroup: 13001
+            fsGroup: 13001
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             dependsOn:
@@ -66,7 +66,8 @@ spec:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
             env:
-              TZ: "${TIME_ZONE}"
+              TZ: ${TIME_ZONE}
+              # STORAGE_FILEPATH: /tmp/servers.json
               DOT: "off"
               DNS_ADDRESS: 127.0.0.2
               VPN_TYPE: wireguard
@@ -79,17 +80,22 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               FIREWALL_INPUT_PORTS: *port
               FIREWALL_VPN_INPUT_PORTS: *torrentPort
-              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR},${SERVICE_CIDRv6}
+              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
             securityContext:
+              runAsUser: 0
+              runAsGroup: 0
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
+              seccompProfile:
+                type: Unconfined
               capabilities:
                 drop:
                   - ALL
                 add:
+                  - NET_RAW
                   - NET_ADMIN
     service:
       app:
@@ -124,10 +130,6 @@ spec:
             secretName: qbittorrent-tls
 
     persistence:
-      tmp:
-        type: emptyDir
-      run:
-        type: emptyDir
       config:
         type: persistentVolumeClaim
         storageClass: longhorn-backup
