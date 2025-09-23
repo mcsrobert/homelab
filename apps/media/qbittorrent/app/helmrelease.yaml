@@ -79,13 +79,7 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               FIREWALL_INPUT_PORTS: *port
               FIREWALL_VPN_INPUT_PORTS: *torrentPort
-              FIREWALL_OUTBOUND_SUBNETS: >-
-                ${LAN_CIDR},
-                ${LAN_CIDRv6},
-                ${CLUSTER_CIDR},
-                ${CLUSTER_CIDRv6},
-                ${SERVICE_CIDR},
-                ${SERVICE_CIDRv6}
+              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR},${SERVICE_CIDRv6}
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
