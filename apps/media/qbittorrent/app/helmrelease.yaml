@@ -25,6 +25,8 @@ spec:
           reloader.stakater.com/auto: "true"
         containers:
           app:
+            dependsOn:
+              - gluetun
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524
@@ -59,6 +61,42 @@ spec:
           #     QBITTORRENT_HOST: localhost
           #     QBITTORRENT_PORT: *appport
           #     EXPORTER_PORT: &metricsport 17871
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.40.0
+            env:
+              TZ: "${TIME_ZONE}"
+              DOT: "off"
+              DNS_ADDRESS: 127.0.0.2
+              VPN_TYPE: wireguard
+              VPN_INTERFACE: wg0
+              VPN_SERVICE_PROVIDER: protonvpn
+              SERVER_COUNTRIES: Netherlands
+              SECURE_CORE_ONLY: "on"
+              PORT_FORWARD_ONLY: "on"
+              VPN_PORT_FORWARDING: "on"
+              VPN_PORT_FORWARDING_PROVIDER: protonvpn
+              FIREWALL_INPUT_PORTS: *port
+              FIREWALL_VPN_INPUT_PORTS: *torrentPort
+              FIREWALL_OUTBOUND_SUBNETS: >-
+                ${LAN_CIDR},
+                ${LAN_CIDRv6},
+                ${CLUSTER_CIDR},
+                ${CLUSTER_CIDRv6},
+                ${SERVICE_CIDR},
+                ${SERVICE_CIDRv6}
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+                add:
+                  - NET_ADMIN
     service:
       app:
         controller: *app

@@ -9,8 +9,8 @@ data:
   TIME_ZONE: Europe/Amsterdam
   LDAP_BASE_DN: dc=home,dc=cluster
   LAN_CIDR: 192.168.178.0/24
-  CLUSTER_CIDR: 10.42.0.0/16
   LAN_CIDRv6: fda9:55ad:3154:0::/64
+  CLUSTER_CIDR: 10.42.0.0/16
   CLUSTER_CIDRv6: fda7:435:42::/108
   SERVICE_CIDR: 10.43.0.0/16
   SERVICE_CIDRv6: fda7:435:43::/112
