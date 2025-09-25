@@ -16,6 +16,9 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
+          dnsPolicy: ClusterFirst
+          dnsConfig:
+            searches: []  # avoid .fritz.box
           securityContext:
             runAsUser: 13001
             runAsGroup: 13001
