@@ -68,13 +68,10 @@ spec:
             env:
               TZ: ${TIME_ZONE}
               # STORAGE_FILEPATH: /tmp/servers.json
-              DOT: "off"
-              DNS_ADDRESS: 127.0.0.2
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: protonvpn
               SERVER_COUNTRIES: Netherlands
-              SECURE_CORE_ONLY: "on"
               PORT_FORWARD_ONLY: "on"
               VPN_PORT_FORWARDING: "on"
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
