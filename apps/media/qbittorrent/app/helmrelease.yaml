@@ -92,8 +92,8 @@ spec:
               seccompProfile:
                 type: Unconfined
               capabilities:
-                drop:
-                  - ALL
+                # drop:
+                #   - ALL
                 add:
                   - NET_RAW
                   - NET_ADMIN
