@@ -31,6 +31,7 @@ spec:
             restartPolicy: Always
             env:
               TZ: ${TIME_ZONE}
+              DNS_KEEP_NAMESERVER: "on"
               # STORAGE_FILEPATH: /tmp/servers.json
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
