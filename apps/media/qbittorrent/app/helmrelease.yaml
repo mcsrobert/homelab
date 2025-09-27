@@ -23,15 +23,49 @@ spec:
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
-        initContainers:
+        containers:
+          app:
+            dependsOn:
+              - gluetun
+            image:
+              repository: ghcr.io/home-operations/qbittorrent
+              tag: 5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524
+            env:
+              TZ: ${TIME_ZONE}
+              QBT_WEBUI_PORT: &port 8080
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+          # exporter:
+          #   image:
+          #     repository: ghcr.io/esanchezm/prometheus-qbittorrent-exporter
+          #     tag: v1.6.0@sha256:b987d19693a5b2fe7314b22009c6302e084ec801fcf96afaf14065b4cdafc842
+          #   env:
+          #     QBITTORRENT_HOST: localhost
+          #     QBITTORRENT_PORT: *appport
+          #     EXPORTER_PORT: &metricsport 17871
           gluetun:
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
-            restartPolicy: Always
             env:
               TZ: ${TIME_ZONE}
-              DNS_KEEP_NAMESERVER: "on"
               # STORAGE_FILEPATH: /tmp/servers.json
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
@@ -42,7 +76,7 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               VPN_PORT_FORWARDING_UP_COMMAND: >-
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-              FIREWALL_INPUT_PORTS: &port 8080
+              FIREWALL_INPUT_PORTS: *port
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
             envFrom:
               - secretRef:
@@ -73,41 +107,6 @@ spec:
                 #   - ALL
                 add:
                   - NET_ADMIN
-        containers:
-          app:
-            image:
-              repository: ghcr.io/home-operations/qbittorrent
-              tag: 5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524
-            env:
-              TZ: ${TIME_ZONE}
-              QBT_WEBUI_PORT: *port
-            probes:
-              liveness:
-                enabled: true
-              readiness:
-                enabled: true
-              startup:
-                enabled: true
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
-            resources:
-              requests:
-                cpu: 10m
-                memory: 256Mi
-              limits:
-                memory: 1Gi
-          # exporter:
-          #   image:
-          #     repository: ghcr.io/esanchezm/prometheus-qbittorrent-exporter
-          #     tag: v1.6.0@sha256:b987d19693a5b2fe7314b22009c6302e084ec801fcf96afaf14065b4cdafc842
-          #   env:
-          #     QBITTORRENT_HOST: localhost
-          #     QBITTORRENT_PORT: *appport
-          #     EXPORTER_PORT: &metricsport 17871
     service:
       app:
         controller: *app
