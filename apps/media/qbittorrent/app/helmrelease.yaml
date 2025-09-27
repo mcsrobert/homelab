@@ -23,10 +23,44 @@ spec:
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
+        initContainers:
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
+            restartPolicy: Always
+            env:
+              TZ: ${TIME_ZONE}
+              # STORAGE_FILEPATH: /tmp/servers.json
+              VPN_TYPE: wireguard
+              VPN_INTERFACE: wg0
+              VPN_SERVICE_PROVIDER: protonvpn
+              SERVER_COUNTRIES: Netherlands
+              PORT_FORWARD_ONLY: "on"
+              VPN_PORT_FORWARDING: "on"
+              VPN_PORT_FORWARDING_PROVIDER: protonvpn
+              VPN_PORT_FORWARDING_UP_COMMAND: >-
+                /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
+              FIREWALL_INPUT_PORTS: *port
+              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
+            securityContext:
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
+              seccompProfile:
+                type: Unconfined
+              capabilities:
+                # drop:
+                #   - ALL
+                add:
+                  - NET_RAW
+                  - NET_ADMIN
         containers:
           app:
-            dependsOn:
-              - gluetun
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524
@@ -60,40 +94,6 @@ spec:
           #     QBITTORRENT_HOST: localhost
           #     QBITTORRENT_PORT: *appport
           #     EXPORTER_PORT: &metricsport 17871
-          gluetun:
-            image:
-              repository: ghcr.io/qdm12/gluetun
-              tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
-            env:
-              TZ: ${TIME_ZONE}
-              # STORAGE_FILEPATH: /tmp/servers.json
-              VPN_TYPE: wireguard
-              VPN_INTERFACE: wg0
-              VPN_SERVICE_PROVIDER: protonvpn
-              SERVER_COUNTRIES: Netherlands
-              PORT_FORWARD_ONLY: "on"
-              VPN_PORT_FORWARDING: "on"
-              VPN_PORT_FORWARDING_PROVIDER: protonvpn
-              VPN_PORT_FORWARDING_UP_COMMAND: >-
-                /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-              FIREWALL_INPUT_PORTS: *port
-              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
-            envFrom:
-              - secretRef:
-                  name: qbittorrent-secret
-            securityContext:
-              runAsUser: 0
-              runAsGroup: 0
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
-              seccompProfile:
-                type: Unconfined
-              capabilities:
-                # drop:
-                #   - ALL
-                add:
-                  - NET_RAW
-                  - NET_ADMIN
     service:
       app:
         controller: *app
