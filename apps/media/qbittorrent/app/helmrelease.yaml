@@ -123,11 +123,11 @@ spec:
         className: traefik
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
-          # gethomepage.dev/enabled: "true"
-          # gethomepage.dev/name: Vaultwarden
-          # gethomepage.dev/icon: vaultwarden-light
-          # gethomepage.dev/description: Lightweight, self-hosted password manager
-          # gethomepage.dev/group: Apps
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: qBittorrent
+          gethomepage.dev/icon: qbittorrent
+          gethomepage.dev/description: Lightweight, open-source bittorrent client
+          gethomepage.dev/group: Media
         hosts:
           - host: &domain qbittorrent.${CLUSTER_DOMAIN}
             paths:
