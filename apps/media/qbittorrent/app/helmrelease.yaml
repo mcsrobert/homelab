@@ -16,6 +16,10 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
           securityContext:
             runAsUser: 13001
             runAsGroup: 13001
