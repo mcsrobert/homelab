@@ -36,7 +36,8 @@ spec:
             restartPolicy: Always
             env:
               TZ: ${TIME_ZONE}
-              # STORAGE_FILEPATH: /tmp/servers.json
+              PUID: 13001
+              GUID: 13001
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: protonvpn
@@ -48,6 +49,10 @@ spec:
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
+              # NOTE: Gluetun sets weird permissions on the default /tmp/gluetun folder
+              # This helps, but requires CAP_CHOWN. I don't know why...
+              # PUBLICIP_FILE: /tmp/gluetun_ip
+              # VPN_PORT_FORWARDING_STATUS_FILE: /tmp/gluetun_forwarded_port
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -65,19 +70,18 @@ spec:
                   failureThreshold: 5
               liveness: *gluetunProbe
               readiness: *gluetunProbe
+            resources:
+              limits:
+                squat.ai/tun: "1"
             securityContext:
-              runAsUser: 0
-              runAsGroup: 0
+              runAsUser: 0  # needed for iptables
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
-              seccompProfile:
-                type: Unconfined
               capabilities:
-                # drop:
-                #   - ALL
+                drop:
+                  - ALL
                 add:
                   # - CHOWN
-                  # - NET_RAW
                   - NET_ADMIN
         containers:
           app:
@@ -123,7 +127,7 @@ spec:
             protocol: HTTP
           # metrics:
           #   port: *metricsport
-          #   type: HTTP
+          #   protocol: HTTP
     ingress:
       app:
         className: traefik
