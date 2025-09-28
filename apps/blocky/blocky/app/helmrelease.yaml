@@ -86,7 +86,7 @@ spec:
             port: 53
             protocol: UDP
     serviceMonitor:
-      main:
+      app:
         serviceName: *app
         endpoints:
           - interval: 30s
