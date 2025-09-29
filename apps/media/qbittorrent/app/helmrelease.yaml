@@ -47,12 +47,12 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               VPN_PORT_FORWARDING_UP_COMMAND: >-
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-              FIREWALL_INPUT_PORTS: &port 8080
-              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
               # NOTE: Gluetun sets weird permissions on the default /tmp/gluetun folder
               # This helps, but requires CAP_CHOWN. I don't know why...
-              # PUBLICIP_FILE: /tmp/gluetun_ip
-              # VPN_PORT_FORWARDING_STATUS_FILE: /tmp/gluetun_forwarded_port
+              VPN_PORT_FORWARDING_STATUS_FILE: /tmp/gluetun_forwarded_port
+              PUBLICIP_FILE: /tmp/gluetun_ip
+              FIREWALL_INPUT_PORTS: &port 8080
+              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -81,7 +81,7 @@ spec:
                 drop:
                   - ALL
                 add:
-                  # - CHOWN
+                  - CHOWN
                   - NET_ADMIN
         containers:
           app:
