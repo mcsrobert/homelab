@@ -22,9 +22,10 @@ spec:
               - name: ndots
                 value: "1"
           securityContext:
-            runAsUser: 13001
-            runAsGroup: 13001
-            fsGroup: 13001
+            runAsUser: 1301
+            runAsGroup: 1301
+            supplementalGroups: [65537]  # for NFS mount
+            fsGroup: 1301
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
@@ -36,8 +37,8 @@ spec:
             restartPolicy: Always
             env:
               TZ: ${TIME_ZONE}
-              PUID: 13001
-              GUID: 13001
+              PUID: 1301
+              GUID: 1301
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: protonvpn
@@ -71,10 +72,14 @@ spec:
               liveness: *gluetunProbe
               readiness: *gluetunProbe
             resources:
+              requests:
+                cpu: 50m
               limits:
+                memory: 128Mi
                 squat.ai/tun: "1"
             securityContext:
               runAsUser: 0  # needed for iptables
+              runAsGroup: 0
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
               capabilities:
@@ -109,7 +114,7 @@ spec:
                 cpu: 10m
                 memory: 256Mi
               limits:
-                memory: 1Gi
+                memory: 4Gi
           # exporter:
           #   image:
           #     repository: ghcr.io/esanchezm/prometheus-qbittorrent-exporter
@@ -149,7 +154,6 @@ spec:
           - hosts:
               - *domain
             secretName: qbittorrent-tls
-
     persistence:
       config:
         type: persistentVolumeClaim
