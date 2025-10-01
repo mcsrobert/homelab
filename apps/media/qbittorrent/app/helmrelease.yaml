@@ -94,7 +94,7 @@ spec:
                 add:
                   - CHOWN
                   - NET_ADMIN
-                  # - SYS_MODULE  # https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/wireguard.md
+                  - SYS_MODULE  # Kernel space Wireguard
         containers:
           app:
             image:
@@ -179,3 +179,14 @@ spec:
           qbittorrent:
             app:
               - path: /config/Downloads
+      # Kernel space Wireguard
+      # See: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/wireguard.md
+      modules:
+        type: hostPath
+        hostPath: /lib/modules
+        hostPathType: Directory
+        advancedMounts:
+          qbittorrent:
+            gluetun:
+              - path: /lib/modules
+                readOnly: true
