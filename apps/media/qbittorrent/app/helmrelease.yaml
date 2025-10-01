@@ -22,9 +22,6 @@ spec:
               - name: ndots
                 value: "1"
           securityContext:
-            runAsUser: 1027
-            runAsGroup: 1027
-            fsGroup: 1027
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
@@ -41,8 +38,6 @@ spec:
                   command: ["/bin/sh", "-c", "(ip rule del table 51820; ip -6 rule del table 51820) || true"]
             env:
               TZ: ${TIME_ZONE}
-              PUID: 1027
-              GUID: 1027
               BLOCK_MALICIOUS: "off"  # Reduces memory usage, see: https://github.com/qdm12/gluetun/issues/2054
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
@@ -85,7 +80,6 @@ spec:
                 squat.ai/tun: "1"
             securityContext:
               runAsUser: 0  # needed for iptables
-              runAsGroup: 0
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
               capabilities:
@@ -111,6 +105,10 @@ spec:
               startup:
                 enabled: true
             securityContext:
+              runAsNonRoot: true
+              runAsUser: 1027
+              runAsGroup: 1027
+              fsGroup: 1027
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
