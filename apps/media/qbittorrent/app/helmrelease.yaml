@@ -16,11 +16,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          # dnsConfig:
-          #   options:
-          #     # avoid dns search domain leaking
-          #     - name: ndots
-          #       value: "1"
           securityContext:
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
