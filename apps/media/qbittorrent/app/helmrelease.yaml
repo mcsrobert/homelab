@@ -16,11 +16,11 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          dnsConfig:
-            options:
-              # avoid dns search domain leaking
-              - name: ndots
-                value: "1"
+          # dnsConfig:
+          #   options:
+          #     # avoid dns search domain leaking
+          #     - name: ndots
+          #       value: "1"
           securityContext:
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
@@ -76,7 +76,7 @@ spec:
               requests:
                 cpu: 50m
               limits:
-                # memory: 512Mi
+                memory: 512Mi
                 squat.ai/tun: "1"
             securityContext:
               runAsUser: 0  # needed for iptables
@@ -96,6 +96,7 @@ spec:
               tag: 5.1.2@sha256:31ac39705e31f7cdcc04dc46c1c0b0cdf8dc6f9865d4894efc097a33adc41524
             env:
               TZ: ${TIME_ZONE}
+              UMASK: "022"
               QBT_WEBUI_PORT: *port
             probes:
               liveness:
@@ -106,9 +107,9 @@ spec:
                 enabled: true
             securityContext:
               runAsNonRoot: true
-              runAsUser: 1027
-              runAsGroup: 1027
-              fsGroup: 1027
+              runAsUser: 6000
+              runAsGroup: 65537
+              fsGroup: 65537
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
