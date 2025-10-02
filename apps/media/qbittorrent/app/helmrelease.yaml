@@ -33,22 +33,24 @@ spec:
                   command: ["/bin/sh", "-c", "(ip rule del table 51820; ip -6 rule del table 51820) || true"]
             env:
               TZ: ${TIME_ZONE}
+              PUID: 6001
+              GUID: 6001
               BLOCK_MALICIOUS: "off"  # Reduces memory usage, see: https://github.com/qdm12/gluetun/issues/2054
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
-              VPN_SERVICE_PROVIDER: protonvpn
-              SERVER_COUNTRIES: Netherlands
-              PORT_FORWARD_ONLY: "on"
+              VPN_SERVICE_PROVIDER: custom
+              # SERVER_COUNTRIES: Netherlands
+              # PORT_FORWARD_ONLY: "on"
               VPN_PORT_FORWARDING: "on"
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               VPN_PORT_FORWARDING_UP_COMMAND: >-
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-              # NOTE: Gluetun sets weird permissions on the default /tmp/gluetun folder
-              # This helps, but requires CAP_CHOWN. I don't know why...
-              VPN_PORT_FORWARDING_STATUS_FILE: /tmp/gluetun_forwarded_port
-              PUBLICIP_FILE: /tmp/gluetun_ip
+              VPN_PORT_FORWARDING_STATUS_FILE: /gluetun/forwarded_port
+              PUBLICIP_FILE: /gluetun/ip
+              # UPDATER_PERIOD: 24h  # Broken, see: https://github.com/qdm12/gluetun/issues/2820
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
+              WIREGUARD_MTU: 1420
             envFrom:
               - secretRef:
                   name: gluetun-secret
@@ -75,6 +77,8 @@ spec:
                 squat.ai/tun: "1"
             securityContext:
               runAsUser: 0  # needed for iptables
+              runAsGroup: 6001
+              fsGroup: 6001
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
               capabilities:
@@ -112,7 +116,7 @@ spec:
                   - ALL
             resources:
               requests:
-                cpu: 10m
+                cpu: 100m
                 memory: 256Mi
               limits:
                 memory: 4Gi
@@ -158,9 +162,7 @@ spec:
     persistence:
       config:
         type: persistentVolumeClaim
-        storageClass: longhorn-backup
-        accessMode: ReadWriteOnce
-        size: 512Mi
+        existingClaim: qbittorrent-config
         advancedMounts:
           qbittorrent:
             app:
@@ -173,6 +175,13 @@ spec:
           qbittorrent:
             app:
               - path: /config/Downloads
+      gluetun:
+        type: persistentVolumeClaim
+        existingClaim: gluetun-data
+        advancedMounts:
+          qbittorrent:
+            gluetun:
+              - path: /gluetun
       # Kernel space Wireguard
       # See: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/wireguard.md
       modules:
