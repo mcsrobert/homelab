@@ -6,7 +6,6 @@ resources:
   - authelia.yaml
   - cloudnative-pg.yaml
   - controlplaneio.yaml
-  - dragonfly-operator.yaml
   - external-secrets.yaml
   - jetstack.yaml
   - longhorn.yaml
