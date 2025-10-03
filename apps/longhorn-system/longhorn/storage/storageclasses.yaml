@@ -11,8 +11,8 @@ parameters:
   recurringJobSelector: |
     [
       {
-        "name":"backup",
-        "isGroup":true
+        "name": "backup",
+        "isGroup": true
       }
     ]
 ---
@@ -28,7 +28,7 @@ parameters:
   recurringJobSelector: |
     [
       {
-        "name":"backup",
-        "isGroup":true
+        "name": "backup",
+        "isGroup": true
       }
     ]
