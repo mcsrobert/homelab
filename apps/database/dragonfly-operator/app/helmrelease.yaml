@@ -6,14 +6,9 @@ metadata:
   name: dragonfly-operator
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: dragonfly-operator
-      version: v1.3.0
-      sourceRef:
-        kind: HelmRepository
-        name: dragonfly-operator
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: dragonfly-operator
   install:
     crds: CreateReplace
   upgrade:
