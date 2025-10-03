@@ -14,4 +14,3 @@ resources:
   - prometheus-community.yaml
   - stakater.yaml
   - tailscale.yaml
-  - traefik.yaml
