@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - authelia.yaml
   - cloudnative-pg.yaml
-  - controlplaneio.yaml
   - external-secrets.yaml
   - jetstack.yaml
   - longhorn.yaml

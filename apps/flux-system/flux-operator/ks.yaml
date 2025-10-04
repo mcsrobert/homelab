@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app flux-operator
+  name: flux-operator
   namespace: flux-system
 spec:
   dependsOn:
@@ -14,18 +14,16 @@ spec:
     name: flux-system
   targetNamespace: flux-system
   interval: 30m
-  timeout: 5m
+  timeout: 3m
+  retryInterval: 2m
   wait: true
   prune: false
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app flux-instance
+  name: flux-instance
   namespace: flux-system
 spec:
   dependsOn:
@@ -36,7 +34,6 @@ spec:
     name: flux-system
   targetNamespace: flux-system
   interval: 30m
+  timeout: 3m
+  retryInterval: 2m
   prune: true
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
