@@ -21,7 +21,14 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         initContainers:
+          coredns:
+            image:
+              repository: mirror.gcr.io/coredns/coredns
+              tag: 1.12.4
+            args: ["-conf", "/etc/coredns/Corefile"]
+            restartPolicy: Always
           gluetun:
+            dependsOn: coredns
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
@@ -35,7 +42,8 @@ spec:
               TZ: ${TIME_ZONE}
               PUID: 6001
               GUID: 6001
-              # DNS_KEEP_NAMESERVER: "on"
+              DOT: "off"
+              DNS_ADDRESS: 127.0.0.2
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: custom
@@ -45,6 +53,8 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               VPN_PORT_FORWARDING_UP_COMMAND: >-
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
+              VPN_PORT_FORWARDING_STATUS_FILE: /gluetun/forwarded_port
+              PUBLICIP_FILE: /gluetun/ip
               # UPDATER_PERIOD: 24h  # Broken, see: https://github.com/qdm12/gluetun/issues/2820
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
@@ -70,6 +80,7 @@ spec:
             resources:
               requests:
                 cpu: 50m
+                memory: 128Mi
               limits:
                 memory: 512Mi
                 squat.ai/tun: "1"
@@ -173,6 +184,14 @@ spec:
           qbittorrent:
             app:
               - path: /downloads
+      coredns:
+        type: configMap
+        name: qbittorrent-coredns
+        advancedMounts:
+          qbittorrent:
+            coredns:
+              - path: /etc/coredns/Corefile
+                subPath: Corefile
       gluetun:
         type: persistentVolumeClaim
         existingClaim: gluetun-data
