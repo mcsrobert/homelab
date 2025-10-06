@@ -35,7 +35,7 @@ spec:
               TZ: ${TIME_ZONE}
               PUID: 6001
               GUID: 6001
-              BLOCK_MALICIOUS: "off"  # Reduces memory usage, see: https://github.com/qdm12/gluetun/issues/2054
+              DNS_KEEP_NAMESERVER: "on"
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: custom
