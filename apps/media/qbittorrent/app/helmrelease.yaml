@@ -35,7 +35,7 @@ spec:
               TZ: ${TIME_ZONE}
               PUID: 6001
               GUID: 6001
-              DNS_KEEP_NAMESERVER: "on"
+              # DNS_KEEP_NAMESERVER: "on"
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: custom
@@ -45,8 +45,6 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               VPN_PORT_FORWARDING_UP_COMMAND: >-
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-              VPN_PORT_FORWARDING_STATUS_FILE: /gluetun/forwarded_port
-              PUBLICIP_FILE: /gluetun/ip
               # UPDATER_PERIOD: 24h  # Broken, see: https://github.com/qdm12/gluetun/issues/2820
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
@@ -119,7 +117,7 @@ spec:
                 cpu: 100m
                 memory: 256Mi
               limits:
-                memory: 4Gi
+                memory: 1Gi
           # exporter:
           #   image:
           #     repository: ghcr.io/esanchezm/prometheus-qbittorrent-exporter
@@ -174,7 +172,7 @@ spec:
         advancedMounts:
           qbittorrent:
             app:
-              - path: /config/Downloads
+              - path: /downloads
       gluetun:
         type: persistentVolumeClaim
         existingClaim: gluetun-data
