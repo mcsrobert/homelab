@@ -61,7 +61,7 @@ spec:
               WIREGUARD_MTU: 1420
             envFrom:
               - secretRef:
-                  name: gluetun-secret
+                  name: qbittorrent-gluetun-secret
             probes:
               startup: &gluetunProbe
                 enabled: true
