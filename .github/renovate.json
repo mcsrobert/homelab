@@ -46,9 +46,10 @@
       "matchDatasources": ["docker"],
       "matchPackagePatterns": [
         "prometheus-operator-crds",
-        "ghcr.io/prometheus-community/charts/prometheus-operator-crds"
+        "ghcr.io/prometheus-community/charts/prometheus-operator-crds",
+        "kube-prometheus-stack"
       ],
-      "groupName": "prometheus-operator-crds",
+      "groupName": "Prometheus",
       "group": {
          "commitMessageTopic": "{{{groupName}}} group"
       }
