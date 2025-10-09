@@ -9,5 +9,4 @@ resources:
   - jetstack.yaml
   - longhorn.yaml
   - metallb.yaml
-  - prometheus-community.yaml
   - tailscale.yaml

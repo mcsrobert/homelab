@@ -28,14 +28,6 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["immich-"],
-      "groupName": "Immich",
-      "group": {
-         "commitMessageTopic": "{{{groupName}}} group"
-      }
-    },
-    {
-      "matchDatasources": ["docker"],
       "matchPackagePatterns": ["flux-operator", "flux-instance"],
       "groupName": "Flux",
       "group": {
@@ -44,12 +36,16 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": [
-        "prometheus-operator-crds",
-        "ghcr.io/prometheus-community/charts/prometheus-operator-crds",
-        "kube-prometheus-stack"
-      ],
+      "matchPackagePatterns": ["prometheus-community"],
       "groupName": "Prometheus",
+      "group": {
+         "commitMessageTopic": "{{{groupName}}} group"
+      }
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["immich-"],
+      "groupName": "Immich",
       "group": {
          "commitMessageTopic": "{{{groupName}}} group"
       }
