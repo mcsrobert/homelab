@@ -3,23 +3,20 @@
 apiVersion: dragonflydb.io/v1alpha1
 kind: Dragonfly
 metadata:
-  name: &app blocky-dragonfly
-  labels:
-    app.kubernetes.io/name: *app
-    app.kubernetes.io/instance: *app
+  name: blocky-dragonfly
 spec:
   image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.34.1@sha256:99eb2dd14ca00b983c302d0a15d15176dccd5a9e85a375bcc5157e1cadd73099
   replicas: 2
+  authentication:
+    passwordFromSecret:
+      name: blocky-dragonfly-auth
+      key: password
   env:
     - name: MAX_MEMORY
       valueFrom:
         resourceFieldRef:
           resource: limits.memory
           divisor: 1Mi
-  authentication:
-    passwordFromSecret:
-      name: blocky-dragonfly-auth
-      key: password
   args:
     - --maxmemory=$(MAX_MEMORY)Mi
     - --proactor_threads=1
@@ -29,20 +26,12 @@ spec:
       memory: 32Mi
     limits:
       memory: 256Mi  # minimum 256Mi per core
+  nodeSelector:
+    feature.node.kubernetes.io/dragonfly.capable: "true"
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
       whenUnsatisfiable: DoNotSchedule
       labelSelector:
         matchLabels:
-          app.kubernetes.io/name: *app
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          # Do not schedule on the Raspberry Pi 4
-          # See: https://github.com/dragonflydb/dragonfly/issues/777
-          - matchExpressions:
-              - key: feature.node.kubernetes.io/cpu-model.id
-                operator: NotIn
-                values: ["53379"]
+          app.kubernetes.io/name: dragonfly

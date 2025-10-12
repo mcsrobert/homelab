@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/nfd.k8s-sigs.io/nodefeaturerule_v1alpha1.json
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: dragonfly-capable
+spec:
+  rules:
+    - name: dragonfly-capable
+      labels:
+        feature.node.kubernetes.io/dragonfly.capable: "true"
+      matchFeatures:
+        - feature: cpu.cpuid
+          matchExpressions:
+            ATOMICS:
+              op: Exists
+            AES:
+              op: Exists
+            SHA2:
+              op: Exists
