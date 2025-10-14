@@ -10,12 +10,13 @@ secure applications, while continuing to learn about Kubernetes and GitOps.
 
 | Service | Use | Cost | Notes |
 | ------- | --- | ---- | ----- |
-| [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | Have used DuckDNS but [had issues](https://www.reddit.com/r/selfhosted/comments/164nc4x/duckdns_servers_are_having_issues_lately/) at scale |
+| [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | Had [issues](https://www.reddit.com/r/selfhosted/comments/164nc4x/duckdns_servers_are_having_issues_lately/) with DuckDNS |
 | [Let's Encrypt](https://letsencrypt.org/) | Certificates | Free | |
 | [Doppler](https://www.doppler.com/) | External Secrets | Free | |
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
 | [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
+| [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (5TB) | ~€13/mo | Running rclone from my NAS |
 
 ## Hardware
 
