@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-4.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prowlarr
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  values:
+    controllers:
+      jellyfin:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/jellyfin/jellyfin
+              tag: 10.10.7
+            resources:
+              requests:
+                cpu: 100m
+                memory: 2Gi
+              limits:
+                memory: 6Gi
+                squat.ai/media: "1"
+    service:
+      app:
+        ports:
+          http:
+            port: &port 8096
+          # discovery:
+          #   port: 7359
+          #   protocol: UDP
+    # route:
+    #   app:
+    #     annotations:
+    #       gethomepage.dev/enabled: "true"
+    #       gethomepage.dev/description: Media server
+    #       gethomepage.dev/group: Media
+    #       gethomepage.dev/icon: sh-jellyfin.svg
+    #       gethomepage.dev/name: Jellyfin
+    #       gethomepage.dev/app: jellyfin
+    #     hostnames: ["{{ .Release.Name }}.hemma.dev"]
+    #     parentRefs:
+    #       - name: internal
+    #         namespace: networking
+    #         sectionName: https
+    #     rules:
+    #       - backendRefs:
+    #           - identifier: app
+    #             port: *port
+    persistence:
+      tmpfs:
+        type: emptyDir
+        globalMounts:
+          - path: /cache
+      media:
+        type: persistentVolumeClaim
+        existingClaim: media-data
+        globalMounts:
+          - path: /media
+      config:
+        existingClaim: jellyfin-config
+        advancedMounts:
+          jellyfin:
+            app:
+              - path: /config
