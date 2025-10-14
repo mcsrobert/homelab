@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: prowlarr
+  name: jellyfin
 spec:
   interval: 30m
   chartRef:
@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jellyfin/jellyfin
-              tag: 10.10.7
+              tag: 10.11.0-rc9@sha256:52b9391b68e5de47e769b4e864b93131dce771a7aee7b4fcee67f2e4f6b40a43
             resources:
               requests:
                 cpu: 100m
@@ -29,28 +29,31 @@ spec:
       app:
         ports:
           http:
-            port: &port 8096
+            port: 8096
           # discovery:
           #   port: 7359
           #   protocol: UDP
-    # route:
-    #   app:
-    #     annotations:
-    #       gethomepage.dev/enabled: "true"
-    #       gethomepage.dev/description: Media server
-    #       gethomepage.dev/group: Media
-    #       gethomepage.dev/icon: sh-jellyfin.svg
-    #       gethomepage.dev/name: Jellyfin
-    #       gethomepage.dev/app: jellyfin
-    #     hostnames: ["{{ .Release.Name }}.hemma.dev"]
-    #     parentRefs:
-    #       - name: internal
-    #         namespace: networking
-    #         sectionName: https
-    #     rules:
-    #       - backendRefs:
-    #           - identifier: app
-    #             port: *port
+    ingress:
+      app:
+        className: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Jellyfin
+          gethomepage.dev/icon: jellyfin
+          gethomepage.dev/description: Open-source Media Server
+          gethomepage.dev/group: Media
+        hosts:
+          - host: &host jellyfin.${CLUSTER_DOMAIN}
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+        tls:
+          - hosts:
+              - *host
+            secretName: jellyfin-tls
     persistence:
       tmpfs:
         type: emptyDir
