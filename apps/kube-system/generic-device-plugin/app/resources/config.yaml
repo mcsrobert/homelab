@@ -11,3 +11,16 @@ devices:
       - count: 10
         paths:
           - path: /dev/net/tun
+
+  - name: media
+    groups:
+      - paths:
+          - path: /dev/mali0
+      - paths:
+          - path: /dev/dri
+      - paths:
+          - path: /dev/dma_heap/
+      - paths:
+          - path: /dev/rga
+      - paths:
+          - path: /dev/mpp_service
