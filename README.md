@@ -2,33 +2,33 @@
 
 This repo contains my IaC homelab, which is managed with Flux and Renovate.
 
-My goal is to run various applications I use, such as Home Assistant and
-Immich, on a low power Kubernetes cluster. I want to deliver stable, fast and
-secure applications, while continuing to learn about Kubernetes and GitOps.
+My goal is to run various self hosted apps I use (such as Home Assistant and
+Immich) on a low power Kubernetes cluster. By following best practices, I aim
+to deliver stable, fast and secure applications, while continuing to learn
+about Kubernetes and GitOps.
 
 ## Cloud Dependencies
 
 | Service | Use | Cost | Notes |
 | ------- | --- | ---- | ----- |
-| [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | Had [issues](https://www.reddit.com/r/selfhosted/comments/164nc4x/duckdns_servers_are_having_issues_lately/) with DuckDNS |
+| [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | |
 | [Let's Encrypt](https://letsencrypt.org/) | Certificates | Free | |
 | [Doppler](https://www.doppler.com/) | External Secrets | Free | |
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
 | [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
-| [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (5TB) | ~€13/mo | Running rclone from my NAS |
+| [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (5TB) | ~€13/mo | rclone sync + snapshots |
 
 ## Hardware
 
-The cluster is running [k3s](https://k3s.io/) on the following nodes:
+My homelab consists of the following hardware:
 
-|  Device | Description | CPU | RAM | Architecture | OS |
-| ------- | ------------| --- | --- | ------------ | -- |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | Master | 8 | 16GB | ARM64 | Ubuntu |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | Master | 8 | 16GB | ARM64 | Ubuntu |
-| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | Master | 4 | 8GB | ARM64 | Raspberry Pi OS |
-
-I also have a Synology NAS I use for backing up Longhorn volumes and storing media.
+|  Device | Role | CPU | RAM | Storage | Architecture | OS |
+| ------- | ---- | --- | --- | ------- | ------------ | -- |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
+| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | Master | 4 | 8GB | 128GB USB | ARM64 | Raspberry Pi OS |
+| Synology DS923+ | NAS | 2 | 4GB | 4x 4TB HDD in RAID5 | x86-64 | DSM |
 
 ## Awknowledgements
 
