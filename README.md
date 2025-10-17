@@ -21,13 +21,13 @@ about Kubernetes and GitOps.
 
 ## Hardware
 
-My homelab consists of the following hardware:
+My homelab consists of a small k3s cluster and a NAS for Longhorn backups and media.
 
 |  Device | Role | CPU | RAM | Storage | Architecture | OS |
 | ------- | ---- | --- | --- | ------- | ------------ | -- |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
-| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | Master | 4 | 8GB | 128GB USB | ARM64 | Raspberry Pi OS |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
+| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | k3s Master | 4 | 8GB | 128GB USB | ARM64 | Raspberry Pi OS |
 | Synology DS923+ | NAS | 2 | 4GB | 4x 4TB HDD in RAID5 | x86-64 | DSM |
 
 ## Awknowledgements
