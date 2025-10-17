@@ -4,16 +4,23 @@
     "github>mcsrobert/renovate-config"
   ],
   "flux": {
-    "managerFilePatterns": ["/\\.ya?ml$/"]
+    "managerFilePatterns": [
+      "/\\.ya?ml$/"
+    ]
   },
   "helm-values": {
-    "managerFilePatterns": ["/\\.ya?ml$/"]
+    "managerFilePatterns": [
+      "/\\.ya?ml$/"
+    ]
   },
   "customManagers": [
     {
+      "customType": "regex",
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
-      "managerFilePatterns": ["/(^|/)helmrelease.*\\.ya?ml$/"],
+      "managerFilePatterns": [
+        "/(^|/)helmrelease.*\\.ya?ml$/"
+      ],
       "matchStrings": [
         "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/values\\.schema\\.json"
       ],
@@ -22,25 +29,38 @@
   ],
   "packageRules": [
     {
-      "matchManagers": ["helm-values"],
-      "matchDatasources": ["docker"],
+      "matchManagers": [
+        "helm-values"
+      ],
+      "matchDatasources": [
+        "docker"
+      ],
       "pinDigests": true
     },
     {
-      "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["flux-operator", "flux-instance"],
+      "matchDatasources": [
+        "docker"
+      ],
       "groupName": "Flux",
       "group": {
-         "commitMessageTopic": "{{{groupName}}} group"
-      }
+        "commitMessageTopic": "{{{groupName}}} group"
+      },
+      "matchPackageNames": [
+        "/flux-operator/",
+        "/flux-instance/"
+      ]
     },
     {
-      "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["immich-"],
+      "matchDatasources": [
+        "docker"
+      ],
       "groupName": "Immich",
       "group": {
-         "commitMessageTopic": "{{{groupName}}} group"
-      }
+        "commitMessageTopic": "{{{groupName}}} group"
+      },
+      "matchPackageNames": [
+        "/immich-/"
+      ]
     }
   ]
 }
