@@ -13,6 +13,8 @@ spec:
   values:
     controllers:
       jellyfin:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -59,14 +61,17 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /cache
-      media:
-        type: persistentVolumeClaim
-        existingClaim: media-data
-        globalMounts:
-          - path: /media
       config:
         existingClaim: jellyfin-config
         advancedMounts:
           jellyfin:
             app:
               - path: /config
+      media:
+        type: nfs
+        server: ${NAS_IP}
+        path: /volume1/shared
+        advancedMounts:
+          jellyfin:
+            app:
+              - path: /media
