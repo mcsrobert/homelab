@@ -19,7 +19,7 @@ devices:
       - paths:
           - path: /dev/dri
       - paths:
-          - path: /dev/dma_heap/
+          - path: /dev/dma_heap
       - paths:
           - path: /dev/rga
       - paths:
