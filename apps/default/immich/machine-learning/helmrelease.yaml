@@ -60,8 +60,12 @@ spec:
             port: 3003
     persistence:
       library:
-        existingClaim: immich-library
-        globalMounts:
-          - path: /usr/src/app/upload
+        type: nfs
+        server: ${NAS_IP}
+        path: /volume1/immich
+        advancedMounts:
+          immich-machine-learning:
+            app:
+              - path: /usr/src/app/upload
       cache:
         type: emptyDir

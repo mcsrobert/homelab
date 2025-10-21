@@ -67,7 +67,9 @@ spec:
             secretName: immich-tls
     persistence:
       library:
-        existingClaim: immich-library
+        type: nfs
+        server: ${NAS_IP}
+        path: /volume1/immich
         advancedMounts:
           immich-server:
             app:
