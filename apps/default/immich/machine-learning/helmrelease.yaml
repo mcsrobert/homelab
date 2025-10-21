@@ -17,6 +17,8 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           nodeSelector:
+            # TODO: Once I got Talos and the RKNPU working, make this better
+            # Probably want to use the generic-device-plugin at that point
             feature.node.kubernetes.io/cpu-model.family: "79"
         containers:
           app:
