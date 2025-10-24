@@ -95,6 +95,26 @@ identity_providers:
         id_token_signed_response_alg: RS256
         userinfo_signed_response_alg: RS256
         token_endpoint_auth_method: client_secret_post
+      - client_id: jellyfin
+        client_name: Jellyfin
+        client_secret: '{{ fileContent "/secrets/oidc-client-jellyfin" }}'
+        public: false
+        authorization_policy: one_factor
+        require_pkce: true
+        pkce_challenge_method: S256
+        redirect_uris:
+          - https://jellyfin.${CLUSTER_DOMAIN}/sso/OID/redirect/authelia
+        scopes:
+          - openid
+          - profile
+          - groups
+        response_types:
+          - code
+        grant_types:
+          - authorization_code
+        access_token_signed_response_alg: none
+        userinfo_signed_response_alg: none
+        token_endpoint_auth_method: client_secret_post
     jwks:
       - key: |
           {{ fileContent "/secrets/oidc/tls.key" | nindent 10 }}
