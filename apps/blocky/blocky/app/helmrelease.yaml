@@ -118,7 +118,8 @@ spec:
       config:
         type: secret
         name: blocky-config
-        globalMounts:
-          - path: /app/config.yml
-            subPath: config.yml
-            readOnly: true
+        advancedMounts:
+          blocky:
+            app:
+              - path: /app/config.yml
+                subPath: config.yml
