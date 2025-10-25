@@ -15,12 +15,6 @@ spec:
       jellyfin:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          sso-copy:
-            image:
-              repository: busybox
-              tag: 1.37.0
-            command: ['sh', '-c', 'cp /sso/SSO-Auth.xml /config/plugins/configurations']
         containers:
           app:
             image:
@@ -65,19 +59,16 @@ spec:
     persistence:
       tmpfs:
         type: emptyDir
-        globalMounts:
-          - path: /cache
-      config:
-        existingClaim: jellyfin-config
-        globalMounts:
-          - path: /config
-      sso:
-        type: secret
-        name: jellyfin-sso
         advancedMounts:
           jellyfin:
-            sso-copy:
-              - path: /sso
+            app:
+              - path: /cache
+      config:
+        existingClaim: jellyfin-config
+        advancedMounts:
+          jellyfin:
+            app:
+              - path: /config
       media:
         type: nfs
         server: ${NAS_IP}
