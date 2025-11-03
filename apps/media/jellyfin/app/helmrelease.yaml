@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jellyfin/jellyfin
-              tag: 10.11.0-rc9@sha256:52b9391b68e5de47e769b4e864b93131dce771a7aee7b4fcee67f2e4f6b40a43
+              tag: 10.11.2@sha256:749972be6e7d440a47531ee36c9e38ea7a6271c875f42e8a52851c39862b0773
             resources:
               requests:
                 cpu: 100m
