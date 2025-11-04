@@ -17,10 +17,10 @@ devices:
       - paths:
           - path: /dev/mali0
       - paths:
-          - path: /dev/dri
+          - path: /dev/dma_heap/*
       - paths:
-          - path: /dev/dma_heap
-      - paths:
-          - path: /dev/rga
+          - path: /dev/dri/*
       - paths:
           - path: /dev/mpp_service
+      - paths:
+          - path: /dev/rga
