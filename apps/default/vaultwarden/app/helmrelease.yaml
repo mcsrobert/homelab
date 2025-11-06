@@ -29,7 +29,7 @@ spec:
               SMTP_SECURITY: "off"
               SMTP_TIMEOUT: 15
               SMTP_FROM_NAME: Vaultwarden
-              SMTP_FROM: no-reply@mail.${CLUSTER_DOMAIN}
+              SMTP_FROM: noreply@mail.${CLUSTER_DOMAIN}
               WEBSOCKET_ENABLED: true
             envFrom:
               - secretRef:

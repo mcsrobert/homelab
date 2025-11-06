@@ -124,7 +124,7 @@ identity_providers:
 notifier:
   smtp:
     address: smtp://maddy.default.svc.cluster.local:2525
-    sender: Authelia <no-reply@mail.${CLUSTER_DOMAIN}>
+    sender: Authelia <noreply@mail.${CLUSTER_DOMAIN}>
     disable_require_tls: true
     disable_starttls: true
 
