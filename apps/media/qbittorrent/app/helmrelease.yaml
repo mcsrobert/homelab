@@ -180,7 +180,7 @@ spec:
       downloads:
         type: nfs
         server: ${NAS_IP}
-        path: /volume1/shared/Downloads
+        path: /volume1/media/Downloads
         advancedMounts:
           qbittorrent:
             app:

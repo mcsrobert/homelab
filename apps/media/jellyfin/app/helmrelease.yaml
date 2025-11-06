@@ -72,7 +72,7 @@ spec:
       media:
         type: nfs
         server: ${NAS_IP}
-        path: /volume1/shared
+        path: /volume1/media
         advancedMounts:
           jellyfin:
             app:
