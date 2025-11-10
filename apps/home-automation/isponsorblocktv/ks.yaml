@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: isponsorblocktv
+  namespace: flux-system
+spec:
+  path: /apps/home-automation/isponsorblocktv/app
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  targetNamespace: home-automation
+  prune: true
+  interval: 15m
+  timeout: 5m
+  wait: true
