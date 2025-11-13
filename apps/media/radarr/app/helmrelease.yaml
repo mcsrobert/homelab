@@ -32,9 +32,7 @@ spec:
             env:
               RADARR__APP__INSTANCENAME: Radarr
               RADARR__APP__THEME: dark
-              RADARR__AUTH__METHOD: External
-              RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
-              RADARR__LOG__DBENABLED: "False"
+              # RADARR__LOG__DBENABLED: "False"
               RADARR__LOG__LEVEL: info
               RADARR__SERVER__PORT: &port 8080
               RADARR__UPDATE__BRANCH: develop
@@ -70,6 +68,8 @@ spec:
         type: nfs
         server: ${NAS_IP}
         path: /volume1/media
+      tmp:
+        type: emptyDir
     service:
       app:
         ports:
@@ -80,7 +80,6 @@ spec:
         className: traefik
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
-          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Radarr
           gethomepage.dev/icon: radarr
