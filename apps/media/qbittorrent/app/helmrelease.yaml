@@ -183,7 +183,7 @@ spec:
         advancedMounts:
           qbittorrent:
             app:
-              - path: /downloads
+              - path: /media/Downloads
       coredns:
         type: configMap
         name: qbittorrent-coredns
