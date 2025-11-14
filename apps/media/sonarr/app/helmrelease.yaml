@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: radarr
+  name: sonarr
 spec:
   interval: 30m
   chartRef:
@@ -12,13 +12,13 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      radarr:
+      sonarr:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
             runAsNonRoot: true
-            runAsUser: 6020
+            runAsUser: 6030
             runAsGroup: 65537
             fsGroup: 65537
             fsGroupChangePolicy: OnRootMismatch
@@ -27,20 +27,20 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/home-operations/radarr
-              tag: 6.0.3.10276@sha256:0ebc60aa20afb0df76b52694cee846b7cf7bd96bb0157f3b68b916e77c8142a0
+              repository: ghcr.io/home-operations/sonarr
+              tag: 4.0.16.2943@sha256:0a1b8f5cb5b072f7ad8c6ff64a25dc512115d1a114ecf19a58a3b4f870207ddd
             env:
-              # See: https://wiki.servarr.com/radarr/environment-variables
+              # See: https://wiki.servarr.com/sonarr/environment-variables
               TZ: ${TIME_ZONE}
-              RADARR__APP__INSTANCENAME: Radarr
-              RADARR__APP__THEME: dark
-              RADARR__APPLICATION_URL: https://radarr.${CLUSTER_DOMAIN}
-              RADARR__LOG__LEVEL: info
-              RADARR__SERVER__PORT: &port 8080
-              RADARR__UPDATE__BRANCH: develop
+              SONARR__APP__INSTANCENAME: Sonarr
+              SONARR__APP__THEME: dark
+              SONARR__APPLICATION_URL: https://sonarr.${CLUSTER_DOMAIN}
+              SONARR__LOG__LEVEL: info
+              SONARR__SERVER__PORT: &port 8080
+              SONARR__UPDATE__BRANCH: develop
             # envFrom:
             #   - secretRef:
-            #       name: radarr-secret
+            #       name: sonarr-secret
             probes:
               startup: &probe
                 enabled: true
@@ -64,7 +64,7 @@ spec:
                   - ALL
     persistence:
       config:
-        existingClaim: radarr-config
+        existingClaim: sonarr-config
       media:
         type: nfs
         server: ${NAS_IP}
@@ -82,12 +82,12 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: Radarr
-          gethomepage.dev/icon: radarr
-          gethomepage.dev/description: Movie organizer/manager
+          gethomepage.dev/name: Sonarr
+          gethomepage.dev/icon: sonarr
+          gethomepage.dev/description: TV Show organizer/manager
           gethomepage.dev/group: Media
         hosts:
-          - host: &host radarr.${CLUSTER_DOMAIN}
+          - host: &host sonarr.${CLUSTER_DOMAIN}
             paths:
               - path: /
                 service:
@@ -96,4 +96,4 @@ spec:
         tls:
           - hosts:
               - *host
-            secretName: radarr-tls
+            secretName: sonarr-tls
