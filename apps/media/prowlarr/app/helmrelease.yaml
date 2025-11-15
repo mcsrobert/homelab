@@ -30,15 +30,16 @@ spec:
               repository: ghcr.io/home-operations/prowlarr
               tag: 2.1.5.5216@sha256:affb671fa367f4b7029d58f4b7d04e194e887ed6af1cf5a678f3c7aca5caf6ca
             env:
+              # See: https://wiki.servarr.com/prowlarr/environment-variables
+              TZ: ${TIME_ZONE}
               PROWLARR__APP__INSTANCENAME: Prowlarr
               PROWLARR__APP__THEME: dark
               PROWLARR__LOG__LEVEL: info
               PROWLARR__SERVER__PORT: &port 8080
               PROWLARR__UPDATE__BRANCH: develop
-              TZ: ${TIME_ZONE}
-            envFrom:
-              - secretRef:
-                  name: prowlarr-secret
+            # envFrom:
+            #   - secretRef:
+            #       name: prowlarr-secret
             probes:
               startup: &probe
                 enabled: true
