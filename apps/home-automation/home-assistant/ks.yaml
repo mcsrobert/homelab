@@ -13,5 +13,5 @@ spec:
   targetNamespace: home-automation
   prune: true
   interval: 15m
-  timeout: 5m
+  timeout: 10m
   wait: true
