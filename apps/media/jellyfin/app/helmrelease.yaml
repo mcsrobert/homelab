@@ -25,7 +25,7 @@ spec:
                 cpu: 100m
                 memory: 2Gi
               limits:
-                memory: 6Gi
+                # memory: 6Gi
                 squat.ai/dma-heap: "1"
                 squat.ai/dri: "1"
                 squat.ai/mali0: "1"
