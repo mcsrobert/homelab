@@ -17,6 +17,6 @@ spec:
   targetNamespace: media
   prune: true
   interval: 15m
-  retryInterval: 2m
-  timeout: 3m
+  retryInterval: 3m
+  timeout: 5m
   wait: true
