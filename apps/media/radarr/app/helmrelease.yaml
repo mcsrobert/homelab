@@ -84,7 +84,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Radarr
           gethomepage.dev/icon: radarr
-          gethomepage.dev/description: Movie organizer/manager
+          gethomepage.dev/description: Movie organizer & manager
           gethomepage.dev/group: Media
         hosts:
           - host: &host radarr.${CLUSTER_DOMAIN}
