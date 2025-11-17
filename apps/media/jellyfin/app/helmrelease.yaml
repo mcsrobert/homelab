@@ -26,7 +26,11 @@ spec:
                 memory: 2Gi
               limits:
                 memory: 6Gi
-                squat.ai/media: "1"
+                squat.ai/dma-heap: "1"
+                squat.ai/dri: "1"
+                squat.ai/mali0: "1"
+                squat.ai/mpp-service: "1"
+                squat.ai/rga: "1"
     service:
       app:
         ports:
