@@ -12,15 +12,25 @@ devices:
         paths:
           - path: /dev/net/tun
 
-  - name: media
+  # Rockchip & Jellyfin
+  # See: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/rockchip/
+  - name: dma-heap
+    groups:
+      - paths:
+          - path: /dev/dma_heap
+  - name: dri
+    groups:
+      - paths:
+          - path: /dev/dri
+  - name: mali0
     groups:
       - paths:
           - path: /dev/mali0
-      - paths:
-          - path: /dev/dma_heap/*
-      - paths:
-          - path: /dev/dri/*
+  - name: mpp-service
+    groups:
       - paths:
           - path: /dev/mpp_service
+  - name: rga
+    groups:
       - paths:
           - path: /dev/rga
