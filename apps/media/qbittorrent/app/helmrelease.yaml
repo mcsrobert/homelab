@@ -40,8 +40,8 @@ spec:
                   command: ["/bin/sh", "-c", "(ip rule del table 51820; ip -6 rule del table 51820) || true"]
             env:
               TZ: ${TIME_ZONE}
-              PUID: 6001
-              GUID: 6001
+              PUID: 0
+              PGID: 6001
               DOT: "off"
               DNS_ADDRESS: 127.0.0.2
               VPN_TYPE: wireguard
