@@ -32,22 +32,22 @@ spec:
             # envFrom:
             #   - secretRef:
             #       name: bazarr-secret
-            probes:
-              startup: &probe
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /ping
-                    port: &port 8080
-              readiness: *probe
-              liveness: *probe
+            # probes:
+            #   startup: &probe
+            #     enabled: true
+            #     custom: true
+            #     spec:
+            #       httpGet:
+            #         path: /health
+            #         port: &port 6767
+            #   readiness: *probe
+            #   liveness: *probe
             resources:
               requests:
                 cpu: 10m
-                memory: 512Mi
+                memory: 256Mi
               limits:
-                memory: 1G
+                memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -57,11 +57,15 @@ spec:
     persistence:
       config:
         existingClaim: bazarr-config
+      media:
+        type: nfs
+        server: ${NAS_IP}
+        path: /volume1/media
     service:
       app:
         ports:
           http:
-            port: *port
+            port: 6767 # *port
     ingress:
       app:
         className: traefik
