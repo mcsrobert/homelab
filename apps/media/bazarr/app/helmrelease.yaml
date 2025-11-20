@@ -42,9 +42,9 @@ spec:
                     port: &port 6767
               readiness: *probe
               startup:
-                <<: *probe
                 spec:
                   initialDelaySeconds: 5
+                <<: *probe
             resources:
               requests:
                 cpu: 10m
