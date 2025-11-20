@@ -32,22 +32,22 @@ spec:
             # envFrom:
             #   - secretRef:
             #       name: bazarr-secret
-            # probes:
-            #   startup: &probe
-            #     enabled: true
-            #     custom: true
-            #     spec:
-            #       httpGet:
-            #         path: /health
-            #         port: &port 6767
-            #   readiness: *probe
-            #   liveness: *probe
+            probes:
+              startup: &probe
+                enabled: false
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 6767
+              readiness: *probe
+              liveness: *probe
             resources:
               requests:
                 cpu: 10m
                 memory: 256Mi
               limits:
-                memory: 512Mi
+                memory: 1Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -65,7 +65,7 @@ spec:
       app:
         ports:
           http:
-            port: 6767 # *port
+            port: *port
     ingress:
       app:
         className: traefik
