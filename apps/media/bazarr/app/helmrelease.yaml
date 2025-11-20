@@ -33,15 +33,18 @@ spec:
             #   - secretRef:
             #       name: bazarr-secret
             probes:
-              startup: &probe
-                enabled: false
+              liveness: &probe
+                enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /
+                    path: /api/
                     port: &port 6767
               readiness: *probe
-              liveness: *probe
+              startup:
+                <<: *probe
+                spec:
+                  initialDelay: 5
             resources:
               requests:
                 cpu: 10m
