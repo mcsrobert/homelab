@@ -3,8 +3,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
-  name: cloudnative-pg
-  namespace: flux-system
+  name: metallb
 spec:
   interval: 1h
-  url: https://cloudnative-pg.github.io/charts
+  url: https://metallb.github.io/metallb
