@@ -35,9 +35,16 @@ spec:
       websecure:
         port: 443
         forwardedHeaders: *forwardedHeaders
+    gateway:
+      listeners:
+        websecure:
+          port: 443
+          protocol: HTTPS
     providers:
       kubernetesCRD:
         allowCrossNamespace: true  # needed for ForwardAuth middleware
+      kubernetesGateway:
+        enabled: true
     metrics:
       prometheus:
         addServicesLabels: true
