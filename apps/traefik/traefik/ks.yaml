@@ -7,6 +7,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: cert-manager-issuers
     - name: prometheus-operator-crds
     - name: metallb-pools
   path: /apps/traefik/traefik/app

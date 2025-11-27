@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: cluster-wildcard-cert
+spec:
+  secretName: cluster-wildcard-tls
+  commonName: &domain "*.${CLUSTER_DOMAIN}"
+  dnsNames:
+    - *domain
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
