@@ -24,20 +24,23 @@ spec:
     ports:
       web:
         port: 80
-        expose:
-          default: false
-        forwardedHeaders: &forwardedHeaders
+        redirections:
+          entryPoint:
+            to: websecure
+            permanent: true
+      websecure:
+        port: 443
+        forwardedHeaders:
           trustedIPs:
             - ${LAN_CIDR}
             - ${LAN_CIDRv6}
             - ${CLUSTER_CIDR}
             - ${CLUSTER_CIDRv6}
-      websecure:
-        port: 443
-        forwardedHeaders: *forwardedHeaders
     gateway:
-      enabled: false
       listeners:
+        web:
+          port: 80
+          protocol: HTTP
         websecure:
           port: 443
           protocol: HTTPS
