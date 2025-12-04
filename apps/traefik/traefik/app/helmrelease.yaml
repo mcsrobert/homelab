@@ -45,9 +45,10 @@ spec:
           port: 443
           protocol: HTTPS
           certificateRefs:
-            - kind: Secret
-              group: ""
-              name: cluster-wildcard-tls
+            - name: cluster-wildcard-tls
+              # kind: Secret
+              # group: ""
+          mode: Terminate
     providers:
       kubernetesCRD:
         allowCrossNamespace: true  # needed for ForwardAuth middleware
