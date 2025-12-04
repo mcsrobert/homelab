@@ -41,13 +41,16 @@ spec:
         web:
           port: 80
           protocol: HTTP
+          namespacePolicy:
+            from: All
         websecure:
           port: 443
           protocol: HTTPS
+          namespacePolicy:
+            from: All
           certificateRefs:
-            - kind: Secret
-              group: ""
-              name: cluster-wildcard-tls
+            - name: cluster-wildcard-tls
+          mode: Terminate
     providers:
       kubernetesCRD:
         allowCrossNamespace: true  # needed for ForwardAuth middleware
