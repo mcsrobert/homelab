@@ -63,6 +63,12 @@ spec:
             port: *port
           metrics:
             port: *metricsPort
+    serviceMonitor:
+      app:
+        service:
+          name: flaresolverr
+        endpoints:
+          - port: metrics
     route:
       app:
         parentRefs:
