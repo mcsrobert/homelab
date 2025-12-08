@@ -14,6 +14,11 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
+    providers:
+      kubernetesCRD:
+        allowCrossNamespace: true  # needed for ForwardAuth middleware
+      kubernetesGateway:
+        enabled: true
     service:
       type: LoadBalancer
       ipFamilyPolicy: RequireDualStack
@@ -23,13 +28,21 @@ spec:
         externalTrafficPolicy: Local
     ports:
       web:
-        port: 80
+        port: 8000
+        expose:
+          default: true
+        exposedPort: 80
         redirections:
           entryPoint:
             to: websecure
             permanent: true
       websecure:
-        port: 443
+        port: 8443
+        expose:
+          default: true
+        exposedPort: 443
+        http3:
+          enabled: true
         forwardedHeaders:
           trustedIPs:
             - ${LAN_CIDR}
@@ -39,23 +52,18 @@ spec:
     gateway:
       listeners:
         web:
-          port: 80
+          port: 8000
           protocol: HTTP
           namespacePolicy:
             from: All
         websecure:
-          port: 443
+          port: 8443
           protocol: HTTPS
           namespacePolicy:
             from: All
           certificateRefs:
             - name: cluster-wildcard-tls
           mode: Terminate
-    providers:
-      kubernetesCRD:
-        allowCrossNamespace: true  # needed for ForwardAuth middleware
-      kubernetesGateway:
-        enabled: true
     metrics:
       prometheus:
         addServicesLabels: true
