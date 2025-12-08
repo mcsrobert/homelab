@@ -74,6 +74,5 @@ spec:
         parentRefs:
           - name: traefik-gateway
             namespace: traefik
-            sectionName: websecure
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
