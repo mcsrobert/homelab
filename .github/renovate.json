@@ -19,10 +19,10 @@
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
       "managerFilePatterns": [
-        "/(^|/)helmrelease.*\\.ya?ml$/"
+        "/(^|/)helm-?release.*\\.ya?ml$/"
       ],
       "matchStrings": [
-        "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/values\\.schema\\.json"
+        "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/schemas/helmrelease-helm-v2\\.schema\\.json"
       ],
       "versioningTemplate": "semver"
     }
