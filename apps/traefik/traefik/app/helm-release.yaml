@@ -10,9 +10,9 @@ spec:
     kind: OCIRepository
     name: traefik
   install:
-    crds: CreateReplace
+    crds: Skip  # handled by traefik-crds
   upgrade:
-    crds: CreateReplace
+    crds: Skip  # handled by traefik-crds
   values:
     providers:
       kubernetesCRD:
