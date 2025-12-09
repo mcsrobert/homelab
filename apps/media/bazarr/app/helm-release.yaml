@@ -60,24 +60,16 @@ spec:
         ports:
           http:
             port: *port
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Bazarr
           gethomepage.dev/icon: bazarr
           gethomepage.dev/description: Subtitle manager
           gethomepage.dev/group: Media
-        hosts:
-          - host: &host bazarr.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: bazarr-tls
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
