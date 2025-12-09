@@ -34,23 +34,22 @@ spec:
               TZ: ${TIME_ZONE}
               RADARR__APP__INSTANCENAME: Radarr
               RADARR__APP__THEME: dark
-              RADARR__APPLICATION_URL: https://radarr.${CLUSTER_DOMAIN}
+              RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${CLUSTER_DOMAIN}"
               RADARR__LOG__LEVEL: info
+              RADARR__LOG__ANALYTICSENABLED: false
               RADARR__SERVER__PORT: &port 8080
               RADARR__UPDATE__BRANCH: develop
             # envFrom:
             #   - secretRef:
             #       name: radarr-secret
             probes:
-              startup: &probe
-                enabled: true
+              liveness: &probe
                 custom: true
                 spec:
                   httpGet:
                     path: /ping
                     port: *port
               readiness: *probe
-              liveness: *probe
             resources:
               requests:
                 cpu: 10m
@@ -76,24 +75,16 @@ spec:
         ports:
           http:
             port: *port
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Radarr
           gethomepage.dev/icon: radarr
           gethomepage.dev/description: Movie organizer & manager
           gethomepage.dev/group: Media
-        hosts:
-          - host: &host radarr.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: radarr-tls
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
