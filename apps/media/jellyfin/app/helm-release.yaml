@@ -22,6 +22,7 @@ spec:
               tag: 10.11.4@sha256:37f2625f5d5d70c5b1ceb57f4d8f2a7ff666ea723fb96b468275bbafbde2c06c
             probes:
               liveness: &probe
+                enabled: true
                 custom: true
                 spec:
                   httpGet:

@@ -44,6 +44,7 @@ spec:
             #       name: radarr-secret
             probes:
               liveness: &probe
+                enabled: true
                 custom: true
                 spec:
                   httpGet:
