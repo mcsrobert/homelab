@@ -43,8 +43,6 @@ spec:
         exposedPort: 443
         http3:
           enabled: true
-        middlewares:
-          - traefik-secure-headers@kubernetescrd
         forwardedHeaders:
           trustedIPs:
             - ${LAN_CIDR}
