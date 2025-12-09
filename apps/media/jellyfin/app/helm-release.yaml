@@ -39,6 +39,21 @@ spec:
                 squat.ai/mali0: "1"
                 squat.ai/mpp-service: "1"
                 squat.ai/rga: "1"
+    persistence:
+      config:
+        existingClaim: jellyfin-config
+        globalMounts:
+          - path: /config
+      media:
+        type: nfs
+        server: ${NAS_IP}
+        path: /volume1/media
+        globalMounts:
+          - path: /media
+      tmpfs:
+        type: emptyDir
+        globalMounts:
+          - path: /cache
     service:
       app:
         ports:
@@ -47,45 +62,17 @@ spec:
           # discovery:
           #   port: 7359
           #   protocol: UDP
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Jellyfin
           gethomepage.dev/icon: jellyfin
           gethomepage.dev/description: Open-source Media Server
           gethomepage.dev/group: Media
-        hosts:
-          - host: &host jellyfin.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: jellyfin-tls
-    persistence:
-      tmpfs:
-        type: emptyDir
-        advancedMounts:
-          jellyfin:
-            app:
-              - path: /cache
-      config:
-        existingClaim: jellyfin-config
-        advancedMounts:
-          jellyfin:
-            app:
-              - path: /config
-      media:
-        type: nfs
-        server: ${NAS_IP}
-        path: /volume1/media
-        advancedMounts:
-          jellyfin:
-            app:
-              - path: /media
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+
