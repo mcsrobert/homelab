@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app qbittorrent
+  name: qbittorrent
 spec:
   interval: 30m
   chartRef:
@@ -63,7 +63,7 @@ spec:
               - secretRef:
                   name: qbittorrent-gluetun-secret
             probes:
-              startup: &gluetunProbe
+              liveness: &gluetunProbe
                 enabled: true
                 custom: true
                 spec:
@@ -75,7 +75,6 @@ spec:
                   periodSeconds: 60
                   timeoutSeconds: 5
                   failureThreshold: 6
-              liveness: *gluetunProbe
               readiness: *gluetunProbe
             resources:
               requests:
@@ -111,8 +110,6 @@ spec:
                 enabled: true
               readiness:
                 enabled: true
-              startup:
-                enabled: true
             securityContext:
               runAsNonRoot: true
               runAsUser: 6000
@@ -137,37 +134,6 @@ spec:
           #     QBITTORRENT_HOST: localhost
           #     QBITTORRENT_PORT: *appport
           #     EXPORTER_PORT: &metricsport 17871
-    service:
-      app:
-        controller: *app
-        ports:
-          http:
-            port: *port
-            protocol: HTTP
-          # metrics:
-          #   port: *metricsport
-          #   protocol: HTTP
-    ingress:
-      app:
-        className: traefik
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: qBittorrent
-          gethomepage.dev/icon: qbittorrent
-          gethomepage.dev/description: Lightweight, open-source bittorrent client
-          gethomepage.dev/group: Media
-        hosts:
-          - host: &domain qbittorrent.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *domain
-            secretName: qbittorrent-tls
     persistence:
       config:
         type: persistentVolumeClaim
@@ -210,3 +176,25 @@ spec:
             gluetun:
               - path: /lib/modules
                 readOnly: true
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+            protocol: HTTP
+          # metrics:
+          #   port: *metricsport
+          #   protocol: HTTP
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: qBittorrent
+          gethomepage.dev/icon: qbittorrent
+          gethomepage.dev/description: Lightweight, open-source bittorrent client
+          gethomepage.dev/group: Media
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
