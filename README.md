@@ -38,3 +38,4 @@ My homelab consists of a small k3s cluster and a NAS for Longhorn backups and me
  - [tyriis/home-ops](https://github.com/tyriis/home-ops)
  - [drag0n141/home-ops](https://github.com/drag0n141/home-ops)
  - [budimanjojo/home-cluster](https://github.com/budimanjojo/home-cluster)
+ - [nicolerenee/infra](https://github.com/nicolerenee/infra)
