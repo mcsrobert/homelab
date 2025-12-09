@@ -34,23 +34,22 @@ spec:
               TZ: ${TIME_ZONE}
               SONARR__APP__INSTANCENAME: Sonarr
               SONARR__APP__THEME: dark
-              SONARR__APPLICATION_URL: https://sonarr.${CLUSTER_DOMAIN}
+              SONARR__APPLICATION_URL: "https://{{ .Release.Name }}.${CLUSTER_DOMAIN}"
               SONARR__LOG__LEVEL: info
+              SONARR__LOG__ANALYTICSENABLED: false
               SONARR__SERVER__PORT: &port 8080
               SONARR__UPDATE__BRANCH: develop
             # envFrom:
             #   - secretRef:
             #       name: sonarr-secret
             probes:
-              startup: &probe
-                enabled: true
+              liveness: &probe
                 custom: true
                 spec:
                   httpGet:
                     path: /ping
                     port: *port
               readiness: *probe
-              liveness: *probe
             resources:
               requests:
                 cpu: 10m
@@ -76,24 +75,16 @@ spec:
         ports:
           http:
             port: *port
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Sonarr
           gethomepage.dev/icon: sonarr
           gethomepage.dev/description: TV Show organizer & manager
           gethomepage.dev/group: Media
-        hosts:
-          - host: &host sonarr.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: sonarr-tls
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
