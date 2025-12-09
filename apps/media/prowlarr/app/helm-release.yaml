@@ -35,21 +35,20 @@ spec:
               PROWLARR__APP__INSTANCENAME: Prowlarr
               PROWLARR__APP__THEME: dark
               PROWLARR__LOG__LEVEL: info
+              PROWLARR__LOG__ANALYTICSENABLED: false
               PROWLARR__SERVER__PORT: &port 8080
               PROWLARR__UPDATE__BRANCH: develop
             # envFrom:
             #   - secretRef:
             #       name: prowlarr-secret
             probes:
-              startup: &probe
-                enabled: true
+              liveness: &probe
                 custom: true
                 spec:
                   httpGet:
                     path: /ping
                     port: *port
               readiness: *probe
-              liveness: *probe
             resources:
               requests:
                 cpu: 10m
@@ -67,36 +66,26 @@ spec:
         existingClaim: prowlarr-config
       tmpfs:
         type: emptyDir
-        advancedMounts:
-          prowlarr:
-            app:
-              - path: /config/logs
-                subPath: logs
-              - path: /tmp
-                subPath: tmp
+        globalMounts:
+          - path: /config/logs
+            subPath: logs
+          - path: /tmp
+            subPath: tmp
     service:
       app:
         ports:
           http:
             port: *port
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Prowlarr
           gethomepage.dev/icon: prowlarr
           gethomepage.dev/description: The ultimate indexer manager
           gethomepage.dev/group: Media
-        hosts:
-          - host: &domain prowlarr.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *domain
-            secretName: prowlarr-tls
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
