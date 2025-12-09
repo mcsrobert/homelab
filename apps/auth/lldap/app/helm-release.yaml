@@ -13,9 +13,17 @@ spec:
   values:
     controllers:
       lldap:
+        annotations:
+          reloader.stakater.com/auto: "true"
         pod:
-          annotations:
-            reloader.stakater.com/auto: "true"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 11001
+            runAsGroup: 11001
+            fsGroup: 11001
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -47,18 +55,11 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 11001
-        runAsGroup: 11001
-        fsGroup: 11001
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
+    persistence:
+      data:
+        existingClaim: lldap-data
     service:
       app:
-        controller: lldap
         ports:
           ldap:
             port: 389
@@ -68,27 +69,16 @@ spec:
           http:
             port: 17170
             protocol: HTTP
-    persistence:
-      data:
-        existingClaim: lldap-data
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: LLDAP
           gethomepage.dev/icon: lldap-dark
           gethomepage.dev/description: Light LDAP implementation
           gethomepage.dev/group: Auth
-        hosts:
-          - host: &host lldap.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: lldap-tls
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
