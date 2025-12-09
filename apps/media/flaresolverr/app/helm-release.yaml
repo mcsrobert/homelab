@@ -35,6 +35,7 @@ spec:
               PROMETHEUS_PORT: &metricsPort 8192
             probes:
               liveness: &probes
+                enabled: true
                 custom: true
                 spec:
                   httpGet:
