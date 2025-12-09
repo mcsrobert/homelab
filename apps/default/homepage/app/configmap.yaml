@@ -21,6 +21,7 @@ data:
   docker.yaml: ""
   kubernetes.yaml: |
     mode: cluster
+    gateway: true
   proxmox.yaml: ""
   settings.yaml: |
     providers:
