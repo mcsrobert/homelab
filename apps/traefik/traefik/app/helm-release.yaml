@@ -28,7 +28,7 @@ spec:
         externalTrafficPolicy: Local
     ports:
       web:
-        port: 8000
+        port: &webPort 8000
         expose:
           default: true
         exposedPort: 80
@@ -37,7 +37,7 @@ spec:
             to: websecure
             permanent: true
       websecure:
-        port: 8443
+        port: &websurePort 8443
         expose:
           default: true
         exposedPort: 443
@@ -53,12 +53,12 @@ spec:
     gateway:
       listeners:
         web:
-          port: 8000
+          port: *webPort
           protocol: HTTP
           namespacePolicy:
             from: All
         websecure:
-          port: 8443
+          port: *websurePort
           protocol: HTTPS
           namespacePolicy:
             from: All
