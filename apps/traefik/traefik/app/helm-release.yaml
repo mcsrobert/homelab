@@ -67,6 +67,7 @@ spec:
           mode: Terminate
     metrics:
       prometheus:
+        addRoutersLabels: true
         addServicesLabels: true
         serviceMonitor:
           enabled: true
