@@ -43,12 +43,13 @@ spec:
         exposedPort: 443
         http3:
           enabled: true
-        forwardedHeaders:
+        forwardedHeaders: &trustedIPs
           trustedIPs:
             - ${LAN_CIDR}
             - ${LAN_CIDRv6}
             - ${CLUSTER_CIDR}
             - ${CLUSTER_CIDRv6}
+        proxyProtocol: *trustedIPs
     gateway:
       listeners:
         web:
