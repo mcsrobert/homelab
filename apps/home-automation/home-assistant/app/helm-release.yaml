@@ -16,6 +16,15 @@ spec:
       home-assistant:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 12000
+            runAsGroup: 12000
+            fsGroup: 12000
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -29,7 +38,7 @@ spec:
                 memory: 500Mi
               limits:
                 memory: 1Gi
-            securityContext: &containerSecurity
+            securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
@@ -66,26 +75,12 @@ spec:
                 memory: 64Mi
               limits:
                 memory: 256Mi
-            securityContext: *containerSecurity
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 12000
-        runAsGroup: 12000
-        fsGroup: 12000
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
-    service:
-      app:
-        primary: true
-        ports:
-          http:
-            port: 8123
-      code-server:
-        ports:
-          code-server:
-            port: 12321
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     persistence:
       config:
         existingClaim: home-assistant-config
@@ -103,6 +98,16 @@ spec:
                 subPath: code-server-tmp
               - path: /nonexistent
                 subPath: nonexistent
+    service:
+      app:
+        primary: true
+        ports:
+          http:
+            port: 8123
+      code-server:
+        ports:
+          code-server:
+            port: 12321
     ingress:
       app:
         className: traefik
