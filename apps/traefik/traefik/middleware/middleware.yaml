@@ -4,6 +4,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: secure-headers
+  namespace: traefik
 spec:
   headers:
     frameDeny: true
@@ -17,6 +18,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: compress
+  namespace: traefik
 spec:
   compress:
     minResponseBodyBytes: 1024
@@ -29,6 +31,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: forwardauth-authelia
+  namespace: traefik
 spec:
   forwardAuth:
     address: http://authelia.auth.svc.cluster.local:9091/api/authz/forward-auth
@@ -44,21 +47,64 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: chain
+  namespace: traefik
 spec:
   chain:
     middlewares:
       - name: secure-headers
       - name: compress
-
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: auth-chain
+  namespace: traefik
 spec:
   chain:
     middlewares:
-      - name: forwardauth-authelia
       - name: secure-headers
+      - name: forwardauth-authelia
       - name: compress
+# NOTE: we need to create this in each namespace for the Gateway API :(
+# I've opened an idea so hopefuly a ReferenceGrant can be used for this
+# See: https://github.com/kubernetes-sigs/gateway-api/discussions/4340
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-chain
+  namespace: blocky
+spec:
+  chain:
+    middlewares:
+      - name: traefik-secure-headers@kubernetescrd
+      - name: traefik-forwardauth-authelia@kubernetescrd
+      - name: traefik-compress@kubernetescrd
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-chain
+  namespace: home-automation
+spec:
+  chain:
+    middlewares:
+      - name: traefik-secure-headers@kubernetescrd
+      - name: traefik-forwardauth-authelia@kubernetescrd
+      - name: traefik-compress@kubernetescrd
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-chain
+  namespace: longhorn
+spec:
+  chain:
+    middlewares:
+      - name: traefik-secure-headers@kubernetescrd
+      - name: traefik-forwardauth-authelia@kubernetescrd
+      - name: traefik-compress@kubernetescrd

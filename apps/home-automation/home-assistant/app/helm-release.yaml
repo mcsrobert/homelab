@@ -108,41 +108,44 @@ spec:
         ports:
           code-server:
             port: 12321
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Home Assistant
           gethomepage.dev/icon: home-assistant
           gethomepage.dev/description: Local smart home control and automation
           gethomepage.dev/group: Home Automation
           gethomepage.dev/app: home-assistant
-        hosts:
-          - host: &host homeassistant.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: home-assistant-tls
+        hostnames:
+          - &host homeassistant.${CLUSTER_DOMAIN}
+        rules:
+          - backendRefs:
+              - identifier: app
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
       code-server:
-        className: traefik
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
-        hosts:
-          - host: &host code.homeassistant.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: code-server
-                  port: code-server
-        tls:
-          - hosts:
-              - *host
-            secretName: code-server-tls
+        hostnames:
+          - *host
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /code/
+            filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: traefik.io
+                  kind: Middleware
+                  name: auth-chain
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
+            backendRefs:
+              - identifier: code-server
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
