@@ -53,7 +53,6 @@ spec:
                 memory: 256Mi
                 squat.ai/conbee2: "1"
             securityContext:
-              runAsGroup: 20
               capabilities:
                 drop:
                   - ALL
@@ -61,37 +60,35 @@ spec:
                   - SYS_RAWIO
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
+    persistence:
+      data:
+        existingClaim: zigbee2mqtt-data
+        globalMounts:
+          - path: /app/data
     service:
       app:
         ports:
           http:
             port: 8080
-    persistence:
-      data:
-        existingClaim: zigbee2mqtt-data
-        advancedMounts:
-          zigbee2mqtt:
-            app:
-              - path: /app/data
-    ingress:
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Zigbee2MQTT
           gethomepage.dev/icon: zigbee2mqtt
           gethomepage.dev/description: Bridge Zigbee devices to MQTT
           gethomepage.dev/group: Home Automation
-        hosts:
-          - host: &host zigbee2mqtt.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: zigbee2mqtt-tls
+        hostnames:
+          - zigbee2mqtt.${CLUSTER_DOMAIN}
+        rules:
+          - filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: traefik.io
+                  kind: Middleware
+                  name: auth-chain
+            backendRefs:
+              - identifier: app
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
