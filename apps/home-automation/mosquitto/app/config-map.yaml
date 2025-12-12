@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.1-standalone-strict/configmap-v1.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-config
+data:
+  mosquitto.conf: |
+    listener 1883
+    protocol mqtt
+
+    # listener 9001
+    # protocol websockets
+
+    persistence true
+    persistence_location /mosquitto/data
+    autosave_interval 60
+
+    allow_anonymous false
+    password_file /mosquitto/config/passwd

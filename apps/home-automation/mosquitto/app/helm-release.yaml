@@ -13,6 +13,17 @@ spec:
   values:
     controllers:
       mosquitto:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 12003
+            runAsGroup: 12003
+            fsGroup: 12003
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -42,57 +53,26 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 12003
-        runAsGroup: 12003
-        fsGroup: 12003
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
+    persistence:
+      cache:
+        existingClaim: mosquitto-data
+        globalMounts:
+          - path: /mosquitto/data
+      passwd:
+        type: secret
+        name: mosquitto-passwd
+        defaultMode: 0700
+        globalMounts:
+          - path: /mosquitto/config/passwd
+            subPath: passwd
+      config:
+        type: configMap
+        name: mosquitto-config
+        globalMounts:
+          - path: /mosquitto/config/mosquitto.conf
+            subPath: mosquitto.conf
     service:
       app:
         ports:
           mqtt:
             port: *port
-    configMaps:
-      config:
-        data:
-          mosquitto.conf: |
-            listener 1883
-            protocol mqtt
-
-            # listener 9001
-            # protocol websockets
-
-            persistence true
-            persistence_location /mosquitto/data
-            autosave_interval 60
-
-            allow_anonymous false
-            password_file /mosquitto/config/passwd
-    persistence:
-      cache:
-        existingClaim: mosquitto-data
-        advancedMounts:
-          mosquitto:
-            app:
-              - path: /mosquitto/data
-      config:
-        type: configMap
-        name: mosquitto
-        advancedMounts:
-          mosquitto:
-            app:
-              - path: /mosquitto/config/mosquitto.conf
-                subPath: mosquitto.conf
-      passwd:
-        type: secret
-        name: mosquitto-passwd
-        defaultMode: 0700
-        advancedMounts:
-          mosquitto:
-            app:
-              - path: /mosquitto/config/passwd
-                subPath: passwd
