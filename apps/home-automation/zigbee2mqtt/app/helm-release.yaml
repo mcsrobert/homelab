@@ -53,6 +53,7 @@ spec:
                 memory: 256Mi
                 squat.ai/conbee2: "1"
             securityContext:
+              runAsGroup: 20  # dialout needed
               capabilities:
                 drop:
                   - ALL
