@@ -101,7 +101,7 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: auth-chain
-  namespace: longhorn
+  namespace: longhorn-system
 spec:
   chain:
     middlewares:
