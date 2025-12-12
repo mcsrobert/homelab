@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app vaultwarden
+  name: vaultwarden
 spec:
   interval: 30m
   chartRef:
@@ -15,6 +15,15 @@ spec:
       vaultwarden:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 11002
+            runAsGroup: 11002
+            fsGroup: 11002
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -42,10 +51,6 @@ spec:
                   httpGet:
                     path: /alive
                     port: &port 80
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probes
             resources:
               requests:
@@ -59,43 +64,28 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 11002
-        runAsGroup: 11002
-        fsGroup: 11002
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
+    persistence:
+      data:
+        existingClaim: vaultwarden-data
     service:
       app:
-        controller: *app
         ports:
           http:
             port: *port
-    ingress:
+            protocol: HTTP
+    route:
       app:
-        className: traefik
         annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Vaultwarden
           gethomepage.dev/icon: vaultwarden-light
           gethomepage.dev/description: Lightweight, self-hosted password manager
           gethomepage.dev/group: Apps
-        hosts:
-          - host: &domain vault.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *domain
-            secretName: vaultwarden-tls
-    persistence:
-      data:
-        existingClaim: vaultwarden-data
+        hostnames:
+          - vault.${CLUSTER_DOMAIN}
+        rules:
+          - backendRefs:
+              - identifier: app
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
