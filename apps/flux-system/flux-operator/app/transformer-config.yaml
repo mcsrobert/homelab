@@ -1,0 +1,9 @@
+# This updates the name in the helm release with the postfix that is applied to the configmap name
+# See: https://github.com/kubernetes-sigs/kustomize/tree/master/examples/transformerconfigs#name-reference-transformer
+---
+nameReference:
+  - kind: ConfigMap
+    version: v1
+    fieldSpecs:
+      - kind: HelmRelease
+        path: spec/valuesFrom/name
