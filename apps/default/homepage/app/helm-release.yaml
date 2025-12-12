@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app homepage
+  name: homepage
 spec:
   interval: 30m
   chartRef:
@@ -17,6 +17,15 @@ spec:
           reloader.stakater.com/auto: "true"
         serviceAccount:
           identifier: homepage
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -32,9 +41,6 @@ spec:
               HOMEPAGE_ALLOWED_HOSTS: &host homepage.${CLUSTER_DOMAIN}
               LOG_TARGETS: stdout
               TZ: ${TIME_ZONE}
-            # envFrom:
-            #   - secretRef:
-            #       name: homepage-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -46,7 +52,6 @@ spec:
                     httpHeaders:
                       - name: Host
                         value: *host
-                  initialDelaySeconds: 0
               readiness: *probes
               startup: *probes
             securityContext:
@@ -55,43 +60,27 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        fsGroup: 65534
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
-    service:
-      app:
-        controller: *app
-        ports:
-          http:
-            port: *port
-    ingress:
-      app:
-        className: traefik
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-        hosts:
-          - host: *host
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: homepage-tls
     persistence:
       config:
         type: configMap
         name: homepage-config
         globalMounts:
           - path: /app/config
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - *host
+        rules:
+          - backendRefs:
+              - identifier: app
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
     serviceAccount:
       homepage: {}
     rbac:
