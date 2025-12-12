@@ -38,39 +38,32 @@ spec:
                   name: immich-config
               - secretRef:
                   name: immich-secret
-    service:
-      app:
-        controller: immich-server
-        ports:
-          http:
-            port: 2283
-    ingress:
-      app:
-        className: traefik
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: Immich
-          gethomepage.dev/icon: immich
-          gethomepage.dev/description: High performance self-hosted photo and video management solution
-          gethomepage.dev/group: Media
-        hosts:
-          - host: &host immich.${CLUSTER_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-        tls:
-          - hosts:
-              - *host
-            secretName: immich-tls
     persistence:
       library:
         type: nfs
         server: ${NAS_IP}
         path: /volume1/immich
-        advancedMounts:
-          immich-server:
-            app:
-              - path: /usr/src/app/upload
+        globalMounts:
+          - path: /usr/src/app/upload
+    service:
+      app:
+        ports:
+          http:
+            port: 2283
+            protocol: HTTP
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Immich
+          gethomepage.dev/icon: immich
+          gethomepage.dev/description: High performance self-hosted photo and video management solution
+          gethomepage.dev/group: Media
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+        rules:
+          - backendRefs:
+              - identifier: app
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik

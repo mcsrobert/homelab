@@ -10,7 +10,7 @@ data:
   # URLs
   IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning:3003
   IMMICH_SERVER_URL: http://immich-server:2283
-  PUBLIC_IMMICH_SERVER_URL: https://immich.${SECRET_DOMAIN}
+  PUBLIC_IMMICH_SERVER_URL: https://immich.${CLUSTER_DOMAIN}
   # Redis
   REDIS_HOSTNAME: immich-dragonfly
   # Postgres
