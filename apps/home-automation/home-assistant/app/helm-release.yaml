@@ -71,9 +71,9 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 64Mi
-              limits:
                 memory: 256Mi
+              limits:
+                memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -103,10 +103,12 @@ spec:
         ports:
           http:
             port: 8123
+            protocol: HTTP
       code-server:
         ports:
-          code-server:
+          http:
             port: 12321
+            protocol: HTTP
     route:
       app:
         annotations:
