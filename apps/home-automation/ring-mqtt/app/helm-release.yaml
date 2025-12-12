@@ -15,6 +15,15 @@ spec:
       ring-mqtt:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 12004
+            runAsGroup: 12004
+            fsGroup: 12004
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             env:
@@ -24,10 +33,6 @@ spec:
             image:
               repository: tsightler/ring-mqtt
               tag: 5.9.1@sha256:b1c45893aee660b45712648d4c48d5891da8fbd04682fde9c826e58fde9612cb
-            ports:
-              - name: rtsp
-                containerPort: &port 8554
-                protocol: TCP
             probes:
               liveness:
                 enabled: true
@@ -47,40 +52,24 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 12004
-        runAsGroup: 12004
-        fsGroup: 12004
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
-    service:
-      app:
-        controller: *app
-        ports:
-          http:
-            port: *port
     persistence:
       data:
         existingClaim: ring-mqtt-data
-        advancedMounts:
-          ring-mqtt:
-            app:
-              - path: /data
+        globalMounts:
+          - path: /data
       config:
         type: secret
         name: ring-mqtt-config
-        advancedMounts:
-          ring-mqtt:
-            app:
-              - path: /data/config.json
-                subPath: config.json
-                readOnly: true
+        globalMounts:
+          - path: /data/config.json
+            subPath: config.json
       tmpfs:
         type: emptyDir
-        advancedMounts:
-          ring-mqtt:
-            app:
-              - path: /run
+        globalMounts:
+          - path: /run
+    service:
+      app:
+        ports:
+          rtsp:
+            port: 8554
+            protocol: TCP
