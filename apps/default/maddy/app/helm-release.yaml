@@ -17,6 +17,22 @@ spec:
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 13000
+            runAsGroup: 13000
+            fsGroup: 13000
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
         containers:
           app:
             image:
@@ -52,22 +68,15 @@ spec:
               capabilities:
                 drop:
                   - ALL
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 13000
-        runAsGroup: 13000
-        fsGroup: 13000
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: *app
+    persistence:
+      config:
+        type: configMap
+        name: maddy-config
+        globalMounts:
+          - path: /data/maddy.conf
+            subPath: maddy.conf
+      tmp:
+        type: emptyDir
     service:
       app:
         ports:
@@ -82,14 +91,3 @@ spec:
       app:
         endpoints:
           - port: metrics
-    persistence:
-      config:
-        type: configMap
-        name: maddy-config
-        globalMounts:
-          - path: /data/maddy.conf
-            subPath: maddy.conf
-      tmpfs:
-        type: emptyDir
-        globalMounts:
-          - path: /tmp
