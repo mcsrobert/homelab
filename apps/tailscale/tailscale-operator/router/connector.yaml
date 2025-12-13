@@ -9,6 +9,7 @@ spec:
   subnetRouter:
     advertiseRoutes:
       - ${LAN_CIDR}
+      - ${LAN_CIDRv6}
   tags:
     - tag:k8s
     - tag:home-lan
