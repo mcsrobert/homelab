@@ -43,8 +43,12 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
-                    port: 53
+                  exec:
+                    command:
+                      - /app/blocky
+                      - healthcheck
+                      - --port
+                      - "53"
                   initialDelaySeconds: 20
                   periodSeconds: 10
                   timeoutSeconds: 1
