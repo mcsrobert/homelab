@@ -21,7 +21,8 @@ about Kubernetes and GitOps.
 
 ## Hardware
 
-My homelab consists of a small k3s cluster and a NAS for Longhorn backups and media.
+My homelab consists of a small k3s cluster and a NAS for Longhorn backups
+and media.
 
 |  Device | Role | CPU | RAM | Storage | Architecture | OS |
 | ------- | ---- | --- | --- | ------- | ------------ | -- |
@@ -32,6 +33,9 @@ My homelab consists of a small k3s cluster and a NAS for Longhorn backups and me
 
 ## Awknowledgements
 
+Using kubesearch.dev, I've found a lot of other repo's that have helped me
+along the way. Big thanks to:
+
  - [cbirkenbeul/homelab](https://github.com/cbirkenbeul/homelab)
  - [bjw-s/home-ops](https://github.com/bjw-s/home-ops)
  - [mapanare-labs/home-ops](https://gitlab.com/mapanare-labs/mapanarenet/home-ops)
@@ -39,3 +43,4 @@ My homelab consists of a small k3s cluster and a NAS for Longhorn backups and me
  - [drag0n141/home-ops](https://github.com/drag0n141/home-ops)
  - [budimanjojo/home-cluster](https://github.com/budimanjojo/home-cluster)
  - [nicolerenee/infra](https://github.com/nicolerenee/infra)
+ - [h3mmy/bloopySphere](https://github.com/h3mmy/bloopySphere)
