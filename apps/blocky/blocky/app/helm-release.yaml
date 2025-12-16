@@ -95,7 +95,7 @@ spec:
     serviceMonitor:
       app:
         service:
-          name: *app
+          name: blocky-app
         endpoints:
           - port: http
             path: /metrics
