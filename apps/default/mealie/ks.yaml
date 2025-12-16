@@ -8,6 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: longhorn-storage
+    - name: traefik-crds
   path: /apps/default/mealie/app
   sourceRef:
     kind: GitRepository

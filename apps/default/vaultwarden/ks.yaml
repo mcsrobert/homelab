@@ -7,10 +7,9 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cert-manager-issuers
-    - name: traefik
-    - name: longhorn-storage
     - name: external-secrets-stores
+    - name: longhorn-storage
+    - name: traefik-crds
   path: /apps/default/vaultwarden/app
   sourceRef:
     kind: GitRepository

@@ -10,6 +10,7 @@ spec:
     - name: external-secrets
     - name: generic-device-plugin
     - name: longhorn-storage
+    - name: traefik-crds
   path: /apps/media/qbittorrent/app
   sourceRef:
     kind: GitRepository

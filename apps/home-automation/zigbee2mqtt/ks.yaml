@@ -11,6 +11,7 @@ spec:
     - name: longhorn-storage
     - name: mosquitto
     - name: node-feature-discovery
+    - name: traefik-crds
   path: /apps/home-automation/zigbee2mqtt/app
   sourceRef:
     kind: GitRepository
