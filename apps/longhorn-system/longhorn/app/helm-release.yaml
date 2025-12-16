@@ -18,35 +18,47 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-
     defaultBackupStore:
       backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
-
     csi:
       attacherReplicaCount: 1
       provisionerReplicaCount: 1
       resizerReplicaCount: 1
       snapshotterReplicaCount: 1
-
     longhornUI:
       replicas: 1
-
-    ingress:
-      enabled: true
-      ingressClassName: traefik
-      annotations:
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        traefik.ingress.kubernetes.io/router.middlewares: traefik-auth-chain@kubernetescrd
-        gethomepage.dev/enabled: "true"
-        gethomepage.dev/name: Longhorn
-        gethomepage.dev/icon: longhorn
-        gethomepage.dev/description: Distributed, highly available Kubernetes storage
-        gethomepage.dev/group: Infrastructure
-        gethomepage.dev/pod-selector: ""
-      host: longhorn.${CLUSTER_DOMAIN}
-      tls: true
-      tlsSecret: longhorn-tls
-
     metrics:
       serviceMonitor:
         enabled: true
+    extraObjects:
+      - apiVersion: gateway.networking.k8s.io/v1
+        kind: HTTPRoute
+        metadata:
+          name: longhorn
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/name: Longhorn
+            gethomepage.dev/icon: longhorn
+            gethomepage.dev/description: Distributed, highly available Kubernetes storage
+            gethomepage.dev/group: Infrastructure
+            gethomepage.dev/pod-selector: ""
+        spec:
+          hostnames:
+            - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          parentRefs:
+            - name: traefik-gateway
+              namespace: traefik
+          rules:
+            - backendRefs:
+                - name: longhorn-frontend
+                  port: 80
+              filters:
+                - type: ExtensionRef
+                  extensionRef:
+                    group: traefik.io
+                    kind: Middleware
+                    name: auth-chain
+              # matches:
+              #   - path:
+              #       type: PathPrefix
+              #       value: /
