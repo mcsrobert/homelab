@@ -44,7 +44,7 @@ spec:
                 custom: true
                 spec:
                   tcpSocket:
-                    port: 53
+                    port: &dnsPort 1053
                   initialDelaySeconds: 20  # blocklist download on startup
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -82,11 +82,11 @@ spec:
         ports:
           dns-tcp:
             port: 53
-            targetPort: 1053
+            targetPort: *dnsPort
             protocol: TCP
           dns-udp:
             port: 53
-            targetPort: 1053
+            targetPort: *dnsPort
             protocol: UDP
     serviceMonitor:
       app:
