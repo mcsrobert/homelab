@@ -8,6 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
+    - name: traefik-crds
   path: /apps/longhorn-system/longhorn/app
   sourceRef:
     kind: GitRepository
