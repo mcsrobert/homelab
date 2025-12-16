@@ -43,13 +43,9 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  exec:
-                    command:
-                      - /app/blocky
-                      - healthcheck
-                      - --port
-                      - "1053"
-                  initialDelaySeconds: 20
+                  tcpSocket:
+                    port: 53
+                  initialDelaySeconds: 20  # blocklist download on startup
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
