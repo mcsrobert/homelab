@@ -8,6 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: longhorn-storage
+    - name: traefik-crds
   path: /apps/media/bazarr/app
   sourceRef:
     kind: GitRepository

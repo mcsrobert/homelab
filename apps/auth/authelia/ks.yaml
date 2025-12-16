@@ -10,7 +10,7 @@ spec:
     - name: prometheus-operator-crds
     - name: cert-manager-issuers
     - name: external-secrets-stores
-    - name: traefik
+    - name: traefik-crds
   path: /apps/auth/authelia/app
   sourceRef:
     kind: GitRepository

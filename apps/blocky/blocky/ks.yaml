@@ -7,10 +7,11 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: prometheus-operator-crds
-    - name: metallb-pools
-    - name: external-secrets-stores
     - name: blocky-dragonfly
+    - name: external-secrets-stores
+    - name: metallb-pools
+    - name: prometheus-operator-crds
+    - name: traefik-crds
   path: /apps/blocky/blocky/app
   sourceRef:
     kind: GitRepository

@@ -6,6 +6,8 @@ metadata:
   name: home-assistant
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: traefik-crds
   path: /apps/home-automation/home-assistant/app
   sourceRef:
     kind: GitRepository

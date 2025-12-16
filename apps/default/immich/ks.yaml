@@ -58,6 +58,7 @@ spec:
     - name: longhorn-storage
     - name: immich-dragonfly
     - name: immich-cloudnative-pg
+    - name: traefik-crds
   path: /apps/default/immich/app
   sourceRef:
     kind: GitRepository

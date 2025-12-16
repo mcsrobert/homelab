@@ -7,8 +7,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: traefik
-    - name: cert-manager
+    - name: traefik-crds
   path: /apps/default/homepage/app
   sourceRef:
     kind: GitRepository
