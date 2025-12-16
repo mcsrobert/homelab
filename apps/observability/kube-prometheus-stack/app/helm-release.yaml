@@ -23,24 +23,21 @@ spec:
       admin:
         existingSecret: grafana-secret
 
-      ingress:
-        enabled: true
-        ingressClassName: traefik
-        annotations:
-          cert-manager.io/cluster-issuer: letsencrypt-production
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: Grafana
-          gethomepage.dev/icon: grafana
-          gethomepage.dev/description: Real-time monitoring with custom dashboards
-          gethomepage.dev/group: Observability
-          gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
-        hosts:
-          - &grafana_domain grafana.${CLUSTER_DOMAIN}
-        path: /
-        tls:
-          - hosts:
-              - *grafana_domain
-            secretName: grafana-tls
+      route:
+        main:
+          enabled: true
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/name: Grafana
+            gethomepage.dev/icon: grafana
+            gethomepage.dev/description: Real-time monitoring with custom dashboards
+            gethomepage.dev/group: Observability
+            gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
+          hostnames:
+            - grafana.${CLUSTER_DOMAIN}
+          parentRefs:
+            - name: traefik-gateway
+              namespace: traefik
 
       # Required to add additional dashboards via config
       # TODO: move to Grafana Operator and deploy dashboards as CRDs
