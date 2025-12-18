@@ -76,4 +76,3 @@ spec:
             namespace: traefik
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
-
