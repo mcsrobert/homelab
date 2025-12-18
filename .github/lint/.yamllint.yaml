@@ -3,10 +3,9 @@ extends: default
 ignore: |
   *.sops.*
 rules:
-  # truthy:
-  #   allowed-values: ["true", "false", "on"]
   indentation: enable
   line-length: disable
+  truthy: {}
   comments:
     min-spaces-from-content: 2
   braces:
