@@ -44,11 +44,13 @@ spec:
               PGID: 6001
               DOT: "off"
               DNS_ADDRESS: 127.0.0.2
+              FIREWALL_INPUT_PORTS: &port 8080
+              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
-              VPN_SERVICE_PROVIDER: custom
-              # SERVER_COUNTRIES: Netherlands
-              # PORT_FORWARD_ONLY: "on"
+              VPN_SERVICE_PROVIDER: protonvpn
+              SERVER_COUNTRIES: Netherlands
+              PORT_FORWARD_ONLY: "on"
               VPN_PORT_FORWARDING: "on"
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               VPN_PORT_FORWARDING_UP_COMMAND: >-
@@ -57,8 +59,7 @@ spec:
               PUBLICIP_FILE: /gluetun/ip
               UPDATER_PERIOD: 24h
               UPDATER_VPN_SERVICE_PROVIDERS: protonvpn
-              FIREWALL_INPUT_PORTS: &port 8080
-              FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
+              WIREGUARD_ADDRESSES: 10.2.0.2/32
               WIREGUARD_MTU: 1420
             envFrom:
               - secretRef:
