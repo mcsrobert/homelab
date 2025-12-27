@@ -55,7 +55,8 @@ spec:
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{"{{"}}PORTS{{"}}"}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
               VPN_PORT_FORWARDING_STATUS_FILE: /gluetun/forwarded_port
               PUBLICIP_FILE: /gluetun/ip
-              # UPDATER_PERIOD: 24h  # Broken, see: https://github.com/qdm12/gluetun/issues/2820
+              UPDATER_PERIOD: 24h
+              UPDATER_VPN_SERVICE_PROVIDERS: protonvpn
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
               WIREGUARD_MTU: 1420
