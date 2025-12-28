@@ -21,14 +21,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         initContainers:
-          coredns:
-            image:
-              repository: coredns/coredns
-              tag: 1.13.2@sha256:94caebb89dcfb9d2c4be45bfda34410a3e1092458fbbbc0284365c9e4c9a7818
-            args: ["-conf", "/etc/coredns/Corefile"]
-            restartPolicy: Always
           gluetun:
-            dependsOn: coredns
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.41.0@sha256:6b54856716d0de56e5bb00a77029b0adea57284cf5a466f23aad5979257d3045
@@ -42,8 +35,6 @@ spec:
               TZ: ${TIME_ZONE}
               PUID: 0
               PGID: 6001
-              DOT: "off"
-              DNS_ADDRESS: 127.0.0.2
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
               VPN_TYPE: wireguard
@@ -152,14 +143,6 @@ spec:
           qbittorrent:
             app:
               - path: /media/Downloads
-      coredns:
-        type: configMap
-        name: qbittorrent-coredns
-        advancedMounts:
-          qbittorrent:
-            coredns:
-              - path: /etc/coredns/Corefile
-                subPath: Corefile
       gluetun:
         type: persistentVolumeClaim
         existingClaim: gluetun-data
