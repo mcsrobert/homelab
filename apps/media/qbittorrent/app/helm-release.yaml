@@ -86,8 +86,8 @@ spec:
                 drop:
                   - ALL
                 add:
-                  - CHOWN
                   - NET_ADMIN
+                  - NET_RAW
                   - SYS_MODULE  # Kernel space Wireguard
         containers:
           app:
