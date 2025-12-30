@@ -164,6 +164,12 @@ spec:
             gluetun:
               - path: /lib/modules
                 readOnly: true
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          qbittorrent:
+            gluetun:
+              - path: /tmp
     service:
       app:
         ports:
