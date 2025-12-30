@@ -19,7 +19,7 @@ spec:
           nodeSelector:
             # TODO: Once I get Talos and the RKNPU working, make this better
             # Probably want to use the generic-device-plugin at that point
-            feature.node.kubernetes.io/cpu-model.family: "79"
+            feature.node.kubernetes.io/cpu-model.family: "47"
         containers:
           app:
             image:
