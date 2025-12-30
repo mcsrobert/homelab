@@ -17,6 +17,9 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": [
+        "app-template YAML schema"
+      ],
       "datasourceTemplate": "docker",
       "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
       "managerFilePatterns": [
@@ -26,6 +29,20 @@
         "# yaml-language-server: \\$schema=https://raw\\.githubusercontent\\.com/bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)/charts/other/app-template/schemas/helmrelease-helm-v2\\.schema\\.json"
       ],
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": [
+        "CloudnativePG Postgresql version"
+      ],
+      "datasourceTemplate": "docker",
+      "managerFilePatterns": [
+        "/\\.yaml$/"
+      ],
+      "matchStrings": [
+        "imageName: (?<depName>\\S+):(?<currentValue>.*\\-.*)"
+      ],
+      "versioningTemplate": "redhat"
     }
   ],
   "packageRules": [
