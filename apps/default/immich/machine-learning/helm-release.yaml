@@ -64,8 +64,13 @@ spec:
         path: /volume1/immich
         globalMounts:
           - path: /usr/src/app/upload
-      cache:
+      tmpfs:
         type: emptyDir
+        globalMounts:
+          - path: /cache
+            subPath: cache
+          - path: /tmp
+            subPath: tmp
     service:
       app:
         ports:
