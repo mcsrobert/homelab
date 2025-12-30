@@ -17,7 +17,7 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           nodeSelector:
-            # TODO: Once I got Talos and the RKNPU working, make this better
+            # TODO: Once I get Talos and the RKNPU working, make this better
             # Probably want to use the generic-device-plugin at that point
             feature.node.kubernetes.io/cpu-model.family: "79"
         containers:
@@ -25,19 +25,6 @@ spec:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
               tag: v2.4.1@sha256:b3deefd1826f113824e9d7bc30d905e7f823535887d03f869330946b6db3b44a
-            resources:
-              requests:
-                cpu: 15m
-                memory: 250Mi
-              limits:
-                memory: 4000Mi
-            probes:
-              startup:
-                enabled: true
-              liveness:
-                enabled: true
-              readiness:
-                enabled: true
             env:
               DB_USERNAME:
                 secretKeyRef:
@@ -54,6 +41,22 @@ spec:
                   name: immich-config
               - configMapRef:
                   name: immich-machine-learning-config
+            probes:
+              liveness: &probes
+                enabled: true
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 75m
+                memory: 1Gi
+              limits:
+                memory: 2Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     persistence:
       library:
         type: nfs
