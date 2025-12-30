@@ -6,7 +6,7 @@ metadata:
   name: immich-cloudnative-pg
 spec:
   instances: 1
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.2@sha256:4a6f5ca2212018322823a92250230d471e2fa33c287ed8b400bd58a3cc3a4e6b
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.1@sha256:d844a09b25458ecb333208ba256df6baa320714257b9fb91752c2d8e75cc2f60
   primaryUpdateStrategy: unsupervised
   storage:
     size: 10Gi
