@@ -4,10 +4,10 @@ repos:
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.37.1
     hooks:
-      - args:
+      - id: yamllint
+        args:
           - --config-file
           - .github/lint/.yamllint.yaml
-        id: yamllint
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
