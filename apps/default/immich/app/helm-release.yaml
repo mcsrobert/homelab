@@ -38,6 +38,22 @@ spec:
                   name: immich-config
               - secretRef:
                   name: immich-secret
+            probes:
+              liveness: &probes
+                enabled: true
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 50m
+                memory: 750Mi
+              limits:
+                memory: 1.5Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     persistence:
       library:
         type: nfs
