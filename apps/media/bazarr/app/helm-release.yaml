@@ -27,6 +27,12 @@ spec:
             image:
               repository: ghcr.io/home-operations/bazarr
               tag: 1.5.3@sha256:2f1c32cb1420b2e56f60cfdf7823737eb501fdb2c13669429d23ab3a02e9ad90
+            env:
+              TZ: "${TIME_ZONE}"
+              BAZARR__INSTANCE_NAME: "{{ .Release.Name }}"
+              BAZARR__PORT: &port 6767
+              BAZARR__APPLICATION_URL: "https://{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+              BAZARR__LOG_LEVEL: info
             probes:
               liveness: &probe
                 enabled: true
@@ -34,8 +40,9 @@ spec:
                 spec:
                   httpGet:
                     path: /api/
-                    port: &port 6767
+                    port: *port
                   initialDelaySeconds: 6
+                  timeoutSeconds: 5
               readiness: *probe
             resources:
               requests:
@@ -69,8 +76,8 @@ spec:
           gethomepage.dev/icon: bazarr
           gethomepage.dev/description: Subtitle manager
           gethomepage.dev/group: Media
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
             namespace: traefik
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
