@@ -42,7 +42,7 @@ spec:
                 custom: true
                 spec:
                   tcpSocket:
-                    port: &dnsPort 1053
+                    port: &dnsPort 53
                   initialDelaySeconds: 20  # blocklist download on startup
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -61,6 +61,8 @@ spec:
                 drop:
                   - ALL
                 add:
+                  # Required, even when binding port 1053
+                  # Else: exec /app/blocky: operation not permitted
                   - NET_BIND_SERVICE
     persistence:
       config:
@@ -82,12 +84,10 @@ spec:
           metallb.io/loadBalancerIPs: "${DNS_IP},${DNS_IPv6}"
         ports:
           dns-tcp:
-            port: 53
-            targetPort: *dnsPort
+            port: *dnsPort
             protocol: TCP
           dns-udp:
-            port: 53
-            targetPort: *dnsPort
+            port: *dnsPort
             protocol: UDP
     serviceMonitor:
       app:
