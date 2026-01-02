@@ -6,11 +6,20 @@ metadata:
   name: immich-cloudnative-pg
 spec:
   instances: 1
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.1@sha256:d844a09b25458ecb333208ba256df6baa320714257b9fb91752c2d8e75cc2f60
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.2@sha256:4a6f5ca2212018322823a92250230d471e2fa33c287ed8b400bd58a3cc3a4e6b
   primaryUpdateStrategy: unsupervised
   storage:
     size: 10Gi
     storageClass: longhorn-backup-high-io
+    pvcTemplate:
+      volumeName: immich-postgres
+      accessModes:
+        - ReadWriteOnce
+  bootstrap:
+    initdb:
+      encoding: UTF8
+      localeCollate: en_US.UTF-8
+      localeCType: en_US.UTF-8
   postgresql:
     shared_preload_libraries:
       - vchord.so
