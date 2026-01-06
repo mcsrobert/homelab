@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: external-secrets-stores
     - name: generic-device-plugin
-    - name: longhorn-storage
+    - name: longhorn
     - name: mosquitto
     - name: node-feature-discovery
     - name: traefik-crds

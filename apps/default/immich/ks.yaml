@@ -8,7 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: cloudnative-pg
-    - name: longhorn-storage
+    - name: longhorn
   path: /apps/default/immich/cloudnative-pg
   sourceRef:
     kind: GitRepository
@@ -55,7 +55,7 @@ metadata:
 spec:
   dependsOn:
     - name: external-secrets-stores
-    - name: longhorn-storage
+    - name: longhorn
     - name: immich-dragonfly
     - name: immich-cloudnative-pg
     - name: traefik-crds
@@ -79,7 +79,7 @@ spec:
   dependsOn:
     - name: immich-server
     - name: immich-cloudnative-pg
-    - name: longhorn-storage
+    - name: longhorn
   path: /apps/default/immich/machine-learning
   sourceRef:
     kind: GitRepository

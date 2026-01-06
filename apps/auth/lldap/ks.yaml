@@ -7,7 +7,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: longhorn-storage
+    - name: longhorn
   path: /apps/auth/lldap/app
   sourceRef:
     kind: GitRepository
