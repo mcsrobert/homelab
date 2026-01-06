@@ -25,6 +25,10 @@ spec:
       snapshotterReplicaCount: 1
     longhornUI:
       replicas: 1
+    persistence:
+      recurringJobSelector:
+        enable: true
+        jobList: '[{"name": "backup", "isGroup": true}]'
     defaultBackupStore:
       backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
     metrics:
@@ -37,6 +41,50 @@ spec:
           name: longhorn
         driver: driver.longhorn.io
         deletionPolicy: Delete
+      - apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: longhorn-backup
+        provisioner: driver.longhorn.io
+        allowVolumeExpansion: true
+        parameters:
+          numberOfReplicas: "3"
+          fsType: "ext4"
+          recurringJobSelector: '[{"name": "backup", "isGroup": true}]'
+      - apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: longhorn-backup-high-io
+        provisioner: driver.longhorn.io
+        allowVolumeExpansion: true
+        parameters:
+          numberOfReplicas: "1"
+          fsType: "ext4"
+          recurringJobSelector: '[{"name": "backup", "isGroup": true}]'
+      - apiVersion: longhorn.io/v1beta2
+        kind: RecurringJob
+        metadata:
+          name: snapshot
+        spec:
+          cron: "*/15 * * * *"
+          task: "snapshot"
+          groups:
+            - backup
+          retain: 24
+          concurrency: 3
+      - apiVersion: longhorn.io/v1beta2
+        kind: RecurringJob
+        metadata:
+          name: backup
+        spec:
+          cron: "0 0 * * *"
+          task: "backup"
+          groups:
+            - backup
+          retain: 7
+          concurrency: 3
+          parameters:
+            full-backup-interval: "7"
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:

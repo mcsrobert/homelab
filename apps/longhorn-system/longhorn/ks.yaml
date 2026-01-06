@@ -19,20 +19,3 @@ spec:
   timeout: 5m
   wait: true
   prune: true
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: longhorn-storage
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: longhorn
-  path: /apps/longhorn-system/longhorn/storage
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  targetNamespace: longhorn-system
-  interval: 15m
-  prune: true
