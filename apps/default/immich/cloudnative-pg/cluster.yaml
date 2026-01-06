@@ -10,16 +10,22 @@ spec:
   primaryUpdateStrategy: unsupervised
   storage:
     size: 10Gi
-    storageClass: longhorn-backup-high-io
-    pvcTemplate:
-      volumeName: immich-postgres
-      accessModes:
-        - ReadWriteOnce
+    storageClass: longhorn
   bootstrap:
-    initdb:
-      encoding: UTF8
-      localeCollate: en_US.UTF-8
-      localeCType: en_US.UTF-8
+    recovery:
+      source: "recovery-cluster"
+      volumeSnapshots:
+        storage:
+          name: "immich-restore-snapshot"
+          kind: VolumeSnapshot
+          apiGroup: snapshot.storage.k8s.io
+  externalClusters:
+    - name: "recovery-cluster"
+      barmanObjectStore:
+        destinationPath: "s3://dummy-bucket/"
+        s3Credentials:
+          accessKeyId: {name: "dummy-secret", key: "id"}
+          secretAccessKey: {name: "dummy-secret", key: "key"}
   postgresql:
     shared_preload_libraries:
       - vchord.so

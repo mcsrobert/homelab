@@ -26,6 +26,7 @@ tasks:
         fluxcd/tap/flux
         helm
         helmfile
+        kubectl-cnpg
         kubernetes-cli
         kustomize
         sops
