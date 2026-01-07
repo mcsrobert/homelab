@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   # Apps
+  - ./garage/ks.yaml
   - ./homepage/ks.yaml
   - ./immich/ks.yaml
   - ./maddy/ks.yaml
