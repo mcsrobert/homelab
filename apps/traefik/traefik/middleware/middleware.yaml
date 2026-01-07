@@ -88,6 +88,19 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: auth-chain
+  namespace: default
+spec:
+  chain:
+    middlewares:
+      - name: traefik-secure-headers@kubernetescrd
+      - name: traefik-forwardauth-authelia@kubernetescrd
+      - name: traefik-compress@kubernetescrd
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: auth-chain
   namespace: home-automation
 spec:
   chain:
