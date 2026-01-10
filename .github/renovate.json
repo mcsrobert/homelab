@@ -58,7 +58,7 @@
     },
     {
       "groupName": "Plugin Barman Cloud",
-      "matchDatasources": ["docker"],
+      "matchDatasources": ["docker", "helm"],
       "matchPackageNames": ["/plugin-barman-cloud/"],
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"

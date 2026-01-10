@@ -11,21 +11,11 @@ spec:
   storage:
     size: 10Gi
     storageClass: longhorn
-  bootstrap:
-    recovery:
-      source: "recovery-cluster"
-      volumeSnapshots:
-        storage:
-          name: "immich-restore-snapshot"
-          kind: VolumeSnapshot
-          apiGroup: snapshot.storage.k8s.io
-  externalClusters:
-    - name: "recovery-cluster"
-      barmanObjectStore:
-        destinationPath: "s3://dummy-bucket/"
-        s3Credentials:
-          accessKeyId: {name: "dummy-secret", key: "id"}
-          secretAccessKey: {name: "dummy-secret", key: "key"}
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: immich-garage-store
   postgresql:
     shared_preload_libraries:
       - vchord.so

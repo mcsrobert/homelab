@@ -8,7 +8,9 @@ metadata:
 spec:
   dependsOn:
     - name: cloudnative-pg
+    - name: external-secrets-stores
     - name: longhorn
+    - name: plugin-barman-cloud
   path: /apps/default/immich/cloudnative-pg
   sourceRef:
     kind: GitRepository
