@@ -5,11 +5,13 @@ kind: HelmRelease
 metadata:
   name: qbittorrent
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
+  driftDetection:
+    mode: enabled
   values:
     controllers:
       qbittorrent:
@@ -17,7 +19,8 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
-            fsGroupChangePolicy: OnRootMismatch
+            # fsGroup: &mediaGroup 65537
+            # fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
         initContainers:
@@ -76,7 +79,6 @@ spec:
             securityContext:
               runAsUser: *gluetunUser
               runAsGroup: *gluetunGroup
-              fsGroup: *gluetunGroup
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false  # See: https://github.com/qdm12/gluetun/discussions/2797
               capabilities:
@@ -103,8 +105,7 @@ spec:
             securityContext:
               runAsNonRoot: true
               runAsUser: 6000
-              runAsGroup: &mediaGroup 65537
-              fsGroup: *mediaGroup
+              runAsGroup: 65537
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
