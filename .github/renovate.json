@@ -55,6 +55,14 @@
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"
       }
+    },
+    {
+      "groupName": "Plugin Barman Cloud",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["/plugin-barman-cloud/"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      }
     }
   ]
 }
