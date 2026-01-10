@@ -10,6 +10,8 @@ spec:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  driftDetection:
+    mode: enabled
   values:
     controllers:
       homepage:
@@ -20,9 +22,9 @@ spec:
         pod:
           securityContext:
             runAsNonRoot: true
-            runAsUser: 65534
-            runAsGroup: 65534
-            fsGroup: 65534
+            runAsUser: &nobody 65534
+            runAsGroup: *nobody
+            fsGroup: *nobody
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
@@ -42,7 +44,7 @@ spec:
               LOG_TARGETS: stdout
               TZ: ${TIME_ZONE}
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
@@ -52,8 +54,7 @@ spec:
                     httpHeaders:
                       - name: Host
                         value: *host
-              readiness: *probes
-              startup: *probes
+              readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

@@ -5,11 +5,13 @@ kind: HelmRelease
 metadata:
   name: bazarr
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
+  driftDetection:
+    mode: enabled
   values:
     controllers:
       bazarr:
@@ -17,8 +19,8 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 6040
-            runAsGroup: 65537
-            fsGroup: 65537
+            runAsGroup: &mediaGroup 65537
+            fsGroup: *mediaGroup
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
