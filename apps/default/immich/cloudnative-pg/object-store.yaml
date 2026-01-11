@@ -22,4 +22,4 @@ spec:
       compression: bzip2
     data:
       compression: bzip2
-  retentionPolicy: "30d"
+  retentionPolicy: 30d
