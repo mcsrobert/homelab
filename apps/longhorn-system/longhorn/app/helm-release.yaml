@@ -41,6 +41,15 @@ spec:
           name: longhorn
         driver: driver.longhorn.io
         deletionPolicy: Delete
+      - apiVersion: snapshot.storage.k8s.io/v1
+        kind: VolumeSnapshotClass
+        metadata:
+          name: longhorn-backup
+        driver: driver.longhorn.io
+        deletionPolicy: Delete
+        parameters:
+          type: bak
+          backupMode: incremental
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
@@ -54,13 +63,12 @@ spec:
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
-          name: longhorn-backup-high-io
+          name: longhorn-cnpg
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "1"
-          fsType: "ext4"
-          recurringJobSelector: '[{"name": "backup", "isGroup": true}]'
+          recurringJobSelector: ''
       - apiVersion: longhorn.io/v1beta2
         kind: RecurringJob
         metadata:
@@ -81,10 +89,10 @@ spec:
           task: "backup"
           groups:
             - backup
-          retain: 7
+          retain: 14
           concurrency: 3
-          parameters:
-            full-backup-interval: "7"
+          # parameters:
+          #   full-backup-interval: "7"
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:

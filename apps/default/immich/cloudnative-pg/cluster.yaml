@@ -11,6 +11,14 @@ spec:
   storage:
     size: 10Gi
     storageClass: longhorn
+  backup:
+    retentionPolicy: 30d
+    volumeSnapshot:
+      className: longhorn-backup
+      online: true
+      onlineConfiguration:
+        immediateCheckpoint: true
+      snapshotOwnerReference: backup
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
