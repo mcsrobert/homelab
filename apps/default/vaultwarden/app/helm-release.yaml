@@ -5,11 +5,13 @@ kind: HelmRelease
 metadata:
   name: vaultwarden
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
+  driftDetection:
+    mode: enabled
   values:
     controllers:
       vaultwarden:
@@ -36,7 +38,6 @@ spec:
               SMTP_HOST: maddy.default.svc.cluster.local
               SMTP_PORT: 2525
               SMTP_SECURITY: "off"
-              SMTP_TIMEOUT: 15
               SMTP_FROM_NAME: Vaultwarden
               SMTP_FROM: noreply@mail.${CLUSTER_DOMAIN}
               WEBSOCKET_ENABLED: true
@@ -44,14 +45,14 @@ spec:
               - secretRef:
                   name: vaultwarden-secret
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     path: /alive
                     port: &port 80
-              readiness: *probes
+              readiness: *probe
             resources:
               requests:
                 cpu: 100m
@@ -74,6 +75,26 @@ spec:
             port: *port
             protocol: HTTP
     route:
+      admin:
+        hostnames:
+          - &host vault.${CLUSTER_DOMAIN}
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /admin/
+            filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: traefik.io
+                  kind: Middleware
+                  name: auth-chain
+            backendRefs:
+              - identifier: app
+        parentRefs: &parentRefs
+          - name: traefik-gateway
+            namespace: traefik
+            sectionName: websecure
       app:
         annotations:
           gethomepage.dev/enabled: "true"
@@ -82,10 +103,8 @@ spec:
           gethomepage.dev/description: Lightweight, self-hosted password manager
           gethomepage.dev/group: Apps
         hostnames:
-          - vault.${CLUSTER_DOMAIN}
+          - *host
         rules:
           - backendRefs:
               - identifier: app
-        parentRefs:
-          - name: traefik-gateway
-            namespace: traefik
+        parentRefs: *parentRefs
