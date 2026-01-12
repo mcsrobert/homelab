@@ -2,14 +2,6 @@
 access_control:
   default_policy: deny
   rules:
-    - domain: vault.${CLUSTER_DOMAIN}
-      resources:
-        - ^/admin
-      policy: one_factor
-      subject:
-        - group:id_admin
-    - domain: vault.${CLUSTER_DOMAIN}
-      policy: bypass
     - domain: '*.${CLUSTER_DOMAIN}'
       policy: one_factor
       subject:
