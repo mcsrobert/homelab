@@ -10,7 +10,6 @@ spec:
   primaryUpdateStrategy: unsupervised
   bootstrap:
     recovery:
-      source: "old-backup-source"
       backup:
         name: immich-cloudnative-pg-20260112103159
   storage:
@@ -29,13 +28,6 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: immich-garage-store
-  externalClusters:
-    - name: "old-backup-source"
-      plugin:
-        name: barman-cloud.cloudnative-pg.io
-        parameters:
-          barmanObjectName: immich-garage-store
-          serverName: immich-cloudnative-pg
   postgresql:
     shared_preload_libraries:
       - vchord.so
