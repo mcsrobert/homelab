@@ -15,6 +15,15 @@ spec:
       immich-server:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 11100
+            runAsGroup: &nfsGroup 65539
+            fsGroup: *nfsGroup
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -39,15 +48,14 @@ spec:
               - secretRef:
                   name: immich-secret
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
-              readiness: *probes
+              readiness: *probe
             resources:
               requests:
                 cpu: 50m
-                memory: 750Mi
               limits:
-                memory: 1.5Gi
+                memory: 2Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
