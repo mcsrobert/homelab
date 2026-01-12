@@ -68,7 +68,6 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "1"
-          recurringJobSelector: ''
       - apiVersion: longhorn.io/v1beta2
         kind: RecurringJob
         metadata:
