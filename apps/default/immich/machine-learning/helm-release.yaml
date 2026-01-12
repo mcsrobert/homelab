@@ -20,6 +20,14 @@ spec:
             # TODO: Once I get Talos and the RKNPU working, make this better
             # Probably want to use the generic-device-plugin at that point
             feature.node.kubernetes.io/cpu-model.family: "47"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 11100
+            runAsGroup: &nfsGroup 65539
+            fsGroup: *nfsGroup
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -42,15 +50,14 @@ spec:
               - configMapRef:
                   name: immich-machine-learning-config
             probes:
-              liveness: &probes
+              liveness: &probe
                 enabled: true
-              readiness: *probes
+              readiness: *probe
             resources:
               requests:
                 cpu: 75m
-                memory: 1Gi
               limits:
-                memory: 2Gi
+                memory: 4Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
