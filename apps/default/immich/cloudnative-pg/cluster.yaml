@@ -6,12 +6,13 @@ metadata:
   name: immich-cloudnative-pg
 spec:
   instances: 1
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:17.5-0.4.2@sha256:4a6f5ca2212018322823a92250230d471e2fa33c287ed8b400bd58a3cc3a4e6b
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.0-0.5.3@sha256:267f6cbb32af6e109e138a143c7e9dd5d44d68433ec2303f0c30e745c788d1a9
   primaryUpdateStrategy: unsupervised
-  bootstrap:
-    recovery:
-      backup:
-        name: immich-cloudnative-pg-20260112103159
+  # bootstrap:
+  #   recovery:
+  #    source: "wal-backups"
+  #     backup:
+  #       name: immich-cloudnative-pg-20260112103159
   storage:
     size: 10Gi
     storageClass: longhorn-cnpg
@@ -28,6 +29,13 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: immich-garage-store
+  # externalClusters:
+  #   - name: "wal-backups"
+  #     plugin:
+  #       name: barman-cloud.cloudnative-pg.io
+  #       parameters:
+  #         barmanObjectName: immich-garage-store
+  #         serverName: immich-cloudnative-pg
   postgresql:
     shared_preload_libraries:
       - vchord.so
