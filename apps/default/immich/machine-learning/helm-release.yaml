@@ -60,7 +60,7 @@ spec:
                 memory: 4Gi
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false  # Can't resolve: Exception in ASGI application: RuntimeError: Data processing error: I/O error: Read-only file system (os error 30)
               capabilities:
                 drop:
                   - ALL
@@ -71,13 +71,10 @@ spec:
         path: /volume1/immich
         globalMounts:
           - path: /usr/src/app/upload
-      tmpfs:
+      cache:
         type: emptyDir
-        globalMounts:
-          - path: /cache
-            subPath: cache
-          - path: /tmp
-            subPath: tmp
+      # tmp:
+      #   type: emptyDir
     service:
       app:
         ports:
