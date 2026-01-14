@@ -102,6 +102,7 @@ spec:
           gethomepage.dev/icon: vaultwarden-light
           gethomepage.dev/description: Lightweight, self-hosted password manager
           gethomepage.dev/group: Apps
+          gethomepage.dev/pod-selector: app.kubernetes.io/name = vaultwarden
         hostnames:
           - *host
         rules:
