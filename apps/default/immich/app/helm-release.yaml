@@ -3,51 +3,61 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: immich-server
+  name: immich
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
+  driftDetection:
+    mode: enabled
   values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
     controllers:
-      immich-server:
+      server:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
-            runAsNonRoot: true
             runAsUser: 11100
             runAsGroup: &nfsGroup 65539
             fsGroup: *nfsGroup
-            fsGroupChangePolicy: OnRootMismatch
-            seccompProfile:
-              type: RuntimeDefault
         containers:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
               tag: v2.4.1@sha256:e6a6298e67ae077808fdb7d8d5565955f60b0708191576143fc02d30ab1389d1
             env:
-              DB_USERNAME:
-                secretKeyRef:
-                  name: immich-cloudnative-pg-app
-                  key: username
-              DB_PASSWORD:
-                secretKeyRef:
-                  name: immich-cloudnative-pg-app
-                  key: password
+              !!merge <<: &sharedEnv
+                TZ: ${TIME_ZONE}
+                PUBLIC_IMMICH_SERVER_URL: https://immich.${CLUSTER_DOMAIN}
+                IMMICH_SERVER_URL: http://immich-server:2283
+                IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning:3003
+                DB_HOSTNAME: immich-cnpg-rw
+                DB_USERNAME:
+                  secretKeyRef:
+                    name: immich-cnpg-app
+                    key: username
+                DB_PASSWORD:
+                  secretKeyRef:
+                    name: immich-cnpg-app
+                    key: password
+              UPLOAD_LOCATION: &uploadPath /usr/src/app/upload
+              REDIS_HOSTNAME: immich-dragonfly
               REDIS_PASSWORD:
                 secretKeyRef:
                   name: immich-dragonfly-secret
                   key: password
-            envFrom:
-              - configMapRef:
-                  name: immich-config
+            envFrom: &envFrom
               - secretRef:
                   name: immich-secret
-            probes:
+            probes: &probes
               liveness: &probe
                 enabled: true
               readiness: *probe
@@ -56,38 +66,99 @@ spec:
                 cpu: 50m
               limits:
                 memory: 2Gi
-            securityContext:
+            securityContext: &securityContext
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
+      machine-learning:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          nodeSelector:
+            # TODO: Once I get Talos and the RKNPU working, make this better
+            # Probably want to use the generic-device-plugin at that point
+            feature.node.kubernetes.io/cpu-model.family: "47"
+          securityContext:
+            runAsUser: 11110
+            runAsGroup: 11110
+            fsGroup: 11110
+        containers:
+          app:
+            image:
+              repository: ghcr.io/immich-app/immich-machine-learning
+              tag: v2.4.1@sha256:b3deefd1826f113824e9d7bc30d905e7f823535887d03f869330946b6db3b44a
+            env:
+              !!merge <<: *sharedEnv
+              # TODO: make this work
+              # Right now RKNPU is too old
+              MACHINE_LEARNING_RKNN: "true"
+              MACHINE_LEARNING_RKNN_THREADS: "2"
+            envFrom: *envFrom
+            probes: *probes
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 2Gi
+            securityContext: *securityContext
     persistence:
-      library:
+      upload:
         type: nfs
         server: ${NAS_IP}
         path: /volume1/immich
-        globalMounts:
-          - path: /usr/src/app/upload
+        advancedMounts:
+          server:
+            app:
+              - path: *uploadPath
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          machine-learning:
+            app:
+              - path: /cache
+                subPath: cache
+              - path: /.cache
+                subPath: internal-cache
+              - path: /.config
+                subPath: config
+              - path: /tmp
+                subPath: tmp
     service:
-      app:
+      server:
+        controller: server
         ports:
           http:
-            port: 2283
+            port: &port 2283
+            protocol: HTTP
+      machine-learning:
+        controller: machine-learning
+        ports:
+          http:
+            port: 3003
             protocol: HTTP
     route:
-      app:
+      server:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Immich
           gethomepage.dev/icon: immich
           gethomepage.dev/description: High performance self-hosted photo and video management solution
           gethomepage.dev/group: Media
+          gethomepage.dev/pod-selector: >-
+            app.kubernetes.io/instance in (
+                immich,
+                immich-cnpg,
+                immich-dragonfly
+            )
         hostnames:
           - immich.${CLUSTER_DOMAIN}
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: server
+                port: *port
         parentRefs:
           - name: traefik-gateway
             namespace: traefik
+            sectionName: websecure

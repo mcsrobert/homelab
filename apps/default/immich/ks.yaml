@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: immich-cloudnative-pg
+  name: immich-cnpg
   namespace: flux-system
 spec:
   dependsOn:
@@ -11,7 +11,7 @@ spec:
     - name: external-secrets-stores
     - name: longhorn
     - name: plugin-barman-cloud
-  path: /apps/default/immich/cloudnative-pg
+  path: /apps/default/immich/cnpg
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -22,7 +22,7 @@ spec:
   healthChecks:
     - apiVersion: postgresql.cnpg.io/v1
       kind: Cluster
-      name: immich-cloudnative-pg
+      name: immich-cnpg
       namespace: *namespace
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
@@ -59,30 +59,9 @@ spec:
     - name: external-secrets-stores
     - name: longhorn
     - name: immich-dragonfly
-    - name: immich-cloudnative-pg
+    - name: immich-cnpg
     - name: traefik-crds
   path: /apps/default/immich/app
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  targetNamespace: default
-  prune: true
-  interval: 30m
-  timeout: 5m
-  wait: true
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: immich-machine-learning
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: immich-server
-    - name: immich-cloudnative-pg
-    - name: longhorn
-  path: /apps/default/immich/machine-learning
   sourceRef:
     kind: GitRepository
     name: flux-system
