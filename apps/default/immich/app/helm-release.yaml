@@ -39,15 +39,10 @@ spec:
                 PUBLIC_IMMICH_SERVER_URL: https://immich.${CLUSTER_DOMAIN}
                 IMMICH_SERVER_URL: http://immich-server:2283
                 IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning:3003
-                DB_HOSTNAME: immich-cnpg-rw
-                DB_USERNAME:
+                DB_URL:
                   secretKeyRef:
                     name: immich-cnpg-app
-                    key: username
-                DB_PASSWORD:
-                  secretKeyRef:
-                    name: immich-cnpg-app
-                    key: password
+                    key: uri
               UPLOAD_LOCATION: &uploadPath /usr/src/app/upload
               REDIS_HOSTNAME: immich-dragonfly
               REDIS_PASSWORD:
@@ -131,13 +126,27 @@ spec:
         ports:
           http:
             port: &port 2283
-            protocol: HTTP
+            primary: true
+          api-metrics:
+            port: 8081
+          microservices-metrics:
+            port: 8082
       machine-learning:
         controller: machine-learning
         ports:
           http:
             port: 3003
-            protocol: HTTP
+    serviceMonitors:
+      server:
+        service:
+          identifier: server
+        endpoints:
+          - port: api-metrics
+            path: /metrics
+            interval: 1m
+          - port: microservices-metrics
+            path: /metrics
+            interval: 1m
     route:
       server:
         annotations:
@@ -148,9 +157,9 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/pod-selector: >-
             app.kubernetes.io/instance in (
-                immich,
-                immich-cnpg,
-                immich-dragonfly
+              immich,
+              immich-cnpg,
+              immich-dragonfly
             )
         hostnames:
           - immich.${CLUSTER_DOMAIN}

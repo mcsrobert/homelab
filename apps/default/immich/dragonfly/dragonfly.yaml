@@ -5,10 +5,10 @@ kind: Dragonfly
 metadata:
   name: &app immich-dragonfly
 spec:
-  labels:
-    app.kubernetes.io/instance: *app
   replicas: 1
   image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.36.0@sha256:af221b68138afb0b0238401c335493cfc2b060d577c5d6c018ddf6a29d3119f9
+  labels:
+    app.kubernetes.io/instance: *app
   authentication:
     passwordFromSecret:
       name: immich-dragonfly-secret
