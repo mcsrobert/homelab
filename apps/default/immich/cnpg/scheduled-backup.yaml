@@ -9,4 +9,6 @@ spec:
   backupOwnerReference: self
   cluster:
     name: immich-cnpg
-  method: volumeSnapshot
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io
