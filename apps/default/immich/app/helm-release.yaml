@@ -136,7 +136,7 @@ spec:
         ports:
           http:
             port: 3003
-    serviceMonitors:
+    serviceMonitor:
       server:
         service:
           identifier: server
