@@ -44,10 +44,11 @@ spec:
                     name: immich-cnpg-app
                     key: uri
               UPLOAD_LOCATION: &uploadPath /usr/src/app/upload
-              REDIS_URL:
+              REDIS_HOSTNAME: immich-dragonfly
+              REDIS_PASSWORD:
                 secretKeyRef:
                   name: immich-dragonfly-secret
-                  key: uri
+                  key: password
             envFrom: &envFrom
               - secretRef:
                   name: immich-secret
