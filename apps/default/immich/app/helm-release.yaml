@@ -71,10 +71,10 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          nodeSelector:
-            # TODO: Once I get Talos and the RKNPU working, make this better
-            # Probably want to use the generic-device-plugin at that point
-            feature.node.kubernetes.io/cpu-model.family: "47"
+          # nodeSelector:
+          #   # TODO: Once I get Talos and the RKNPU working, make this better
+          #   # Probably want to use the generic-device-plugin at that point
+          #   feature.node.kubernetes.io/cpu-model.family: "47"
           securityContext:
             runAsUser: 11110
             runAsGroup: 11110
