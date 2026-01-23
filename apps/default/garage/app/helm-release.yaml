@@ -28,6 +28,19 @@ spec:
             runAsUser: 7000
             runAsGroup: &nfsGroup 65538
             fsGroup: *nfsGroup
+          # This is avoid 132 exit code crashes on the RPI4
+          # TODO: figure out what CPU instructions are needed
+          # and create NFD rule OR wait until RPI4 is retired
+          # remove this entirely.
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: NotIn
+                        values:
+                          - raspberrypi
         containers:
           app:
             image:
