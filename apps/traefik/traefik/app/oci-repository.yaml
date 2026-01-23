@@ -8,7 +8,7 @@ spec:
   interval: 1h
   url: oci://ghcr.io/traefik/helm/traefik
   ref:
-    tag: 38.0.2
+    tag: 39.0.0
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
