@@ -114,7 +114,7 @@ spec:
         controller: garage
         ports:
           s3:
-            port: &s3Port 3900
+            port: 3900
             protocol: HTTP
             primary: true
           api:
@@ -124,20 +124,9 @@ spec:
         controller: webui
         ports:
           http:
-            port: &webuiPort 3909
+            port: &port 3909
             protocol: HTTP
     route:
-      garage:
-        hostnames:
-          - s3.${CLUSTER_DOMAIN}
-        rules:
-          - backendRefs:
-              - name: garage
-                port: *s3Port
-        parentRefs: &parentRefs
-          - name: traefik-gateway
-            namespace: traefik
-            sectionName: websecure
       webui:
         annotations:
           gethomepage.dev/enabled: "true"
@@ -157,5 +146,8 @@ spec:
                   name: auth-chain
             backendRefs:
               - name: garage-webui
-                port: *webuiPort
-        parentRefs: *parentRefs
+                port: *port
+        parentRefs:
+          - name: traefik-gateway
+            namespace: traefik
+            sectionName: websecure
