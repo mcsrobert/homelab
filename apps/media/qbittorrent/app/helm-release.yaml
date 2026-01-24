@@ -43,7 +43,7 @@ spec:
                   command: ["/bin/sh", "-c", "(ip rule del table 51820; ip -6 rule del table 51820) || true"]
             env:
               TZ: ${TIME_ZONE}
-              LOG_LEVEL: debug
+              LOG_LEVEL: info
               PUID: &gluetunUser 0  # needed for iptables
               PGID: &gluetunGroup 6001
               FIREWALL_INPUT_PORTS: &port 8080
