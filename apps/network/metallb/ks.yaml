@@ -8,11 +8,11 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-  path: /apps/metallb-system/metallb/app
+  path: /apps/network/metallb/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: metallb-system
+  targetNamespace: network
   prune: true
   interval: 15m
   timeout: 5m
@@ -27,10 +27,10 @@ metadata:
 spec:
   dependsOn:
     - name: metallb
-  path: /apps/metallb-system/metallb/pools
+  path: /apps/network/metallb/pools
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: metallb-system
+  targetNamespace: network
   prune: true
   interval: 15m
