@@ -32,7 +32,7 @@ data:
         - MetalLB:
             description: Bare-metal load-balancing for Kubernetes
             icon: metallb
-            namespace: metallb-system
+            namespace: network
             app: metallb
     - Observability:
         - Prometheus:
