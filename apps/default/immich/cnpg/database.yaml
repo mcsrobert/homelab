@@ -5,10 +5,10 @@ kind: Database
 metadata:
   name: immich-database
 spec:
-  name: immich
+  name: app
   owner: app
   cluster:
-    name: immich-cnpg
+    name: immich-cnpg-v2
   extensions:
     - ensure: present
       name: vector
