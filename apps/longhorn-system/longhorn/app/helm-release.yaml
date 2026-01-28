@@ -68,30 +68,6 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "1"
-      - apiVersion: longhorn.io/v1beta2
-        kind: RecurringJob
-        metadata:
-          name: snapshot
-        spec:
-          cron: "*/15 * * * *"
-          task: "snapshot"
-          groups:
-            - backup
-          retain: 24
-          concurrency: 3
-      - apiVersion: longhorn.io/v1beta2
-        kind: RecurringJob
-        metadata:
-          name: backup
-        spec:
-          cron: "0 0 * * *"
-          task: "backup"
-          groups:
-            - backup
-          retain: 14
-          concurrency: 3
-          # parameters:
-          #   full-backup-interval: "7"
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:
