@@ -32,10 +32,12 @@ spec:
         expose:
           default: true
         exposedPort: 80
-        redirections:
-          entryPoint:
-            to: websecure
-            permanent: true
+        http:
+          redirections:
+            entryPoint:
+              to: websecure
+              scheme: https
+              permanent: true
       websecure:
         port: &websurePort 8443
         expose:
