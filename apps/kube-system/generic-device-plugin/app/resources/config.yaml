@@ -12,25 +12,36 @@ devices:
         paths:
           - path: /dev/net/tun
 
-  # Rockchip & Jellyfin
-  # See: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/rockchip/
-  - name: dma-heap
-    groups:
-      - paths:
-          - path: /dev/dma_heap
-  - name: dri
-    groups:
-      - paths:
-          - path: /dev/dri
-  - name: mali0
-    groups:
-      - paths:
-          - path: /dev/mali0
-  - name: mpp-service
+  - name: vpu
     groups:
       - paths:
           - path: /dev/mpp_service
-  - name: rga
+          - path: /dev/rga
+          - path: /dev/mali0
+          - path: /dev/dri/renderD128
+          - path: /dev/dma_heap/system
+          - path: /dev/dma_heap/system-uncached
+
+  - name: npu
     groups:
       - paths:
-          - path: /dev/rga
+          - path: /dev/dri/renderD129
+          - path: /dev/dma_heap/system
+          - path: /dev/dma_heap/system-uncached
+          - path: /dev/rknpu
+        mounts:
+          - hostPath: /sys/firmware/devicetree/base
+            containerPath: /proc/device-tree
+            readOnly: true
+          - hostPath: /sys/class/drm
+            containerPath: /sys/class/drm
+            readOnly: true
+          - hostPath: /sys/devices
+            containerPath: /sys/devices
+            readOnly: true
+          - hostPath: /usr/lib/aarch64-linux-gnu/libmali.so.1.9.0
+            containerPath: /usr/lib/libmali.so
+            readOnly: true
+          - hostPath: /usr/lib/librknnrt.so
+            containerPath: /usr/lib/librknnrt.so
+            readOnly: true
