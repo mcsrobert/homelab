@@ -61,7 +61,7 @@ spec:
                 cpu: 50m
               limits:
                 memory: 2Gi
-            securityContext: &securityContext
+            securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities:
@@ -71,33 +71,43 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          # nodeSelector:
-          #   # TODO: Once I get Talos and the RKNPU working, make this better
-          #   # Probably want to use the generic-device-plugin at that point
-          #   feature.node.kubernetes.io/cpu-model.family: "47"
+          nodeSelector:
+            kubernetes.io/hostname: turingpi-rk1-3
           securityContext:
             runAsUser: 11110
             runAsGroup: 11110
             fsGroup: 11110
+          hostUsers: false
         containers:
           app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: v2.4.1@sha256:b3deefd1826f113824e9d7bc30d905e7f823535887d03f869330946b6db3b44a
+              tag: v2.4.1-rknn
             env:
               !!merge <<: *sharedEnv
-              # TODO: make this work
-              # Right now RKNPU is too old
+              IMMICH_LOG_LEVEL: verbose
               MACHINE_LEARNING_RKNN: "true"
-              MACHINE_LEARNING_RKNN_THREADS: "2"
+              MACHINE_LEARNING_RKNN_THREADS: "3"
             envFrom: *envFrom
             probes: *probes
             resources:
               requests:
                 cpu: 100m
               limits:
-                memory: 2Gi
-            securityContext: *securityContext
+                memory: 4Gi
+                squat.ai/npu: "1"
+            securityContext:
+              supplementalGroups: [44, 105]  # video, render
+              procMount: Unmasked  # need /proc/device-tree/compatible
+              appArmorProfile:
+                type: Unconfined
+              seccompProfile:
+                type: Unconfined
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     persistence:
       upload:
         type: nfs
