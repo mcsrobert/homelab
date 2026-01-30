@@ -41,7 +41,7 @@ spec:
                 IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning:3003
                 DB_URL:
                   secretKeyRef:
-                    name: immich-cnpg-v2-app
+                    name: immich-cnpg-app
                     key: uri
               UPLOAD_LOCATION: &uploadPath /usr/src/app/upload
               REDIS_HOSTNAME: immich-dragonfly

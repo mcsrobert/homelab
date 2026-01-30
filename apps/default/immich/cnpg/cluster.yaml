@@ -3,7 +3,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: immich-cnpg-v2
+  name: immich-cnpg
 spec:
   instances: 1
   imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.0-0.5.3@sha256:267f6cbb32af6e109e138a143c7e9dd5d44d68433ec2303f0c30e745c788d1a9
@@ -14,8 +14,6 @@ spec:
   bootstrap:
     recovery:
       source: garage-backups
-      recoveryTarget:
-        backupID: 20260126T000003
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
@@ -27,7 +25,7 @@ spec:
         name: barman-cloud.cloudnative-pg.io
         parameters:
           barmanObjectName: immich-garage-store
-          serverName: immich-cnpg
+          serverName: immich-cnpg-v2
   postgresql:
     shared_preload_libraries:
       - vchord.so
