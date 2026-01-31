@@ -15,7 +15,6 @@ spec:
   values:
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
@@ -25,6 +24,7 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
+            runAsNonRoot: true
             runAsUser: 11100
             runAsGroup: &nfsGroup 65539
             fsGroup: *nfsGroup
@@ -73,11 +73,11 @@ spec:
         pod:
           nodeSelector:
             kubernetes.io/hostname: turingpi-rk1-3
-          securityContext:
-            runAsUser: 11110
-            runAsGroup: 11110
-            fsGroup: 11110
-          hostUsers: false
+          # securityContext:
+          #   runAsUser: 11110
+          #   runAsGroup: 11110
+          #   fsGroup: 11110
+          # hostUsers: false
         containers:
           app:
             image:
@@ -96,18 +96,27 @@ spec:
               limits:
                 memory: 4Gi
                 squat.ai/npu: "1"
-            securityContext:
-              supplementalGroups: [44, 105]  # video, render
-              procMount: Unmasked  # need /proc/device-tree/compatible
-              appArmorProfile:
-                type: Unconfined
-              seccompProfile:
-                type: Unconfined
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
+            securityContext: {}
+              # TODO: run as non root when kernel supports it
+              # I'm running Rockchip BSP 6.1 currently, which does not support
+              # "procMount: Unmasked", which is needed for /proc/device-tree/compatible
+              # Per the docs: "In practice this means you need at least Linux
+              # 6.3, as tmpfs started supporting idmap mounts in that version.
+              # This is usually needed as several Kubernetes features use tmpfs
+              # (the service account token that is mounted by default uses a
+              # tmpfs, Secrets use a tmpfs, etc.)
+              # ---
+              # supplementalGroups: [44, 105]  # video, render
+              # procMount: Unmasked  # need /proc/device-tree/compatible
+              # appArmorProfile:
+              #   type: Unconfined
+              # seccompProfile:
+              #   type: Unconfined
+              # allowPrivilegeEscalation: false
+              # readOnlyRootFilesystem: true
+              # capabilities:
+              #   drop:
+              #     - ALL
     persistence:
       upload:
         type: nfs
@@ -130,6 +139,24 @@ spec:
                 subPath: config
               - path: /tmp
                 subPath: tmp
+      libmali:
+        type: hostPath
+        hostPath: /usr/lib/aarch64-linux-gnu/libmali.so.1.9.0
+        hostPathType: File
+        advancedMounts:
+          machine-learning:
+            app:
+              - path: /usr/lib/libmali.so
+                readOnly: true
+      librknnrt:
+        type: hostPath
+        hostPath: /usr/lib/librknnrt.so
+        hostPathType: File
+        advancedMounts:
+          machine-learning:
+            app:
+              - path: /usr/lib/librknnrt.so
+                readOnly: true
     service:
       server:
         controller: server
