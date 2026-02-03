@@ -96,7 +96,8 @@ spec:
               limits:
                 memory: 4Gi
                 squat.ai/npu: "1"
-            securityContext: {}
+            securityContext:
+              privileged: true
               # TODO: run as non root when kernel supports it
               # I'm running Rockchip BSP 6.1 currently, which does not support
               # "procMount: Unmasked", which is needed for /proc/device-tree/compatible
