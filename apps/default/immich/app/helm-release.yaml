@@ -77,7 +77,7 @@ spec:
           #   runAsUser: 11110
           #   runAsGroup: 11110
           #   fsGroup: 11110
-          hostUsers: false
+          # hostUsers: false
         containers:
           app:
             image:
@@ -85,7 +85,7 @@ spec:
               tag: v2.5.2-rknn@sha256:97de724aa5da8b4fde1d41af34885bd9858b814a045ac39eb5a64086b90f8a53
             env:
               !!merge <<: *sharedEnv
-              IMMICH_LOG_LEVEL: verbose
+              IMMICH_LOG_LEVEL: info
               MACHINE_LEARNING_RKNN: "true"
               MACHINE_LEARNING_RKNN_THREADS: "3"
             envFrom: *envFrom
@@ -98,7 +98,7 @@ spec:
                 squat.ai/npu: "1"
             securityContext:
               # TODO: run as non root when kernel supports it
-              privileged: false
+              privileged: true
               # I'm running Rockchip BSP 6.1 currently, which does not support
               # "procMount: Unmasked", which is needed for /proc/device-tree/compatible
               # Per the docs: "In practice this means you need at least Linux
@@ -107,16 +107,16 @@ spec:
               # (the service account token that is mounted by default uses a
               # tmpfs, Secrets use a tmpfs, etc.)
               # ---
-              supplementalGroups: [44, 105]  # video, render
-              appArmorProfile:
-                type: Unconfined
-              seccompProfile:
-                type: Unconfined
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                add:
-                  - IPC_LOCK
+              # supplementalGroups: [44, 105]  # video, render
+              # appArmorProfile:
+              #   type: Unconfined
+              # seccompProfile:
+              #   type: Unconfined
+              # allowPrivilegeEscalation: false
+              # readOnlyRootFilesystem: true
+              # capabilities:
+              #   add:
+              #     - IPC_LOCK
     persistence:
       upload:
         type: nfs
