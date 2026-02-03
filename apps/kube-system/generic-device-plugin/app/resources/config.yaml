@@ -15,13 +15,17 @@ devices:
   - name: vpu
     groups:
       - paths:
+          - path: /dev/dma_heap
+          - path: /dev/dri
+          - path: /dev/mali0
           - path: /dev/mpp_service
           - path: /dev/rga
-          - path: /dev/mali0
-          - path: /dev/dri
-          - path: /dev/dma_heap
 
   - name: npu
     groups:
       - paths:
+          - path: /dev/dma_heap
           - path: /dev/dri
+          - path: /dev/mpp_service
+          - path: /dev/rga
+          - path: /dev/rknpu
