@@ -58,7 +58,6 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "3"
-          fsType: "ext4"
           recurringJobSelector: '[{"name": "backup", "isGroup": true}]'
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
