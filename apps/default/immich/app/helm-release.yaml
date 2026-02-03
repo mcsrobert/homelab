@@ -77,7 +77,7 @@ spec:
           #   runAsUser: 11110
           #   runAsGroup: 11110
           #   fsGroup: 11110
-          # hostUsers: false
+          hostUsers: false
         containers:
           app:
             image:
@@ -97,8 +97,8 @@ spec:
                 memory: 4Gi
                 squat.ai/npu: "1"
             securityContext:
-              privileged: true
               # TODO: run as non root when kernel supports it
+              privileged: false
               # I'm running Rockchip BSP 6.1 currently, which does not support
               # "procMount: Unmasked", which is needed for /proc/device-tree/compatible
               # Per the docs: "In practice this means you need at least Linux
@@ -107,17 +107,16 @@ spec:
               # (the service account token that is mounted by default uses a
               # tmpfs, Secrets use a tmpfs, etc.)
               # ---
-              # supplementalGroups: [44, 105]  # video, render
-              # procMount: Unmasked  # need /proc/device-tree/compatible
-              # appArmorProfile:
-              #   type: Unconfined
-              # seccompProfile:
-              #   type: Unconfined
-              # allowPrivilegeEscalation: false
-              # readOnlyRootFilesystem: true
-              # capabilities:
-              #   drop:
-              #     - ALL
+              supplementalGroups: [44, 105]  # video, render
+              appArmorProfile:
+                type: Unconfined
+              seccompProfile:
+                type: Unconfined
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                add:
+                  - IPC_LOCK
     persistence:
       upload:
         type: nfs
@@ -140,23 +139,14 @@ spec:
                 subPath: config
               - path: /tmp
                 subPath: tmp
-      libmali:
+      dt-compatible:
         type: hostPath
-        hostPath: /usr/lib/aarch64-linux-gnu/libmali.so.1.9.0
+        hostPath: /sys/firmware/devicetree/base/compatible
         hostPathType: File
         advancedMounts:
           machine-learning:
             app:
-              - path: /usr/lib/libmali.so
-                readOnly: true
-      librknnrt:
-        type: hostPath
-        hostPath: /usr/lib/librknnrt.so
-        hostPathType: File
-        advancedMounts:
-          machine-learning:
-            app:
-              - path: /usr/lib/librknnrt.so
+              - path: /proc/device-tree/compatible
                 readOnly: true
     service:
       server:
