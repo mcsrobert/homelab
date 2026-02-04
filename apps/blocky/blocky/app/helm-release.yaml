@@ -20,19 +20,26 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: &nobody 65534
-            runAsGroup: *nobody
-            seccompProfile:
-              type: RuntimeDefault
           topologySpreadConstraints:
+            # Ensure we run on both the RPI4 and Turing Pi board
+            - maxSkew: 1
+              topologyKey: feature.node.kubernetes.io/kernel-version.full
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: *app
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: &nobody 65534
+            runAsGroup: *nobody
+            seccompProfile:
+              type: RuntimeDefault
         containers:
           app:
             image:
@@ -63,8 +70,7 @@ spec:
                 drop:
                   - ALL
                 add:
-                  # Required, even when binding port 1053
-                  # Else: exec /app/blocky: operation not permitted
+                  # NOTE: Required, even when binding port 1053 or: exec /app/blocky: operation not permitted
                   - NET_BIND_SERVICE
     persistence:
       config:
