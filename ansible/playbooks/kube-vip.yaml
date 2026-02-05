@@ -1,0 +1,19 @@
+---
+- name: Configure kube-vip
+  hosts: server
+  become: true
+  vars:
+    POD_MANIFEST_DIR: /var/lib/rancher/k3s/agent/pod-manifests
+  tasks:
+
+    - name: Ensure k3s static pod directory exists
+      ansible.builtin.file:
+        path: "{{ POD_MANIFEST_DIR }}"
+        state: directory
+        mode: '0755'
+
+    - name: Generate kube-vip manifest from template
+      ansible.builtin.template:
+        src: ../templates/kube-vip.yaml.j2
+        dest: "{{ POD_MANIFEST_DIR }}/kube-vip.yaml"
+        mode: '0644'

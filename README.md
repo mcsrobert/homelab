@@ -24,17 +24,18 @@ about Kubernetes and GitOps.
 My homelab consists of a small k3s cluster and a NAS for Longhorn backups
 and media.
 
-|  Device | Role | CPU | RAM | Storage | Architecture | OS |
-| ------- | ---- | --- | --- | ------- | ------------ | -- |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | 8 | 16GB | 512GB SSD | ARM64 | Ubuntu |
-| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | k3s Master | 4 | 8GB | 128GB USB | ARM64 | Raspberry Pi OS |
-| Synology DS923+ | NAS | 2 | 4GB | 4x 4TB HDD in RAID5 | x86-64 | DSM |
+|  Device | Role | SoC | CPU | RAM | Storage | Architecture | OS |
+| ------- | ---- | --- | --- | --- | ------- | ------------ | -- |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | Rockchip RK3588 | 4x Cortex-A76 +<br>4x Cortex-A55 | 16GB LPDDR4-4224 | 512GB SSD | ARM64 | Armbian |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | Rockchip RK3588 | 4x Cortex-A76 +<br>4x Cortex-A55 | 16GB LPDDR4-4224 | 512GB SSD | ARM64 | Armbian |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s Master | Rockchip RK3588 | 4x Cortex-A76 +<br>4x Cortex-A55 | 32GB LPDDR4-4224 | 512GB SSD | ARM64 | Armbian |
+| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | k3s Worker | Broadcom BCM2711 | 4x Cortex A72 | 8GB LPDDR4-2400 | 128GB USB | ARM64 | Raspberry Pi OS |
+| Synology DS923+ | NAS | n/a | 2x AMD Ryzen 1600 | 4GB DDR4 ECC | 4x 4TB HDD in RAID5 | x86-64 | DSM |
 
 ## Awknowledgements
 
-Using kubesearch.dev, I've found a lot of other repo's that have helped me
-along the way. Big thanks to:
+Using [kubesearch.dev](https://kubesearch.dev), I've found a lot of other
+repo's that have helped me along the way. Big thanks to:
 
  - [cbirkenbeul/homelab](https://github.com/cbirkenbeul/homelab)
  - [bjw-s/home-ops](https://github.com/bjw-s/home-ops)
