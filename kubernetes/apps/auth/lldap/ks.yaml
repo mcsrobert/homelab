@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: lldap
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: longhorn
+  path: /kubernetes/apps/auth/lldap/app
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  targetNamespace: auth
+  prune: true
+  interval: 15m
+  timeout: 5m
+  wait: true

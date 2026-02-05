@@ -1,0 +1,19 @@
+---
+version: '3'
+
+tasks:
+
+  install_flux:
+    desc: Install Flux and create a secret with the SOPS key
+    dir: '{{.BOOTSTRAP_DIR}}'
+    cmds:
+      - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply --server-side --filename -
+      - '{{if eq .SOPS_SECRET_EXISTS "false"}}kubectl --namespace flux-system create secret generic sops-age --from-file=age.agekey={{.SOPS_AGE_KEY_FILE}}{{end}}'
+      - kubectl apply --server-side --filename {{.CLUSTER_SETTINGS_FILE}}
+      - sops exec-file {{.CLUSTER_SECRETS_FILE}} "kubectl apply --server-side --filename {}"
+      - helmfile --file ./helmfile.yaml apply --skip-diff-on-install --suppress-diff
+    vars:
+      SOPS_SECRET_EXISTS:
+        sh: kubectl --namespace flux-system get secret sops-age &>/dev/null && echo true || echo false
+      CLUSTER_SETTINGS_FILE: '{{.META_DIR}}/settings/cluster-settings.yaml'
+      CLUSTER_SECRETS_FILE: '{{.META_DIR}}/settings/cluster-secrets.sops.yaml'
