@@ -3,7 +3,7 @@ collections:
 
   - name: kubernetes.core
     type: galaxy
-    version: 2.2.0
+    version: 6.3.0
 
   - name: https://github.com/k3s-io/k3s-ansible.git
     type: git
