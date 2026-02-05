@@ -5,23 +5,28 @@ env:
   # KUBECONFIG: '{{.ROOT_DIR}}/kubeconfig'
   SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.agekey'
 
+vars:
+  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
+  BOOTSTRAP_DIR: '{{.KUBERNETES_DIR}}/bootstrap'
+  META_DIR: '{{.KUBERNETES_DIR}}/meta'
+
 includes:
-  bootstrap: bootstrap/
+  bootstrap: 'kubernetes/bootstrap'
 
 
 tasks:
 
   install_deps:
-    desc: Install dependencies with Brew
+    desc: Install Homebrew dependencies
     cmds:
-      - brew install {{.DEPS}} {{.CLI_ARGS}}
+      - brew install {{.BREW_DEPS}}
     preconditions:
       - sh: command -v brew
         msg: |
           Homebrew is not installed. Using MacOS, Linux or WSL?
           Head over to https://brew.sh to get up and running.
     vars:
-      DEPS: >-
+      BREW_DEPS: >-
         age
         fluxcd/tap/flux
         helm
@@ -30,3 +35,10 @@ tasks:
         kubernetes-cli
         kustomize
         sops
+
+  install_helm_diff_plugin:
+    desc: Install Helm diff plugin
+    cmds:
+      - helm plugin install https://github.com/databus23/helm-diff --verify=false
+    preconditions:
+      - helm plugin list | ! egrep -q '^diff\s'
