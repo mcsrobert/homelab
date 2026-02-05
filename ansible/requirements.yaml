@@ -1,0 +1,10 @@
+---
+collections:
+
+  - name: kubernetes.core
+    type: galaxy
+    version: 2.2.0
+
+  - name: https://github.com/k3s-io/k3s-ansible.git
+    type: git
+    version: bc3f66be7b224de78833b6cfbdd92b4adb0219d4
