@@ -70,14 +70,12 @@ spec:
       machine-learning:
         annotations:
           reloader.stakater.com/auto: "true"
-        pod:
-          nodeSelector:
-            kubernetes.io/hostname: turingpi-rk1-3
-          # securityContext:
-          #   runAsUser: 11110
-          #   runAsGroup: 11110
-          #   fsGroup: 11110
-          # hostUsers: false
+        # pod:
+        #   securityContext:
+        #     runAsUser: 11110
+        #     runAsGroup: 11110
+        #     fsGroup: 11110
+        #   hostUsers: false
         containers:
           app:
             image:
