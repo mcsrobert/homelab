@@ -93,7 +93,7 @@ spec:
                 cpu: 100m
               limits:
                 memory: 4Gi
-                squat.ai/npu: "1"
+                squat.ai/npu: 1
             securityContext:
               # TODO: run as non root when kernel supports it
               privileged: true
@@ -124,28 +124,19 @@ spec:
           server:
             app:
               - path: *uploadPath
-      tmpfs:
-        type: emptyDir
-        advancedMounts:
-          machine-learning:
-            app:
-              - path: /cache
-                subPath: cache
-              - path: /.cache
-                subPath: internal-cache
-              - path: /.config
-                subPath: config
-              - path: /tmp
-                subPath: tmp
-      dt-compatible:
-        type: hostPath
-        hostPath: /sys/firmware/devicetree/base/compatible
-        hostPathType: File
-        advancedMounts:
-          machine-learning:
-            app:
-              - path: /proc/device-tree/compatible
-                readOnly: true
+      # tmpfs:
+      #   type: emptyDir
+      #   advancedMounts:
+      #     machine-learning:
+      #       app:
+      #         - path: /cache
+      #           subPath: cache
+      #         - path: /.cache
+      #           subPath: internal-cache
+      #         - path: /.config
+      #           subPath: config
+      #         - path: /tmp
+      #           subPath: tmp
     service:
       server:
         controller: server
