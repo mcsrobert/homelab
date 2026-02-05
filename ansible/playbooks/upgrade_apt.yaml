@@ -1,0 +1,56 @@
+---
+- name: Upgrade host packages
+  hosts: k3s_cluster
+  become: true
+  serial: 1
+  environment:
+    K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+  tasks:
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+        autoremove: yes
+        autoclean: yes
+      register: apt_result
+
+    - name: Check if a reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required_file
+
+    - name: Reboot when required
+      block:
+
+        - name: Drain node before reboot
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            state: drain
+            delete_options:
+              delete_emptydir_data: true
+              ignore_daemonsets: true
+              force: true
+              terminate_grace_period: 60
+              wait_timeout: 300
+              wait_sleep: 15
+            pod_selectors:
+              - app!=csi-attacher
+              - app!=csi-provisioner
+              - longhorn.io/component!=instance-manager
+
+        - name: Reboot node for kernel updates
+          ansible.builtin.reboot:
+            msg: Reboot initiated by Ansible after package upgrades
+            connect_timeout: 5
+            reboot_timeout: 600
+            pre_reboot_delay: 0
+            post_reboot_delay: 30
+
+        - name: Uncordon node after reboot
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            state: uncordon
+
+      when: reboot_required_file.stat.exists

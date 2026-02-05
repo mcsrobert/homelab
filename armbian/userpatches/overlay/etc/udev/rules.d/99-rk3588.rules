@@ -1,0 +1,7 @@
+SUBSYSTEM=="dma_heap", MODE="0660", GROUP="video"
+KERNEL=="card*", MODE="0660", GROUP="video"
+KERNEL=="renderD*", MODE="0660", GROUP="render"
+KERNEL=="renderD129", SUBSYSTEM=="drm", SYMLINK+="rknpu", MODE="0660", GROUP="render"
+KERNEL=="rga", MODE="0660", GROUP="video"
+KERNEL=="mali0", MODE="0660", GROUP="video"
+KERNEL=="mpp_service", MODE="0660", GROUP="video"

@@ -1,0 +1,42 @@
+---
+k3s_cluster:
+  children:
+    server:
+      hosts:
+        turingpi-rk1-1:
+          ansible_host: 192.168.178.31
+          ansible_user: armbian
+        turingpi-rk1-2:
+          ansible_host: 192.168.178.32
+          ansible_user: armbian
+        turingpi-rk1-3:
+          ansible_host: 192.168.178.33
+          ansible_user: armbian
+    agent:
+      hosts:
+        raspberrypi:
+          ansible_host: 192.168.178.10
+          ansible_user: maurice
+
+  vars:
+    ansible_port: 22
+    k3s_version: v1.34.3+k3s1
+    api_endpoint: 192.168.178.40
+
+    # Optional vars
+    cluster_context: homelab
+    api_port: 6443
+
+    server_config_yaml: |
+      write-kubeconfig-mode: 600
+      embedded-registry: true
+      disable:
+        - servicelb
+        - traefik
+        - local-storage
+      flannel-backend: wireguard-native
+      flannel-ipv6-masq: true
+      cluster-cidr: 10.42.0.0/16,fda7:435:42::/108
+      service-cidr: 10.43.0.0/16,fda7:435:43::/112
+      kube-controller-manager-arg:
+        - node-cidr-mask-size-ipv6=112

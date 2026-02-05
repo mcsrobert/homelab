@@ -1,0 +1,54 @@
+---
+- name: Install RK3588 drivers
+  hosts: server
+  become: true
+  vars:
+    rknn_version: v2.3.2
+    mali_version: v1.9-1-20260121-6167409
+    mpp_version: v1.5.0-1-20260121-750e76e
+    rga_version: v2.2.0-1-20260121-2cffdf6
+
+  handlers:
+
+    - name: Refresh library cache
+      ansible.builtin.command: ldconfig
+
+    - name: Reload udev
+      ansible.builtin.shell: udevadm control --reload-rules && udevadm trigger
+
+  tasks:
+
+    - name: Install RKNN runtime library
+      ansible.builtin.get_url:
+        url: https://github.com/airockchip/rknn-toolkit2/raw/refs/tags/{{ rknn_version }}/rknpu2/runtime/Linux/librknn_api/aarch64/librknnrt.so
+        dest: /usr/lib/librknnrt.so
+        mode: '0755'
+        owner: root
+        group: root
+      notify: Refresh library cache
+
+    # - name: Install Mali G610 driver
+    #   ansible.builtin.apt:
+    #     deb: https://github.com/tsukumijima/libmali-rockchip/releases/download/{{ mali_version }}/libmali-valhall-g610-g24p0-gbm_1.9-1_arm64.deb
+    #   notify: Refresh library cache
+
+    # - name: Install MPP driver
+    #   ansible.builtin.apt:
+    #     deb: https://github.com/tsukumijima/mpp-rockchip/releases/download/{{ mpp_version }}/librockchip-mpp1_1.5.0-1_arm64.deb
+    #   notify: Refresh library cache
+
+    # - name: Install VPU driver
+    #   ansible.builtin.apt:
+    #     deb: https://github.com/tsukumijima/mpp-rockchip/releases/download/{{ mpp_version }}/librockchip-vpu0_1.5.0-1_arm64.deb
+    #   notify: Refresh library cache
+
+    # - name: Install RGA driver
+    #   ansible.builtin.apt:
+    #     deb: https://github.com/tsukumijima/librga-rockchip/releases/download/{{ rga_version }}/librga2_2.2.0-1_arm64.deb
+    #   notify: Refresh library cache
+
+    - name: Configure udev rules for NPU and GPU permissions
+      ansible.builtin.copy:
+        src: ../../armbian/userpatches/overlay/etc/udev/rules.d/99-rk3588.rules
+        dest: /etc/udev/rules.d/99-rk3588.rules
+      notify: Reload udev
