@@ -3,9 +3,13 @@
   hosts: server
   become: true
   vars:
+    # renovate: datasource=git-tags depName=https://github.com/airockchip/rknn-toolkit2
     rknn_version: v2.3.2
+    # renovate: datasource=git-tags depName=https://github.com/tsukumijima/libmali-rockchip
     mali_version: v1.9-1-20260121-6167409
+    # renovate: datasource=git-tags depName=https://github.com/tsukumijima/mpp-rockchip
     mpp_version: v1.5.0-1-20260121-750e76e
+    # renovate: datasource=git-tags depName=https://github.com/tsukumijima/librga-rockchip
     rga_version: v2.2.0-1-20260121-2cffdf6
 
   handlers:
