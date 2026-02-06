@@ -1,0 +1,29 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "packageRules": [
+    {
+      "groupName": "Flux",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["flux-operator", "flux-instance"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      }
+    },
+    {
+      "groupName": "Immich",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["immich-"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      }
+    },
+    {
+      "groupName": "Plugin Barman Cloud",
+      "matchDatasources": ["docker", "helm"],
+      "matchPackageNames": ["plugin-barman-cloud"],
+      "group": {
+        "commitMessageTopic": "{{{groupName}}} group"
+      }
+    }
+  ]
+}

@@ -7,7 +7,7 @@ repos:
       - id: yamllint
         args:
           - --config-file
-          - .github/lint/.yamllint.yaml
+          - .yamllint.yaml
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -27,3 +27,9 @@ repos:
     rev: v2.1.1
     hooks:
       - id: forbid-secrets
+
+  - repo: https://github.com/renovatebot/pre-commit-hooks
+    rev: 43.4.0
+    hooks:
+      - id: renovate-config-validator
+        files: 'renovate(rc|/.+)?\.json5?$'
