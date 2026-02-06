@@ -19,18 +19,32 @@
       "description": ["Update YAML schema for HelmReleases with app-template chart"],
       "customType": "regex",
       "datasourceTemplate": "docker",
-      "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
-      "managerFilePatterns": ["/(^|/)helm-?release.*\\.ya?ml$/"],
+      "managerFilePatterns": ["(^|/)helm-?release.*\\.ya?ml$"],
       "matchStrings": ["bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "ghcr.io/bjw-s-labs/helm/app-template",
       "versioningTemplate": "semver"
     },
     {
-      "description": ["CloudnativePG Postgresql version"],
+      "description": "Process annotated dependencies",
       "customType": "regex",
-      "datasourceTemplate": "docker",
-      "managerFilePatterns": ["/\\.yaml$/"],
-      "matchStrings": ["imageName: (?<depName>\\S+):(?<currentValue>.*\\-.*)"],
-      "versioningTemplate": "redhat"
+      "managerFilePatterns": [
+        "(^|/).+\\.env$",
+        "(^|/).+\\.sh$",
+        "(^|/).+\\.ya?ml(\\.j2)?$"
+      ],
+      "matchStrings": [
+        // # renovate: datasource=github-releases depName=k3s-io/k3s
+        // k3s_release_version: &version v1.29.0+k3s1
+        // # renovate: datasource=helm depName=cilium repository=https://helm.cilium.io
+        // version: 1.15.1
+        // # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+        // KUBERNETES_VERSION=v1.31.1
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+(:\\s|=)(&\\S+\\s)?(?<currentValue>\\S+)",
+        // # renovate: datasource=docker depName=ghcr.io/prometheus-operator/prometheus-operator
+        // https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.80.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>(v|\\d)[^/]+)"
+      ],
+      "datasourceTemplate": "{{#if datasource}}{{{datasource}}}{{else}}github-releases{{/if}}"
     }
   ],
   "packageRules": [
@@ -46,12 +60,12 @@
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"
       },
-      "matchPackageNames": ["/flux-operator/", "/flux-instance/"]
+      "matchPackageNames": ["flux-operator", "flux-instance"]
     },
     {
       "groupName": "Immich",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["/immich-/"],
+      "matchPackageNames": ["immich-"],
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"
       }
@@ -59,7 +73,7 @@
     {
       "groupName": "Plugin Barman Cloud",
       "matchDatasources": ["docker", "helm"],
-      "matchPackageNames": ["/plugin-barman-cloud/"],
+      "matchPackageNames": ["plugin-barman-cloud"],
       "group": {
         "commitMessageTopic": "{{{groupName}}} group"
       }

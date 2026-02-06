@@ -34,7 +34,8 @@
         line: "127.0.1.1 {{ inventory_hostname }}"
       when: hostname_changed.changed
 
-    - name: Install dependencies for k3s and Longhorn
+    # NOTE: k3s deps are installed by k3s_ansible
+    - name: Install dependencies for Longhorn
       ansible.builtin.apt:
         name:
           - open-iscsi
@@ -62,7 +63,8 @@
         mode: '0644'
       notify: Update initramfs
 
-    - name: Check if multipathd is running and disable it
+    # See: https://longhorn.io/kb/troubleshooting-volume-with-multipath/
+    - name: Check if multipathd is running and disable it for Longhorn
       block:
 
         - name: Check if multipathd service exists
