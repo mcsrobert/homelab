@@ -11,7 +11,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/requirements\\.ya?ml$/"],
       "matchStrings": [
-        "- name: (?<packageName>https://github\\.com/(?<depName>[a-z0-9-]+/[a-z0-9-]+))(\\.git)?(\\s+type: git)?\\s+version: (?<currentValue>.+)"
+        "- name: https://github\\.com/(?<depName>[\\S+]+/[\\S]+)(\\.git)?(\\s+type: git)?\\s+version: (?<currentValue>.+)"
       ],
       "datasourceTemplate": "github-tags"
     },
@@ -20,7 +20,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/requirements\\.ya?ml$/"],
       "matchStrings": [
-        "- name: (?<depName>[a-z0-9._]+)(\\s+type: galaxy)?\\s+version: (?<currentValue>.+)"
+        "- name: (?<depName>\\S+)(\\s+type: galaxy)?\\s+version: (?<currentValue>.+)"
       ],
       "datasourceTemplate": "galaxy-collection",
       "versioningTemplate": "semver"
