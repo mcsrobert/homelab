@@ -19,8 +19,9 @@
         "/\\.ya?ml(\\.j2)?$/"
       ],
       "matchStrings": [
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\n.+ (?<currentValue>\\S+)$"
-      ]
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.* (?<currentValue>\\S+)$"
+      ],
+      "versioningTemplate": "semver"
     }
   ]
 }
