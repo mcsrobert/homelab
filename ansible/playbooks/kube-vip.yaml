@@ -2,6 +2,7 @@
 - name: Configure kube-vip
   hosts: server
   become: true
+  serial: 1
   vars:
     POD_MANIFEST_DIR: /var/lib/rancher/k3s/agent/pod-manifests
   tasks:
