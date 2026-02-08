@@ -18,3 +18,10 @@
         src: ../templates/kube-vip.yaml.j2
         dest: "{{ POD_MANIFEST_DIR }}/kube-vip.yaml"
         mode: '0644'
+
+    - name: Wait the node to come back online
+      ansible.builtin.wait_for:
+        port: 6443
+        state: started
+        delay: 10
+        timeout: 300
