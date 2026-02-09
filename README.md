@@ -1,8 +1,8 @@
 # Homelab
 
-This is my Kubernetes-based homelab, managed with FluxCD, Ansible and Renovate.
+My Kubernetes-based homelab, managed with FluxCD, Ansible and Renovate.
 
-My goal is to run various self hosted apps I use (smart-home, media,
+The goal is to run various self hosted apps I use (smart-home, media,
 password/document managers, etc.) on a low power Kubernetes cluster and
 follow best practices. I aim to deliver stable, fast and secure services,
 while continuing to learn about Kubernetes and GitOps.

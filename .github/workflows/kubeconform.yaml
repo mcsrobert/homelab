@@ -1,0 +1,21 @@
+name: kubeconform
+on: push
+jobs:
+  kubeconform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
+        with:
+          entrypoint: /kubeconform
+          args: >-
+            -output json
+            -summary
+            -schema-location default
+            -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json
+            -schema-location https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/{{.ResourceKind}}.json
+            -ignore-filename-pattern resources/
+            -ignore-filename-pattern helmfile\.ya?ml
+            -ignore-filename-pattern helm-values\.ya?ml
+            -ignore-filename-pattern transformer-config\.ya?ml
+            kubernetes/
