@@ -8,11 +8,11 @@ metadata:
 spec:
   dependsOn:
     - name: external-secrets-stores
-  path: /kubernetes/apps/tailscale/tailscale-operator/app
+  path: /kubernetes/apps/network/tailscale-operator/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: tailscale
+  targetNamespace: network
   prune: true
   interval: 30m
   timeout: 5m
@@ -27,11 +27,11 @@ metadata:
 spec:
   dependsOn:
     - name: tailscale-operator
-  path: /kubernetes/apps/tailscale/tailscale-operator/router
+  path: /kubernetes/apps/network/tailscale-operator/router
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: tailscale
+  targetNamespace: network
   prune: true
   interval: 30m
   timeout: 5m
