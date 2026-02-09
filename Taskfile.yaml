@@ -7,14 +7,15 @@ env:
 
 vars:
   KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
-  BOOTSTRAP_DIR: '{{.KUBERNETES_DIR}}/bootstrap'
-  META_DIR: '{{.KUBERNETES_DIR}}/meta'
-
-includes:
-  bootstrap: 'kubernetes/bootstrap'
-
 
 tasks:
+
+  default:
+    desc: Setup workspace
+    cmds:
+      - task: install_deps
+      - task: install_helm_diff_plugin
+      - pre-commit install
 
   install_deps:
     desc: Install Homebrew dependencies
@@ -29,16 +30,42 @@ tasks:
       BREW_DEPS: >-
         age
         fluxcd/tap/flux
+        git
         helm
         helmfile
         kubectl-cnpg
         kubernetes-cli
         kustomize
         sops
+        pre-commit
 
   install_helm_diff_plugin:
     desc: Install Helm diff plugin
     cmds:
-      - helm plugin install https://github.com/databus23/helm-diff --verify=false
+      - |
+          if ! helm plugin list | grep -q '^diff\s'; then
+            helm plugin install https://github.com/databus23/helm-diff --verify=false
+          else
+            helm plugin update diff
+          fi
+
+  bootstrap_flux:
+    desc: Install Flux and create a secret with the SOPS key
+    dir: '{{.KUBERNETES_DIR}}/bootstrap'
+    cmds:
+      - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply --server-side --filename -
+      - |
+          if ! kubectl get secret sops-age --namespace flux-system; then
+            kubectl create secret generic sops-age --namespace flux-system --from-file=age.agekey={{.SOPS_AGE_KEY_FILE}}
+          fi
+      - kubectl apply --server-side --filename {{.CLUSTER_SETTINGS_FILE}}
+      - sops exec-file {{.CLUSTER_SECRETS_FILE}} "kubectl apply --server-side --filename {}"
+      - helmfile --file ./helmfile.yaml apply --skip-diff-on-install --suppress-diff
     preconditions:
-      - helm plugin list | ! egrep -q '^diff\s'
+      - test -f {{.SOPS_AGE_KEY_FILE}}
+      - test -f {{.CLUSTER_SETTINGS_FILE}}
+      - test -f {{.CLUSTER_SECRETS_FILE}}
+    vars:
+      SETTINGS_DIR: '{{.KUBERNETES_DIR}}/meta/settings'
+      CLUSTER_SETTINGS_FILE: '{{.SETTINGS_DIR}}/cluster-settings.yaml'
+      CLUSTER_SECRETS_FILE: '{{.SETTINGS_DIR}}/cluster-secrets.sops.yaml'
