@@ -56,15 +56,15 @@ tasks:
       - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply --server-side --filename -
       - |
           if ! kubectl get secret sops-age --namespace flux-system; then
-            kubectl create secret generic sops-age --namespace flux-system --from-file=age.agekey={{.SOPS_AGE_KEY_FILE}}
+            kubectl create secret generic sops-age --namespace flux-system --from-file=age.agekey="{{.SOPS_AGE_KEY_FILE}}"
           fi
-      - kubectl apply --server-side --filename {{.CLUSTER_SETTINGS_FILE}}
-      - sops exec-file {{.CLUSTER_SECRETS_FILE}} "kubectl apply --server-side --filename {}"
+      - kubectl apply --server-side --filename "{{.CLUSTER_SETTINGS_FILE}}"
+      - sops exec-file "{{.CLUSTER_SECRETS_FILE}}" "kubectl apply --server-side --filename {}"
       - helmfile --file ./helmfile.yaml apply --skip-diff-on-install --suppress-diff
     preconditions:
-      - test -f {{.SOPS_AGE_KEY_FILE}}
-      - test -f {{.CLUSTER_SETTINGS_FILE}}
-      - test -f {{.CLUSTER_SECRETS_FILE}}
+      - test -f "{{.SOPS_AGE_KEY_FILE}}"
+      - test -f "{{.CLUSTER_SETTINGS_FILE}}"
+      - test -f "{{.CLUSTER_SECRETS_FILE}}"
     vars:
       SETTINGS_DIR: '{{.KUBERNETES_DIR}}/meta/settings'
       CLUSTER_SETTINGS_FILE: '{{.SETTINGS_DIR}}/cluster-settings.yaml'
