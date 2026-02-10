@@ -41,13 +41,13 @@
           - open-iscsi
           - nfs-common
         state: present
-        update_cache: yes
+        update_cache: true
 
     - name: Enable and start iscsid service
       ansible.builtin.service:
         name: iscsid
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Load dm_crypt module
       community.general.modprobe:
@@ -77,8 +77,8 @@
           ansible.builtin.systemd:
             name: multipathd
             state: stopped
-            enabled: no
-            masked: yes
+            enabled: false
+            masked: true
           when: "'multipathd.service' in multipathd_check.stdout"
 
     - name: Harden SSH Configuration

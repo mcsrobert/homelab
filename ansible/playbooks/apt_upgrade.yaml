@@ -11,9 +11,9 @@
     - name: Upgrade all packages
       ansible.builtin.apt:
         upgrade: dist
-        update_cache: yes
-        autoremove: yes
-        autoclean: yes
+        update_cache: true
+        autoremove: true
+        autoclean: true
       register: apt_result
 
     - name: Check if a reboot is required
