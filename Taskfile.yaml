@@ -51,7 +51,6 @@ tasks:
 
   bootstrap_flux:
     desc: Install Flux and create a secret with the SOPS key
-    dir: '{{.KUBERNETES_DIR}}/bootstrap'
     cmds:
       - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply --server-side --filename -
       - |
@@ -60,12 +59,12 @@ tasks:
           fi
       - kubectl apply --server-side --filename "{{.CLUSTER_SETTINGS_FILE}}"
       - sops exec-file "{{.CLUSTER_SECRETS_FILE}}" "kubectl apply --server-side --filename {}"
-      - helmfile --file ./helmfile.yaml apply --skip-diff-on-install --suppress-diff
+      - helmfile --file "{{.HELMFILE_FILE}}" apply --skip-diff-on-install --suppress-diff
     preconditions:
       - test -f "{{.SOPS_AGE_KEY_FILE}}"
       - test -f "{{.CLUSTER_SETTINGS_FILE}}"
       - test -f "{{.CLUSTER_SECRETS_FILE}}"
     vars:
-      SETTINGS_DIR: '{{.KUBERNETES_DIR}}/meta/settings'
-      CLUSTER_SETTINGS_FILE: '{{.SETTINGS_DIR}}/cluster-settings.yaml'
-      CLUSTER_SECRETS_FILE: '{{.SETTINGS_DIR}}/cluster-secrets.sops.yaml'
+      HELMFILE_FILE: '{{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml'
+      CLUSTER_SETTINGS_FILE: '{{.KUBERNETES_DIR}}/meta/settings/cluster-settings.yaml'
+      CLUSTER_SECRETS_FILE: '{{.KUBERNETES_DIR}}/meta/settings/cluster-secrets.sops.yaml'
