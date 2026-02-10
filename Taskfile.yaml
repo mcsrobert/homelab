@@ -1,12 +1,12 @@
 ---
-version: '3'
+version: "3"
 
 env:
   # KUBECONFIG: '{{.ROOT_DIR}}/kubeconfig'
-  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.agekey'
+  SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.agekey"
 
 vars:
-  KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
+  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
 
 tasks:
 
@@ -43,20 +43,20 @@ tasks:
     desc: Install or upgrade Helm diff plugin
     cmds:
       - |
-          if ! helm plugin list | grep -q '^diff\s'; then
-            helm plugin install https://github.com/databus23/helm-diff --verify=false
-          else
-            helm plugin update diff
-          fi
+        if ! helm plugin list | grep -q '^diff\s'; then
+          helm plugin install https://github.com/databus23/helm-diff --verify=false
+        else
+          helm plugin update diff
+        fi
 
   bootstrap_flux:
     desc: Install Flux and create a secret with the SOPS key
     cmds:
       - kubectl create namespace flux-system --dry-run=client -o yaml | kubectl apply --server-side --filename -
       - |
-          if ! kubectl get secret sops-age --namespace flux-system; then
-            kubectl create secret generic sops-age --namespace flux-system --from-file=age.agekey="{{.SOPS_AGE_KEY_FILE}}"
-          fi
+        if ! kubectl get secret sops-age --namespace flux-system; then
+          kubectl create secret generic sops-age --namespace flux-system --from-file=age.agekey="{{.SOPS_AGE_KEY_FILE}}"
+        fi
       - kubectl apply --server-side --filename "{{.CLUSTER_SETTINGS_FILE}}"
       - sops exec-file "{{.CLUSTER_SECRETS_FILE}}" "kubectl apply --server-side --filename {}"
       - helmfile --file "{{.HELMFILE_FILE}}" apply --skip-diff-on-install --suppress-diff
@@ -65,6 +65,6 @@ tasks:
       - test -f "{{.CLUSTER_SETTINGS_FILE}}"
       - test -f "{{.CLUSTER_SECRETS_FILE}}"
     vars:
-      HELMFILE_FILE: '{{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml'
-      CLUSTER_SETTINGS_FILE: '{{.KUBERNETES_DIR}}/meta/settings/cluster-settings.yaml'
-      CLUSTER_SECRETS_FILE: '{{.KUBERNETES_DIR}}/meta/settings/cluster-secrets.sops.yaml'
+      HELMFILE_FILE: "{{.KUBERNETES_DIR}}/bootstrap/helmfile.yaml"
+      CLUSTER_SETTINGS_FILE: "{{.KUBERNETES_DIR}}/meta/settings/cluster-settings.yaml"
+      CLUSTER_SECRETS_FILE: "{{.KUBERNETES_DIR}}/meta/settings/cluster-secrets.sops.yaml"

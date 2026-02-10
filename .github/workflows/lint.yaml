@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: lint
 on: push
 jobs:
@@ -7,14 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - run: pip install yamllint
-      - run: yamllint .
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Run yamllint
+        run: yamllint .
 
   kubeconform:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
+      - name: Run kubeconform
+        uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
         with:
           entrypoint: /kubeconform
           args: >-
@@ -28,3 +32,12 @@ jobs:
             -ignore-filename-pattern helm-values\.ya?ml
             -ignore-filename-pattern transformer-config\.ya?ml
             kubernetes/
+
+  ansible-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@v26.1.1
+        with:
+          requirements_file: requirements.yaml

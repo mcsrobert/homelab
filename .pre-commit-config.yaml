@@ -1,11 +1,5 @@
 ---
 repos:
-
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.38.0
-    hooks:
-      - id: yamllint
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -20,13 +14,23 @@ repos:
       - id: fix-spaces
       - id: fix-unicode-dashes
 
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+
   - repo: https://github.com/k8s-at-home/sops-pre-commit
     rev: v2.1.1
     hooks:
       - id: forbid-secrets
 
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v26.1.1
+    hooks:
+      - id: ansible-lint
+
   - repo: https://github.com/renovatebot/pre-commit-hooks
     rev: 43.5.4
     hooks:
       - id: renovate-config-validator
-        files: 'renovate(rc|/.+)?\.json5?$'
+        files: "renovate(rc|/.+)?\\.json5?$"

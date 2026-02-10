@@ -14,3 +14,6 @@ kubeconfig
 
 # Armbian
 .not_logged_in_yet
+
+# Ansible
+.ansible/.lock

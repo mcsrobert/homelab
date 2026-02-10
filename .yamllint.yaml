@@ -6,11 +6,15 @@ rules:
   indentation: enable
   line-length: disable
   truthy: {}
+  comments-indentation: disable
   comments:
-    min-spaces-from-content: 2
+    min-spaces-from-content: 1
   braces:
     min-spaces-inside: 0
     max-spaces-inside: 1
   brackets:
     min-spaces-inside: 0
     max-spaces-inside: 0
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true

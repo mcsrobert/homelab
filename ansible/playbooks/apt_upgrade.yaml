@@ -7,7 +7,6 @@
     K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
   tasks:
-
     - name: Upgrade all packages
       ansible.builtin.apt:
         upgrade: dist
@@ -22,8 +21,8 @@
       register: reboot_required_file
 
     - name: Reboot when required
+      when: reboot_required_file.stat.exists
       block:
-
         - name: Drain node before reboot
           kubernetes.core.k8s_drain:
             name: "{{ inventory_hostname }}"
@@ -52,5 +51,3 @@
           kubernetes.core.k8s_drain:
             name: "{{ inventory_hostname }}"
             state: uncordon
-
-      when: reboot_required_file.stat.exists

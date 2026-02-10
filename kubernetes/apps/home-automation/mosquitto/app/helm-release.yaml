@@ -61,7 +61,7 @@ spec:
       passwd:
         type: secret
         name: mosquitto-passwd
-        defaultMode: 0700
+        defaultMode: 256 # 0400
         globalMounts:
           - path: /mosquitto/config/passwd
             subPath: passwd

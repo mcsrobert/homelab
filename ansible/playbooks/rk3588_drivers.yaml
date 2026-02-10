@@ -1,6 +1,7 @@
 ---
 - name: Install RK3588 drivers
   hosts: server
+  gather_facts: false
   become: true
   vars:
     # renovate: datasource=github-releases depName=airockchip/rknn-toolkit2
@@ -13,22 +14,22 @@
     rga_version: v2.2.0-1-20260121-2cffdf6
 
   handlers:
-
     - name: Refresh library cache
       ansible.builtin.command: ldconfig
+      changed_when: true
 
     - name: Reload udev
       ansible.builtin.shell: udevadm control --reload-rules && udevadm trigger
+      changed_when: true
 
   tasks:
-
     - name: Install RKNN runtime library
       ansible.builtin.get_url:
         url: https://github.com/airockchip/rknn-toolkit2/raw/refs/tags/{{ rknn_version }}/rknpu2/runtime/Linux/librknn_api/aarch64/librknnrt.so
         dest: /usr/lib/librknnrt.so
-        mode: '0755'
         owner: root
         group: root
+        mode: "0755"
       notify: Refresh library cache
 
     # - name: Install Mali G610 driver
@@ -55,4 +56,7 @@
       ansible.builtin.copy:
         src: ../../armbian/userpatches/overlay/etc/udev/rules.d/99-rk3588.rules
         dest: /etc/udev/rules.d/99-rk3588.rules
+        owner: root
+        group: root
+        mode: "0644"
       notify: Reload udev

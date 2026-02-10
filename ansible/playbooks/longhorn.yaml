@@ -1,0 +1,55 @@
+---
+- name: Prepare k3s_cluster for Longhorn
+  hosts: k3s_cluster
+  become: true
+  gather_facts: false
+
+  handlers:
+
+    - name: Update initramfs
+      ansible.builtin.command: update-initramfs -u
+      changed_when: true
+
+  tasks:
+
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name:
+          # https://longhorn.io/docs/1.11.0/deploy/install/#installation-requirements
+          - open-iscsi
+          # https://longhorn.io/docs/1.11.0/deploy/install/#installing-nfsv4-client
+          - nfs-common
+        state: present
+        update_cache: true
+
+    - name: Enable and start iscsid service
+      ansible.builtin.service:
+        name: iscsid
+        state: started
+        enabled: true
+
+    - name: Load dm_crypt module
+      community.general.modprobe:
+        name: dm_crypt
+        state: present
+
+    - name: Ensure dm_crypt persists on reboot
+      ansible.builtin.copy:
+        content: "dm_crypt\n"
+        dest: /etc/modules-load.d/dm_crypt.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Update initramfs
+
+    # See: https://longhorn.io/kb/troubleshooting-volume-with-multipath/
+    - name: Disable and mask multipathd
+      ansible.builtin.systemd:
+        name: multipathd
+        state: stopped
+        enabled: false
+        masked: true
+      when: "'multipathd.service' in ansible_facts.services"
