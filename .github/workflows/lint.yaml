@@ -26,14 +26,14 @@ jobs:
           list-files: shell
           filters: |
             ansible:
-              - 'ansible/**'
+              - added|modified: 'ansible/**'
             kubernetes:
-              - 'kubernetes/**'
+              - added|modified: 'kubernetes/**'
             markdown:
-              - '**/*.md'
+              - added|modified: '**/*.md'
             yaml:
-              - '**/*.yaml'
-              - '**/*.yml'
+              - added|modified: '**/*.yaml'
+              - added|modified: '**/*.yml'
 
   ansible-lint:
     needs: changes
