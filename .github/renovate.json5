@@ -1,0 +1,23 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'github>mcsrobert/renovate-config',
+    'github>mcsrobert/homelab//.github/renovate/ansible-galaxy.json5',
+    'github>mcsrobert/homelab//.github/renovate/custom-managers.json5',
+    'github>mcsrobert/homelab//.github/renovate/groups.json5',
+  ],
+  flux: {
+    managerFilePatterns: ['/\\.ya?ml$/'],
+  },
+  'helm-values': {
+    managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/'],
+  },
+  packageRules: [
+    {
+      description: 'Pin docker images from helm-values',
+      matchManagers: ['helm-values'],
+      matchDatasources: ['docker'],
+      pinDigests: true,
+    }
+  ]
+}
