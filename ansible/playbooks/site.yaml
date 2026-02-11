@@ -1,0 +1,15 @@
+---
+- name: Configure k3s_cluster
+  import_playbook: ./configure.yaml
+
+- name: Prepare k3s_cluster for Longhorn
+  import_playbook: ./longhorn.yaml
+
+- name: Install RK3588 drivers
+  import_playbook: ./rk3588_drivers.yaml
+
+- name: Configure kube-vip
+  import_playbook: ./kube-vip.yaml
+
+- name: Install k3s
+  import_playbook: k3s.orchestration.site
