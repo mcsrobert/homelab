@@ -14,19 +14,15 @@ repos:
       - id: fix-spaces
       - id: fix-unicode-dashes
 
+  - repo: https://github.com/k8s-at-home/sops-pre-commit
+    rev: v2.1.1
+    hooks:
+      - id: forbid-secrets
+
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:
       - id: yamllint
-
-  # See: https://github.com/ansible/ansible-lint/discussions/1256
-  - repo: https://github.com/ansible/ansible-lint
-    rev: v26.1.1
-    hooks:
-      - id: ansible-lint
-        args:
-          - ansible/
-        stages: [pre-push, manual]
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.10
@@ -38,13 +34,17 @@ repos:
     hooks:
       - id: markdownlint-cli2
 
-  - repo: https://github.com/k8s-at-home/sops-pre-commit
-    rev: v2.1.1
-    hooks:
-      - id: forbid-secrets
-
   - repo: https://github.com/renovatebot/pre-commit-hooks
     rev: 43.8.2
     hooks:
       - id: renovate-config-validator
         files: "renovate(rc|/.+)?\\.json5?$"
+
+  # See: https://github.com/ansible/ansible-lint/discussions/1256
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v26.1.1
+    hooks:
+      - id: ansible-lint
+        args:
+          - ansible/
+        stages: [pre-push, manual]
