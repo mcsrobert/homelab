@@ -14,6 +14,8 @@ jobs:
       ansible: ${{ steps.filter.outputs.ansible }}
       kubernetes: ${{ steps.filter.outputs.kubernetes }}
       kubernetes_files: ${{ steps.filter.outputs.kubernetes_files }}
+      markdown: ${{ steps.filter.outputs.markdown }}
+      markdown_files: ${{ steps.filter.outputs.markdown_files }}
       yaml: ${{ steps.filter.outputs.yaml }}
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
     steps:
@@ -27,6 +29,8 @@ jobs:
               - 'ansible/**'
             kubernetes:
               - 'kubernetes/**'
+            markdown:
+              - '**/*.md'
             yaml:
               - '**/*.yaml'
               - '**/*.yml'
@@ -37,7 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: ansible/ansible-lint@v26.1.1
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@v26.1.1
         with:
           requirements_file: requirements.yaml
 
@@ -47,7 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
+      - name: Run kubeconform
+        uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
         with:
           entrypoint: /kubeconform
           args: >-
@@ -62,11 +68,24 @@ jobs:
             -ignore-filename-pattern transformer-config\.ya?ml
             ${{ needs.changes.outputs.kubernetes_files }}
 
+  markdownlint:
+    needs: changes
+    if: ${{ needs.changes.outputs.markdown == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: DavidAnson/markdownlint-cli2-action@v22
+        with:
+          globs: '${{ needs.changes.outputs.markdown_files }}'
+          separator: ' '
+
   yamllint:
     needs: changes
     if: ${{ needs.changes.outputs.yaml == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - run: pip install yamllint
-      - run: yamllint ${{ needs.changes.outputs.yaml_files }}
+      - name: Install yamllint
+        run: pip install yamllint
+      - name: Run yamllint
+        run: yamllint ${{ needs.changes.outputs.yaml_files }}
