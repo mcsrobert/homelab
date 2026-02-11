@@ -4,19 +4,13 @@
     {
       "groupName": "Flux",
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["flux-operator", "flux-instance"],
-      "group": {"commitMessageTopic": "{{{groupName}}} group"}
-    },
-    {
-      "groupName": "Immich",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["immich-"],
+      "matchDepNames": ["/flux-/"],
       "group": {"commitMessageTopic": "{{{groupName}}} group"}
     },
     {
       "groupName": "Plugin Barman Cloud",
       "matchDatasources": ["docker", "helm"],
-      "matchPackageNames": ["plugin-barman-cloud"],
+      "matchDepNames": ["/plugin-barman-cloud/"],
       "group": {"commitMessageTopic": "{{{groupName}}} group"}
     }
   ]
