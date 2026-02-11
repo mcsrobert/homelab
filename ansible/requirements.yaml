@@ -1,0 +1,13 @@
+---
+collections:
+  - name: https://github.com/k3s-io/k3s-ansible
+    type: git
+    version: 1.1.1
+
+  - name: kubernetes.core
+    type: galaxy
+    version: 6.3.0
+
+  - name: community.general
+    type: galaxy
+    version: 12.3.0
