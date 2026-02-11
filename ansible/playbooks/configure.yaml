@@ -11,25 +11,11 @@
       register: ghostty_terminfo
       changed_when: false
 
-
-- name: Prepare k3s_cluster
+- name: Configure k3s_cluster
   hosts: k3s_cluster
   become: true
 
-  handlers:
-
-    - name: Update /etc/hosts entry with hostname
-      ansible.builtin.lineinfile:
-        path: /etc/hosts
-        regexp: "^127\\.0\\.1\\.1"
-        line: "127.0.1.1 {{ inventory_hostname }}"
-
-    - name: Restart SSH
-      ansible.builtin.service:
-        name: sshd
-        state: restarted
-
-  tasks:
+  pre_tasks:
 
     - name: Verify we are booted from NVMe
       ansible.builtin.command: findmnt -n -o SOURCE /
@@ -38,10 +24,7 @@
       changed_when: false
       when: inventory_hostname != 'raspberrypi'
 
-    - name: Set system hostname
-      ansible.builtin.hostname:
-        name: "{{ inventory_hostname }}"
-      notify: Update /etc/hosts entry with hostname
+  tasks:
 
     - name: Apply Ghostty terminfo when missing
       block:
@@ -59,6 +42,11 @@
           when: ghostty_check.rc != 0
           changed_when: true
 
+    - name: Set system hostname
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+      notify: Update /etc/hosts entry with hostname
+
     - name: Harden SSH Configuration
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
@@ -75,15 +63,15 @@
         - { regexp: "^#?X11Forwarding", line: "X11Forwarding no" }
       notify: Restart SSH
 
+  handlers:
 
-- name: Prepare k3s_cluster for Longhorn
-  import_playbook: ./longhorn.yaml
+    - name: Update /etc/hosts entry with hostname
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: "^127\\.0\\.1\\.1"
+        line: "127.0.1.1 {{ inventory_hostname }}"
 
-- name: Install RK3588 drivers
-  import_playbook: ./rk3588_drivers.yaml
-
-- name: Configure kube-vip
-  import_playbook: ./kube-vip.yaml
-
-- name: Install k3s
-  import_playbook: k3s.orchestration.site
+    - name: Restart SSH
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
