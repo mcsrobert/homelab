@@ -16,4 +16,4 @@ kubeconfig
 .not_logged_in_yet
 
 # Ansible
-.ansible/.lock
+.ansible
