@@ -1,11 +1,27 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    'github>mcsrobert/renovate-config',
+    'config:recommended',
+    'docker:enableMajor',
+    'helpers:pinGitHubActionDigests',
     'github>mcsrobert/homelab//.github/renovate/ansible-galaxy.json5',
+    'github>mcsrobert/homelab//.github/renovate/commit-message.json5',
     'github>mcsrobert/homelab//.github/renovate/custom-managers.json5',
     'github>mcsrobert/homelab//.github/renovate/groups.json5',
+    'github>mcsrobert/homelab//.github/renovate/pr-labels.json5',
+    ':dependencyDashboard',
+    ':disableRateLimiting',
+    ':enablePreCommit'
   ],
+  timezone: 'Europe/Amsterdam',
+  dependencyDashboardTitle: 'Renovate Dashboard',
+  suppressNotifications: [
+    'prEditedNotification',
+    'prIgnoreNotification',
+  ],
+  commitBodyTable: true,
+  rebaseWhen: 'auto',
+  platformCommit: 'enabled',
   flux: {
     managerFilePatterns: ['/\\.ya?ml$/'],
   },
@@ -19,5 +35,5 @@
       matchDatasources: ['docker'],
       pinDigests: true,
     }
-  ]
+  ],
 }
