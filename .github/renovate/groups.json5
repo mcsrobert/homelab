@@ -1,0 +1,17 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  packageRules: [
+    {
+      groupName: 'Flux',
+      matchDatasources: ['docker'],
+      matchDepNames: ['/flux-/'],
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+    },
+    {
+      groupName: 'Plugin Barman Cloud',
+      matchDatasources: ['docker', 'helm'],
+      matchDepNames: ['/plugin-barman-cloud/'],
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+    }
+  ]
+}

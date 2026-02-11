@@ -1,0 +1,21 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  customManagers: [
+    {
+      description: 'Update YAML schema for HelmReleases with app-template chart',
+      customType: 'regex',
+      datasourceTemplate: 'docker',
+      managerFilePatterns: ['/helm-?release\\.ya?ml$/'],
+      matchStrings: ['bjw-s-labs/helm-charts/app-template-(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
+      depNameTemplate: 'ghcr.io/bjw-s-labs/helm/app-template',
+      versioningTemplate: 'semver',
+    },
+    {
+      description: 'Process annotated dependencies',
+      customType: 'regex',
+      managerFilePatterns: ['/\\.env$/', '/\\.sh$/', '/\\.ya?ml(\\.j2)?$/'],
+      matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.* (?<currentValue>\\S+)$'],
+      versioningTemplate: 'semver',
+    }
+  ]
+}

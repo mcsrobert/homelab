@@ -1,0 +1,25 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  // This works around and issue with Github references
+  // https://github.com/renovatebot/renovate/discussions/35239
+  'ansible-galaxy': {
+    enabled: false,
+  },
+  customManagers: [
+    {
+      description: 'Ansible GitHub repository collections',
+      customType: 'regex',
+      managerFilePatterns: ['/requirements\\.ya?ml$/'],
+      matchStrings: ['- name: https://github\\.com/(?<depName>[\\S+]+/[\\S]+)(\\.git)?(\\s+type: git)?\\s+version: (?<currentValue>.+)'],
+      datasourceTemplate: 'github-tags'
+    },
+    {
+      description: 'Ansible Galaxy collections',
+      customType: 'regex',
+      managerFilePatterns: ['/requirements\\.ya?ml$/'],
+      matchStrings: ['- name: (?<depName>\\S+)(\\s+type: galaxy)?\\s+version: (?<currentValue>.+)'],
+      datasourceTemplate: 'galaxy-collection',
+      versioningTemplate: 'semver'
+    }
+  ]
+}
