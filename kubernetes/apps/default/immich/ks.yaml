@@ -8,7 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: cloudnative-pg
-    - name: external-secrets-stores
+    - name: external-secrets
     - name: longhorn
     - name: plugin-barman-cloud
   path: /kubernetes/apps/default/immich/cnpg
@@ -34,7 +34,7 @@ metadata:
 spec:
   dependsOn:
     - name: dragonfly-operator
-    - name: external-secrets-stores
+    - name: external-secrets
   path: /kubernetes/apps/default/immich/dragonfly
   sourceRef:
     kind: GitRepository
@@ -56,7 +56,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: external-secrets-stores
+    - name: external-secrets
     - name: longhorn
     - name: immich-dragonfly
     - name: immich-cnpg
