@@ -26,7 +26,7 @@ jobs:
           list-files: shell
           filters: |
             ansible:
-              - added|modified: 'ansible/**'
+              - 'ansible/**'
             kubernetes:
               - added|modified: 'kubernetes/**'
             markdown:
