@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: prometheus-operator-crds
     - name: cert-manager-issuers
-    - name: external-secrets-stores
+    - name: external-secrets
     - name: traefik-crds
   path: /kubernetes/apps/auth/authelia/app
   sourceRef:
