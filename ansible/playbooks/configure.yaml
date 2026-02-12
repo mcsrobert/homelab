@@ -1,5 +1,4 @@
 ---
-
 - name: Prepare localhost
   hosts: localhost
   gather_facts: false
@@ -62,6 +61,24 @@
         - { regexp: "^#?PermitEmptyPasswords", line: "PermitEmptyPasswords no" }
         - { regexp: "^#?X11Forwarding", line: "X11Forwarding no" }
       notify: Restart SSH
+
+    - name: Configure k3s registry mirror cache Spegel
+      vars:
+        k3s_config_dir: /etc/rancher/k3s/
+      block:
+        - name: Ensure k3s config directory exists
+          ansible.builtin.file:
+            path: "{{ k3s_config_dir }}"
+            state: directory
+            mode: "0755"
+        - name: Ensure we mirror/cache all repos with Spegel
+          ansible.builtin.blockinfile:
+            path: "{{ k3s_config_dir }}/registries.yaml"
+            create: true
+            mode: "0400"
+            block: |
+              mirrors:
+                "*":
 
   handlers:
 
