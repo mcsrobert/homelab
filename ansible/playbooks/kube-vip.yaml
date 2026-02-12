@@ -5,7 +5,18 @@
   serial: 1
   vars:
     pod_manifest_dir: /var/lib/rancher/k3s/agent/pod-manifests
+
+  handlers:
+
+    - name: Wait the node to come back online
+      ansible.builtin.wait_for:
+        port: 6443
+        state: started
+        delay: 10
+        timeout: 300
+
   tasks:
+
     - name: Ensure k3s static pod directory exists
       ansible.builtin.file:
         path: "{{ pod_manifest_dir }}"
@@ -17,10 +28,4 @@
         src: kube-vip.yaml.j2
         dest: "{{ pod_manifest_dir }}/kube-vip.yaml"
         mode: "0644"
-
-    - name: Wait the node to come back online
-      ansible.builtin.wait_for:
-        port: 6443
-        state: started
-        delay: 10
-        timeout: 300
+      notify: Wait the node to come back online
