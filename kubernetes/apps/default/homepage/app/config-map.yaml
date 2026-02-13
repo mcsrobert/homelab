@@ -51,7 +51,7 @@ data:
         - Traefik:
             description: Modern reverse proxy for applications
             icon: traefik-proxy
-            namespace: traefik
+            namespace: network
             app: traefik
         - Tailscale:
             href: https://login.tailscale.com/admin/machines

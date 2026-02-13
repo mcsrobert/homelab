@@ -123,9 +123,10 @@ spec:
         rules:
           - backendRefs:
               - identifier: app
-        parentRefs:
+        parentRefs: &parentRefs
           - name: traefik-gateway
-            namespace: traefik
+            namespace: network
+            sectionName: websecure
       code-server:
         hostnames:
           - *host
@@ -147,6 +148,4 @@ spec:
                     replacePrefixMatch: /
             backendRefs:
               - identifier: code-server
-        parentRefs:
-          - name: traefik-gateway
-            namespace: traefik
+        parentRefs: *parentRefs

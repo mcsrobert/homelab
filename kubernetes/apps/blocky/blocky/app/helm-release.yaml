@@ -114,7 +114,8 @@ spec:
           gethomepage.dev/group: Network
         parentRefs:
           - name: traefik-gateway
-            namespace: traefik
+            namespace: network
+            sectionName: websecure
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         rules:
