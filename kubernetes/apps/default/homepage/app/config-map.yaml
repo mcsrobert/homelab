@@ -28,12 +28,6 @@ data:
       longhorn:
         url: http://longhorn-frontend.longhorn-system.svc.cluster.local
   services.yaml: |
-    - Infrastructure:
-        - MetalLB:
-            description: Bare-metal load-balancing for Kubernetes
-            icon: metallb
-            app: metallb
-            namespace: network
     - Observability:
         - Prometheus:
             description: Metrics and time-series database
@@ -48,6 +42,11 @@ data:
             widget:
               type: fritzbox
               url: http://192.168.178.1
+        - MetalLB:
+            description: Bare-metal load-balancing for Kubernetes
+            icon: metallb
+            app: metallb
+            namespace: network
         - Traefik:
             description: Modern reverse proxy for applications
             icon: traefik-proxy
