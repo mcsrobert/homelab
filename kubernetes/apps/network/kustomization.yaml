@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   # Apps
+  - ./blocky/ks.yaml
   - ./metallb/ks.yaml
   - ./tailscale-operator/ks.yaml
   - ./traefik/ks.yaml
