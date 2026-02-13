@@ -37,7 +37,8 @@ spec:
             - grafana.${CLUSTER_DOMAIN}
           parentRefs:
             - name: traefik-gateway
-              namespace: traefik
+              namespace: network
+              sectionName: websecure
 
       # Required to add additional dashboards via config
       # TODO: move to Grafana Operator and deploy dashboards as CRDs

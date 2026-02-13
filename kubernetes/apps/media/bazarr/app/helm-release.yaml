@@ -83,5 +83,5 @@ spec:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
-            namespace: traefik
+            namespace: network
             sectionName: websecure

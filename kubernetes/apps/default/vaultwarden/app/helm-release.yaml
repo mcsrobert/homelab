@@ -93,7 +93,7 @@ spec:
               - identifier: app
         parentRefs: &parentRefs
           - name: traefik-gateway
-            namespace: traefik
+            namespace: network
             sectionName: websecure
       app:
         annotations:

@@ -6,11 +6,11 @@ metadata:
   name: traefik-crds
   namespace: flux-system
 spec:
-  path: /kubernetes/apps/traefik/traefik/crds
+  path: /kubernetes/apps/network/traefik/crds
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: traefik
+  targetNamespace: network
   prune: true
   interval: 15m
   timeout: 5m
@@ -27,11 +27,11 @@ spec:
     - name: metallb-pools
     - name: prometheus-operator-crds
     - name: traefik-crds
-  path: /kubernetes/apps/traefik/traefik/app
+  path: /kubernetes/apps/network/traefik/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: traefik
+  targetNamespace: network
   prune: true
   interval: 15m
   timeout: 5m
@@ -46,7 +46,7 @@ metadata:
 spec:
   dependsOn:
     - name: traefik-crds
-  path: /kubernetes/apps/traefik/traefik/middleware
+  path: /kubernetes/apps/network/traefik/middleware
   sourceRef:
     kind: GitRepository
     name: flux-system

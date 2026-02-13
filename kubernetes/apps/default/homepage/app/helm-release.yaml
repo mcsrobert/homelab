@@ -81,7 +81,8 @@ spec:
               - identifier: app
         parentRefs:
           - name: traefik-gateway
-            namespace: traefik
+            namespace: network
+            sectionName: websecure
     serviceAccount:
       homepage: {}
     rbac:
