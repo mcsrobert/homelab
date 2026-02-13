@@ -12,11 +12,11 @@ spec:
     - name: metallb-pools
     - name: prometheus-operator-crds
     - name: traefik-crds
-  path: /kubernetes/apps/blocky/blocky/app
+  path: /kubernetes/apps/network/blocky/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: blocky
+  targetNamespace: network
   interval: 30m
   timeout: 5m
   wait: true
@@ -32,11 +32,11 @@ spec:
   dependsOn:
     - name: dragonfly-operator
     - name: external-secrets
-  path: /kubernetes/apps/blocky/blocky/dragonfly
+  path: /kubernetes/apps/network/blocky/dragonfly
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: &namespace blocky
+  targetNamespace: &namespace network
   interval: 30m
   timeout: 5m
   healthChecks:
