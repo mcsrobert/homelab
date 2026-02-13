@@ -32,14 +32,14 @@ data:
         - MetalLB:
             description: Bare-metal load-balancing for Kubernetes
             icon: metallb
-            namespace: network
             app: metallb
+            namespace: network
     - Observability:
         - Prometheus:
             description: Metrics and time-series database
             icon: prometheus
-            namespace: observability
             app: prometheus
+            namespace: observability
     - Network:
         - FRITZ!Box 5590:
             href: http://fritz.box
@@ -57,8 +57,8 @@ data:
             href: https://login.tailscale.com/admin/machines
             description: Zero-config VPN with WireGuard.
             icon: tailscale
-            namespace: tailscale
             app: tailscale
+            namespace: network
             podSelector: ""
   widgets.yaml: |
     - kubernetes:
