@@ -84,7 +84,7 @@ spec:
             gethomepage.dev/name: Longhorn
             gethomepage.dev/icon: longhorn
             gethomepage.dev/description: Distributed, highly available Kubernetes storage
-            gethomepage.dev/group: Infrastructure
+            gethomepage.dev/group: Storage
             gethomepage.dev/pod-selector: ""
         spec:
           hostnames:
