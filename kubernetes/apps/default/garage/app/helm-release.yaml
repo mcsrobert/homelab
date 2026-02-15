@@ -133,7 +133,7 @@ spec:
           gethomepage.dev/name: Garage
           gethomepage.dev/icon: garage
           gethomepage.dev/description: S3-compatible object store for small self-hosted deployments
-          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/group: Storage
           gethomepage.dev/pod-selector: app.kubernetes.io/name = garage
         hostnames:
           - garage.${CLUSTER_DOMAIN}
