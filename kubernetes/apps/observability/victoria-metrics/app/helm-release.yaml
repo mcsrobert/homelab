@@ -112,62 +112,62 @@ spec:
             - grafana.${CLUSTER_DOMAIN}
           parentRefs: *parentRefs
 
-      # Required to add additional dashboards via config
-      # TODO: move to Grafana Operator and deploy dashboards as CRDs
-      dashboardProviders:
-        dashboardproviders.yaml:
-          apiVersion: 1
-          providers:
-            - name: default
-              orgId: 1
-              folder: ''
-              type: file
-              disableDeletion: true
-              editable: false
-              options:
-                path: /var/lib/grafana/dashboards/default
+      # # Required to add additional dashboards via config
+      # # TODO: move to Grafana Operator and deploy dashboards as CRDs
+      # dashboardProviders:
+      #   dashboardproviders.yaml:
+      #     apiVersion: 1
+      #     providers:
+      #       - name: default
+      #         orgId: 1
+      #         folder: ''
+      #         type: file
+      #         disableDeletion: true
+      #         editable: false
+      #         options:
+      #           path: /var/lib/grafana/dashboards/default
 
-      dashboards:
-        default:
-          longhorn:
-            gnetId: 16888
-            revision: 9
-          traefik:
-            gnetId: 17346
-            revision: 9
-          metallb:
-            gnetId: 20162
-            revision: 6
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          blocky:
-            gnetId: 13768
-            revision: 6
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-              - name: VAR_BLOCKY_URL
-                value: http:\/\/blocky-app.blocky.svc.cluster.local
-          cert-manager:
-            url: https://gitlab.com/uneeq-oss/cert-manager-mixin/-/raw/master/dashboards/cert-manager.json
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          flux-cluster:
-            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          flux-control-plane:
-            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          node-feature-discovery:
-            url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
-            datasource:
-              - name: DS_PROMETHEUS
-                value: Prometheus
-          dragonfly:
-            url: https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/refs/heads/main/monitoring/grafana-dashboard.json
+      # dashboards:
+      #   default:
+      #     longhorn:
+      #       gnetId: 16888
+      #       revision: 9
+      #     traefik:
+      #       gnetId: 17346
+      #       revision: 9
+      #     metallb:
+      #       gnetId: 20162
+      #       revision: 6
+      #       datasource:
+      #         - name: DS_PROMETHEUS
+      #           value: Prometheus
+      #     blocky:
+      #       gnetId: 13768
+      #       revision: 6
+      #       datasource:
+      #         - name: DS_PROMETHEUS
+      #           value: Prometheus
+      #         - name: VAR_BLOCKY_URL
+      #           value: http:\/\/blocky-app.blocky.svc.cluster.local
+      #     cert-manager:
+      #       url: https://gitlab.com/uneeq-oss/cert-manager-mixin/-/raw/master/dashboards/cert-manager.json
+      #       datasource:
+      #         - name: DS_PROMETHEUS
+      #           value: Prometheus
+      #     flux-cluster:
+      #       url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
+      #       datasource:
+      #         - name: DS_PROMETHEUS
+      #           value: Prometheus
+      #     flux-control-plane:
+      #       url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
+      #       datasource:
+      #         - name: DS_PROMETHEUS
+      #           value: Prometheus
+      #     node-feature-discovery:
+      #       url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
+      #       datasource:
+      #         - name: DS_PROMETHEUS
+      #           value: Prometheus
+      #     dragonfly:
+      #       url: https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/refs/heads/main/monitoring/grafana-dashboard.json
