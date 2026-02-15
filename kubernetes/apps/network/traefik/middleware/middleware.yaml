@@ -75,19 +75,6 @@ apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: auth-chain
-  namespace: blocky
-spec:
-  chain:
-    middlewares:
-      - name: network-secure-headers@kubernetescrd
-      - name: network-forwardauth-authelia@kubernetescrd
-      - name: network-compress@kubernetescrd
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: auth-chain
   namespace: default
 spec:
   chain:
