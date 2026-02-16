@@ -14,12 +14,13 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-    fullnameOverride: stack
+    fullnameOverride: victoria-metrics
 
     defaultDashboards:
       enabled: true
 
     victoria-metrics-operator:
+      fullnameOverride: victoria-metrics-operator
       operator:
         enable_converter_ownership: true
 
@@ -41,6 +42,9 @@ spec:
           requests:
             cpu: 500m
             # memory: 1.2Gi
+      extraArgs:
+        maxLabelsPerTimeseries: "150"
+        # downsampling.period: 30d:1m,90d:5m,180d:30m,1y:1h,2y:4h,5y:12h,10y:1d
       ingress:
         enabled: false
       route:
