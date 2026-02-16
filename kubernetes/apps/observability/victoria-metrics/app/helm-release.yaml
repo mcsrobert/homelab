@@ -14,7 +14,7 @@ spec:
   upgrade:
     crds: CreateReplace
   values:
-    # fullnameOverride: stack
+    fullnameOverride: stack
 
     defaultDashboards:
       enabled: true
