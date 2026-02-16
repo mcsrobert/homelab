@@ -28,7 +28,7 @@ spec:
     persistence:
       recurringJobSelector:
         enable: true
-        jobList: '[{"name": "backup", "isGroup": true}]'
+        jobList: &backupJobGroup '[{"name": "backup", "isGroup": true}]'
     defaultBackupStore:
       backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
     metrics:
@@ -58,7 +58,7 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "3"
-          recurringJobSelector: '[{"name": "backup", "isGroup": true}]'
+          recurringJobSelector: *backupJobGroup
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
@@ -75,6 +75,7 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "1"
+          recurringJobSelector: *backupJobGroup
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:
