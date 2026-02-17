@@ -30,14 +30,17 @@ k3s_cluster:
 
     server_config_yaml: |
       write-kubeconfig-mode: 600
-      embedded-registry: true
+      cluster-cidr: 10.42.0.0/16,fda7:435:42::/108
+      service-cidr: 10.43.0.0/16,fda7:435:43::/112
+
+      kube-controller-manager-arg:
+        - node-cidr-mask-size-ipv6=112
+
       disable:
         - servicelb
         - traefik
         - local-storage
+
       flannel-backend: wireguard-native
       flannel-ipv6-masq: true
-      cluster-cidr: 10.42.0.0/16,fda7:435:42::/108
-      service-cidr: 10.43.0.0/16,fda7:435:43::/112
-      kube-controller-manager-arg:
-        - node-cidr-mask-size-ipv6=112
+      embedded-registry: true

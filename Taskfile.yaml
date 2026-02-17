@@ -29,6 +29,7 @@ tasks:
     vars:
       BREW_DEPS: >-
         age
+        ansible
         fluxcd/tap/flux
         git
         helm

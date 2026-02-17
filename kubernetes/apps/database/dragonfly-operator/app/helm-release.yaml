@@ -15,6 +15,9 @@ spec:
     crds: CreateReplace
   values:
     manager:
+      extraArgs:
+        # See: https://github.com/dragonflydb/dragonfly-operator/issues/258
+        - --metrics-bind-address=0.0.0.0:8080
       resources:
         requests:
           cpu: 10m
@@ -22,5 +25,9 @@ spec:
         limits:
           cpu: 500m
           memory: 64Mi
+
     serviceMonitor:
       enabled: true
+    # TODO: enable when I have the Grafana Operator
+    grafanaDashboard:
+      enabled: false
