@@ -1,17 +1,40 @@
 ---
-- name: Upgrade host packages
+- name: Upgrade remote host
   hosts: k3s_cluster
   become: true
   serial: 1
   environment:
     K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
+  pre_tasks:
+
+    - name: Update apt repo and cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Ensure pip and venv are present
+      ansible.builtin.apt:
+        name:
+          - python3-pip
+          - python3-venv
+        state: present
+
+    - name: Prepare venv with kubernetes
+      ansible.builtin.pip:
+        name: kubernetes==35.0.0
+        state: present
+        virtualenv: /opt/ansible_venv
+        virtualenv_command: /usr/bin/python3 -m venv
+
+    - name: Set the python interpreter to use the venv
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: /opt/ansible_venv/bin/python
+
   tasks:
 
     - name: Upgrade all packages
       ansible.builtin.apt:
         upgrade: dist
-        update_cache: true
         autoremove: true
         autoclean: true
       register: apt_result
@@ -22,8 +45,9 @@
       register: reboot_required_file
 
     - name: Reboot when required
-      when: reboot_required_file.stat.exists
+      # when: reboot_required_file.stat.exists
       block:
+
         - name: Drain node before reboot
           kubernetes.core.k8s_drain:
             name: "{{ inventory_hostname }}"
@@ -39,6 +63,7 @@
               - app!=csi-attacher
               - app!=csi-provisioner
               - longhorn.io/component!=instance-manager
+          failed_when: false
 
         - name: Reboot node for kernel updates
           ansible.builtin.reboot:
