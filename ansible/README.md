@@ -8,7 +8,7 @@ A collection a playbooks to manage the cluster. Wraps around the amazing
 Before you can run the playbooks, you need to install the requirements.
 
 ```bash
-ansible-galaxy install -r requirements.yml
+ansible-galaxy install -r requirements.yaml
 ```
 
 ## How to run
