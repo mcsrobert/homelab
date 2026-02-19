@@ -70,21 +70,28 @@ spec:
     alertmanager:
       enabled: true
       spec:
-        externalURL: https://vm-alert.${CLUSTER_DOMAIN}
+        externalURL: https://vm-alertmanager.${CLUSTER_DOMAIN}
         routePrefix: /
       ingress:
         enabled: false
       route:
         enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: VMAlertmanager
+          gethomepage.dev/icon: alertmanager
+          gethomepage.dev/description: Collects, manages and sends alerts to receivers
+          gethomepage.dev/group: Observability
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=vmalertmanager
         parentRefs: *parentRefs
         hostnames:
-          - vm-alert.${CLUSTER_DOMAIN}
+          - vm-alertmanager.${CLUSTER_DOMAIN}
 
     vmalert:
       enabled: true
       spec:
         extraArgs:
-          external.url: https://vmalert.${CLUSTER_DOMAIN}
+          external.url: https://vm-alert.${CLUSTER_DOMAIN}
         evaluationInterval: 15s
       ingress:
         enabled: false
@@ -92,7 +99,7 @@ spec:
         enabled: true
         parentRefs: *parentRefs
         hostnames:
-          - vmalert.${CLUSTER_DOMAIN}
+          - vm-alert.${CLUSTER_DOMAIN}
 
     vmagent:
       enabled: true
@@ -105,7 +112,6 @@ spec:
             cpu: 200m
             memory: 200Mi
           limits:
-            cpu: 500m
             memory: 500Mi
       ingress:
         enabled: false
@@ -113,7 +119,7 @@ spec:
         enabled: true
         parentRefs: *parentRefs
         hostnames:
-          - vmagent.${CLUSTER_DOMAIN}
+          - vm-agent.${CLUSTER_DOMAIN}
 
     grafana:
       enabled: true
@@ -126,7 +132,7 @@ spec:
             gethomepage.dev/enabled: "true"
             gethomepage.dev/name: Grafana
             gethomepage.dev/icon: grafana
-            gethomepage.dev/description: Real-time monitoring with custom dashboards
+            gethomepage.dev/description: The open and composable observability platform
             gethomepage.dev/group: Observability
             gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
           hostnames:
