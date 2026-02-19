@@ -37,7 +37,7 @@
         - name: Apply Ghostty terminfo
           ansible.builtin.command: tic -x -
           args:
-            stdin: "{{ ghostty_terminfo.stdout }}"
+            stdin: "{{ hostvars['localhost'].ghostty_terminfo.stdout }}"
           when: ghostty_check.rc != 0
           changed_when: true
 
@@ -66,14 +66,16 @@
       vars:
         k3s_config_dir: /etc/rancher/k3s/
       block:
+
         - name: Ensure k3s config directory exists
           ansible.builtin.file:
-            path: "{{ k3s_config_dir }}"
+            path: /etc/rancher/k3s/
             state: directory
             mode: "0755"
+
         - name: Ensure we mirror/cache all repos with Spegel
           ansible.builtin.blockinfile:
-            path: "{{ k3s_config_dir }}/registries.yaml"
+            path: /etc/rancher/k3s/}/registries.yaml
             create: true
             mode: "0400"
             block: |
@@ -86,7 +88,7 @@
       ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: "^127\\.0\\.1\\.1"
-        line: "127.0.1.1 {{ inventory_hostname }}"
+        line: "127.0.1.1\t{{ inventory_hostname }}"
 
     - name: Restart SSH
       ansible.builtin.service:

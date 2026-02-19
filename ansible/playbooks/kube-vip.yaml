@@ -1,31 +1,43 @@
 ---
-- name: Configure kube-vip
+- name: Install kube-vip
   hosts: server
   become: true
-  serial: 1
-  vars:
-    pod_manifest_dir: /var/lib/rancher/k3s/agent/pod-manifests
-
-  handlers:
-
-    - name: Wait the node to come back online
-      ansible.builtin.wait_for:
-        port: 6443
-        state: started
-        delay: 10
-        timeout: 300
 
   tasks:
 
     - name: Ensure k3s static pod directory exists
       ansible.builtin.file:
-        path: "{{ pod_manifest_dir }}"
+        path: /var/lib/rancher/k3s/agent/pod-manifests
         state: directory
         mode: "0755"
 
     - name: Generate kube-vip manifest from template
       ansible.builtin.template:
         src: kube-vip.yaml.j2
-        dest: "{{ pod_manifest_dir }}/kube-vip.yaml"
+        dest: /var/lib/rancher/k3s/agent/pod-manifests/kube-vip.yaml
+        mode: "0644"
+
+
+- name: Upgrade kube-vip
+  hosts: server
+  tags: [upgrade, never]
+  become: true
+  serial: 1
+
+  tasks:
+
+    - name: Generate kube-vip manifest from template
+      ansible.builtin.template:
+        src: kube-vip.yaml.j2
+        dest: /var/lib/rancher/k3s/agent/pod-manifests/kube-vip.yaml
         mode: "0644"
       notify: Wait the node to come back online
+
+  handlers:
+
+    - name: Wait the API to come back online
+      ansible.builtin.wait_for:
+        port: 6443
+        state: started
+        delay: 10
+        timeout: 300

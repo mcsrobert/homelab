@@ -45,7 +45,7 @@
       register: reboot_required_file
 
     - name: Reboot when required
-      # when: reboot_required_file.stat.exists
+      when: reboot_required_file.stat.exists
       block:
 
         - name: Drain node before reboot
