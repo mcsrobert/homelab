@@ -8,8 +8,8 @@
 - name: Install RK3588 drivers
   import_playbook: ./rk3588_drivers.yaml
 
-- name: Configure kube-vip
-  import_playbook: ./kube-vip.yaml
-
 - name: Install k3s
   import_playbook: k3s.orchestration.site
+
+- name: Configure kube-vip
+  import_playbook: ./kube-vip.yaml
