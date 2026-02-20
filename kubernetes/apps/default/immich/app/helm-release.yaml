@@ -161,10 +161,8 @@ spec:
         endpoints:
           - port: api-metrics
             path: /metrics
-            interval: 1m
           - port: microservices-metrics
             path: /metrics
-            interval: 1m
     route:
       server:
         annotations:
