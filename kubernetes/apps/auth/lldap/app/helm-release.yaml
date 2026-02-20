@@ -59,27 +59,33 @@ spec:
       data:
         existingClaim: lldap-data
     service:
-      app:
+      lldap:
         ports:
           ldap:
             port: 389
             targetPort: 3890
             protocol: TCP
             primary: true
+      ui:
+        ports:
           http:
-            port: 17170
+            port: &uiPort 17170
             protocol: HTTP
     route:
-      app:
+      ui:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: LLDAP
           gethomepage.dev/icon: lldap-dark
           gethomepage.dev/description: Light LDAP implementation
           gethomepage.dev/group: Auth
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+        rules:
+          - backendRefs:
+              - name: lldap-ui
+                port: *uiPort
