@@ -105,8 +105,6 @@ spec:
       enabled: true
       spec:
         scrapeInterval: 20s
-        externalLabels:
-          cluster: k3s
         resources:
           requests:
             cpu: 200m
@@ -120,24 +118,6 @@ spec:
         parentRefs: *parentRefs
         hostnames:
           - vm-agent.${CLUSTER_DOMAIN}
-
-    grafana:
-      enabled: true
-      admin:
-        existingSecret: grafana-secret
-      route:
-        main:
-          enabled: true
-          annotations:
-            gethomepage.dev/enabled: "true"
-            gethomepage.dev/name: Grafana
-            gethomepage.dev/icon: grafana
-            gethomepage.dev/description: The open and composable observability platform
-            gethomepage.dev/group: Observability
-            gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
-          hostnames:
-            - grafana.${CLUSTER_DOMAIN}
-          parentRefs: *parentRefs
 
       # # Required to add additional dashboards via config
       # # TODO: move to Grafana Operator and deploy dashboards as CRDs

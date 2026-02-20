@@ -46,6 +46,8 @@ jobs:
         with:
           requirements_file: ansible/requirements.yaml
 
+  # TODO: Should probably run on the output of flux local
+  # Grafana breaks because its too strict to allow Flux ${VARS}
   kubeconform:
     needs: changes
     if: ${{ needs.changes.outputs.kubernetes == 'true' }}
@@ -66,6 +68,7 @@ jobs:
             -ignore-filename-pattern helmfile\.ya?ml
             -ignore-filename-pattern helm-values\.ya?ml
             -ignore-filename-pattern transformer-config\.ya?ml
+            -skip grafana.integreatly.org/v1beta1/Grafana
             ${{ needs.changes.outputs.kubernetes_files }}
 
   markdownlint:
