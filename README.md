@@ -1,21 +1,23 @@
 # Homelab
 
-My Kubernetes-based homelab, managed with FluxCD, Ansible, GitHub Actions and Renovate.
+My Kubernetes-based homelab, managed with FluxCD, Ansible, GitHub Actions and
+Renovate.
 
 The goal is to run various self hosted apps I use (smart-home, media,
-password/document managers, etc.) on a low power Kubernetes cluster and
-follow best practices. I aim to deliver stable, fast and secure services,
-while continuing to learn about Kubernetes and GitOps.
+password/document managers, etc.) on a low power Kubernetes cluster and follow
+best practices. I aim to deliver stable, fast and secure services, while
+continuing to learn about Kubernetes and GitOps.
 
 ## Repository
 
 This repository currently consists of 3 main directories:
 
-- [armbian](./armbian): build configuration for a custom Armbian image for
-  my RK1 compute modules. This is based on the 6.1 BSP kernel for NPU support.
+- [armbian](./armbian): build configuration for a custom Armbian image for my
+  RK1 compute modules. This is based on the 6.1 BSP kernel for NPU support.
 - [ansible](./ansible/): playbooks to install/upgrade packages, k3s, drivers
   and kube-vip.
-- [kubernetes](./kubernetes/): cluster bootstrap and Kubernetes manifests.
+- [kubernetes](./kubernetes/): cluster bootstrap and Kubernetes manifests for
+  FluxCD.
 
 ## Hardware
 
@@ -44,7 +46,7 @@ My homelab consists of a small k3s cluster and a NAS.
 ## Acknowledgements
 
 Using [kubesearch.dev](https://kubesearch.dev), I've found a lot of other
-repo's that have helped me along the way. Big thanks to:
+repositories that have helped me along the way. Big thanks to:
 
 - [cbirkenbeul/homelab](https://github.com/cbirkenbeul/homelab)
 - [bjw-s/home-ops](https://github.com/bjw-s/home-ops)
