@@ -29,7 +29,8 @@ spec:
   dependsOn:
     - name: external-secrets
     - name: grafana-operator
-  path: /kubernetes/apps/observability/grafana/instance
+    - name: prometheus-operator-crds
+  path: /kubernetes/apps/observability/grafana/app
   sourceRef:
     kind: GitRepository
     name: flux-system

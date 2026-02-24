@@ -5,14 +5,13 @@ kind: GrafanaDashboard
 metadata:
   name: grafana-operator
 spec:
-  allowCrossNamespaceImport: true
+  instanceSelector:
+    matchLabels:
+      grafana.home.arpa/instance: grafana
   configMapRef:
     name: grafana-operator-dashboard
     key: grafana-operator.json
   datasources:
     - datasourceName: Prometheus
       inputName: DS_PROMETHEUS
-  instanceSelector:
-    matchLabels:
-      grafana.internal/instance: grafana
   folder: Operators
