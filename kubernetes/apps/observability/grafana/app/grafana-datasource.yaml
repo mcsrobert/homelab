@@ -7,7 +7,7 @@ metadata:
 spec:
   instanceSelector:
     matchLabels:
-      app.kubernetes.io/instance: grafana-observability
+      grafana.home.arpa/instance: grafana
   datasource:
     type: prometheus
     name: prometheus
@@ -23,7 +23,7 @@ metadata:
 spec:
   instanceSelector:
     matchLabels:
-      app.kubernetes.io/instance: grafana-observability
+      grafana.home.arpa/instance: grafana
   datasource:
     type: alertmanager
     name: alertmanager
@@ -40,7 +40,7 @@ spec:
 # spec:
 #   instanceSelector:
 #     matchLabels:
-#       app.kubernetes.io/instance: grafana-observability
+#       grafana.home.arpa/instance: grafana
 #   datasource:
 #     type: loki
 #     name: loki
