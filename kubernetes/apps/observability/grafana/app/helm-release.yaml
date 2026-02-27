@@ -16,12 +16,11 @@ spec:
       grafana.home.arpa/instance: grafana
     admin:
       existingSecret: grafana-admin-secret
-    env:
-      - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
-        valueFrom:
-          secretKeyRef:
-            name: grafana-oauth-secret
-            key: OIDC_CLIENT_SECRET
+    envValueFrom:
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
+        secretKeyRef:
+          name: grafana-oauth-secret
+          key: OIDC_CLIENT_SECRET
     grafana.ini:
       analytics:
         check_for_updates: false
