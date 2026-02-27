@@ -18,6 +18,8 @@ spec:
 
     defaultDashboards:
       enabled: true
+    grafana:
+      enabled: false
 
     kubeScheduler:
       enabled: false
@@ -118,9 +120,6 @@ spec:
         parentRefs: *parentRefs
         hostnames:
           - vm-agent.${CLUSTER_DOMAIN}
-
-    grafana:
-      enabled: false
 
       # # Required to add additional dashboards via config
       # # TODO: move to Grafana Operator and deploy dashboards as CRDs
