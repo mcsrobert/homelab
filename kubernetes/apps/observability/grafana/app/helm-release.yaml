@@ -16,11 +16,7 @@ spec:
       grafana.home.arpa/instance: grafana
     admin:
       existingSecret: grafana-admin-secret
-    envValueFrom:
-      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET:
-        secretKeyRef:
-          name: grafana-oauth-secret
-          key: OIDC_CLIENT_SECRET
+    envFromSecret: grafana-oauth-secret
     grafana.ini:
       analytics:
         check_for_updates: false
@@ -46,13 +42,17 @@ spec:
         use_pkce: true
         role_attribute_path: contains(groups[*], 'id_admin') && 'Admin' || 'Viewer'
         role_attribute_strict: true
-        auth_style: InHeader
+        # auth_style: InHeader
       date_formats:
         use_browser_locale: true
       metrics:
         enabled: true
       news:
         news_feed_enabled: false
+      log:
+        level: debug
+      server:
+        root_url: https://grafana.${CLUSTER_DOMAIN}/
     serviceMonitor:
       enabled: true
     route:
@@ -73,3 +73,103 @@ spec:
             sectionName: websecure
     persistence:
       enabled: false
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        # deleteDatasources:
+        #   - { name: Alertmanager, orgId: 1 }
+        #   - { name: Loki, orgId: 1 }
+        #   - { name: Prometheus, orgId: 1 }
+        #   - { name: Tempo, orgId: 1 }
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            uid: prometheus
+            access: proxy
+            url: http://vmsingle-victoria-metrics:8428
+            isDefault: true
+          # - name: Loki
+          #   type: loki
+          #   uid: loki
+          #   access: proxy
+          #   url: http://loki-headless.observability.svc.cluster.local:3100
+          #   jsonData:
+          #     maxLines: 250
+          - name: Alertmanager
+            type: alertmanager
+            uid: alertmanager
+            access: proxy
+            url: http://vmalertmanager-victoria-metrics:9093
+            jsonData:
+              implementation: prometheus
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: default
+            orgId: 1
+            folder: ""
+            type: file
+            disableDeletion: true
+            editable: false
+            options:
+              path: /var/lib/grafana/dashboards/default
+    dashboards:
+      default:
+        blocky:
+          gnetId: 13768
+          revision: 6
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+            - name: VAR_BLOCKY_URL
+              value: http:\/\/blocky-app.network.svc.cluster.local
+        cert-manager:
+          gnetId: 20842
+          revision: 3
+          datasource: Prometheus
+        dragonfly:
+          url: https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/refs/heads/main/monitoring/grafana-dashboard.json
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        flux-cluster:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        flux-control-plane:
+          url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        longhorn:
+          gnetId: 16888
+          revision: 9
+        metallb:
+          gnetId: 20162
+          revision: 6
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        node-feature-discovery:
+          url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+        traefik:
+          gnetId: 17346
+          revision: 9
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+        label: grafana_dashboard
+        folderAnnotation: grafana_folder
+        provider:
+          disableDelete: true
+          foldersFromFilesStructure: true
+      datasources:
+        enabled: true
+        searchNamespace: ALL
+        labelValue: ""
