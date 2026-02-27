@@ -3,32 +3,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: grafana-operator
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: prometheus-operator-crds
-  path: /kubernetes/apps/observability/grafana/operator
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  targetNamespace: observability
-  interval: 1h
-  retryInterval: 5m
-  timeout: 10m
-  wait: true
-  prune: true
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
   name: grafana
   namespace: flux-system
 spec:
   dependsOn:
     - name: external-secrets
-    - name: grafana-operator
     - name: prometheus-operator-crds
   path: /kubernetes/apps/observability/grafana/app
   sourceRef:
