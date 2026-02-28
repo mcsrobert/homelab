@@ -42,7 +42,7 @@ spec:
         use_pkce: true
         role_attribute_path: contains(groups[*], 'id_admin') && 'Admin' || 'Viewer'
         role_attribute_strict: true
-        # auth_style: InHeader
+        auth_style: InHeader
       date_formats:
         use_browser_locale: true
       metrics:
@@ -51,8 +51,12 @@ spec:
         news_feed_enabled: false
       log:
         level: debug
+        filters: sqlstore:debug,sqlite3:debug,oauth.generic_oauth:debug
       server:
         root_url: https://grafana.${CLUSTER_DOMAIN}/
+      users:
+        allow_sign_up: true
+        auto_assign_org: true
     serviceMonitor:
       enabled: true
     route:
