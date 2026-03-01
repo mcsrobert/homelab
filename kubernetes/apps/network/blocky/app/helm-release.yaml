@@ -15,19 +15,12 @@ spec:
   values:
     controllers:
       blocky:
-        replicas: 3
+        replicas: 4
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
           topologySpreadConstraints:
-            # Ensure we run on both the RPI4 and Turing Pi board
-            - maxSkew: 1
-              topologyKey: feature.node.kubernetes.io/kernel-version.full
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/name: *app
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname
               whenUnsatisfiable: DoNotSchedule
