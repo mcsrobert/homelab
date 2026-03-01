@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.18.1-standalone-strict/configmap-v1.json
+# yaml-language-server: $schema=https://kubernetesjsonschema.dev/v1.34.0-standalone-strict/configmap-v1.json
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -52,7 +52,7 @@ data:
             icon: tailscale
             app: tailscale
             namespace: network
-            podSelector: ""
+            podSelector: app.kubernetes.io/name in (tailscale, tailscale-operator)
   widgets.yaml: |
     - kubernetes:
         cluster:

@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: tailscale
 spec:
-  interval: 30m
+  interval: 1h
   chart:
     spec:
       chart: tailscale-operator
@@ -17,6 +17,23 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: operator
+            patch: |
+              - op: replace
+                path: /metadata/name
+                value: tailscale-operator
+              - op: add
+                path: /metadata/labels
+                value:
+                  app.kubernetes.io/name: tailscale-operator
+              - op: add
+                path: /spec/template/metadata/labels/app.kubernetes.io~1name
+                value: tailscale-operator
   values:
     oauthSecretVolume:
       secret:
