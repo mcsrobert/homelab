@@ -56,3 +56,4 @@ repositories that have helped me along the way. Big thanks to:
 - [budimanjojo/home-cluster](https://github.com/budimanjojo/home-cluster)
 - [nicolerenee/infra](https://github.com/nicolerenee/infra)
 - [h3mmy/bloopySphere](https://github.com/h3mmy/bloopySphere)
+- [Chrtol/home-cluster](https://github.com/Chrtol/home-cluster)
