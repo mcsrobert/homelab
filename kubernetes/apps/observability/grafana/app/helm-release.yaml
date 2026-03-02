@@ -121,7 +121,7 @@ spec:
             - name: DS_PROMETHEUS
               value: Prometheus
             - name: VAR_BLOCKY_URL
-              value: http:\/\/blocky-app.network.svc.cluster.local
+              value: http:\/\/blocky-app.network.svc.cluster.local:4000
         cert-manager:
           gnetId: 20842
           revision: 3
