@@ -116,7 +116,7 @@ spec:
       default:
         blocky:
           gnetId: 13768
-          revision: 6
+          revision: 7
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
@@ -143,7 +143,7 @@ spec:
               value: Prometheus
         longhorn:
           gnetId: 16888
-          revision: 9
+          revision: 11
         metallb:
           gnetId: 20162
           revision: 6
