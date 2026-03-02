@@ -41,7 +41,7 @@ spec:
       enabled: true
       spec:
         replicaCount: 1
-        retentionPeriod: 30d
+        retentionPeriod: 10d
         storage:
           storageClassName: longhorn-victoria-metrics
           accessModes:
