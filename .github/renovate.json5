@@ -34,6 +34,6 @@
       matchManagers: ['helm-values'],
       matchDatasources: ['docker'],
       pinDigests: true,
-    }
+    },
   ],
 }
