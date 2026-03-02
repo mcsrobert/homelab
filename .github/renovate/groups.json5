@@ -12,6 +12,14 @@
       matchDatasources: ['docker', 'helm'],
       matchDepNames: ['/plugin-barman-cloud/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
-    }
+    },
+    {
+      description: 'Auto Merge CI Dependencies Weekly',
+      groupName: 'CI dependencies',
+      matchManagers: ['github-actions', 'pre-commit'],
+      schedule: ['* 7-9 * * 2'],
+      minimumReleaseAge: '7d',
+      automerge: true,
+    },
   ]
 }
