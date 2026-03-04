@@ -32,10 +32,19 @@
         mode: "0755"
       notify: Refresh library cache
 
-    # - name: Install Mali G610 driver
-    #   ansible.builtin.apt:
-    #     deb: https://github.com/tsukumijima/libmali-rockchip/releases/download/{{ mali_version }}/libmali-valhall-g610-g24p0-gbm_1.9-1_arm64.deb
-    #   notify: Refresh library cache
+    # Needed for Jellyfin HDR tone-mapping
+    # See: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/rockchip/#configure-on-linux-host
+    - name: Install Mali G610 driver
+      ansible.builtin.apt:
+        deb: https://github.com/tsukumijima/libmali-rockchip/releases/download/{{ mali_version }}/libmali-valhall-g610-g24p0-gbm_1.9-1_arm64.deb
+      notify: Refresh library cache
+
+    - name: Change the group of the driver to video
+      ansible.builtin.file:
+        path: /usr/lib/aarch64-linux-gnu/libmali.so.1.9.0
+        group: video
+        state: file
+        mode: "0644"
 
     # - name: Install MPP driver
     #   ansible.builtin.apt:

@@ -36,6 +36,9 @@ spec:
               limits:
                 memory: 6Gi
                 squat.ai/vpu: "1"
+            securityContext:
+              privileged: true
+              # supplementalGroups: [44, 105]
     persistence:
       config:
         existingClaim: jellyfin-config
@@ -51,6 +54,12 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /cache
+      libmali:
+        type: hostPath
+        hostPath: /usr/lib/aarch64-linux-gnu/libmali.so.1.9.0
+        hostPathType: File
+        globalMounts:
+          - path: /usr/lib/aarch64-linux-gnu/libmali.so
     service:
       app:
         ports:
