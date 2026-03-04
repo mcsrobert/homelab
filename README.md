@@ -12,12 +12,13 @@ continuing to learn about Kubernetes and GitOps.
 
 This repository currently consists of 3 main directories:
 
-- [armbian](./armbian): build configuration for a custom Armbian image for my
-  RK1 compute modules. This is based on the 6.1 BSP kernel for NPU support.
-- [ansible](./ansible/): playbooks to install/upgrade packages, k3s, drivers
+- [Armbian](./armbian): builds a custom image for the RK1 compute modules,
+  based on the 6.1 BSP kernel for NPU support.
+
+- [Ansible](./ansible/): playbooks to install/upgrade packages, k3s, drivers
   and kube-vip.
-- [kubernetes](./kubernetes/): cluster bootstrap and Kubernetes manifests for
-  FluxCD.
+
+- [Kubernetes](./kubernetes/): cluster bootstrap and manifests for FluxCD.
 
 ## Hardware
 
