@@ -12,12 +12,13 @@ continuing to learn about Kubernetes and GitOps.
 
 This repository currently consists of 3 main directories:
 
-- [armbian](./armbian): build configuration for a custom Armbian image for my
-  RK1 compute modules. This is based on the 6.1 BSP kernel for NPU support.
-- [ansible](./ansible/): playbooks to install/upgrade packages, k3s, drivers
+- [Armbian](./armbian): builds a custom image for the RK1 compute modules,
+  based on the 6.1 BSP kernel for NPU support.
+
+- [Ansible](./ansible/): playbooks to install/upgrade packages, k3s, drivers
   and kube-vip.
-- [kubernetes](./kubernetes/): cluster bootstrap and Kubernetes manifests for
-  FluxCD.
+
+- [Kubernetes](./kubernetes/): cluster bootstrap and manifests for FluxCD.
 
 ## Hardware
 
@@ -25,10 +26,10 @@ My homelab consists of a small k3s cluster and a NAS.
 
 | Device | Role | SoC | CPU | RAM | Storage | OS |
 | ------ | ---- | --- | --- | --- | ------- | -- |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s master | RK3588 | 4x Cortex-A76 + 4x Cortex-A55 | 32GB LPDDR4 | 512GB NVMe | Armbian |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s master | RK3588 | 4x Cortex-A76 + 4x Cortex-A55 | 16GB LPDDR4 | 512GB NVMe | Armbian |
-| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s master | RK3588 | 4x Cortex-A76 + 4x Cortex-A55 | 16GB LPDDR4 | 512GB NVMe | Armbian |
-| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | k3s worker | BCM2711 | 4x Cortex A72 | 8GB LPDDR4 | 128GB USB | Raspberry Pi OS |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s server | RK3588 | 4x Cortex-A76 + 4x Cortex-A55 | 32GB LPDDR4 | 512GB NVMe | Armbian |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s server | RK3588 | 4x Cortex-A76 + 4x Cortex-A55 | 16GB LPDDR4 | 512GB NVMe | Armbian |
+| [Turing Pi RK1](https://turingpi.com/product/turing-rk1/) | k3s server | RK3588 | 4x Cortex-A76 + 4x Cortex-A55 | 16GB LPDDR4 | 512GB NVMe | Armbian |
+| [Raspberry Pi 4B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) | k3s agent | BCM2711 | 4x Cortex A72 | 8GB LPDDR4 | 128GB USB | Raspberry Pi OS |
 | Synology DS923+ | NAS | n/a | 2x AMD Ryzen 1600 | 4GB DDR4 ECC | 4x 4TB HDD (RAID5) | DSM |
 
 ## Cloud Dependencies

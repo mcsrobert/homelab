@@ -15,6 +15,13 @@ spec:
       jellyfin:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          securityContext:
+            # runAsNonRoot: true
+            runAsUser: 6100
+            runAsGroup: 65537  # media
+            fsGroup: 65537  # media
+            fsGroupChangePolicy: OnRootMismatch
         containers:
           app:
             image:
@@ -37,8 +44,26 @@ spec:
                 memory: 6Gi
                 squat.ai/vpu: "1"
             securityContext:
+              # NOTE: This is needed for hwaccel per the docs: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/rockchip/#linux-setups
+              # I tried to make it work without, but was not able to.
               privileged: true
-              # supplementalGroups: [44, 105]
+              # allowPrivilegeEscalation: true
+              # seccompProfile:
+              #   type: Unconfined
+              # appArmorProfile:
+              #   type: Unconfined
+              # seLinuxOptions:
+              #   level: "s0"
+              # capabilities:
+              #   add:
+              #     - SYS_ADMIN      # For /sys access
+              #     - IPC_LOCK       # For DMA buffers
+              #     - SYS_RAWIO      # For register access
+              #     - SYS_RESOURCE   # For memory allocation
+              #     - DAC_READ_SEARCH
+              #     - DAC_OVERRIDE
+              #     - SETUID         # For privilege escalation if needed
+              #     - SETGID
     persistence:
       config:
         existingClaim: jellyfin-config
@@ -60,6 +85,7 @@ spec:
         hostPathType: File
         globalMounts:
           - path: /usr/lib/aarch64-linux-gnu/libmali.so
+            readOnly: true
     service:
       app:
         ports:
@@ -76,9 +102,9 @@ spec:
           gethomepage.dev/icon: jellyfin
           gethomepage.dev/description: Open-source Media Server
           gethomepage.dev/group: Media
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
