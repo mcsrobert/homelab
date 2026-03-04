@@ -42,7 +42,6 @@ spec:
             # terminationMessagePath: /tmp/term
             securityContext:
               privileged: true
-              readOnlyRootFilesystem: true
     service:
       app:
         controller: *app

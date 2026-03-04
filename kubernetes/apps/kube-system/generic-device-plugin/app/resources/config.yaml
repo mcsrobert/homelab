@@ -12,6 +12,7 @@ devices:
         paths:
           - path: /dev/net/tun
 
+  # https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/rockchip
   - name: vpu
     groups:
       - paths:
