@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app mosquitto
+  name: mosquitto
 spec:
   interval: 30m
   chartRef:
@@ -58,6 +58,12 @@ spec:
         existingClaim: mosquitto-data
         globalMounts:
           - path: /mosquitto/data
+      config:
+        type: configMap
+        name: mosquitto-config
+        globalMounts:
+          - path: /mosquitto/config/mosquitto.conf
+            subPath: mosquitto.conf
       passwd:
         type: secret
         name: mosquitto-passwd
@@ -65,12 +71,6 @@ spec:
         globalMounts:
           - path: /mosquitto/config/passwd
             subPath: passwd
-      config:
-        type: configMap
-        name: mosquitto-config
-        globalMounts:
-          - path: /mosquitto/config/mosquitto.conf
-            subPath: mosquitto.conf
     service:
       app:
         ports:
