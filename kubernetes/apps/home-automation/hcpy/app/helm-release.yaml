@@ -1,0 +1,61 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-4.6.2/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hcpy
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 1h
+  driftDetection:
+    mode: enabled
+  values:
+    controllers:
+      hcpy:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        pod:
+          # TODO: If I ever use Multus, remove these
+          hostAliases:
+            - ip: ${DISHWASHER_IP}
+              hostnames: [dishwasher]
+            - ip: ${OVEN_IP}
+              hostnames: [oven]
+            - ip: ${WASHER_IP}
+              hostnames: [washer]
+            - ip: ${DRYER_IP}
+              hostnames: [dryer]
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 12020
+            runAsGroup: 12020
+            fsGroup: 12020
+            fsGroupChangePolicy: OnRootMismatch
+            seccompProfile:
+              type: RuntimeDefault
+        containers:
+          app:
+            image:
+              repository: ghcr.io/hcpy2-0/hcpy
+              tag: v0.4.8@sha256:806c23c4733a112941b13d622318eb2522301a6e46b49fb09c76ef5c9898e58c
+            resources:
+              requests:
+                cpu: 5m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    persistence:
+      config:
+        type: secret
+        name: hcpy-config-secret
+        globalMounts:
+          - path: /app/config
