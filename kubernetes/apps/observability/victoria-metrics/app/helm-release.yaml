@@ -107,6 +107,9 @@ spec:
       enabled: true
       spec:
         scrapeInterval: 20s
+        inlineRelabelConfig:
+          - action: labeldrop
+            regex: "feature_node_kubernetes_io_(.*)"
         resources:
           requests:
             cpu: 200m
