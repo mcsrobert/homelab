@@ -39,7 +39,7 @@ spec:
               scheme: https
               permanent: true
       websecure:
-        port: &websurePort 8443
+        port: &websecurePort 8443
         expose:
           default: true
         exposedPort: 443
@@ -60,12 +60,12 @@ spec:
           namespacePolicy:
             from: All
         websecure:
-          port: *websurePort
+          port: *websecurePort
           protocol: HTTPS
           namespacePolicy:
             from: All
           certificateRefs:
-            - name: cluster-wildcard-tls
+            - name: ${CLUSTER_DOMAIN/./-}-tls
           mode: Terminate
     metrics:
       prometheus:

@@ -3,9 +3,9 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: cluster-wildcard-cert
+  name: ${CLUSTER_DOMAIN/./-}-cert
 spec:
-  secretName: cluster-wildcard-tls
+  secretName: ${CLUSTER_DOMAIN/./-}-tls
   commonName: &domain "*.${CLUSTER_DOMAIN}"
   dnsNames:
     - *domain
