@@ -1,3 +1,5 @@
 ---
+web:
+  enabled: false
 serviceMonitor:
   create: true
