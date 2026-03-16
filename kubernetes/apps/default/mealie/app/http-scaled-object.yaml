@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/http.keda.sh/httpscaledobject_v1alpha1.json
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
+metadata:
+  name: mealie
+spec:
+  hosts:
+    - mealie.${CLUSTER_DOMAIN}
+  scaleTargetRef:
+    name: mealie
+    service: mealie
+    port: 9000
+  scalingMetric:
+    requestRate:
+      granularity: 1s
+  scaledownPeriod: 300
+  replicas:
+    min: 0
+    max: 1
