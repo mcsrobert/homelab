@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: keda-http-add-on
+  name: keda-add-ons-http
 spec:
   chart:
     spec:
@@ -22,8 +22,8 @@ spec:
       replicas:
         min: 1
         max: 10
-      tcpConnectTimeout: 5000ms # default: 500ms
-      keepAlive: 10s # default: 1s
-      responseHeaderTimeout: 5000ms # default: 500ms
+      keepAlive: 5s
+      responseHeaderTimeout: 30s
+      tcpConnectTimeout: 30s
     scaler:
       replicas: 1

@@ -7,6 +7,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: keda-add-ons-http
     - name: longhorn
     - name: traefik-crds
   path: /kubernetes/apps/default/mealie/app
