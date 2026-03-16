@@ -5,11 +5,11 @@ kind: HelmRelease
 metadata:
   name: mealie
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
   driftDetection:
     mode: enabled
   values:
@@ -87,10 +87,13 @@ spec:
           gethomepage.dev/description: Recipe manager and meal planner
           gethomepage.dev/group: Apps
         hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          - mealie.${CLUSTER_DOMAIN}
         rules:
           - backendRefs:
-              - identifier: app
+              - kind: Service
+                name: keda-add-ons-http-interceptor-proxy
+                namespace: system
+                port: 8080
         parentRefs:
           - name: traefik-gateway
             namespace: network
