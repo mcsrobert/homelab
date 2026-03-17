@@ -9,38 +9,8 @@ spec:
     kind: OCIRepository
     name: flux-operator
   interval: 1h
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: HTTPRoute
-              name: *app
-            patch: |
-              - op: add
-                path: /spec/rules/0/filters
-                value:
-                  - type: ExtensionRef
-                    extensionRef:
-                      group: traefik.io
-                      kind: Middleware
-                      name: auth-chain
   values:
     fullnameOverride: *app
     installCRDs: false
     web:
       serverOnly: true
-      httpRoute:
-        enabled: true
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: FluxCD
-          gethomepage.dev/icon: flux-cd
-          gethomepage.dev/description: Open and extensible continuous delivery solution for Kubernetes
-          gethomepage.dev/group: Kubernetes
-          gethomepage.dev/pod-selector: ''
-        hostnames:
-          - flux.${CLUSTER_DOMAIN}
-        parentRefs:
-          - name: traefik-gateway
-            namespace: network
-            sectionName: websecure

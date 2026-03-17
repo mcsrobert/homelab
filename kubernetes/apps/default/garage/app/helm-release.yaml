@@ -12,6 +12,8 @@ spec:
     namespace: flux-system
   driftDetection:
     mode: enabled
+    ignore:
+      - paths: ["/spec/replicas"]
   values:
     defaultPodOptions:
       securityContext:
@@ -78,13 +80,13 @@ spec:
               tag: 1.1.0@sha256:17c793551873155065bf9a022dabcde874de808a1f26e648d4b82e168806439c
             env:
               TZ: ${TIME_ZONE}
-              API_BASE_URL: http://garage:3903
-              S3_ENDPOINT_URL: http://garage:3900
+              API_BASE_URL: http://garage.{{ .Release.Namespace }}.svc.cluster.local:3903
+              S3_ENDPOINT_URL: http://garage.{{ .Release.Namespace }}.svc.cluster.local:3900
             resources:
               requests:
                 cpu: 100m
               limits:
-                memory: 512Mi
+                memory: 256Mi
             probes: *probes
             securityContext: *securityContext
     persistence:
@@ -145,8 +147,10 @@ spec:
                   kind: Middleware
                   name: auth-chain
             backendRefs:
-              - name: garage-webui
-                port: *port
+              - kind: Service
+                name: keda-add-ons-http-interceptor-proxy
+                namespace: system
+                port: 8080
         parentRefs:
           - name: traefik-gateway
             namespace: network

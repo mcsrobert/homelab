@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
+  - ./http-scaled-object.yaml
 configMapGenerator:
   - name: garage-config-tpl
     files:
