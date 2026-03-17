@@ -67,6 +67,7 @@ jobs:
             -ignore-filename-pattern helmfile\.ya?ml
             -ignore-filename-pattern helm-values\.ya?ml
             -ignore-filename-pattern transformer-config\.ya?ml
+            -skip gateway.networking.k8s.io/v1/HTTPRoute
             ${{ needs.changes.outputs.kubernetes_files }}
 
   markdownlint:

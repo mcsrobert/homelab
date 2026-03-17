@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/gateway.networking.k8s.io/httproute_v1beta1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: flux-web
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: FluxCD
+    gethomepage.dev/icon: flux-cd
+    gethomepage.dev/description: Open and extensible continuous delivery solution for Kubernetes
+    gethomepage.dev/group: Kubernetes
+    gethomepage.dev/pod-selector: ''
+spec:
+  hostnames:
+    - flux.${CLUSTER_DOMAIN}
+  rules:
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: auth-chain
+      backendRefs:
+        - kind: Service
+          name: keda-add-ons-http-interceptor-proxy
+          namespace: system
+          port: 8080
+  parentRefs:
+    - name: traefik-gateway
+      namespace: network
+      sectionName: websecure
