@@ -12,6 +12,8 @@ spec:
   interval: 30m
   driftDetection:
     mode: enabled
+    ignore:
+      - paths: ["/spec/replicas"]
   values:
     controllers:
       mealie:
@@ -36,18 +38,20 @@ spec:
               PGID: 6060
               TZ: ${TIME_ZONE}
               BASE_URL: https://mealie.${CLUSTER_DOMAIN}
-              SMTP_HOST: maddy.default.svc.cluster.local
-              SMTP_PORT: 2525
-              SMTP_FROM_NAME: Mealie
-              SMTP_FROM_EMAIL: noreply@mail.{CLUSTER_DOMAIN}
-              SMTP_AUTH_STRATEGY: NONE
+              API_DOCS: false
+              ALLOW_PASSWORD_LOGIN: false
               OIDC_AUTH_ENABLED: true
               OIDC_CONFIGURATION_URL: https://authelia.${CLUSTER_DOMAIN}/.well-known/openid-configuration
               OIDC_CLIENT_ID: mealie
               OIDC_USER_GROUP: id_user
               OIDC_ADMIN_GROUP: id_admin
-              OIDC_AUTO_REDIRECT: true
+              OIDC_AUTO_REDIRECT: false
               OIDC_REMEMBER_ME: true
+              SMTP_AUTH_STRATEGY: NONE
+              SMTP_HOST: maddy.default.svc.cluster.local
+              SMTP_PORT: 2525
+              SMTP_FROM_NAME: Mealie
+              SMTP_FROM_EMAIL: noreply@mail.${CLUSTER_DOMAIN}
             envFrom:
               - secretRef:
                   name: mealie-secret
@@ -60,6 +64,11 @@ spec:
             probes:
               liveness: &probes
                 enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /app/healthcheck.sh
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
