@@ -126,7 +126,7 @@ spec:
         controller: webui
         ports:
           http:
-            port: &port 3909
+            port: 3909
             protocol: HTTP
     route:
       webui:
