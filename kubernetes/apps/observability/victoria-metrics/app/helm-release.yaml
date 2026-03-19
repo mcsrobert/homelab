@@ -56,7 +56,7 @@ spec:
             memory: 3Gi
           requests:
             cpu: 500m
-            # memory: 1.2Gi
+            memory: 1.5Gi
         # downsampling.period: 30d:1m,90d:5m,180d:30m,1y:1h,2y:4h,5y:12h,10y:1d
       ingress:
         enabled: false
@@ -72,8 +72,28 @@ spec:
     alertmanager:
       enabled: true
       spec:
-        externalURL: https://vm-alertmanager.${CLUSTER_DOMAIN}
+        externalURL: https://alertmanager.${CLUSTER_DOMAIN}
         routePrefix: /
+      config:
+        receivers:
+          - name: 'blackhole'
+            webhook_configs: []
+          - name: ntfy-critical
+            webhook_configs:
+              - url: https://ntfy.sh/${NTFY_ALERTMANAGER_TOPIC}/prometheus?title=CRITICAL+Alert&priority=5&tags=rotating_light
+          - name: ntfy-warning
+            webhook_configs:
+              - url: https://ntfy.sh/${NTFY_ALERTMANAGER_TOPIC}/prometheus?title=WARNING+Alert&priority=3&tags=warning
+        route:
+          receiver: blackhole
+          group_by: [alertname]
+          routes:
+            - matchers:
+                - severity = critical
+              receiver: ntfy-critical
+            - matchers:
+                - severity = warning
+              receiver: ntfy-warning
       ingress:
         enabled: false
       route:
@@ -87,7 +107,7 @@ spec:
           gethomepage.dev/pod-selector: app.kubernetes.io/name=vmalertmanager
         parentRefs: *parentRefs
         hostnames:
-          - vm-alertmanager.${CLUSTER_DOMAIN}
+          - alertmanager.${CLUSTER_DOMAIN}
 
     vmalert:
       enabled: true
