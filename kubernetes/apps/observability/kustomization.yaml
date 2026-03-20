@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./namespace.yaml
   # Apps
+  - ./alertmanager-ntfy/ks.yaml
   - ./grafana/ks.yaml
   - ./prometheus-operator-crds/ks.yaml
   - ./victoria-metrics/ks.yaml

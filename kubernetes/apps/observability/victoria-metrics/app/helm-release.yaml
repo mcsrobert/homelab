@@ -13,7 +13,16 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:
+  valuesFrom:
+    - kind: Secret
+      name: alertmanager-ntfy-config-secret
+      valuesKey: ALERTMANAGER_NTFY_HTTP_USERNAME
+      targetPath: alertmanager.config.receivers[1].webhook_configs[0].http_config.basic_auth.username
+    - kind: Secret
+      name: alertmanager-ntfy-config-secret
+      valuesKey: ALERTMANAGER_NTFY_HTTP_PASSWORD
+      targetPath: alertmanager.config.receivers[1].webhook_configs[0].http_config.basic_auth.password
+  values: # https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/#parameters
     fullnameOverride: victoria-metrics
 
     defaultDashboards:
@@ -76,24 +85,22 @@ spec:
         routePrefix: /
       config:
         receivers:
-          - name: 'blackhole'
+          - name: blackhole
             webhook_configs: []
-          - name: ntfy-critical
+          - name: ntfy
             webhook_configs:
-              - url: https://ntfy.sh/${NTFY_ALERTMANAGER_TOPIC}/prometheus?title=CRITICAL+Alert&priority=5&tags=rotating_light
-          - name: ntfy-warning
-            webhook_configs:
-              - url: https://ntfy.sh/${NTFY_ALERTMANAGER_TOPIC}/prometheus?title=WARNING+Alert&priority=3&tags=warning
+              - url: http://alertmanager-ntfy.observability.svc.cluster.local:8000/hook
+                http_config:
+                  basic_auth:
+                    username: <USERNAME PLACEHOLDER>
+                    password: <PASSWORD PLACEHOLDER>
         route:
-          receiver: blackhole
+          receiver: ntfy
           group_by: [alertname]
           routes:
             - matchers:
-                - severity = critical
-              receiver: ntfy-critical
-            - matchers:
-                - severity = warning
-              receiver: ntfy-warning
+                - alertname = Watchdog
+              receiver: blackhole
       ingress:
         enabled: false
       route:
