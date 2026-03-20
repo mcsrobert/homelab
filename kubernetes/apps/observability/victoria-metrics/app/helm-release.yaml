@@ -13,15 +13,6 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  valuesFrom:
-    - kind: Secret
-      name: alertmanager-ntfy-config-secret
-      valuesKey: ALERTMANAGER_NTFY_HTTP_USERNAME
-      targetPath: alertmanager.config.receivers[1].webhook_configs[0].http_config.basic_auth.username
-    - kind: Secret
-      name: alertmanager-ntfy-config-secret
-      valuesKey: ALERTMANAGER_NTFY_HTTP_PASSWORD
-      targetPath: alertmanager.config.receivers[1].webhook_configs[0].http_config.basic_auth.password
   values: # https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/#parameters
     fullnameOverride: victoria-metrics
 
@@ -82,25 +73,7 @@ spec:
       enabled: true
       spec:
         externalURL: https://alertmanager.${CLUSTER_DOMAIN}
-        routePrefix: /
-      config:
-        receivers:
-          - name: blackhole
-            webhook_configs: []
-          - name: ntfy
-            webhook_configs:
-              - url: http://alertmanager-ntfy.observability.svc.cluster.local:8000/hook
-                http_config:
-                  basic_auth:
-                    username: <USERNAME PLACEHOLDER>
-                    password: <PASSWORD PLACEHOLDER>
-        route:
-          receiver: ntfy
-          group_by: [alertname]
-          routes:
-            - matchers:
-                - alertname = Watchdog
-              receiver: blackhole
+        configSecret: alertmanager-config-secret
       ingress:
         enabled: false
       route:
