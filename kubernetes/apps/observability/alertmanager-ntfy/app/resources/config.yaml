@@ -1,0 +1,33 @@
+---
+# Docs: https://github.com/alexbakker/alertmanager-ntfy/blob/master/config.example.yml
+http:
+  auth:
+    username: "{{ .ALERTMANAGER_NTFY_HTTP_USERNAME }}"
+    password: "{{ .ALERTMANAGER_NTFY_HTTP_PASSWORD }}"
+ntfy:
+  notification:
+    # The topic can either be a hardcoded string or a gval expression that evaluates to a string
+    topic: "{{ .ALERTMANAGER_NTFY_TOPIC }}"
+    # Priority reference: https://docs.ntfy.sh/publish/#message-priority
+    # Can either be a hardcoded string or a gval expression that evaluates to a string
+    priority: |
+      status == "firing" ? "urgent" : "default"
+    tags:
+      # Tags with no condition are always included
+      # Emoji shortcode reference: https://docs.ntfy.sh/emojis/
+      - tag: "+1"
+        condition: status == "resolved"
+      - tag: rotating_light
+        condition: status == "firing"
+    templates:
+      title: |
+        {{ `{{ if eq .Status "resolved" }}Resolved: {{ end }}{{ index .Annotations "summary" }}` }}
+      description: |
+        {{ `{{ index .Annotations "description" }}` }}
+      headers:
+        X-Click: |
+          {{ `{{ .GeneratorURL }}` }}
+  # Whether to forward alerts asynchronously. When enabled, a 202 status code is
+  # returned immediately. When disabled, forwarding errors result in a 5xx status
+  # code.
+  async: false
