@@ -5,7 +5,7 @@
       description: 'Process annotated dependencies',
       customType: 'regex',
       managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/'],
-      matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.* (?<currentValue>\\S+)'],
+      matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: extractVersion=(?<extractVersionTemplate>\\S+))?\\n.*[:=]\\s*["\']?(?<currentValue>[^"\'\\s]+)["\']?'],
       versioningTemplate: 'semver-coerced',
     },
     {
