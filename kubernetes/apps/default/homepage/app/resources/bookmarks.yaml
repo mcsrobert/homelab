@@ -1,0 +1,8 @@
+---
+- Developer:
+    - Github:
+        - abbr: GH
+          href: https://github.com/mcsrobert/homelab
+    - Asus RT-AX86S:
+        - abbr: RT
+          href: https://asus-wifi-router.fritz.box:8443
