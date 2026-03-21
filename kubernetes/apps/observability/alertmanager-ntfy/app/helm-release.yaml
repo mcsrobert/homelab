@@ -14,7 +14,7 @@ spec:
     mode: enabled
   values:
     controllers:
-      hcpy:
+      alertmanager-ntfy:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
