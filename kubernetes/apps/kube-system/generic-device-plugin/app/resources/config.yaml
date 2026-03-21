@@ -5,6 +5,7 @@ devices:
     groups:
       - paths:
           - path: /dev/serial/by-id/usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2487785-if00
+            mountPath: /dev/ttyACM0
 
   - name: tun
     groups:
