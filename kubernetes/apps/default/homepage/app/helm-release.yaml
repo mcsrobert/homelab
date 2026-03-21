@@ -40,9 +40,12 @@ spec:
               limits:
                 memory: 256Mi
             env:
+              TZ: ${TIME_ZONE}
               HOMEPAGE_ALLOWED_HOSTS: &host homepage.${CLUSTER_DOMAIN}
               LOG_TARGETS: stdout
-              TZ: ${TIME_ZONE}
+            envFrom:
+              - secretRef:
+                  name: homepage-secret
             probes:
               liveness: &probe
                 enabled: true

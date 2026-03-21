@@ -1,0 +1,26 @@
+---
+- Network:
+    - FRITZ!Box 5590:
+        href: http://fritz.box
+        description: Fiber modem and WiFi 6 router
+        icon: avm-fritzbox
+        widget:
+          type: fritzbox
+          url: http://192.168.178.1
+    - MetalLB:
+        description: Bare-metal load-balancing for Kubernetes
+        icon: metallb
+        app: metallb
+        namespace: network
+    - Traefik:
+        description: Modern reverse proxy for applications
+        icon: traefik-proxy
+        namespace: network
+        app: traefik
+    - Tailscale:
+        href: https://login.tailscale.com/admin/machines
+        description: Zero-config VPN with WireGuard.
+        icon: tailscale
+        app: tailscale
+        namespace: network
+        podSelector: app.kubernetes.io/name in (tailscale, tailscale-operator)

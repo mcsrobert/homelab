@@ -171,6 +171,10 @@ spec:
           gethomepage.dev/icon: immich
           gethomepage.dev/description: High performance self-hosted photo and video management solution
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: immich
+          gethomepage.dev/widget.url: https://immich.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_IMMICH_API_KEY}}` }}"
+          gethomepage.dev/widget.version: "2"
           gethomepage.dev/pod-selector: >-
             app.kubernetes.io/instance in (
               immich,
