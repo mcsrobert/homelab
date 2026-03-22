@@ -85,6 +85,9 @@ spec:
           gethomepage.dev/icon: prowlarr
           gethomepage.dev/description: The ultimate indexer manager
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: prowlarr
+          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_PROWLARR_API_KEY}}` }}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
