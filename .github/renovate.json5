@@ -11,7 +11,8 @@
     'github>mcsrobert/homelab//.github/renovate/pr-labels.json5',
     ':dependencyDashboard',
     ':disableRateLimiting',
-    ':enablePreCommit'
+    ':enablePreCommit',
+    ':separatePatchReleases',
   ],
   timezone: 'Europe/Amsterdam',
   dependencyDashboardTitle: 'Renovate Dashboard',
@@ -19,6 +20,7 @@
     'prEditedNotification',
     'prIgnoreNotification',
   ],
+  prTitleStrict: true,
   commitBodyTable: true,
   rebaseWhen: 'auto',
   platformCommit: 'enabled',
