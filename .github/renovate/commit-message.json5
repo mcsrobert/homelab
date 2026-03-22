@@ -32,16 +32,16 @@
     },
     {
       matchDatasources: ['docker'],
-      semanticCommitScope: 'container'
+      semanticCommitScope: 'container',
     },
     {
       matchDatasources: ['helm'],
-      semanticCommitScope: 'helm'
+      semanticCommitScope: 'helm',
     },
     {
       matchManagers: ['github-actions'],
       semanticCommitType: 'ci',
-      semanticCommitScope: 'github-action'
+      semanticCommitScope: 'github-action',
     }
   ]
 }
