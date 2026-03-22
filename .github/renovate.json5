@@ -19,6 +19,7 @@
     'prEditedNotification',
     'prIgnoreNotification',
   ],
+  separateMinorPatch: true,
   commitBodyTable: true,
   rebaseWhen: 'auto',
   platformCommit: 'enabled',
