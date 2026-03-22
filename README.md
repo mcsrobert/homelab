@@ -42,6 +42,7 @@ My homelab consists of a small k3s cluster and a NAS.
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
 | [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
+| [ntfy](https://ntfy.sh) | Notifications | Free | |
 | [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (5TB) | ~€13/mo | rclone sync + snapshots |
 
 ## Acknowledgements
