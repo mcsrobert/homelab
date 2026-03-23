@@ -34,7 +34,7 @@ spec:
               TZ: ${TIME_ZONE}
               SONARR__APP__INSTANCENAME: Sonarr
               SONARR__APP__THEME: dark
-              SONARR__APPLICATION_URL: "https://{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+              SONARR__APPLICATION_URL: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
               SONARR__LOG__LEVEL: info
               SONARR__LOG__ANALYTICSENABLED: false
               SONARR__SERVER__PORT: &port 8080
@@ -84,6 +84,9 @@ spec:
           gethomepage.dev/icon: sonarr
           gethomepage.dev/description: TV Show organizer & manager
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: sonarr
+          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SONARR_API_KEY}}` }}"
         parentRefs:
           - name: traefik-gateway
             namespace: network

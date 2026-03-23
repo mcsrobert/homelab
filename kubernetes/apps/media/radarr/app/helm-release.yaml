@@ -34,7 +34,7 @@ spec:
               TZ: ${TIME_ZONE}
               RADARR__APP__INSTANCENAME: Radarr
               RADARR__APP__THEME: dark
-              RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+              RADARR__APPLICATION_URL: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
               RADARR__LOG__LEVEL: info
               RADARR__LOG__ANALYTICSENABLED: false
               RADARR__SERVER__PORT: &port 8080
@@ -84,6 +84,9 @@ spec:
           gethomepage.dev/icon: radarr
           gethomepage.dev/description: Movie organizer & manager
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: radarr
+          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_RADARR_API_KEY}}` }}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
