@@ -102,6 +102,13 @@ spec:
           gethomepage.dev/icon: jellyfin
           gethomepage.dev/description: Open-source Media Server
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: jellyfin
+          gethomepage.dev/widget.version: "2"
+          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}` }}"
+          gethomepage.dev/widget.enableBlocks: "true"
+          gethomepage.dev/widget.enableNowPlaying: "false"
+          gethomepage.dev/widget.enableMediaControl: "false"
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
