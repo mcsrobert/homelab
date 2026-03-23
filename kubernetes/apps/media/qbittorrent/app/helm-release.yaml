@@ -199,6 +199,10 @@ spec:
           gethomepage.dev/icon: qbittorrent
           gethomepage.dev/description: Lightweight, open-source bittorrent client
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: qbittorrent
+          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_WEB_USERNAME}}`}}"
+          gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_WEB_PASSWORD}}`}}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
