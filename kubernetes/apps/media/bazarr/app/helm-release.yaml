@@ -79,6 +79,9 @@ spec:
           gethomepage.dev/icon: bazarr
           gethomepage.dev/description: Subtitle manager
           gethomepage.dev/group: Media
+          gethomepage.dev/widget.type: bazarr
+          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_BAZARR_API_KEY}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
