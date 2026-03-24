@@ -2,6 +2,14 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
+      matchPackagePatterns: ['*'],
+      groupName: null, // matches any group
+      group: {
+        commitMessageExtra: '',
+        commitMessageSuffix: '',
+      },
+    },
+    {
       matchUpdateTypes: ['major'],
       semanticCommitType: 'feat!',
       commitMessageTopic: '{{depName}}',
