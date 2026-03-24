@@ -11,7 +11,7 @@
       customType: 'regex',
       managerFilePatterns: ['/requirements\\.ya?ml$/'],
       matchStrings: ['- name: https://github\\.com/(?<depName>[\\S+]+/[\\S]+)(\\.git)?(\\s+type: git)?\\s+version: (?<currentValue>.+)'],
-      datasourceTemplate: 'github-tags'
+      datasourceTemplate: 'github-tags',
     },
     {
       description: 'Ansible Galaxy collections',
