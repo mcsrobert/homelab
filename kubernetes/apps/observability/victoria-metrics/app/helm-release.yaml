@@ -108,14 +108,26 @@ spec:
       spec:
         scrapeInterval: 20s
         inlineRelabelConfig:
+          # # drop high cardinality labels
+          # - action: labeldrop
+          #   regex: ^(id|uid|pod_uid|image|ip|address|snapshot|backup)$
+          # drop kubernetes labels
           - action: labeldrop
-            regex: "feature_node_kubernetes_io_(.*)"
+            regex: ^beta_kubernetes_io_
+          - action: labeldrop
+            regex: ^node(_role)?_kubernetes_io_
+          # drop node feature discovery labels
+          - action: labeldrop
+            regex: ^feature_node_kubernetes_io_
+          # drop k3s labels
+          - action: labeldrop
+            regex: ^p2p_k3s_cattle_io_enabled$
         resources:
           requests:
             cpu: 200m
             memory: 250Mi
           limits:
-            memory: 500Mi
+            memory: 1Gi
       ingress:
         enabled: false
       route:
