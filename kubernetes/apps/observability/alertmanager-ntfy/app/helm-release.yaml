@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: ghcr.io/alexbakker/alertmanager-ntfy
-              tag: 1.1.0@sha256:d676c8b688e789201d8fd05e90c7380a33bcadc46786c03a3e6bcee671484b53
+              tag: 1.2.1@sha256:2a862f23c8fb67f777824979487c06a417b2f9bbbc2eb45a974a1fb45b9bbff3
             args:
               - --configs
               - &configPath /config.yaml
