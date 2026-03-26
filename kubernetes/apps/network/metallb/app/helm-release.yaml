@@ -17,9 +17,9 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:
+  values: # https://github.com/metallb/metallb/tree/main/charts/metallb#values
     prometheus:
       namespace: observability
-      serviceAccount: observability-kube-prometheus-operator
-      serviceMonitor:
+      rbacPrometheus: false
+      podMonitor:
         enabled: true
