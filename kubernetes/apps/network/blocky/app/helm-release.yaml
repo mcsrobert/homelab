@@ -71,7 +71,7 @@ spec:
         name: blocky-config
         globalMounts:
           - path: /app/config.yml
-            subPath: config.yml
+            subPath: config.yaml
     service:
       app:
         ports:

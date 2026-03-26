@@ -5,3 +5,9 @@ kind: Kustomization
 resources:
   - ./helm-release.yaml
   - ./external-secret.yaml
+configMapGenerator:
+  - name: blocky-config-tpl
+    files:
+      - ./resources/config.yaml
+generatorOptions:
+  disableNameSuffixHash: true
