@@ -43,7 +43,7 @@ ports:
   # dns: 1053
   http: 4000
 redis:
-  address: blocky-dragonfly
+  address: blocky-dragonfly.network.svc.cluster.local:6379
   password: "{{ .BLOCKY_DRAGONFLY_PASSWORD }}"
 prometheus:
   enable: true
