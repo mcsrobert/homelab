@@ -5,10 +5,12 @@ kind: HelmRelease
 metadata:
   name: traefik-crds
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: traefik-crds
+  interval: 30m
+  driftDetection:
+    mode: enabled
   install:
     crds: CreateReplace
   upgrade:
