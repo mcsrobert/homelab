@@ -5,18 +5,20 @@ kind: HelmRelease
 metadata:
   name: traefik
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: traefik
+  interval: 30m
+  driftDetection:
+    mode: enabled
   install:
-    crds: Skip  # handled by traefik-crds
+    crds: CreateReplace
   upgrade:
-    crds: Skip  # handled by traefik-crds
-  values:
+    crds: CreateReplace
+  values: # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/VALUES.md#values
     providers:
       kubernetesCRD:
-        allowCrossNamespace: true  # needed for ForwardAuth middleware
+        enabled: false
       kubernetesGateway:
         enabled: true
     service:
