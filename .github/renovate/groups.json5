@@ -2,6 +2,18 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
+      description: 'Auto Merge Dev & CI Dependencies every Tuesday',
+      groupName: 'Dev & CI dependencies',
+      matchDatasources: [
+        'galaxy-collection',
+        'github-actions',
+        'pre-commit',
+      ],
+      minimumReleaseAge: '6d',
+      schedule: ['* 7-9 * * 2'],
+      automerge: true,
+    },
+    {
       groupName: 'k3s',
       matchDatasources: ['github-releases'],
       matchDepNames: [
@@ -21,18 +33,6 @@
       matchDatasources: ['docker', 'helm'],
       matchDepNames: ['/plugin-barman-cloud/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
-    },
-    {
-      description: 'Auto Merge CI Dependencies Weekly',
-      groupName: 'CI dependencies',
-      matchManagers: [
-        'ansible-galaxy',
-        'github-actions',
-        'pre-commit',
-      ],
-      schedule: ['* 7-9 * * 2'],
-      minimumReleaseAge: '6d',
-      automerge: true,
     },
   ]
 }
