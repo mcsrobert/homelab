@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: external-secrets
     - name: longhorn
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/default/mealie/app
   sourceRef:
     kind: GitRepository

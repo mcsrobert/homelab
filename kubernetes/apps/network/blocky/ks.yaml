@@ -11,7 +11,7 @@ spec:
     - name: external-secrets
     - name: metallb-pools
     - name: prometheus-operator-crds
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/network/blocky/app
   sourceRef:
     kind: GitRepository

@@ -47,7 +47,7 @@ metadata:
 spec:
   dependsOn:
     - name: flux-operator
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/flux-system/flux-operator/web
   sourceRef:
     kind: GitRepository
