@@ -99,10 +99,11 @@ spec:
           - mealie.${CLUSTER_DOMAIN}
         rules:
           - backendRefs:
-              - kind: Service
-                name: keda-add-ons-http-interceptor-proxy
-                namespace: system
-                port: 8080
+              - identifier: app
+        #       - kind: Service
+        #         name: keda-add-ons-http-interceptor-proxy
+        #         namespace: system
+        #         port: 8080
         parentRefs:
           - name: traefik-gateway
             namespace: network
