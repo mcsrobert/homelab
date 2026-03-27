@@ -6,6 +6,8 @@ metadata:
   name: traefik-crds
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: gateway-api-crds
   path: /kubernetes/apps/network/traefik/crds
   sourceRef:
     kind: GitRepository
