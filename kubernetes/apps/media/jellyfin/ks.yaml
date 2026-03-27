@@ -10,7 +10,7 @@ spec:
     - name: external-secrets
     - name: generic-device-plugin
     - name: longhorn
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/media/jellyfin/app
   sourceRef:
     kind: GitRepository
