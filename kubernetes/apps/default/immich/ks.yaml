@@ -60,7 +60,7 @@ spec:
     - name: longhorn
     - name: immich-dragonfly
     - name: immich-cnpg
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/default/immich/app
   sourceRef:
     kind: GitRepository
