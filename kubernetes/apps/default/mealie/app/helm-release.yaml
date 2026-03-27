@@ -45,7 +45,7 @@ spec:
               OIDC_CLIENT_ID: mealie
               OIDC_USER_GROUP: id_user
               OIDC_ADMIN_GROUP: id_admin
-              OIDC_AUTO_REDIRECT: false
+              OIDC_AUTO_REDIRECT: true
               OIDC_REMEMBER_ME: true
               SMTP_AUTH_STRATEGY: NONE
               SMTP_HOST: maddy.default.svc.cluster.local
