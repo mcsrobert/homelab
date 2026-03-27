@@ -6,6 +6,7 @@ resources:
   - ./namespace.yaml
   # Apps
   - ./external-snapshotter/ks.yaml
+  - ./gateway-api/ks.yaml
   - ./generic-device-plugin/ks.yaml
   - ./node-feature-discovery/ks.yaml
   - ./reloader/ks.yaml
