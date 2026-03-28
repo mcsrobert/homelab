@@ -31,7 +31,7 @@
         src: kube-vip.yaml.j2
         dest: /var/lib/rancher/k3s/agent/pod-manifests/kube-vip.yaml
         mode: "0644"
-      notify: Wait the node to come back online
+      notify: Wait the API to come back online
 
   handlers:
 
