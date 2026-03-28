@@ -18,3 +18,4 @@ config-example.conf
 
 # Ansible
 .ansible
+.cache
