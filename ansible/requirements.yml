@@ -4,10 +4,14 @@ collections:
     type: git
     version: 1.2.0
 
-  - name: kubernetes.core
-    type: galaxy
-    version: 6.3.0
-
   - name: community.general
     type: galaxy
     version: 12.5.0
+
+  - name: ansible.posix
+    type: galaxy
+    version: 2.1.0
+
+  - name: kubernetes.core
+    type: galaxy
+    version: 6.3.0
