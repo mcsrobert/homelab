@@ -1,0 +1,29 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  packageRules: [
+    {
+      description: 'All releases are at least 14d old',
+      matchPackageNames: ['*'],
+      minimumReleaseAge: '14d',
+    },
+    {
+      description: 'Auto merge patch releases',
+      matchUpdateTypes: ['patch'],
+      matchCurrentVersion: '>=1.0.0',
+      automerge: true,
+    },
+    {
+      description: 'Group and auto merge Dev & CI dependencies',
+      groupName: 'Dev & CI dependencies',
+      matchFileNames: [
+        '.github/**',
+        'ansible/requirements.yml',
+        '.pre-commit-config.yaml',
+      ],
+      minimumReleaseAge: '30d',
+      schedule: ['* 7-9 * * 1'],  // Monday morning
+      automergeSchedule: ['* 13-15 * * 4'], // Thursday afternoon
+      automerge: true,
+    },
+  ]
+}
