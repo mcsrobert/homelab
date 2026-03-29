@@ -2,18 +2,6 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      description: 'Auto Merge Dev & CI dependencies every Tuesday',
-      groupName: 'Dev & CI dependencies',
-      matchFileNames: [
-        '.github/**',
-        'ansible/requirements.yml',
-        '.pre-commit-config.yaml',
-      ],
-      minimumReleaseAge: '6d',
-      schedule: ['* 7-9 * * 2'],
-      automerge: true,
-    },
-    {
       groupName: 'k3s',
       matchDatasources: ['github-releases'],
       matchDepNames: [
