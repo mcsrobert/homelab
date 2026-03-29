@@ -5,8 +5,7 @@ route:
     - alertname
   routes:
     - matchers:
-        - alertname = Watchdog
-        - alertname = InfoInhibitor
+        - alertname =~ "Watchdog|InfoInhibitor"
       receiver: blackhole
 receivers:
   - name: blackhole
