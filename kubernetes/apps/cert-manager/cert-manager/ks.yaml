@@ -6,6 +6,8 @@ metadata:
   name: cert-manager
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/cert-manager/cert-manager/app
   sourceRef:
     kind: GitRepository
