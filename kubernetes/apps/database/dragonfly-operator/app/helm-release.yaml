@@ -13,7 +13,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:
+  values: # https://github.com/dragonflydb/dragonfly-operator/blob/main/charts/dragonfly-operator/values.yaml
     manager:
       extraArgs:
         # See: https://github.com/dragonflydb/dragonfly-operator/issues/258
@@ -25,9 +25,7 @@ spec:
         limits:
           cpu: 500m
           memory: 64Mi
-
     serviceMonitor:
       enabled: true
-    # TODO: enable when I have the Grafana Operator
     grafanaDashboard:
-      enabled: false
+      enabled: true
