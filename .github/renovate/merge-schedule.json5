@@ -11,6 +11,7 @@
       matchUpdateTypes: ['patch'],
       matchCurrentVersion: '>=1.0.0',
       automerge: true,
+      automergeSchedule: ['* 11-13 * * 1-5'], // Weekdays, mid day
     },
     {
       description: 'Group and auto merge Dev & CI dependencies',
@@ -22,8 +23,8 @@
       ],
       minimumReleaseAge: '30d',
       schedule: ['* 7-9 * * 1'],  // Monday morning
-      automergeSchedule: ['* 13-15 * * 4'], // Thursday afternoon
       automerge: true,
+      automergeSchedule: ['* 13-15 * * 4'], // Thursday afternoon
     },
   ]
 }
