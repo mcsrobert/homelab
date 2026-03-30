@@ -95,15 +95,15 @@ spec:
           gethomepage.dev/icon: mealie
           gethomepage.dev/description: Recipe manager and meal planner
           gethomepage.dev/group: Apps
+          gethomepage.dev/widget.type: mealie
+          gethomepage.dev/widget.version: "2"
+          gethomepage.dev/widget.url: https://mealie.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_MEALIE_API_TOKEN}}` }}"
         hostnames:
           - mealie.${CLUSTER_DOMAIN}
         rules:
           - backendRefs:
               - identifier: app
-        #       - kind: Service
-        #         name: keda-add-ons-http-interceptor-proxy
-        #         namespace: system
-        #         port: 8080
         parentRefs:
           - name: traefik-gateway
             namespace: network
