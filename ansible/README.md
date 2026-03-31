@@ -17,11 +17,11 @@ The [playbooks/](./playbooks/) directory contains several playbook to run.
 A playbook can be run as follows:
 
 ```bash
-ansible-playbook -i inventory.yaml playbooks/install.yaml
+ansible-playbook playbooks/install.yaml
 ```
 
 To just upgrade k3s, run:
 
 ```bash
-ansible-playbook -i inventory.yaml k3s.orchestration.upgrade
+ansible-playbook k3s.orchestration.upgrade
 ```
