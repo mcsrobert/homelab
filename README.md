@@ -1,12 +1,12 @@
 # Homelab
 
-A production-grade, GitOps-driven homelab running ~20 self-hosted applications
-on a low-power ARM Kubernetes cluster. Infrastructure and application
-configuration are fully declarative and managed through
-[FluxCD](https://fluxcd.io), [Ansible](https://docs.ansible.com), [GitHub
+My GitOps-driven homelab running ~20 self-hosted applications on a low-power ARM
+Kubernetes cluster. Infrastructure and application configuration are fully
+declarative and managed through [FluxCD](https://fluxcd.io),
+[Ansible](https://docs.ansible.com), [GitHub
 Actions](https://docs.github.com/en/actions) and
-[Renovate](https://docs.github.com/en/actions) -- covering everything from
-initial OS image builds to automated dependency updates.
+[Renovate](https://docs.github.com/en/actions); covering everything from initial
+OS image builds to automated dependency updates.
 
 ## Repository
 
@@ -80,7 +80,7 @@ options, as long as they offer enough features.
 ### Observability
 
 - [Victoria Metrics](https://victoriametrics.com/products/open-source/) - Scrape
-  and storage metrics. Lighter alternative to Prometheus.
+  and store metrics. Lighter alternative to Prometheus.
 - [Victoria Logs](https://victoriametrics.com/products/victorialogs/) - Collect
   and store logs. Lighter alternative to Loki.
 - [Grafana](https://grafana.com) - UI to explore data and dashboards
