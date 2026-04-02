@@ -8,4 +8,5 @@ resources:
   - ./alertmanager-ntfy/ks.yaml
   - ./grafana/ks.yaml
   - ./prometheus-operator-crds/ks.yaml
+  - ./victoria-logs/ks.yaml
   - ./victoria-metrics/ks.yaml
