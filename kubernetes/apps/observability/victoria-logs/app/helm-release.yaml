@@ -21,8 +21,27 @@ spec:
         size: 20Gi
       route:
         enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Victoria Logs
+          gethomepage.dev/icon: victorialogs
+          gethomepage.dev/description: Simple & Reliable Logs Solution
+          gethomepage.dev/group: Observability
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=victoria-logs-single
         hostnames:
           - victoria-logs.${CLUSTER_DOMAIN}
+        extraRules:
+          - filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /select/vmui/
+                  statusCode: 302
+            matches:
+              - path:
+                  type: Exact
+                  value: /
         parentRefs:
           - name: traefik-gateway
             namespace: network
