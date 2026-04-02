@@ -5,10 +5,12 @@ kind: HelmRelease
 metadata:
   name: victoria-metrics
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
-    name: victoria-metrics
+    name: victoria-metrics-k8s-stack
+  interval: 30m
+  driftDetection:
+    mode: enabled
   install:
     crds: CreateReplace
   upgrade:
@@ -18,6 +20,8 @@ spec:
 
     defaultDashboards:
       enabled: true
+      annotations:
+        grafana_folder: observability
     grafana:
       enabled: false
 
@@ -40,7 +44,6 @@ spec:
     vmsingle:
       enabled: true
       spec:
-        replicaCount: 1
         retentionPeriod: 10d
         storage:
           storageClassName: longhorn-victoria-metrics
@@ -67,7 +70,7 @@ spec:
             namespace: network
             sectionName: websecure
         hostnames:
-          - vm.${CLUSTER_DOMAIN}
+          - victoria-metrics.${CLUSTER_DOMAIN}
 
     alertmanager:
       enabled: true

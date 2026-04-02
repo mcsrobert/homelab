@@ -1,0 +1,26 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs-collector
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-logs-collector
+  interval: 30m
+  driftDetection:
+    mode: enabled
+  values: # https://docs.victoriametrics.com/helm/victoria-logs-collector/#parameters
+    remoteWrite:
+      - url: http://victoria-logs-server.{{ .Release.Namespace }}.svc.cluster.local:9428
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    podMonitor:
+      enabled: true
+      vm: true

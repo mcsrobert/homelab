@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-logs-single
+  interval: 30m
+  driftDetection:
+    mode: enabled
+  values: # https://docs.victoriametrics.com/helm/victoria-logs-single/#parameters
+    fullnameOverride: victoria-logs
+    server:
+      retentionPeriod: 10d
+      persistentVolume:
+        enabled: true
+        storageClassName: longhorn-victoria-metrics
+        size: 20Gi
+      route:
+        enabled: true
+        hostnames:
+          - victoria-logs.${CLUSTER_DOMAIN}
+        parentRefs:
+          - name: traefik-gateway
+            namespace: network
+            sectionName: websecure
+      vmServiceScrape:
+        enabled: true
+    dashboards:
+      enabled: true
+      annotations:
+        grafana_folder: observability
+      labels:
+        grafana_dashboard: "1"
