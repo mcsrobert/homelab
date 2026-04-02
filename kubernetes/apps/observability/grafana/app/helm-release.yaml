@@ -60,7 +60,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Grafana
           gethomepage.dev/icon: grafana
-          gethomepage.dev/description: The open and composable observability platform
+          gethomepage.dev/description: Open and composable observability platform
           gethomepage.dev/group: Observability
           gethomepage.dev/pod-selector: app.kubernetes.io/name=grafana
         hostnames:

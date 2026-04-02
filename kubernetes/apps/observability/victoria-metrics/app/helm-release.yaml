@@ -65,12 +65,31 @@ spec:
         enabled: false
       route:
         enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Victoria Metrics
+          gethomepage.dev/icon: victoriametrics
+          gethomepage.dev/description: Time Series Database & Monitoring Solution
+          gethomepage.dev/group: Observability
+          gethomepage.dev/pod-selector: app.kubernetes.io/name=vmsingle
+        hostnames:
+          - victoria-metrics.${CLUSTER_DOMAIN}
+        extraRules:
+          - filters:
+              - type: RequestRedirect
+                requestRedirect:
+                  path:
+                    type: ReplaceFullPath
+                    replaceFullPath: /vmui/
+                  statusCode: 302
+            matches:
+              - path:
+                  type: Exact
+                  value: /
         parentRefs: &parentRefs
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-        hostnames:
-          - victoria-metrics.${CLUSTER_DOMAIN}
 
     alertmanager:
       enabled: true
@@ -88,9 +107,9 @@ spec:
           gethomepage.dev/description: Collects, manages and sends alerts to receivers
           gethomepage.dev/group: Observability
           gethomepage.dev/pod-selector: app.kubernetes.io/name=vmalertmanager
-        parentRefs: *parentRefs
         hostnames:
           - alertmanager.${CLUSTER_DOMAIN}
+        parentRefs: *parentRefs
 
     vmalert:
       enabled: true
@@ -102,9 +121,9 @@ spec:
         enabled: false
       route:
         enabled: true
-        parentRefs: *parentRefs
         hostnames:
           - vm-alert.${CLUSTER_DOMAIN}
+        parentRefs: *parentRefs
 
     vmagent:
       enabled: true
@@ -135,6 +154,6 @@ spec:
         enabled: false
       route:
         enabled: true
-        parentRefs: *parentRefs
         hostnames:
           - vm-agent.${CLUSTER_DOMAIN}
+        parentRefs: *parentRefs
