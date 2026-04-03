@@ -57,6 +57,7 @@ spec:
                     httpHeaders:
                       - name: Host
                         value: *host
+                  timeoutSeconds: 10
               readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
