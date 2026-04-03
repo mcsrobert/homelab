@@ -22,9 +22,9 @@ spec:
         pod:
           securityContext:
             runAsNonRoot: true
-            runAsUser: &nobody 65534
-            runAsGroup: *nobody
-            fsGroup: *nobody
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
@@ -41,8 +41,8 @@ spec:
                 memory: 256Mi
             env:
               TZ: ${TIME_ZONE}
-              HOMEPAGE_ALLOWED_HOSTS: &host homepage.${CLUSTER_DOMAIN}
               LOG_TARGETS: stdout
+              HOMEPAGE_ALLOWED_HOSTS: &host homepage.${CLUSTER_DOMAIN}
             envFrom:
               - secretRef:
                   name: homepage-secret
@@ -60,7 +60,7 @@ spec:
               readiness: *probe
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              readOnlyRootFilesystem: false # fixes: Failed to update prerender cache
               capabilities:
                 drop:
                   - ALL
