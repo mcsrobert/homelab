@@ -7,24 +7,24 @@
       minimumReleaseAge: '14d',
     },
     {
-      description: 'Auto merge patch releases',
+      description: 'Auto merge patch releases on weekdays',
       matchUpdateTypes: ['patch'],
       matchCurrentVersion: '>=1.0.0',
+      schedule: ['* 12-13 * * 0-4'],
       automerge: true,
-      automergeSchedule: ['* 11-13 * * 1-5'], // Weekdays, mid day
+      automergeSchedule: ['* 10-11 * * 1-5'],
     },
     {
-      description: 'Group and auto merge Dev & CI dependencies',
+      description: 'Group and auto merge Dev & CI dependencies weekly',
       groupName: 'Dev & CI dependencies',
       matchFileNames: [
         '.github/**',
         'ansible/requirements.yml',
         '.pre-commit-config.yaml',
       ],
-      minimumReleaseAge: '30d',
-      schedule: ['* 7-9 * * 1'],  // Monday morning
+      schedule: ['* 7-8 * * 3'],
       automerge: true,
-      automergeSchedule: ['* 13-15 * * 4'], // Thursday afternoon
+      automergeSchedule: ['* 14-15 * * 2'],
     },
   ]
 }
