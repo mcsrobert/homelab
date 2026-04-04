@@ -34,12 +34,9 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  tcpSocket:
-                    port: &port 1883
-                  initialDelaySeconds: 1
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+                  exec:
+                    command: ['mosquitto_sub', '-p', '1880', '-t', '$$SYS/#', '-C', '1', '-E', '-i', 'probe', '-W', '3']
+                  periodSeconds: 15
               readiness: *probes
             resources:
               requests:
@@ -75,4 +72,4 @@ spec:
       app:
         ports:
           mqtt:
-            port: *port
+            port: 1883
