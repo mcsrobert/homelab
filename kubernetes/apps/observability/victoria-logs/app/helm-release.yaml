@@ -25,7 +25,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Victoria Logs
           gethomepage.dev/icon: victorialogs
-          gethomepage.dev/description: Simple & Reliable Logs Solution
+          gethomepage.dev/description: Simple and reliable logging solution
           gethomepage.dev/group: Observability
           gethomepage.dev/pod-selector: app.kubernetes.io/name=victoria-logs-single
         hostnames:

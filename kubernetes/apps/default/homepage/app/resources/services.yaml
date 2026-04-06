@@ -19,7 +19,7 @@
         app: traefik
     - Tailscale:
         href: https://login.tailscale.com/admin/machines
-        description: Zero-config VPN with WireGuard.
+        description: Zero-config VPN with WireGuard
         icon: tailscale
         app: tailscale
         namespace: network

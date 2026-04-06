@@ -69,7 +69,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Victoria Metrics
           gethomepage.dev/icon: victoriametrics
-          gethomepage.dev/description: Time Series Database & Monitoring Solution
+          gethomepage.dev/description: Time series database and monitoring solution
           gethomepage.dev/group: Observability
           gethomepage.dev/pod-selector: app.kubernetes.io/name=vmsingle
         hostnames:
