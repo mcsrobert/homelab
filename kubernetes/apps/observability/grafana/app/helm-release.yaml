@@ -74,11 +74,6 @@ spec:
     datasources:
       datasources.yaml:
         apiVersion: 1
-        # deleteDatasources:
-        #   - { name: Alertmanager, orgId: 1 }
-        #   - { name: Loki, orgId: 1 }
-        #   - { name: Prometheus, orgId: 1 }
-        #   - { name: Tempo, orgId: 1 }
         datasources:
           - name: Prometheus
             type: prometheus
@@ -86,13 +81,6 @@ spec:
             access: proxy
             url: http://vmsingle-victoria-metrics:8428
             isDefault: true
-          # - name: Loki
-          #   type: loki
-          #   uid: loki
-          #   access: proxy
-          #   url: http://loki-headless.observability.svc.cluster.local:3100
-          #   jsonData:
-          #     maxLines: 250
           - name: Alertmanager
             type: alertmanager
             uid: alertmanager
@@ -112,16 +100,24 @@ spec:
             editable: false
             options:
               path: /var/lib/grafana/dashboards/default
+          - name: network
+            orgId: 1
+            folder: network
+            type: file
+            disableDeletion: true
+            editable: false
+            options:
+              path: /var/lib/grafana/dashboards/network
+          - name: storage
+            orgId: 1
+            folder: storage
+            type: file
+            disableDeletion: true
+            editable: false
+            options:
+              path: /var/lib/grafana/dashboards/storage
     dashboards:
       default:
-        blocky:
-          gnetId: 13768
-          revision: 7
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
-            - name: VAR_BLOCKY_URL
-              value: http:\/\/blocky-app.network.svc.cluster.local:4000
         cert-manager:
           gnetId: 20842
           revision: 3
@@ -136,23 +132,38 @@ spec:
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
-        longhorn:
-          gnetId: 16888
-          revision: 11
+        node-feature-discovery:
+          url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
+          datasource:
+            - name: DS_PROMETHEUS
+              value: prometheus
+      network:
+        blocky:
+          gnetId: 13768
+          revision: 7
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
+            - name: VAR_BLOCKY_URL
+              value: http:\/\/blocky-app.network.svc.cluster.local:4000
         metallb:
           gnetId: 20162
           revision: 6
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
-        node-feature-discovery:
-          url: https://raw.githubusercontent.com/kubernetes-sigs/node-feature-discovery/master/examples/grafana-dashboard.json
-          datasource:
-            - name: DS_PROMETHEUS
-              value: Prometheus
         traefik:
           gnetId: 17346
           revision: 9
+      storage:
+        garage:
+          url: https://git.deuxfleurs.fr/Deuxfleurs/garage/raw/branch/main-v1/script/telemetry/grafana-garage-dashboard-prometheus.json
+          datasource:
+            - name: DS_DS_PROMETHEUS
+              value: Prometheus
+        longhorn:
+          gnetId: 16888
+          revision: 11
     sidecar:
       dashboards:
         enabled: true
