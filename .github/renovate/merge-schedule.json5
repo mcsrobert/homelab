@@ -8,6 +8,7 @@
     },
     {
       description: 'Auto merge patch releases on weekdays',
+      matchDatasources: ['docker', 'helm'],
       matchUpdateTypes: ['patch'],
       matchCurrentVersion: '>=1.0.0',
       schedule: ['* 12-13 * * 0-4'],
