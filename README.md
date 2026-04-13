@@ -85,7 +85,11 @@ options, as long as they offer enough features.
   and store logs. Lighter alternative to Loki.
 - [Grafana](https://grafana.com) - UI to explore data and dashboards
 
-### Auth
+### Security
+
+- [Kyverno](https://kyverno.io) - Kubernetes-native Policies
+
+### AuthN / AuthZ
 
 - [Authelia](https://www.authelia.com) - Provides OIDC and can act as a
   ForwardAuth proxy. Lighter alternative to Authentik or Keycloak. Tried Pocket
