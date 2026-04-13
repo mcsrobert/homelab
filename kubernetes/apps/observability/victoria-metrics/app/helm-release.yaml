@@ -40,6 +40,12 @@ spec:
       fullnameOverride: victoria-metrics-operator
       operator:
         enable_converter_ownership: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
 
     vmsingle:
       enabled: true
@@ -96,6 +102,12 @@ spec:
       spec:
         externalURL: https://alertmanager.${CLUSTER_DOMAIN}
         configSecret: alertmanager-config-secret
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
       ingress:
         enabled: false
       route:
@@ -116,6 +128,12 @@ spec:
       spec:
         extraArgs:
           external.url: https://vm-alert.${CLUSTER_DOMAIN}
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
         evaluationInterval: 15s
       ingress:
         enabled: false
@@ -146,10 +164,10 @@ spec:
             regex: ^p2p_k3s_cattle_io_enabled$
         resources:
           requests:
-            cpu: 200m
-            memory: 250Mi
+            cpu: 500m
+            memory: 384Mi
           limits:
-            memory: 1Gi
+            memory: 768Mi
       ingress:
         enabled: false
       route:
@@ -157,3 +175,19 @@ spec:
         hostnames:
           - vm-agent.${CLUSTER_DOMAIN}
         parentRefs: *parentRefs
+
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 32Mi
+        limits:
+          memory: 256Mi
+
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 24Mi
+        limits:
+          memory: 64Mi
