@@ -9,7 +9,7 @@ spec:
   dependsOn:
     - name: alertmanager-ntfy
     - name: external-secrets
-    - name: traefik
+    - name: traefik-crds
   path: /kubernetes/apps/observability/victoria-metrics/app
   sourceRef:
     kind: GitRepository

@@ -55,11 +55,11 @@ spec:
         extraArgs:
           maxLabelsPerTimeseries: "150"
         resources:
-          limits:
-            memory: 3Gi
           requests:
             cpu: 500m
             memory: 1.5Gi
+          limits:
+            memory: 3Gi
         # downsampling.period: 30d:1m,90d:5m,180d:30m,1y:1h,2y:4h,5y:12h,10y:1d
       ingress:
         enabled: false
@@ -102,7 +102,7 @@ spec:
         enabled: true
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: VMAlertmanager
+          gethomepage.dev/name: Alertmanager
           gethomepage.dev/icon: alertmanager
           gethomepage.dev/description: Collects, manages and sends alerts to receivers
           gethomepage.dev/group: Observability
