@@ -19,6 +19,12 @@ spec:
         enabled: true
         storageClassName: longhorn-victoria-metrics
         size: 20Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
       route:
         enabled: true
         annotations:

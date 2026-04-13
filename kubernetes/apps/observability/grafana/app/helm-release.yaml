@@ -51,6 +51,12 @@ spec:
         news_feed_enabled: false
       server:
         root_url: https://grafana.${CLUSTER_DOMAIN}/
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
     serviceMonitor:
       enabled: true
     route:
@@ -174,6 +180,12 @@ spec:
           disableDelete: true
           foldersFromFilesStructure: true
       datasources:
-        enabled: true
+        enabled: false
         searchNamespace: ALL
         labelValue: ""
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
