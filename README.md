@@ -87,7 +87,8 @@ options, as long as they offer enough features.
 
 ### Security
 
-- [Kyverno](https://kyverno.io) - Kubernetes-native Policies
+- [Kyverno](https://kyverno.io) - Kubernetes-native policies for security and
+  automation.
 
 ### AuthN / AuthZ
 
