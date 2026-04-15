@@ -94,7 +94,7 @@ spec:
                 cpu: 100m
               limits:
                 memory: 4Gi
-                squat.ai/npu: 1
+                devic.es/npu: 1
             securityContext:
               # TODO: run as non root when kernel supports it
               privileged: true

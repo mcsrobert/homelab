@@ -42,7 +42,7 @@ spec:
                 memory: 2Gi
               limits:
                 memory: 6Gi
-                squat.ai/vpu: "1"
+                devic.es/vpu: "1"
             securityContext:
               # NOTE: This is needed for hwaccel per the docs: https://jellyfin.org/docs/general/post-install/transcoding/hardware-acceleration/rockchip/#linux-setups
               # I tried to make it work without, but was not able to.
