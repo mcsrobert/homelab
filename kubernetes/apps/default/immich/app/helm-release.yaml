@@ -32,7 +32,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: v2.6.3@sha256:0cc1f82953d9598eb9e9dd11cbde1f50fe54f9c46c4506b089e8ad7bfc9d1f0c
+              tag: v2.7.5@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
             env:
               !!merge <<: &sharedEnv
                 TZ: ${TIME_ZONE}
@@ -81,7 +81,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: v2.6.3-rknn@sha256:5551deaab631043e0acdb2dbb093c0b2c741439eb851da145ece26b79d2f5007
+              tag: v2.7.5-rknn@sha256:397aee8a2dc67fda0af410679ae977a9a2d749f743c97ed28c9f23c9d101cb44
             env:
               !!merge <<: *sharedEnv
               IMMICH_LOG_LEVEL: info
