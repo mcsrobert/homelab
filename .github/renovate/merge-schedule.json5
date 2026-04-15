@@ -1,31 +1,34 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  respectLatest: false,
   packageRules: [
     {
-      description: 'All releases are at least 14d old',
-      matchPackageNames: ['*'],
-      minimumReleaseAge: '14d',
-    },
-    {
-      description: 'Auto merge patch releases on weekdays',
+      description: 'Auto merge patch releases twice a month',
       matchDatasources: ['docker', 'helm'],
       matchUpdateTypes: ['patch'],
-      matchCurrentVersion: '>=1.0.0',
-      schedule: ['* 12-13 * * 0-4'],
+      schedule: ['on the 4th and 19th day of the month'],
       automerge: true,
-      automergeSchedule: ['* 10-11 * * 1-5'],
+      automergeSchedule: [
+        'on the 1st, 2nd, 3rd, 15th, 16th, 17th day of the month',
+        'between 11:00 and 14:00',
+        'every weekday',
+      ],
     },
     {
-      description: 'Group and auto merge Dev & CI dependencies weekly',
+      description: 'Group and auto merge Dev & CI dependencies once a month',
       groupName: 'Dev & CI dependencies',
       matchFileNames: [
         '.github/**',
         'ansible/requirements.yml',
         '.pre-commit-config.yaml',
       ],
-      schedule: ['* 7-8 * * 3'],
+      schedule: ['on the 4th day of the month'],
       automerge: true,
-      automergeSchedule: ['* 14-15 * * 2'],
+      automergeSchedule: [
+        'on the 1st, 2nd, 3rd day of the month',
+        'between 15:00 and 17:00',
+        'every weekday',
+      ],
     },
   ]
 }
