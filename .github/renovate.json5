@@ -16,7 +16,7 @@
     ':separatePatchReleases',
   ],
   timezone: 'Europe/Amsterdam',
-  dependencyDashboardTitle: 'Renovate Dashboard',
+  dependencyDashboardTitle: 'Renovate Dashboard 🤖',
   prTitleStrict: true,
   commitBodyTable: true,
   rebaseWhen: 'auto',
