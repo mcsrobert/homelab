@@ -9,12 +9,13 @@
       versioningTemplate: 'semver-coerced',
     },
     {
-      description: 'Update YAML schema for kubernetes manifests',
+      description: 'Update YAML schema for kubernetes manifests based on k3s version',
       customType: 'regex',
       managerFilePatterns: ['/\\.ya?ml$/'],
       matchStrings: ['yannh/kubernetes-json-schema/master/(?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
       datasourceTemplate: 'github-releases',
-      depNameTemplate: 'kubernetes/kubernetes',
+      depNameTemplate: 'k3s-io/k3s',
+      extractVersionTemplate: '^(?<version>v[^+]+)'
     },
     {
       description: 'Update YAML schema for helm releases with app-template chart',
