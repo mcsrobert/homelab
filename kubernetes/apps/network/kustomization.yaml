@@ -7,5 +7,5 @@ resources:
   # Apps
   - ./blocky/ks.yaml
   - ./metallb/ks.yaml
-  - ./tailscale-operator/ks.yaml
+  - ./tailscale/ks.yaml
   - ./traefik/ks.yaml
