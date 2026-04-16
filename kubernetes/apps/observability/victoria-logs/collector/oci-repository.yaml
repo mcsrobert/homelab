@@ -8,7 +8,7 @@ spec:
   interval: 24h
   url: oci://ghcr.io/victoriametrics/helm-charts/victoria-logs-collector
   ref:
-    tag: 0.2.15
+    tag: 0.2.16
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
