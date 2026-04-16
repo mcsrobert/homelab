@@ -6,13 +6,13 @@
       description: 'Auto merge patch releases twice a month',
       matchDatasources: ['docker', 'helm'],
       matchUpdateTypes: ['patch'],
-      schedule: ['on the 4th and 19th day of the month'],
       automerge: true,
       automergeSchedule: [
         'on the 1st, 2nd, 3rd, 15th, 16th, 17th day of the month',
-        'after 11:00 and before 14:00',
+        'after 10:00 and before 15:00',
         'every weekday',
       ],
+      schedule: ['on the 4th and 19th day of the month'],
     },
     {
       description: 'Group and auto merge Dev & CI dependencies once a month',
@@ -22,13 +22,13 @@
         'ansible/requirements.yml',
         '.pre-commit-config.yaml',
       ],
-      schedule: ['on the 4th day of the month'],
       automerge: true,
       automergeSchedule: [
         'on the 1st, 2nd, 3rd day of the month',
-        'after 15:00 and before 17:00',
+        'after 15:00 and before 19:00',
         'every weekday',
       ],
+      schedule: ['on the 4th day of the month'],
     },
   ]
 }
