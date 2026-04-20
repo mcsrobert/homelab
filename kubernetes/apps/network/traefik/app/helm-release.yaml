@@ -44,7 +44,7 @@ spec:
           default: true
         exposedPort: 443
         http3:
-          enabled: true
+          enabled: false
         forwardedHeaders: &trustedIPs
           trustedIPs:
             - ${LAN_CIDR}
