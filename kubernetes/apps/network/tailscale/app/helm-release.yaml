@@ -20,7 +20,7 @@ spec:
         serviceAccount:
           name: &serviceAccountName tailscale
         pod:
-          hostNetwork: false
+          hostNetwork: true
           securityContext:
             seccompProfile:
               type: RuntimeDefault
@@ -31,7 +31,6 @@ spec:
               tag: v1.96.5@sha256:dbeff02d2337344b351afac203427218c4d0a06c43fc10a865184063498472a6
             env:
               TZ: ${TIME_ZONE}
-              TS_AUTH_ONCE: true
               TS_HOSTNAME: home-lan-router
               TS_USERSPACE: false
               TS_ROUTES: "${LAN_CIDR},${LAN_CIDRv6}"
@@ -85,11 +84,20 @@ spec:
           - path: /lib/modules
             readOnly: true
     service:
-      app:
+      tailscale:
         ports:
           http:
             port: *port
             protocol: HTTP
+      peer:
+        type: NodePort
+        ipFamilyPolicy: PreferDualStack
+        externalTrafficPolicy: Local
+        ports:
+          udp:
+            port: 41641
+            nodePort: 31641
+            protocol: UDP
     serviceMonitor:
       app:
         service:
