@@ -20,7 +20,7 @@ spec:
         serviceAccount:
           name: &serviceAccountName tailscale
         pod:
-          hostNetwork: true
+          hostNetwork: false
           securityContext:
             seccompProfile:
               type: RuntimeDefault
