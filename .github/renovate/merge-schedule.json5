@@ -3,19 +3,6 @@
   respectLatest: false,
   packageRules: [
     {
-      description: 'Auto merge non-major releases twice a month',
-      matchDatasources: ['docker', 'helm'],
-      matchUpdateTypes: ['minor', 'patch', 'digest'],
-      automerge: true,
-      automergeSchedule: [
-        'on the 1st, 2nd, 3rd, 15th, 16th, 17th day of the month',
-        'after 10:00 and before 15:00',
-        'every weekday',
-      ],
-      schedule: ['on the 4th, 18th day of the month'],
-      addLabels: ['renovate/automerge'],
-    },
-    {
       description: 'Group and auto merge Dev & CI dependencies once a month',
       groupName: 'Dev & CI dependencies',
       matchFileNames: [
@@ -30,6 +17,19 @@
         'every weekday',
       ],
       schedule: ['on the 4th day of the month'],
+      addLabels: ['renovate/automerge'],
+    },
+    {
+      description: 'Auto merge non-major releases twice a month',
+      matchDatasources: ['docker', 'helm'],
+      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      automerge: true,
+      automergeSchedule: [
+        'on the 1st, 2nd, 3rd, 15th, 16th, 17th day of the month',
+        'after 10:00 and before 15:00',
+        'every weekday',
+      ],
+      schedule: ['on the 4th, 18th day of the month'],
       addLabels: ['renovate/automerge'],
     },
   ]
