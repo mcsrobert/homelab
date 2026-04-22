@@ -80,9 +80,10 @@ spec:
             protocol: HTTP
       dns:
         type: LoadBalancer
-        ipFamilyPolicy: RequireDualStack
         annotations:
           metallb.io/loadBalancerIPs: "${DNS_IP},${DNS_IPv6}"
+        ipFamilyPolicy: RequireDualStack
+        externalTrafficPolicy: Local
         ports:
           dns-tcp:
             port: *dnsPort
