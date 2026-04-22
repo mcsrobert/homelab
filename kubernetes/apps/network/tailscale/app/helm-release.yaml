@@ -69,7 +69,7 @@ spec:
             securityContext:
               runAsUser: 0
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
+              readOnlyRootFilesystem: true
               capabilities:
                 drop:
                   - ALL
@@ -77,6 +77,14 @@ spec:
                   - NET_ADMIN
                   - NET_RAW
     persistence:
+      tmp:
+        type: emptyDir
+      run:
+        type: emptyDir
+      var-run-tailscale:
+        type: emptyDir
+        globalMounts:
+          - path: /var/run/tailscale
       modules:
         type: hostPath
         hostPath: /lib/modules
