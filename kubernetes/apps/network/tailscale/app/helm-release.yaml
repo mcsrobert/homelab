@@ -92,10 +92,10 @@ spec:
             protocol: HTTP
       peer:
         type: LoadBalancer
-        ipFamilyPolicy: RequireDualStack
-        externalTrafficPolicy: Local
         annotations:
           metallb.io/loadBalancerIPs: "${TAILSCALE_IP},${TAILSCALE_IPv6}"
+        ipFamilyPolicy: RequireDualStack
+        externalTrafficPolicy: Local
         ports:
           udp:
             port: *peerPort
