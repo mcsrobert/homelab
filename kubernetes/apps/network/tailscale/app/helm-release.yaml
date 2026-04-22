@@ -31,6 +31,7 @@ spec:
               tag: v1.96.5@sha256:dbeff02d2337344b351afac203427218c4d0a06c43fc10a865184063498472a6
             env:
               TZ: ${TIME_ZONE}
+              PORT: &peerPort 41641
               TS_HOSTNAME: home-lan-router
               TS_USERSPACE: false
               TS_ROUTES: "${LAN_CIDR},${LAN_CIDRv6}"
@@ -90,13 +91,14 @@ spec:
             port: *port
             protocol: HTTP
       peer:
-        type: NodePort
-        ipFamilyPolicy: PreferDualStack
+        type: LoadBalancer
+        ipFamilyPolicy: RequireDualStack
         externalTrafficPolicy: Local
+        annotations:
+          metallb.io/loadBalancerIPs: "${TAILSCALE_IP},${TAILSCALE_IPv6}"
         ports:
           udp:
-            port: 41641
-            nodePort: 31641
+            port: *peerPort
             protocol: UDP
     serviceMonitor:
       app:
