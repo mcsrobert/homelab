@@ -6,7 +6,7 @@
         icon: avm-fritzbox
         widget:
           type: fritzbox
-          url: http://192.168.178.1
+          url: http://${FRITZBOX_IP}
     - MetalLB:
         description: Bare-metal load-balancing for Kubernetes
         icon: metallb
