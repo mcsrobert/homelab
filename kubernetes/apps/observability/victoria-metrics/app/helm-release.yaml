@@ -42,7 +42,7 @@ spec:
         enable_converter_ownership: true
       resources:
         requests:
-          cpu: 10m
+          cpu: 50m
           memory: 64Mi
         limits:
           memory: 128Mi
@@ -104,10 +104,16 @@ spec:
         configSecret: alertmanager-config-secret
         resources:
           requests:
-            cpu: 10m
-            memory: 64Mi
+            cpu: 25m
+            memory: 32Mi
           limits:
-            memory: 128Mi
+            memory: 64Mi
+        configReloaderResources:
+          requests:
+            cpu: 5m
+            memory: 16Mi
+          limits:
+            memory: 32Mi
       ingress:
         enabled: false
       route:
