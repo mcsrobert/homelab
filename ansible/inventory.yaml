@@ -41,7 +41,6 @@ k3s_cluster:
         - local-storage
 
       flannel-backend: wireguard-native
-      flannel-ipv6-masq: true
+      flannel-ipv6-masq: false
       embedded-registry: true
-
       nonroot-devices: true
