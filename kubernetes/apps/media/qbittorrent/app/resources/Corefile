@@ -33,5 +33,5 @@ fritz.box:53 {
     log {
         class error
     }
-    forward . 192.168.178.1
+    forward . ${FRITZBOX_IP}
 }

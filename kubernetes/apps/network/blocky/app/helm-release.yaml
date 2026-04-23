@@ -14,7 +14,7 @@ spec:
     mode: enabled
   values:
     controllers:
-      blocky:
+      *app :
         replicas: 4
         strategy: RollingUpdate
         annotations:
@@ -34,7 +34,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          *app :
             image:
               repository: ghcr.io/0xerr0r/blocky
               tag: v0.29.0@sha256:a6d99f323d3036a99a3767a52ad612f4d8f3f31167492bfc14d4ea57b24cdfd0
@@ -64,6 +64,7 @@ spec:
                   - ALL
                 add:
                   # NOTE: Required, even when binding port 1053 or: exec /app/blocky: operation not permitted
+                  # See: https://github.com/0xERR0R/blocky/issues/1461
                   - NET_BIND_SERVICE
     persistence:
       config:
@@ -72,8 +73,13 @@ spec:
         globalMounts:
           - path: /app/config.yml
             subPath: config.yaml
+      # cert:
+      #   type: secret
+      #   name: blocky-tls
+      #   globalMounts:
+      #     - path: /app/cert
     service:
-      app:
+      *app :
         ports:
           http:
             port: 4000
@@ -81,25 +87,25 @@ spec:
       dns:
         type: LoadBalancer
         annotations:
-          metallb.io/loadBalancerIPs: "${DNS_IP},${DNS_IPv6}"
+          metallb.io/loadBalancerIPs: "${BLOCKY_IP},${BLOCKY_IPv6}"
         ipFamilyPolicy: RequireDualStack
         externalTrafficPolicy: Local
         ports:
-          dns-tcp:
+          tcp:
             port: *dnsPort
             protocol: TCP
-          dns-udp:
+          udp:
             port: *dnsPort
             protocol: UDP
     serviceMonitor:
-      app:
+      *app :
         service:
-          name: blocky-app
+          name: *app
         endpoints:
           - port: http
             path: /metrics
     route:
-      app:
+      *app :
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Blocky
@@ -114,7 +120,7 @@ spec:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: *app
             filters:
               - type: ExtensionRef
                 extensionRef:

@@ -1,3 +1,13 @@
+# certFile: /app/cert/tls.crt
+# keyFile: /app/cert/tls.key
+ports:
+  # dns: 1053
+  http: 4000
+redis:
+  address: blocky-dragonfly.network.svc.cluster.local:6379
+  password: "{{ .BLOCKY_DRAGONFLY_PASSWORD }}"
+prometheus:
+  enable: true
 upstreams:
   groups:
     default:
@@ -19,10 +29,10 @@ bootstrapDns:
 conditional:
   fallbackUpstream: false
   mapping:
-    fritz.box: 192.168.178.1
-    178.168.192.in-addr.arpa: 192.168.178.1
+    fritz.box: ${FRITZBOX_IP}
+    178.168.192.in-addr.arpa: ${FRITZBOX_IP}
 clientLookup:
-  upstream: 192.168.178.1
+  upstream: ${FRITZBOX_IP}
 blocking:
   denylists:
     ads:
@@ -39,11 +49,3 @@ customDNS:
   mapping:
     nas.${CLUSTER_DOMAIN}: ${NAS_IP}
     ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
-ports:
-  # dns: 1053
-  http: 4000
-redis:
-  address: blocky-dragonfly.network.svc.cluster.local:6379
-  password: "{{ .BLOCKY_DRAGONFLY_PASSWORD }}"
-prometheus:
-  enable: true
