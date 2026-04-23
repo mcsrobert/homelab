@@ -8,6 +8,11 @@ spec:
   validationFailureAction: Audit
   rules:
     - name: memory-limits
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - longhorn-system
       match:
         any:
           - resources:
