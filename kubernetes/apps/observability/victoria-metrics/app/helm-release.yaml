@@ -108,7 +108,7 @@ spec:
             memory: 32Mi
           limits:
             memory: 64Mi
-        configReloaderResources:
+        configReloaderResources: &configReloaderResources
           requests:
             cpu: 5m
             memory: 16Mi
@@ -134,13 +134,14 @@ spec:
       spec:
         extraArgs:
           external.url: https://vm-alert.${CLUSTER_DOMAIN}
+        evaluationInterval: 15s
         resources:
           requests:
             cpu: 50m
             memory: 64Mi
           limits:
             memory: 128Mi
-        evaluationInterval: 15s
+        configReloaderResources: *configReloaderResources
       ingress:
         enabled: false
       route:

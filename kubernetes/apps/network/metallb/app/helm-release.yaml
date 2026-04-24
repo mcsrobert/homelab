@@ -18,6 +18,20 @@ spec:
   upgrade:
     crds: CreateReplace
   values: # https://github.com/metallb/metallb/tree/main/charts/metallb#values
+    controller:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+    speaker:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
     prometheus:
       namespace: observability
       rbacPrometheus: false

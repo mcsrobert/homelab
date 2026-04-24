@@ -8,11 +8,11 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-  path: /kubernetes/apps/kube-system/reloader/app
+  path: /kubernetes/apps/system/reloader/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: kube-system
+  targetNamespace: system
   interval: 30m
   timeout: 5m
   wait: true

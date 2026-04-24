@@ -19,6 +19,12 @@ spec:
         allowCrossNamespace: true  # needed for ForwardAuth middleware
       kubernetesGateway:
         enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
     service:
       type: LoadBalancer
       ipFamilyPolicy: RequireDualStack
