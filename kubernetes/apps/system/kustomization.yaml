@@ -6,3 +6,4 @@ resources:
   - ./namespace.yaml
   # Apps
   - ./keda/ks.yaml
+  - ./reloader/ks.yaml
