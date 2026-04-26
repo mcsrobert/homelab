@@ -68,10 +68,10 @@ options, as long as they offer enough features.
 
 ### Network
 
-- [Flannel](https://github.com/flannel-io/flannel) - CNI provided by k3s. If I
-  wasn't using k3s, I'd probably use Cilium.
-- [MetalLB](https://metallb.io) - Bare-metal load balancer. ServiceLB is offered
-  by k3s, but only works on host IPs, so I've replaced it with MetalLB.
+- [Flannel](https://github.com/flannel-io/flannel) - CNI provided by k3s.
+  Considering Cilium for more features.
+- [MetalLB](https://metallb.io) - Bare-metal load balancer using Layer 2.
+  Replaces ServiceLB offered by k3s, as it only works on host IPs.
 - [Traefik](https://traefik.io) - Application proxy. I've replaced the one
   offered by k3s with my own install for more control and recently migrated from
   Ingress to the [Gateway API](https://gateway-api.sigs.k8s.io). Considering
@@ -87,6 +87,8 @@ options, as long as they offer enough features.
 
 ### Security
 
+- [External Secrets](https://external-secrets.io) - Syncs secrets from external
+  providers, avoiding hardcoded credentials.
 - [Kyverno](https://kyverno.io) - Kubernetes-native policies for security and
   automation.
 
