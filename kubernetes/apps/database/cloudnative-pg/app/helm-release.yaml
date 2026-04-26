@@ -17,10 +17,12 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:
+  values: # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg#values
     crds:
       create: true
     monitoring:
       podMonitorEnabled: true
-      # grafanaDashboard:
-      #   create: true
+      grafanaDashboard:
+        create: true
+        annotations:
+          grafana_folder: database
