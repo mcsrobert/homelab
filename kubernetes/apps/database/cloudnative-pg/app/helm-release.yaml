@@ -20,6 +20,12 @@ spec:
   values: # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg#values
     crds:
       create: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
     monitoring:
       podMonitorEnabled: true
       grafanaDashboard:
