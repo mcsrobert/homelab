@@ -22,6 +22,32 @@ spec:
       enabled: true
     dns01RecursiveNameserversOnly: true
     dns01RecursiveNameservers: https://1.1.1.1/dns-query,https://1.0.0.1/dns-query
+    resources:
+      requests:
+        cpu: 5m
+        memory: 32Mi
+      limits:
+        memory: 128Mi
+    networkPolicy:
+      enabled: true
+    webhook:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 16Mi
+        limits:
+          memory: 64Mi
+      networkPolicy:
+        enabled: true
+    cainjector:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 128Mi
+        limits:
+          memory: 256Mi
+      networkPolicy:
+        enabled: true
     prometheus:
       enabled: true
       servicemonitor:
