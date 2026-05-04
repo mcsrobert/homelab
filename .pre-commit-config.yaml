@@ -25,24 +25,24 @@ repos:
       - id: yamllint
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.11
+    rev: v1.7.12
     hooks:
       - id: actionlint
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.22.0
+    rev: v0.22.1
     hooks:
       - id: markdownlint-cli2
 
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: 43.94.0
+    rev: 43.150.0
     hooks:
       - id: renovate-config-validator
         files: "renovate(rc|/.+)?\\.json5?$"
 
   # See: https://github.com/ansible/ansible-lint/discussions/1256
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.3.0
+    rev: v26.4.0
     hooks:
       - id: ansible-lint
         args:
