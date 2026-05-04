@@ -2,11 +2,11 @@
 collections:
   - name: https://github.com/k3s-io/k3s-ansible
     type: git
-    version: 1.1.0
+    version: 1.2.0
 
   - name: community.general
     type: galaxy
-    version: 12.5.0
+    version: 12.6.0
 
   - name: ansible.posix
     type: galaxy
@@ -14,4 +14,4 @@ collections:
 
   - name: kubernetes.core
     type: galaxy
-    version: 6.3.0
+    version: 6.4.0
