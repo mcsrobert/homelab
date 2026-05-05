@@ -40,7 +40,7 @@ spec:
           app:
             image:
               repository: ghcr.io/hcpy2-0/hcpy
-              tag: v0.4.10@sha256:bb339823699d6050c4e3948d454971650601de5ffab93018bca5e930b1be3aac
+              tag: v0.4.11@sha256:3046b68761f95d01c69f8fd845c975b0d7efc135f5cf0612c974192c74040b05
             resources:
               requests:
                 cpu: 5m
