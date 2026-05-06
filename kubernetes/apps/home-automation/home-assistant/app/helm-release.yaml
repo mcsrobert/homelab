@@ -44,30 +44,10 @@ spec:
               capabilities:
                 drop:
                   - ALL
-          code-server:
+          hass-configurator:
             image:
-              repository: ghcr.io/coder/code-server
-              tag: 4.116.0@sha256:4671fcaba60044478bc8238ad630cd53e19294de29012e6e2069411273f02415
-            args:
-              - --auth
-              - none
-              - --disable-telemetry
-              - --disable-update-check
-              - --config
-              - /config/.code-server/config
-              - --user-data-dir
-              - /config/.code-server/user-data
-              - --extensions-dir
-              - /config/.code-server/extensions
-              - --port
-              - "12321"
-              - /config
-            env:
-              HOME: /config/.code-server
-              HASS_SERVER: http://localhost:8123
-            envFrom:
-              - secretRef:
-                  name: home-assistant-code-server-secret
+              repository: causticlab/hass-configurator-docker
+              tag: 0.6.0@sha256:06f064f1b4a5b17d8095e8565ae334267c4af9c6eaae19b4da536959ea6498b8
             resources:
               requests:
                 cpu: 10m
@@ -81,22 +61,28 @@ spec:
                 drop:
                   - ALL
     persistence:
-      config:
+      home-assistant-config:
         existingClaim: home-assistant-config
-        globalMounts:
-          - path: /config
-      tmpfs:
+        advancedMounts:
+          home-assistant:
+            app:
+              - path: /config
+          hass-configurator:
+            app:
+              - path: /home-assistant-config
+      hass-configurator-config:
+        type: secret
+        name: hass-configurator-config
+        advancedMounts:
+          hass-configurator:
+            app:
+              - path: /config
+      tmp:
         type: emptyDir
         advancedMounts:
           home-assistant:
             app:
               - path: /tmp
-                subPath: home-assistant-tmp
-            code-server:
-              - path: /tmp
-                subPath: code-server-tmp
-              - path: /nonexistent
-                subPath: nonexistent
     service:
       app:
         primary: true
@@ -104,10 +90,10 @@ spec:
           http:
             port: 8123
             protocol: HTTP
-      code-server:
+      hass-configurator:
         ports:
           http:
-            port: 12321
+            port: 3218
             protocol: HTTP
     route:
       app:
@@ -127,7 +113,7 @@ spec:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-      code-server:
+      hass-configurator:
         hostnames:
           - *host
         rules:
@@ -147,5 +133,5 @@ spec:
                     type: ReplacePrefixMatch
                     replacePrefixMatch: /
             backendRefs:
-              - identifier: code-server
+              - identifier: hass-configurator
         parentRefs: *parentRefs
