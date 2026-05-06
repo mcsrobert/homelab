@@ -1,0 +1,6 @@
+{
+    "BASEPATH": "/home-assistant-config",
+    "ENFORCE_BASEPATH": true,
+    "GIT": true,
+    "HASS_API_PASSWORD": "${HASS_API_PASSWORD}"
+}
