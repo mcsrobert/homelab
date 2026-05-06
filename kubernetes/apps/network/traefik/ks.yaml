@@ -3,32 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: traefik-crds
-  namespace: flux-system
-spec:
-  dependsOn:
-    - name: gateway-api-crds
-  path: /kubernetes/apps/network/traefik/crds
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  targetNamespace: network
-  prune: true
-  interval: 15m
-  timeout: 5m
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
   name: traefik
   namespace: flux-system
 spec:
   dependsOn:
     - name: cert-manager-issuers
+    - name: gateway-api-crds
     - name: metallb-pools
     - name: prometheus-operator-crds
-    - name: traefik-crds
   path: /kubernetes/apps/network/traefik/app
   sourceRef:
     kind: GitRepository
@@ -47,7 +29,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: traefik-crds
+    - name: traefik
   path: /kubernetes/apps/network/traefik/middleware
   sourceRef:
     kind: GitRepository

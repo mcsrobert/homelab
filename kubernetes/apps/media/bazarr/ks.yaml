@@ -8,7 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: longhorn
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/media/bazarr/app
   sourceRef:
     kind: GitRepository

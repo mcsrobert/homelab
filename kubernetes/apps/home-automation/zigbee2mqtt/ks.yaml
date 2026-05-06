@@ -12,7 +12,7 @@ spec:
     - name: longhorn
     - name: mosquitto
     - name: node-feature-discovery
-    - name: traefik-crds
+    - name: gateway-api-crds
   path: /kubernetes/apps/home-automation/zigbee2mqtt/app
   sourceRef:
     kind: GitRepository
