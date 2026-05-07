@@ -15,6 +15,18 @@ spec:
     crds: CreateReplace
   values: # https://github.com/mogenius/renovate-operator/blob/main/charts/renovate-operator/values.yaml
     fullnameOverride: renovate-operator
+    webhook:
+      enabled: true
+    auth:
+      defaultAllowedGroups: id_admin
+      oidc:
+        enabled: true
+        issuerUrl: https://authelia.${CLUSTER_DOMAIN}
+        redirectUrl: https://renovate.${CLUSTER_DOMAIN}/auth/callback
+        clientId: renovate-operator
+        existingSecret: renovate-operator-secret
+        additionalScopes:
+          - groups
     route:
       enabled: true
       hostnames:
@@ -22,8 +34,12 @@ spec:
       parentRefs:
         - name: traefik-gateway
           namespace: network
-    webhook:
-      enabled: true
+    resources: {}
+      # requests:
+      #   cpu: 10m
+      #   memory: 32Mi
+      # limits:
+      #   memory: 128Mi
     metrics:
       enabled: true
       serviceMonitor:
@@ -31,4 +47,4 @@ spec:
       dashboard:
         enabled: true
         annotations:
-          grafana_folder: "{{ .Release.Namespace }}"
+          grafana_folder: development
