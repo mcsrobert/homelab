@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: renovate-operator
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: renovate-operator
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+  values: # https://github.com/mogenius/renovate-operator/blob/main/charts/renovate-operator/values.yaml
+    fullnameOverride: renovate-operator
+    route:
+      enabled: true
+      hostnames:
+        - renovate.${CLUSTER_DOMAIN}
+      parentRefs:
+        - name: traefik-gateway
+          namespace: network
+    webhook:
+      enabled: true
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+      dashboard:
+        enabled: true
+        annotations:
+          grafana_folder: "{{ .Release.Namespace }}"
