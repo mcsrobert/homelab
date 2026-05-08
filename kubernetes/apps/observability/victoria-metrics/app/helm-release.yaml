@@ -59,13 +59,13 @@ spec:
             requests:
               storage: 64Gi
         extraArgs:
-          maxLabelsPerTimeseries: "150"
+          maxLabelsPerTimeseries: "100"
         resources:
           requests:
             cpu: 500m
-            memory: 1.5Gi
+            memory: 2Gi
           limits:
-            memory: 3Gi
+            memory: 4Gi
         # downsampling.period: 30d:1m,90d:5m,180d:30m,1y:1h,2y:4h,5y:12h,10y:1d
       ingress:
         enabled: false
@@ -153,6 +153,9 @@ spec:
     vmagent:
       enabled: true
       spec:
+        extraArgs:
+          promscrape.maxScrapeSize: "32MB"
+          promscrape.streamParse: "true"
         scrapeInterval: 20s
         inlineRelabelConfig:
           # # drop high cardinality labels
