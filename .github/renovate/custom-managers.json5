@@ -14,7 +14,7 @@
       managerFilePatterns: ['/\\.ya?ml$/'],
       matchStrings: ['yannh/kubernetes-json-schema/master/(?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
       datasourceTemplate: 'github-releases',
-      depNameTemplate: 'kubernetes',
+      depNameTemplate: 'kubernetes/kubernetes',
     },
     {
       description: 'Update YAML schema for helm releases with app-template chart',
