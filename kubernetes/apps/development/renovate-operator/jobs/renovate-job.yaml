@@ -12,7 +12,7 @@ spec:
   extraEnv: []
     # - name: ENV_NAME
     #   value: "EV_VALUE"
-  image: renovate/renovate:43.171.2
+  image: renovate/renovate:43.171.2@sha256:6c6c29deb58af6bb386270f860838dccbf7f7eda9e36acc559d052bb5af599ff
   parallelism: 5
   resources:
     requests:
