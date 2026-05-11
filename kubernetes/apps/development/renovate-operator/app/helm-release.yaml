@@ -30,6 +30,13 @@ spec:
         fetchUserInfoGroups: true
     route:
       enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: Renovate Operator
+        gethomepage.dev/icon: renovate
+        gethomepage.dev/description: Streamline Renovate executions in Kubernetes
+        gethomepage.dev/group: Development
+        gethomepage.dev/pod-selector: app=renovate-operator
       hostnames:
         - renovate.${CLUSTER_DOMAIN}
       parentRefs:
