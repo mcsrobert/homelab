@@ -5,7 +5,7 @@ kind: HelmRelease
 metadata:
   name: renovate-operator
 spec:
-  interval: 30m
+  interval: 1h
   chartRef:
     kind: OCIRepository
     name: renovate-operator
@@ -27,6 +27,7 @@ spec:
         existingSecret: renovate-operator-secret
         additionalScopes:
           - groups
+        fetchUserInfoGroups: true
     route:
       enabled: true
       hostnames:
@@ -34,12 +35,12 @@ spec:
       parentRefs:
         - name: traefik-gateway
           namespace: network
-    resources: {}
-      # requests:
-      #   cpu: 10m
-      #   memory: 32Mi
-      # limits:
-      #   memory: 128Mi
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
     metrics:
       enabled: true
       serviceMonitor:

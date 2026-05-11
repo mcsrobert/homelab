@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/renovate-operator.mogenius.com/renovatejob_v1alpha1.json
+apiVersion: renovate-operator.mogenius.com/v1alpha1
+kind: RenovateJob
+metadata:
+  name: renovate-github
+spec:
+  provider:
+    name: github
+  image: renovate/renovate:43.171.2@sha256:6c6c29deb58af6bb386270f860838dccbf7f7eda9e36acc559d052bb5af599ff
+  parallelism: 5
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  schedule: 0 * * * *
+  secretRef: renovate-github-secret
