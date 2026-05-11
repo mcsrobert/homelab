@@ -18,5 +18,25 @@ spec:
   upgrade:
     crds: CreateReplace
   values:  # Docs: https://github.com/external-secrets/external-secrets/tree/main/deploy/charts/external-secrets
+    resources:
+      requests:
+        cpu: 5m
+        memory: 48Mi
+      limits:
+        memory: 96Mi
+    certController:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 48Mi
+        limits:
+          memory: 96Mi
+    webhook:
+      resources:
+        requests:
+          cpu: 5m
+          memory: 48Mi
+        limits:
+          memory: 96Mi
     serviceMonitor:
       enabled: true
