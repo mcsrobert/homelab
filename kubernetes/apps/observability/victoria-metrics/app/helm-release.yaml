@@ -178,6 +178,7 @@ spec:
             memory: 384Mi
           limits:
             memory: 768Mi
+        configReloaderResources: *configReloaderResources
       ingress:
         enabled: false
       route:
