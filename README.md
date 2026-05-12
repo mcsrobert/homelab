@@ -5,7 +5,7 @@ Kubernetes cluster. Infrastructure and application configuration are fully
 declarative and managed through [FluxCD](https://fluxcd.io),
 [Ansible](https://docs.ansible.com), [GitHub
 Actions](https://docs.github.com/en/actions) and
-[Renovate](https://docs.github.com/en/actions); covering everything from initial
+[Renovate](https://docs.renovatebot.com); covering everything from initial
 OS image builds to automated dependency updates.
 
 ## Repository
