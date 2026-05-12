@@ -32,5 +32,11 @@
       schedule: ['on the 4th, 18th day of the month'],
       addLabels: ['renovate/automerge'],
     },
+    // TODO: remove once v1.2.0 bug is fixed
+    // https://github.com/k3s-io/k3s-ansible/pull/534
+    {
+      matchPackageNames: ['k3s-io/k3s-ansible'],
+      enabled: false,
+    },
   ]
 }
