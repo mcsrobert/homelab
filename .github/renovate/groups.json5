@@ -13,7 +13,7 @@
     {
       groupName: 'Flux',
       matchDatasources: ['docker'],
-      matchDepNames: ['/flux-/'],
+      matchDepNames: ['/flux-(operator|instance)/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
     {
