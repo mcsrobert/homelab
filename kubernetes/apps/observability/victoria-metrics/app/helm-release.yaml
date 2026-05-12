@@ -40,6 +40,13 @@ spec:
       fullnameOverride: victoria-metrics-operator
       operator:
         enable_converter_ownership: true
+      env:
+        - name: VM_CONFIG_RELOADER_REQUEST_CPU
+          value: 5m
+        - name: VM_CONFIG_RELOADER_REQUEST_MEMORY
+          value: 16Mi
+        - name: VM_CONFIG_RELOADER_LIMIT_MEMORY
+          value: 32Mi
       resources:
         requests:
           cpu: 50m
@@ -108,12 +115,6 @@ spec:
             memory: 32Mi
           limits:
             memory: 64Mi
-        configReloaderResources: &configReloaderResources
-          requests:
-            cpu: 5m
-            memory: 16Mi
-          limits:
-            memory: 32Mi
       ingress:
         enabled: false
       route:
@@ -141,7 +142,6 @@ spec:
             memory: 64Mi
           limits:
             memory: 128Mi
-        configReloaderResources: *configReloaderResources
       ingress:
         enabled: false
       route:

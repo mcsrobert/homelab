@@ -3,26 +3,35 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: enforce-resource-limits
+  name: require-resource-constraints
+  annotations:
+    policies.kyverno.io/title: Require all pods have resource constraints
+    policies.kyverno.io/description: >-
+      Setting requests for cpu and memory allows for better scheduling and
+      memory limits prevent a single pod from taking out a whole node.
 spec:
   validationFailureAction: Audit
   rules:
-    - name: memory-limits
-      exclude:
-        any:
-          - resources:
-              namespaces:
-                - longhorn-system
+    - name: validate-resources
       match:
         any:
           - resources:
               kinds:
                 - Pod
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - longhorn-system
       validate:
-        message: Memory limits are required
+        message: CPU + memory requests and memory limits are required. CPU limits are optional.
         pattern:
           spec:
-            containers:
+            containers: &resources
               - resources:
+                  requests:
+                    cpu: "?*"
+                    memory: "?*"
                   limits:
                     memory: "?*"
+            =(initContainers): *resources
