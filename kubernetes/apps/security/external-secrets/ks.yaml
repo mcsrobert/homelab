@@ -8,11 +8,11 @@ metadata:
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-  path: /kubernetes/apps/external-secrets/external-secrets/app
+  path: /kubernetes/apps/security/external-secrets/app
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: external-secrets
+  targetNamespace: security
   interval: 30m
   timeout: 5m
   wait: true
@@ -27,10 +27,10 @@ metadata:
 spec:
   dependsOn:
     - name: external-secrets
-  path: /kubernetes/apps/external-secrets/external-secrets/stores
+  path: /kubernetes/apps/security/external-secrets/stores
   sourceRef:
     kind: GitRepository
     name: flux-system
-  targetNamespace: external-secrets
+  targetNamespace: security
   interval: 30m
   prune: true
