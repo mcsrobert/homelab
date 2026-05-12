@@ -134,15 +134,10 @@ spec:
                 - ""
               resources:
                 - secrets
-              verbs:
-                - create
-            - apiGroups:
-                - ""
               resourceNames:
                 - *stateSecret
-              resources:
-                - secrets
               verbs:
+                - create
                 - get
                 - update
                 - patch
