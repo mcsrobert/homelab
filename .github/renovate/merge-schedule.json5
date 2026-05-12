@@ -3,6 +3,12 @@
   respectLatest: false,
   packageRules: [
     {
+      description: 'Automatically pin digests whenever possible',
+      matchUpdateTypes: ['pinDigest'],
+      automerge: true,
+      addLabels: ['renovate/automerge'],
+    },
+    {
       description: 'Group and auto merge Dev & CI dependencies once a month',
       groupName: 'Dev & CI dependencies',
       matchFileNames: [
