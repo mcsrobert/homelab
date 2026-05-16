@@ -19,8 +19,6 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           securityContext:
-            # fsGroup: &mediaGroup 65537
-            # fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
         initContainers:
@@ -30,6 +28,22 @@ spec:
               tag: 1.14.3@sha256:b21d26b915e10acb5bc78715c1e8b6047ab2675389b2bcc18b3a6499d90e74c0
             args: ["-conf", "/etc/coredns/Corefile"]
             restartPolicy: Always
+            resources:
+              requests:
+                cpu: 5m
+                memory: 24Mi
+              limits:
+                memory: 48Mi
+            securityContext:
+              runAsUser: 65534
+              runAsGroup: 65534
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              # capabilities:
+              #   drop:
+              #     - ALL
+              #   add:
+              #     - NET_BIND
           gluetun:
             dependsOn: coredns
             image:
