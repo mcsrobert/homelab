@@ -16,7 +16,7 @@ spec:
   values: # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/VALUES.md#values
     providers:
       kubernetesCRD:
-        enabled: false
+        allowCrossNamespace: true  # needed for ForwardAuth and network-*@kubernetescrd chains
       kubernetesGateway:
         enabled: true
     resources:
