@@ -3,12 +3,6 @@
   respectLatest: false,
   packageRules: [
     {
-      description: 'Automatically pin digests whenever possible',
-      matchUpdateTypes: ['pinDigest'],
-      automerge: true,
-      addLabels: ['renovate/automerge'],
-    },
-    {
       description: 'Group and auto merge Dev & CI dependencies once a month',
       groupName: 'Dev & CI dependencies',
       matchFileNames: [
@@ -23,6 +17,12 @@
         'every weekday',
       ],
       schedule: ['on the 4th day of the month'],
+      addLabels: ['renovate/automerge'],
+    },
+    {
+      description: 'Automatically pin digests whenever possible',
+      matchUpdateTypes: ['pinDigest'],
+      automerge: true,
       addLabels: ['renovate/automerge'],
     },
     {
