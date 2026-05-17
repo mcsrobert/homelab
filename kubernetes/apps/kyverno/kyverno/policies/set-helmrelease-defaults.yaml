@@ -17,9 +17,7 @@ spec:
         any:
           - resources:
               kinds:
-                - HelmRelease
-              apiVersions:
-                - helm.toolkit.fluxcd.io/v2
+                - helm.toolkit.fluxcd.io/v2/HelmRelease
       mutate:
         patchStrategicMerge:
           spec:
