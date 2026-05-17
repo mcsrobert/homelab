@@ -10,7 +10,6 @@ metadata:
       Applies Flux HelmRelease remediation and drift detection defaults when
       fields are not set in the manifest.
 spec:
-  mutateExistingOnPolicyUpdate: true
   rules:
     - name: set-helmrelease-defaults
       match:
