@@ -13,8 +13,6 @@ spec:
         kind: HelmRepository
         name: kyverno
   interval: 1h
-  driftDetection:
-    mode: enabled
   install:
     crds: CreateReplace
   upgrade:
