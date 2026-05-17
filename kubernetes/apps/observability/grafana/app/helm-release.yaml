@@ -9,8 +9,6 @@ spec:
     kind: OCIRepository
     name: grafana
   interval: 1h
-  driftDetection:
-    mode: enabled
   values: # https://github.com/grafana-community/helm-charts/blob/main/charts/grafana/values.yaml
     labels:
       grafana.home.arpa/instance: grafana

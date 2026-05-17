@@ -10,10 +10,6 @@ spec:
     name: app-template
     namespace: flux-system
   interval: 30m
-  driftDetection:
-    mode: enabled
-    ignore:
-      - paths: ["/spec/replicas"]
   values:
     controllers:
       mealie:
