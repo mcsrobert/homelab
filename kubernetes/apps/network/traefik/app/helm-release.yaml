@@ -9,8 +9,6 @@ spec:
     kind: OCIRepository
     name: traefik
   interval: 30m
-  driftDetection:
-    mode: enabled
   install:
     crds: CreateReplace
   upgrade:

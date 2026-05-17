@@ -9,8 +9,6 @@ spec:
     kind: OCIRepository
     name: victoria-logs-single
   interval: 30m
-  driftDetection:
-    mode: enabled
   values: # https://docs.victoriametrics.com/helm/victoria-logs-single/#parameters
     fullnameOverride: victoria-logs
     server:

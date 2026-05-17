@@ -9,8 +9,6 @@ spec:
     kind: OCIRepository
     name: victoria-metrics-k8s-stack
   interval: 30m
-  driftDetection:
-    mode: enabled
   install:
     crds: CreateReplace
   upgrade:

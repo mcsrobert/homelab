@@ -10,8 +10,6 @@ spec:
     name: app-template
     namespace: flux-system
   interval: 1h
-  driftDetection:
-    mode: enabled
   values:
     controllers:
       hcpy:

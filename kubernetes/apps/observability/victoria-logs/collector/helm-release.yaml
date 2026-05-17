@@ -9,8 +9,6 @@ spec:
     kind: OCIRepository
     name: victoria-logs-collector
   interval: 30m
-  driftDetection:
-    mode: enabled
   values: # https://docs.victoriametrics.com/helm/victoria-logs-collector/#parameters
     remoteWrite:
       - url: http://victoria-logs-server.{{ .Release.Namespace }}.svc.cluster.local:9428

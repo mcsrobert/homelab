@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/kyverno.io/clusterpolicy_v1.json
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: set-helmrelease-defaults
+  annotations:
+    policies.kyverno.io/title: HelmRelease defaults
+    policies.kyverno.io/description: >-
+      Applies Flux HelmRelease remediation and drift detection defaults when
+      fields are not set in the manifest.
+spec:
+  mutateExistingOnPolicyUpdate: true
+  rules:
+    - name: set-helmrelease-defaults
+      match:
+        any:
+          - resources:
+              kinds:
+                - HelmRelease
+              apiVersions:
+                - helm.toolkit.fluxcd.io/v2
+      mutate:
+        patchStrategicMerge:
+          spec:
+            +(driftDetection):
+              +(mode): enabled
+            +(install):
+              +(remediation):
+                +(retries): 3
+                +(remediateLastFailure): true
+            +(upgrade):
+              +(remediation):
+                +(retries): 3
+                +(strategy): rollback
+                +(remediateLastFailure): true
