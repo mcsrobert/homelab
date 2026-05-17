@@ -79,5 +79,6 @@ spec:
       prometheus:
         addRoutersLabels: true
         addServicesLabels: true
+        disableAPICheck: true  # required for flux-local
         serviceMonitor:
           enabled: true

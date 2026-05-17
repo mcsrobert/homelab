@@ -44,6 +44,7 @@ jobs:
         with:
           path: kubernetes/cluster
           enable-helm: true
+          sources: flux-system
 
   diff:
     name: Flux Local Diff
@@ -72,14 +73,14 @@ jobs:
           path: kubernetes/cluster
           live-branch: ${{ github.event.repository.default_branch }}
           resource: ${{ matrix.resources }}
+          sources: flux-system
           skip-invalid-kustomization-paths: true
 
       - name: Add Comment
         if: ${{ steps.diff.outputs.diff != '' }}
-        continue-on-error: true
         uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11
+        continue-on-error: true
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
           message-id: ${{ github.event.pull_request.number }}/${{ matrix.resources }}
           message-failure: Diff was not successful
           message: |-
