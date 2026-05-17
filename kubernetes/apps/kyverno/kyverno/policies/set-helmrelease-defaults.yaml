@@ -27,7 +27,10 @@ spec:
                 +(retries): 3
                 +(remediateLastFailure): true
             +(upgrade):
+              +(cleanupOnFail): true
               +(remediation):
-                +(retries): 3
                 +(strategy): rollback
+                +(retries): 3
                 +(remediateLastFailure): true
+            +(rollback):
+              +(cleanupOnFail): true
