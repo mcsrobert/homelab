@@ -25,6 +25,19 @@ spec:
         enabled: true
 
     backgroundController:
+      rbac:
+        clusterRole:
+          extraResources:
+            - apiGroups:
+                - helm.toolkit.fluxcd.io
+              resources:
+                - helmreleases
+              verbs:
+                - get
+                - list
+                - watch
+                - update
+                - patch
       serviceMonitor:
         enabled: true
 
