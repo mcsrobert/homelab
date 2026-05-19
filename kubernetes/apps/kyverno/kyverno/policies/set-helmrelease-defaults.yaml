@@ -1,7 +1,7 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/kyverno.io/clusterpolicy_v1.json
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/mutatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
 metadata:
   name: set-helmrelease-defaults
   annotations:
@@ -10,31 +10,42 @@ metadata:
       Applies Flux HelmRelease remediation and drift detection defaults when
       fields are not set in the manifest.
 spec:
-  rules:
-    - name: set-helmrelease-defaults
-      match:
-        any:
-          - resources:
-              kinds:
-                - helm.toolkit.fluxcd.io/v2/HelmRelease
-      mutate:
-        mutateExistingOnPolicyUpdate: true
-        targets:
-          - apiVersion: helm.toolkit.fluxcd.io/v2
-            kind: HelmRelease
-        patchStrategicMerge:
-          spec:
-            +(driftDetection):
-              +(mode): enabled
-            +(install):
-              +(remediation):
-                +(retries): 3
-                +(remediateLastFailure): true
-            +(upgrade):
-              +(cleanupOnFail): true
-              +(remediation):
-                +(strategy): rollback
-                +(retries): 3
-                +(remediateLastFailure): true
-            +(rollback):
-              +(cleanupOnFail): true
+  evaluation:
+    background:
+      enabled: true
+    admission:
+      enabled: true
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["helm.toolkit.fluxcd.io"]
+        apiVersions: ["v2"]
+        resources: ["helmreleases"]
+        operations: ["CREATE", "UPDATE"]
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: |
+          Object{
+            spec: Object.spec{
+              driftDetection: Object.spec.driftDetection{
+                mode: object.?spec.?driftDetection.?mode.orValue("enabled")
+              },
+              install: Object.spec.install{
+                remediation: Object.spec.install.remediation{
+                  retries: object.?spec.?install.?remediation.?retries.orValue(3),
+                  remediateLastFailure: object.?spec.?install.?remediation.?remediateLastFailure.orValue(true)
+                }
+              },
+              upgrade: Object.spec.upgrade{
+                cleanupOnFail: object.?spec.?upgrade.?cleanupOnFail.orValue(true),
+                remediation: Object.spec.upgrade.remediation{
+                  strategy: object.?spec.?upgrade.?remediation.?strategy.orValue("rollback"),
+                  retries: object.?spec.?upgrade.?remediation.?retries.orValue(3),
+                  remediateLastFailure: object.?spec.?upgrade.?remediation.?remediateLastFailure.orValue(true)
+                }
+              },
+              rollback: Object.spec.rollback{
+                cleanupOnFail: object.?spec.?rollback.?cleanupOnFail.orValue(true)
+              }
+            }
+          }

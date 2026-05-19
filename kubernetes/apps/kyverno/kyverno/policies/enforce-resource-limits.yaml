@@ -1,37 +1,39 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/kyverno.io/clusterpolicy_v1.json
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/validatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
 metadata:
   name: require-resource-constraints
   annotations:
     policies.kyverno.io/title: Require all pods have resource constraints
     policies.kyverno.io/description: >-
-      Setting requests for cpu and memory allows for better scheduling and
-      memory limits prevent a single pod from taking out a whole node.
+      Ensures CPU/Memory requests and Memory limits are defined.
+      CPU limits remain optional.
 spec:
-  validationFailureAction: Audit
-  rules:
-    - name: validate-resources
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-      exclude:
-        any:
-          - resources:
-              namespaces:
-                - longhorn-system
-      validate:
-        message: CPU + memory requests and memory limits are required. CPU limits are optional.
-        pattern:
-          spec:
-            containers: &resources
-              - resources:
-                  requests:
-                    cpu: "?*"
-                    memory: "?*"
-                  limits:
-                    memory: "?*"
-            =(initContainers): *resources
+  validationActions: ["Audit"]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["longhorn-system"]
+  validations:
+    - expression: >-
+        object.spec.containers.all(c,
+          c.?resources.?requests.?cpu.hasValue() &&
+          c.?resources.?requests.?memory.hasValue() &&
+          c.?resources.?limits.?memory.hasValue()
+        )
+      message: CPU + memory requests and memory limits are required for all containers.
+    - expression: >-
+        !has(object.spec.initContainers) ||
+        object.spec.initContainers.all(c,
+          c.?resources.?requests.?cpu.hasValue() &&
+          c.?resources.?requests.?memory.hasValue() &&
+          c.?resources.?limits.?memory.hasValue()
+        )
+      message: CPU + memory requests and memory limits are required for all initContainers.
