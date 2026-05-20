@@ -17,7 +17,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:
+  values: # https://github.com/longhorn/longhorn/blob/master/chart/README.md#values
     csi:
       attacherReplicaCount: 1
       provisionerReplicaCount: 1
@@ -25,12 +25,14 @@ spec:
       snapshotterReplicaCount: 1
     longhornUI:
       replicas: 1
+    defaultSettings:
+      logLevel: Warn
+    defaultBackupStore:
+      backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
     persistence:
       recurringJobSelector:
         enable: true
         jobList: &backupJobGroup '[{"name": "backup", "isGroup": true}]'
-    defaultBackupStore:
-      backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
     metrics:
       serviceMonitor:
         enabled: true
