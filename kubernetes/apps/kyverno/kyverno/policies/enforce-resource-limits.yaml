@@ -16,6 +16,7 @@ spec:
       - apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
+        operations: ["CREATE", "UPDATE"]
     namespaceSelector:
       matchExpressions:
         - key: kubernetes.io/metadata.name
