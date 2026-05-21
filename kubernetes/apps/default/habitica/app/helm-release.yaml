@@ -1,0 +1,152 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.0.1/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: habitica
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    controllers:
+      habitica:
+        # annotations:
+        #   reloader.stakater.com/auto: "true"
+        containers:
+          habitica:
+            image:
+              repository: docker.io/awinterstein/habitica-server
+              tag: 5.48.0@sha256:c3732b25863f0d0a8f0b11e7cc147a4b7226fe966e4bc3feb426e07a3e256f51
+            env:
+              TZ: ${TIME_ZONE}
+              NODE_DB_URI: mongodb://habitica-mongodb/habitica
+              BASE_URL: http://127.0.0.1:3000
+              INVITE_ONLY: true
+              EMAIL_SERVER_URL: maddy.default.svc.cluster.local
+              EMAIL_SERVER_PORT: 2525
+              ADMIN_EMAIL: noreply@mail.${CLUSTER_DOMAIN}
+            probes:
+              liveness: &probe
+                enabled: true
+              readiness: *probe
+            # resources:
+            #   requests:
+            #     cpu: 25m
+            #     memory: 64Mi
+            #   limits:
+            #     memory: 256Mi
+            securityContext:
+              runAsUser: 65534
+              runAsGroup: 65534
+              # allowPrivilegeEscalation: false
+              # readOnlyRootFilesystem: true
+              # capabilities:
+              #   drop:
+              #     - ALL
+      mongodb:
+        # annotations:
+        #   reloader.stakater.com/auto: "true"
+        pod:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/hostname
+                        operator: NotIn
+                        values: ["raspberrypi"]
+          securityContext:
+            runAsUser: 7002
+            runAsGroup: 7002
+            fsGroup: 7002
+        containers:
+          mongodb:
+            image:
+              repository: docker.io/library/mongo
+              tag: 6.0.4@sha256:4b5bf3c2bb7516164f6dcb44acce4fdcb428abfe5771a1128304a0f34ab9ff7c
+            env:
+              TZ: ${TIME_ZONE}
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+            # probes:
+            #   liveness: &probe
+            #     enabled: true
+            #     custom: true
+            #     spec:
+            #       exec:
+            #         command:
+            #           - mongosh
+            #           - --quiet
+            #           - --eval
+            #           - db.adminCommand('ping')
+            #   readiness: *probe
+            securityContext: {}
+              # allowPrivilegeEscalation: false
+              # readOnlyRootFilesystem: true
+              # capabilities:
+              #   drop:
+              #     - ALL
+    persistence:
+      mongodb-data:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        advancedMounts:
+          mongodb:
+            mongodb:
+              - path: /data
+      # habitica-tmp:
+      #   type: emptyDir
+      #   advancedMounts:
+      #     habitica:
+      #       habitica:
+      #         - path: /tmp
+      # mongodb-tmp:
+      #   type: emptyDir
+      #   advancedMounts:
+      #     mongodb:
+      #       mongodb:
+      #         - path: /tmp
+    service:
+      habitica:
+        controller: habitica
+        ports:
+          http:
+            port: 3000
+            protocol: HTTP
+      mongodb:
+        controller: mongodb
+        ports:
+          mongodb:
+            port: 27017
+    route:
+      habitica:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Habitica
+          gethomepage.dev/icon: habitica
+          gethomepage.dev/description: Habit tracker app which treats your goals like an RPG
+          gethomepage.dev/group: Apps
+          gethomepage.dev/pod-selector: app.kubernetes.io/name = habitica
+        hostnames:
+          - habitica.${CLUSTER_DOMAIN}
+        rules:
+          - backendRefs:
+              - identifier: habitica
+        parentRefs:
+          - name: traefik-gateway
+            namespace: network
+            sectionName: websecure
