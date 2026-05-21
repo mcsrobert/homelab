@@ -85,9 +85,10 @@ spec:
               S3_ENDPOINT_URL: http://garage.{{ .Release.Namespace }}.svc.cluster.local:3900
             resources:
               requests:
-                cpu: 100m
+                cpu: 5m
+                memory: 16Mi
               limits:
-                memory: 256Mi
+                memory: 64Mi
             probes: *probes
             securityContext: *securityContext
     persistence:
