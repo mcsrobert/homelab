@@ -17,7 +17,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values: # https://github.com/longhorn/longhorn/blob/master/chart/README.md#values
+  values: # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
     csi:
       attacherReplicaCount: 1
       provisionerReplicaCount: 1
@@ -27,6 +27,8 @@ spec:
       replicas: 1
     defaultSettings:
       logLevel: Warn
+      orphanResourceAutoDeletion: replica-data;instance
+      allowCollectingLonghornUsageMetrics: false
     defaultBackupStore:
       backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
     persistence:
