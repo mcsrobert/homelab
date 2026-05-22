@@ -25,6 +25,7 @@
       description: 'Auto merge non-major releases twice a month',
       matchDatasources: ['docker', 'helm'],
       matchUpdateTypes: ['minor', 'patch', 'digest'],
+      excludePackageNames: ['longhorn'],
       automerge: true,
       automergeSchedule: ['on the 1st, 2nd, 3rd, 15th, 16th, 17th day of the month every weekday after 10:00 and before 15:00'],
       schedule: ['on the 4th, 18th day of the month'],
