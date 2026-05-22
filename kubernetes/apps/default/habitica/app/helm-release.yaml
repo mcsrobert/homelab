@@ -82,7 +82,7 @@ spec:
           mongodb:
             image:
               repository: docker.io/library/mongo
-              tag: 6.0.4@sha256:4b5bf3c2bb7516164f6dcb44acce4fdcb428abfe5771a1128304a0f34ab9ff7c
+              tag: 8.3.2@sha256:94b405c5aa83d5160e6dd97383c4687d471f8a6bd247ed3ff6463c092ebf7a8c
             args:
               - "--wiredTigerCacheSizeGB=0.25"
             env:
