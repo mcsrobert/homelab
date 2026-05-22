@@ -119,7 +119,7 @@ spec:
         advancedMounts:
           mongodb:
             mongodb:
-              - path: /data
+              - path: /data/db
       # habitica-tmp:
       #   type: emptyDir
       #   advancedMounts:
