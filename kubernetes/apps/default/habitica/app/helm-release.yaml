@@ -13,7 +13,6 @@ spec:
   values:
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
@@ -54,8 +53,7 @@ spec:
             #   limits:
             #     memory: 256Mi
             securityContext:
-              runAsUser: 65534
-              runAsGroup: 65534
+              runAsUser: 0
               # allowPrivilegeEscalation: false
               # readOnlyRootFilesystem: true
               # capabilities:
@@ -75,6 +73,7 @@ spec:
                         operator: NotIn
                         values: ["raspberrypi"]
           securityContext:
+            runAsNonRoot: true
             runAsUser: 7002
             runAsGroup: 7002
             fsGroup: 7002
