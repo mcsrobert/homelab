@@ -83,6 +83,8 @@ spec:
               repository: docker.io/library/mongo
               tag: 8.3.2@sha256:94b405c5aa83d5160e6dd97383c4687d471f8a6bd247ed3ff6463c092ebf7a8c
             args:
+              - "--replSet"
+              - "rs"
               - "--wiredTigerCacheSizeGB=0.25"
             env:
               TZ: ${TIME_ZONE}
@@ -92,18 +94,35 @@ spec:
             #     memory: 64Mi
             #   limits:
             #     memory: 128Mi
-            # probes:
-            #   liveness: &probe
-            #     enabled: true
-            #     custom: true
-            #     spec:
-            #       exec:
-            #         command:
-            #           - mongosh
-            #           - --quiet
-            #           - --eval
-            #           - db.adminCommand('ping')
-            #   readiness: *probe
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - mongosh
+                      - --quiet
+                      - --eval
+                      - |-
+                          try { rs.status() } catch (err) {
+                            rs.initiate({
+                              _id: "rs",
+                              members: [{_id: 0, host: "habitica-mongodb-0:27017"}]
+                            })
+                          }
+
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - mongosh
+                      - --quiet
+                      - --eval
+                      - db.adminCommand('ping')
+              readiness: *probe
             securityContext: {}
               # allowPrivilegeEscalation: false
               # readOnlyRootFilesystem: true
@@ -114,7 +133,7 @@ spec:
       mongodb-data:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
-        size: 1Gi
+        size: 2Gi
         advancedMounts:
           mongodb:
             mongodb:
