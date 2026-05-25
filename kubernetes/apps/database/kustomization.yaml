@@ -7,3 +7,4 @@ resources:
   # Apps
   - ./cloudnative-pg/ks.yaml
   - ./dragonfly-operator/ks.yaml
+  - ./mongodb-operator/ks.yaml
