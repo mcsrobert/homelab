@@ -1,0 +1,50 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/fluxcd.controlplane.io/resourceset_v1.json
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSet
+metadata:
+  name: mongodb-operator-rbac
+spec:
+  inputs:
+    - namespace: default
+  resources:
+    - apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: mongodb-kubernetes-appdb
+        namespace: << inputs.namespace >>
+    - apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: mongodb-kubernetes-database-pods
+        namespace: << inputs.namespace >>
+    - apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: mongodb-kubernetes-ops-manager
+        namespace: << inputs.namespace >>
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: mongodb-kubernetes-appdb
+        namespace: << inputs.namespace >>
+      rules:
+        - apiGroups: [""]
+          resources: ["secrets"]
+          verbs: ["get"]
+        - apiGroups: [""]
+          resources: ["pods"]
+          verbs: ["patch", "delete", "get"]
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: mongodb-kubernetes-appdb
+        namespace: << inputs.namespace >>
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: mongodb-kubernetes-appdb
+      subjects:
+        - kind: ServiceAccount
+          name: mongodb-kubernetes-appdb
+          namespace: << inputs.namespace >>
