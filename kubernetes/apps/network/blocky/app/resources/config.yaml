@@ -37,7 +37,7 @@ blocking:
   denylists:
     ads:
       - https://big.oisd.nl/domainswild
-      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt
+      - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/normal.txt
     malware:
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/doh.txt
       - https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.txt
