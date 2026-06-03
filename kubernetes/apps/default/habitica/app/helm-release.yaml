@@ -50,31 +50,19 @@ spec:
                     port: &habiticaPort 3000
                     path: /api/v3/status
               readiness: *probe
-            # resources:
-            #   requests:
-            #     cpu: 25m
-            #     memory: 64Mi
-            #   limits:
-            #     memory: 256Mi
+            resources:
+              requests:
+                cpu: 25m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
             securityContext:
-              runAsUser: 0
-              # allowPrivilegeEscalation: false
-              # readOnlyRootFilesystem: true
-              # capabilities:
-              #   drop:
-              #     - ALL
-      # habitica-tmp:
-      #   type: emptyDir
-      #   advancedMounts:
-      #     habitica:
-      #       habitica:
-      #         - path: /tmp
-      # mongodb-tmp:
-      #   type: emptyDir
-      #   advancedMounts:
-      #     mongodb:
-      #       mongodb:
-      #         - path: /tmp
+              runAsUser: 0  # cannot create /etc/environment
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false  # cannot create /etc/environment
+              capabilities:
+                drop:
+                  - ALL
     service:
       habitica:
         controller: habitica
