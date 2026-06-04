@@ -7,7 +7,7 @@ metadata:
 spec:
   members: 1
   type: ReplicaSet
-  # TODO: renovate tag
+  # renovate: datasource=docker depName=quay.io/mongodb/mongodb-community-server
   version: 8.3.2
   statefulSet:
     spec:
