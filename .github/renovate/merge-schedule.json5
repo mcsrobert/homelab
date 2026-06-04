@@ -11,7 +11,7 @@
         '.pre-commit-config.yaml',
       ],
       automerge: true,
-      automergeSchedule: ['on the 1st, 2nd, 3rd day of the month every weekday after 15:00 and before 19:00'],
+      automergeSchedule: ['on the 1st, 2nd, 3rd day of the month every weekday after 16:00 and before 19:00'],
       schedule: ['on the 4th day of the month'],
       addLabels: ['renovate/automerge'],
     },
@@ -31,10 +31,22 @@
       schedule: ['on the 4th, 18th day of the month'],
       addLabels: ['renovate/automerge'],
     },
-    // TODO: remove once v1.2.0 bug is fixed
-    // https://github.com/k3s-io/k3s-ansible/pull/534
     {
+      description: 'Skip first minor release for Longhorn',
+      matchPackageNames: ['longhorn'],
+      matchNewValue: '/^\\d+\\.\\d+\\.0$/',
+      enabled: false,
+    },
+    {
+      description: 'Skip first monthly release for Home Assistant',
+      matchPackageNames: ['ghcr.io/home-operations/home-assistant'],
+      matchNewValue: '/^\\d{4}\\.\\d+\\.0$/',
+      enabled: false,
+    },
+    {
+      description: 'Disable until issue is resolved: https://github.com/k3s-io/k3s-ansible/pull/534',
       matchPackageNames: ['k3s-io/k3s-ansible'],
+      matchNewValue: '1.2.0',
       enabled: false,
     },
   ]
