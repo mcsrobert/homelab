@@ -42,7 +42,7 @@ spec:
                 custom: true
                 spec:
                   tcpSocket:
-                    port: &dnsPort 53
+                    port: &dnsPort 1053
                   initialDelaySeconds: 20  # blocklist download on startup
                   periodSeconds: 10
                   timeoutSeconds: 5
@@ -60,10 +60,6 @@ spec:
               capabilities:
                 drop:
                   - ALL
-                add:
-                  # NOTE: Required, even when binding port 1053 or: exec /app/blocky: operation not permitted
-                  # See: https://github.com/0xERR0R/blocky/issues/1461
-                  - NET_BIND_SERVICE
     persistence:
       config:
         type: secret
@@ -90,10 +86,12 @@ spec:
         externalTrafficPolicy: Local
         ports:
           tcp:
-            port: *dnsPort
+            port: 53
+            targetPort: *dnsPort
             protocol: TCP
           udp:
-            port: *dnsPort
+            port: 53
+            targetPort: *dnsPort
             protocol: UDP
     serviceMonitor:
       *app :

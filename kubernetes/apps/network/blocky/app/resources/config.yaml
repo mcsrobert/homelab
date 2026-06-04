@@ -1,7 +1,7 @@
 # certFile: /app/cert/tls.crt
 # keyFile: /app/cert/tls.key
 ports:
-  # dns: 1053
+  dns: 1053
   http: 4000
 redis:
   address: blocky-dragonfly.network.svc.cluster.local:6379
