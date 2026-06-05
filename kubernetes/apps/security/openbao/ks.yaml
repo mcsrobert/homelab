@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: openbao
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cert-manager
+    - name: longhorn
+    - name: prometheus-operator-crds
+  path: /kubernetes/apps/security/openbao/app
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  targetNamespace: security
+  interval: 30m
+  timeout: 5m
+  wait: true
+  prune: true
