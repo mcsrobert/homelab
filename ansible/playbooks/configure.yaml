@@ -60,7 +60,7 @@
         - { regexp: "^#?KbdInteractiveAuthentication", line: "KbdInteractiveAuthentication no" }
         - { regexp: "^#?PermitEmptyPasswords", line: "PermitEmptyPasswords no" }
         - { regexp: "^#?X11Forwarding", line: "X11Forwarding no" }
-      notify: Restart SSH
+      notify: Restart sshd
 
     - name: Configure k3s registry mirror cache Spegel
       vars:
@@ -75,12 +75,25 @@
 
         - name: Ensure we mirror/cache all repos with Spegel
           ansible.builtin.blockinfile:
-            path: /etc/rancher/k3s/}/registries.yaml
+            path: /etc/rancher/k3s/registries.yaml
             create: true
             mode: "0400"
             block: |
               mirrors:
                 "*":
+
+    - name: Check if Armbian ramlog config exists
+      ansible.builtin.stat:
+        path: /etc/default/armbian-ramlog
+      register: armbian_ramlog
+
+    - name: Configure Armbian ramlog size
+      ansible.builtin.lineinfile:
+        path: /etc/default/armbian-ramlog
+        regexp: '^SIZE='
+        line: 'SIZE=100M'
+      when: armbian_ramlog.stat.exists
+      notify: Restart armbian-ramlog
 
   handlers:
 
@@ -90,7 +103,12 @@
         regexp: "^127\\.0\\.1\\.1"
         line: "127.0.1.1\t{{ inventory_hostname }}"
 
-    - name: Restart SSH
+    - name: Restart sshd
       ansible.builtin.service:
         name: sshd
+        state: restarted
+
+    - name: Restart armbian-ramlog
+      ansible.builtin.service:
+        name: armbian-ramlog
         state: restarted
