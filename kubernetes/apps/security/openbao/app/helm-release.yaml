@@ -1,0 +1,118 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openbao
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: openbao
+      version: 0.28.3
+      sourceRef:
+        kind: HelmRepository
+        name: openbao
+  values: # https://github.com/openbao/openbao-helm/blob/main/charts/openbao/values.yaml
+    server:
+      enabled: true
+      standalone:
+        enabled: true
+        config: |
+          ui = true
+          disable_mlock = true
+
+          api_addr = "https://bao.${CLUSTER_DOMAIN}"
+
+          listener "tcp" {
+            address         = "[::]:8200"
+            cluster_address = "[::]:8201"
+
+            tls_cert_file = "/tls/tls.crt"
+            tls_key_file  = "/tls/tls.key"
+            tls_min_version = "tls13"
+
+            telemetry {
+              disable_hostname = true
+              unauthenticated_metrics_access = true
+            }
+          }
+
+          storage "raft" {
+            path    = "/openbao/data"
+            node_id = "node1"
+          }
+
+          audit "file" {
+            file_path = "/openbao/audit/audit.log"
+          }
+
+          seal "static" {
+            disabled = false
+            current_key_id = "20260606-1"
+            current_key = "file:///openbao/secrets/unseal-20260606-1.key"
+          }
+
+          telemetry {
+            prometheus_retention_time = "30s"
+            disable_hostname = true
+          }
+
+      dataStorage:
+        enabled: true
+        size: 2Gi
+
+      auditStorage:
+        enabled: true
+        size: 1Gi
+
+      volumes:
+        - name: secrets
+          secret:
+            secretName: openbao-secrets
+        - name: tls
+          secret:
+            secretName: openbao-tls
+
+      volumeMounts:
+        - name: secrets
+          mountPath: /openbao/secrets
+          readOnly: true
+        - name: tls
+          mountPath: /tls
+          readOnly: true
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+
+      serverTelemetry:
+        serviceMonitor:
+          enabled: true
+        grafanaDashboard:
+          enabled: true
+          extraAnnotations:
+            grafana_folder: security
+
+      networkPolicy:
+        enabled: true
+        ingress:
+          - from:
+              - namespaceSelector:
+                  matchLabels:
+                    name: network
+                podSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: traefik
+              - namespaceSelector:
+                  matchLabels:
+                    name: observability
+                podSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: vmagent
+            ports:
+              - port: 8200
+                protocol: TCP
