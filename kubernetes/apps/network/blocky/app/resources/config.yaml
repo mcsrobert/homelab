@@ -48,4 +48,5 @@ blocking:
 customDNS:
   mapping:
     nas.${CLUSTER_DOMAIN}: ${NAS_IP}
+    bao.${CLUSTER_DOMAIN}: ${OPENBAO_IP},${OPENBAO_IPv6}
     ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
