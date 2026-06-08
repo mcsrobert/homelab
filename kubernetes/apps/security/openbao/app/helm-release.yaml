@@ -14,6 +14,8 @@ spec:
         kind: HelmRepository
         name: openbao
   values: # https://github.com/openbao/openbao-helm/blob/main/charts/openbao/values.yaml
+    global:
+      tlsDisable: false
     server:
       enabled: true
       standalone:
@@ -43,8 +45,11 @@ spec:
             node_id = "node1"
           }
 
-          audit "file" {
-            file_path = "/openbao/audit/audit.log"
+          audit "file" "to-stdout" {
+            options {
+              file_path = "/dev/stdout"
+              log_raw = "true"
+            }
           }
 
           seal "static" {
@@ -63,8 +68,8 @@ spec:
         size: 2Gi
 
       auditStorage:
-        enabled: true
-        size: 1Gi
+        enabled: false
+        # size: 1Gi
 
       volumes:
         - name: secrets
@@ -89,30 +94,40 @@ spec:
         limits:
           memory: 512Mi
 
-      serverTelemetry:
-        serviceMonitor:
-          enabled: true
-        grafanaDashboard:
-          enabled: true
-          extraAnnotations:
-            grafana_folder: security
-
       networkPolicy:
         enabled: true
         ingress:
           - from:
-              - namespaceSelector:
-                  matchLabels:
-                    name: network
-                podSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: traefik
+              - podSelector: {}
               - namespaceSelector:
                   matchLabels:
                     name: observability
                 podSelector:
                   matchLabels:
                     app.kubernetes.io/name: vmagent
+              - ipBlock:
+                  cidr: ${LAN_CIDR}
+              - ipBlock:
+                  cidr: ${LAN_CIDRv6}
             ports:
               - port: 8200
                 protocol: TCP
+
+    ui:
+      enabled: true
+      annotations:
+        metallb.io/loadBalancerIPs: "${OPENBAO_IP},${OPENBAO_IPv6}"
+      serviceType: LoadBalancer
+      serviceIPFamilyPolicy: RequireDualStack
+      externalTrafficPolicy: Local
+      externalPort: 443
+
+    serverTelemetry:
+      serviceMonitor:
+        enabled: true
+      prometheusRules:
+        enabled: true
+      grafanaDashboard:
+        enabled: true
+        extraAnnotations:
+          grafana_folder: security
