@@ -18,6 +18,11 @@ spec:
       tlsDisable: false
     server:
       enabled: true
+
+      statefulSet:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
       standalone:
         enabled: true
         config: |
@@ -58,10 +63,54 @@ spec:
             current_key = "file:///openbao/secrets/unseal-20260606-1.key"
           }
 
+          initialize "bootstrap" {
+            request "enable-ldap" {
+              operation = "update"
+              path      = "sys/auth/ldap"
+              data      = { type = "ldap" }
+            }
+
+            request "configure-lldap" {
+              operation = "update"
+              path      = "auth/ldap/config"
+              data = {
+                url         = "ldap://lldap.auth.svc.cluster.local"
+                binddn      = "uid=openbao,ou=people,${LDAP_BASE_DN}"
+                bindpass    = { eval_type = "string", eval_source = "env", env_var = "LLDAP_BIND_PASSWORD" }
+                userdn      = "ou=people,${LDAP_BASE_DN}"
+                userattr    = "uid"
+                groupdn     = "ou=groups,${LDAP_BASE_DN}"
+                groupattr   = "cn"
+                groupfilter = "(&(objectClass=groupOfUniqueNames)(member={{"{{.UserDN}}"}}))"
+              }
+            }
+
+            request "write-admin-policy" {
+              operation = "update"
+              path      = "sys/policies/acl/admin-policy"
+              data = {
+                policy = <<EOT
+                  path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
+                EOT
+              }
+            }
+
+            request "map-admin-group" {
+              operation = "update"
+              path      = "auth/ldap/groups/openbao_admin"
+              data      = { policies = ["admin-policy"] }
+            }
+          }
+
           telemetry {
             prometheus_retention_time = "30s"
             disable_hostname = true
           }
+
+      extraSecretEnvironmentVars:
+        - envName: LLDAP_BIND_PASSWORD
+          secretName: openbao-auth-lldap
+          secretKey: bind-password
 
       dataStorage:
         enabled: true
@@ -69,7 +118,6 @@ spec:
 
       auditStorage:
         enabled: false
-        # size: 1Gi
 
       volumes:
         - name: secrets
