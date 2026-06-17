@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: radarr
+  name: &app radarr
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      radarr:
+      *app :
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -25,23 +25,19 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          *app :
             image:
               repository: ghcr.io/home-operations/radarr
               tag: 6.2.1.10461@sha256:0756fffa75b30219e3dbac8d027a5389f53cbb34ae83fa4b0976c1b0524c8eb1
-            env:
-              # See: https://wiki.servarr.com/radarr/environment-variables
+            env:  # See: https://wiki.servarr.com/radarr/environment-variables
               TZ: ${TIME_ZONE}
-              RADARR__APP__INSTANCENAME: Radarr
+              RADARR__APP__INSTANCENAME: *app
               RADARR__APP__THEME: dark
               RADARR__APPLICATION_URL: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
               RADARR__LOG__LEVEL: info
               RADARR__LOG__ANALYTICSENABLED: false
               RADARR__SERVER__PORT: &port 8080
               RADARR__UPDATE__BRANCH: develop
-            # envFrom:
-            #   - secretRef:
-            #       name: radarr-secret
             probes:
               liveness: &probe
                 enabled: true
@@ -73,12 +69,12 @@ spec:
       tmp:
         type: emptyDir
     service:
-      app:
+      *app :
         ports:
           http:
             port: *port
     route:
-      app:
+      *app :
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Radarr
@@ -88,9 +84,9 @@ spec:
           gethomepage.dev/widget.type: radarr
           gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_RADARR_API_KEY}}` }}"
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
