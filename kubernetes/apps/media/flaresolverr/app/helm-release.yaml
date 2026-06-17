@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: flaresolverr
+  name: &app flaresolverr
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      flaresolverr:
+      *app :
         pod:
           securityContext:
             runAsNonRoot: true
@@ -23,7 +23,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          *app :
             image:
               repository: ghcr.io/flaresolverr/flaresolverr
               tag: v3.5.0@sha256:139dfee1c6f89249c8d665d1333a42e8ec74ec0a86bc6bb1c8461e10d3a66a47
@@ -31,7 +31,7 @@ spec:
               TZ: ${TIME_ZONE}
               LOG_LEVEL: info
               PORT: &port 8191
-              PROMETHEUS_ENABLED: "true"
+              PROMETHEUS_ENABLED: true
               PROMETHEUS_PORT: &metricsPort 8192
             probes:
               liveness: &probes
@@ -59,23 +59,23 @@ spec:
                 drop:
                   - ALL
     service:
-      app:
+      *app :
         ports:
           http:
             port: *port
           metrics:
             port: *metricsPort
     serviceMonitor:
-      app:
+      *app :
         service:
-          name: flaresolverr
+          name: *app
         endpoints:
           - port: metrics
     route:
-      app:
+      *app :
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
