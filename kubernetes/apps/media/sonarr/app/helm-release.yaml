@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: sonarr
+  name: &app sonarr
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      sonarr:
+      *app :
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -25,23 +25,19 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          *app :
             image:
               repository: ghcr.io/home-operations/sonarr
               tag: 4.0.17.2967@sha256:4ff5667a371e08b098858fa2457a99a5fef5f6a32640eb8567efe979d13ac9fc
-            env:
-              # See: https://wiki.servarr.com/sonarr/environment-variables
+            env:  # See: https://wiki.servarr.com/sonarr/environment-variables
               TZ: ${TIME_ZONE}
-              SONARR__APP__INSTANCENAME: Sonarr
+              SONARR__APP__INSTANCENAME: *app
               SONARR__APP__THEME: dark
               SONARR__APPLICATION_URL: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
               SONARR__LOG__LEVEL: info
               SONARR__LOG__ANALYTICSENABLED: false
               SONARR__SERVER__PORT: &port 8080
               SONARR__UPDATE__BRANCH: develop
-            # envFrom:
-            #   - secretRef:
-            #       name: sonarr-secret
             probes:
               liveness: &probe
                 enabled: true
@@ -73,12 +69,12 @@ spec:
       tmp:
         type: emptyDir
     service:
-      app:
+      *app :
         ports:
           http:
             port: *port
     route:
-      app:
+      *app :
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Sonarr
@@ -88,9 +84,9 @@ spec:
           gethomepage.dev/widget.type: sonarr
           gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SONARR_API_KEY}}` }}"
+        hostnames:
+          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
