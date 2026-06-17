@@ -87,7 +87,7 @@ spec:
 
             request "write-admin-policy" {
               operation = "update"
-              path      = "sys/policies/acl/admin-policy"
+              path      = "sys/policies/acl/admin"
               data = {
                 policy = <<EOT
                   path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
@@ -98,7 +98,7 @@ spec:
             request "map-admin-group" {
               operation = "update"
               path      = "auth/ldap/groups/openbao_admin"
-              data      = { policies = ["admin-policy"] }
+              data      = { policies = ["admin"] }
             }
           }
 
