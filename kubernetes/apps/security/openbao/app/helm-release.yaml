@@ -26,21 +26,20 @@ spec:
       standalone:
         enabled: true
         config: |
-          ui = true
+          ui            = true
           disable_mlock = true
-
-          api_addr = "https://bao.${CLUSTER_DOMAIN}"
+          api_addr      = "https://bao.${CLUSTER_DOMAIN}"
 
           listener "tcp" {
             address         = "[::]:8200"
             cluster_address = "[::]:8201"
 
-            tls_cert_file = "/tls/tls.crt"
-            tls_key_file  = "/tls/tls.key"
+            tls_cert_file   = "/tls/tls.crt"
+            tls_key_file    = "/tls/tls.key"
             tls_min_version = "tls13"
 
             telemetry {
-              disable_hostname = true
+              disable_hostname               = true
               unauthenticated_metrics_access = true
             }
           }
@@ -53,17 +52,58 @@ spec:
           audit "file" "to-stdout" {
             options {
               file_path = "/dev/stdout"
-              log_raw = "true"
+              log_raw   = "true"
             }
           }
 
           seal "static" {
-            disabled = false
+            disabled       = false
             current_key_id = "20260606-1"
-            current_key = "file:///openbao/secrets/unseal-20260606-1.key"
+            current_key    = "file:///openbao/secrets/unseal-20260606-1.key"
           }
 
           initialize "bootstrap" {
+
+            request "enable-kv-v2" {
+              operation = "update"
+              path      = "sys/mounts/kv"
+              data      = { type = "kv-v2" }
+            }
+
+            request "enable-k8s-auth" {
+              operation = "update"
+              path      = "sys/auth/kubernetes"
+              data      = { type = "kubernetes" }
+            }
+
+            request "configure-k8s-auth" {
+              operation = "update"
+              path      = "auth/kubernetes/config"
+              data = { kubernetes_host = "https://kubernetes.default.svc.cluster.local" }
+            }
+
+            request "write-eso-policy" {
+              operation = "update"
+              path      = "sys/policies/acl/eso-readonly"
+              data = {
+                policy = <<EOT
+                  path "kv/data/*" { capabilities = ["read"] }
+                  path "kv/metadata/*" { capabilities = ["list", "read"] }
+                EOT
+              }
+            }
+
+            request "map-eso-role" {
+              operation = "update"
+              path      = "auth/kubernetes/role/eso-role"
+              data = {
+                bound_service_account_names      = ["external-secrets"]
+                bound_service_account_namespaces = ["security"]
+                token_ttl                        = "1h"
+                token_max_ttl                    = "4h"
+                token_policies                   = ["eso-readonly"]
+              }
+            }
             request "enable-ldap-auth" {
               operation = "update"
               path      = "sys/auth/ldap"
@@ -100,54 +140,11 @@ spec:
               path      = "auth/ldap/groups/openbao_admin"
               data      = { policies = ["admin"] }
             }
-
-            request "enable-k8s-auth" {
-              operation = "update"
-              path      = "sys/auth/kubernetes"
-              data      = { type = "kubernetes" }
-            }
-
-            request "configure-k8s-auth" {
-              operation = "update"
-              path      = "auth/kubernetes/config"
-              data = {
-                kubernetes_host = "https://kubernetes.default.svc.cluster.local"
-              }
-            }
-
-            request "enable-kv-v2" {
-              operation = "update"
-              path      = "sys/mounts/secret"
-              data      = { type = "kv-v2" }
-            }
-
-            request "write-eso-policy" {
-              operation = "update"
-              path      = "sys/policies/acl/eso-readonly"
-              data = {
-                policy = <<EOT
-                  path "secret/data/*" { capabilities = ["read"] }
-                  path "secret/metadata/*" { capabilities = ["list", "read"] }
-                EOT
-              }
-            }
-
-            request "map-eso-role" {
-              operation = "update"
-              path      = "auth/kubernetes/role/eso-role"
-              data = {
-                bound_service_account_names      = ["external-secrets"]
-                bound_service_account_namespaces = ["security"]
-                token_ttl                       = "1h"
-                token_max_ttl                   = "4h"
-                token_policies                  = ["eso-readonly"]
-              }
-            }
           }
 
           telemetry {
             prometheus_retention_time = "30s"
-            disable_hostname = true
+            disable_hostname          = true
           }
 
       extraSecretEnvironmentVars:
