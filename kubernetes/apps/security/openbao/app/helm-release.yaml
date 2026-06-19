@@ -117,7 +117,7 @@ spec:
 
             request "enable-kv-v2" {
               operation = "update"
-              path      = "sys/mounts/secrets"
+              path      = "sys/mounts/secret"
               data      = { type = "kv-v2" }
             }
 
@@ -126,8 +126,8 @@ spec:
               path      = "sys/policies/acl/eso-readonly"
               data = {
                 policy = <<EOT
-                  path "secrets/data/*" { capabilities = ["read"] }
-                  path "secrets/metadata/*" { capabilities = ["list", "read"] }
+                  path "secret/data/*" { capabilities = ["read"] }
+                  path "secret/metadata/*" { capabilities = ["list", "read"] }
                 EOT
               }
             }
