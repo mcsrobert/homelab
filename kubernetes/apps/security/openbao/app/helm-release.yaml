@@ -64,13 +64,13 @@ spec:
           }
 
           initialize "bootstrap" {
-            request "enable-ldap" {
+            request "enable-ldap-auth" {
               operation = "update"
               path      = "sys/auth/ldap"
               data      = { type = "ldap" }
             }
 
-            request "configure-lldap" {
+            request "configure-ldap-auth" {
               operation = "update"
               path      = "auth/ldap/config"
               data = {
@@ -99,6 +99,49 @@ spec:
               operation = "update"
               path      = "auth/ldap/groups/openbao_admin"
               data      = { policies = ["admin"] }
+            }
+
+            request "enable-k8s-auth" {
+              operation = "update"
+              path      = "sys/auth/kubernetes"
+              data      = { type = "kubernetes" }
+            }
+
+            request "configure-k8s-auth" {
+              operation = "update"
+              path      = "auth/kubernetes/config"
+              data = {
+                kubernetes_host = "https://kubernetes.default.svc.cluster.local"
+              }
+            }
+
+            request "enable-kv-v2" {
+              operation = "update"
+              path      = "sys/mounts/secrets"
+              data      = { type = "kv-v2" }
+            }
+
+            request "write-eso-policy" {
+              operation = "update"
+              path      = "sys/policies/acl/eso-readonly"
+              data = {
+                policy = <<EOT
+                  path "secrets/data/*" { capabilities = ["read"] }
+                  path "secrets/metadata/*" { capabilities = ["list", "read"] }
+                EOT
+              }
+            }
+
+            request "map-eso-role" {
+              operation = "update"
+              path      = "auth/kubernetes/role/eso-role"
+              data = {
+                bound_service_account_names      = ["external-secrets"]
+                bound_service_account_namespaces = ["security"]
+                token_ttl                       = "1h"
+                token_max_ttl                   = "4h"
+                token_policies                  = ["eso-readonly"]
+              }
             }
           }
 
