@@ -37,5 +37,7 @@ spec:
     prometheus:
       namespace: observability
       rbacPrometheus: false
-      podMonitor:
+      serviceMonitor:
+        enabled: true
+      prometheusRule:
         enabled: true
