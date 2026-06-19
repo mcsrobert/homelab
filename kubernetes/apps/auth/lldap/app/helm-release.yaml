@@ -3,16 +3,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: lldap
+  name: &app lldap
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
   values:
     controllers:
-      lldap:
+      *app :
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -25,7 +25,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          *app :
             image:
               repository: ghcr.io/lldap/lldap
               tag: v0.6.3-alpine-rootless@sha256:ba2c50930ea998eefd5454aa678a7977448019248b1827da87d330df0b71c284
@@ -59,7 +59,7 @@ spec:
       data:
         existingClaim: lldap-data
     service:
-      lldap:
+      *app :
         ports:
           ldap:
             port: 389
@@ -72,7 +72,7 @@ spec:
             port: &uiPort 17170
             protocol: HTTP
     route:
-      ui:
+      *app :
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: LLDAP
@@ -89,3 +89,28 @@ spec:
           - backendRefs:
               - name: lldap-ui
                 port: *uiPort
+    networkpolicies:
+      *app :
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: *app
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: authelia
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: network
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: traefik
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: security
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: openbao
