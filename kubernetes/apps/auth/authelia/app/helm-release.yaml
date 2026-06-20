@@ -31,7 +31,7 @@ spec:
               tag: 4.39.20@sha256:1b363e9279e742397966333f364e0876ae02bf5c876de73e83af6d48c57ff51b
             envFrom:
               - secretRef:
-                  name: authelia-secret
+                  name: authelia-env-secret
             env:
               X_AUTHELIA_CONFIG: /config/configuration.yaml
               X_AUTHELIA_CONFIG_FILTERS: template
@@ -60,16 +60,16 @@ spec:
         globalMounts:
           - path: /config/configuration.yaml
             subPath: configuration.yaml
-      secret-files:
-        type: secret
-        name: authelia-secret-files
-        globalMounts:
-          - path: /secrets
       oidc-cert:
         type: secret
         name: authelia-oidc-tls
         globalMounts:
-          - path: /secrets/oidc
+          - path: /oidc
+      oidc-client-secrets:
+        type: secret
+        name: authelia-oidc-client-secrets
+        globalMounts:
+          - path: /oidc/clients
     service:
       app:
         ports:
