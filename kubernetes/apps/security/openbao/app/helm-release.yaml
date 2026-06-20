@@ -66,7 +66,7 @@ spec:
 
             request "enable-kv-v2" {
               operation = "update"
-              path      = "sys/mounts/kv"
+              path      = "sys/mounts/homelab"
               data      = { type = "kv-v2" }
             }
 
@@ -87,8 +87,8 @@ spec:
               path      = "sys/policies/acl/eso-readonly"
               data = {
                 policy = <<EOT
-                  path "kv/data/*" { capabilities = ["read"] }
-                  path "kv/metadata/*" { capabilities = ["list", "read"] }
+                  path "homelab/data/*" { capabilities = ["read"] }
+                  path "homelab/metadata/*" { capabilities = ["list", "read"] }
                 EOT
               }
             }
