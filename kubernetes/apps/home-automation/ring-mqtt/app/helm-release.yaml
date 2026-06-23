@@ -25,7 +25,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          ring-mqtt:
             env:
               # See: https://github.com/just-containers/s6-overlay/issues/600
               S6_READ_ONLY_ROOT: 1
@@ -68,7 +68,7 @@ spec:
         globalMounts:
           - path: /run
     service:
-      app:
+      ring-mqtt:
         ports:
           rtsp:
             port: 8554
