@@ -25,7 +25,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          zigbee2mqtt:
             image:
               repository: ghcr.io/koenkk/zigbee2mqtt
               tag: 2.12.0@sha256:1debff565ab6841417bd9f7ce8ad44f8c5f25a8b02a24ce3fd79e4779a4763a5
@@ -67,12 +67,12 @@ spec:
         globalMounts:
           - path: /app/data
     service:
-      app:
+      zigbee2mqtt:
         ports:
           http:
             port: 8080
     route:
-      app:
+      zigbee2mqtt:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Zigbee2MQTT
@@ -89,7 +89,7 @@ spec:
                   kind: Middleware
                   name: auth-chain
             backendRefs:
-              - identifier: app
+              - identifier: zigbee2mqtt
         parentRefs:
           - name: traefik-gateway
             namespace: network

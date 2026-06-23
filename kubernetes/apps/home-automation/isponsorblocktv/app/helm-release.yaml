@@ -25,7 +25,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          isponsorblocktv:
             image:
               repository: ghcr.io/dmunozv04/isponsorblocktv
               tag: v2.9.0@sha256:5b8cfa805cb60b99a9e83a2df62d41c63865a315f7ee7cfed1a78052d93650b6
