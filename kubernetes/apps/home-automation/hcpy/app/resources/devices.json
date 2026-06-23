@@ -2,8 +2,8 @@
     {
         "name": "Washing Machine",
         "host": "washer",
-        "key": "{{ .HCPY_DEVICES_WASHER_KEY }}",
-        "iv": "{{ .HCPY_DEVICES_WASHER_IV }}",
+        "key": "{{ .WASHER_KEY }}",
+        "iv": "{{ .WASHER_IV }}",
         "description": {
             "type": "Washer",
             "brand": "SIEMENS",
@@ -1651,8 +1651,8 @@
     {
         "name": "Dryer",
         "host": "dryer",
-        "key": "{{ .HCPY_DEVICES_DRYER_KEY }}",
-        "iv": "{{ .HCPY_DEVICES_DRYER_IV }}",
+        "key": "{{ .DRYER_KEY }}",
+        "iv": "{{ .DRYER_IV }}",
         "description": {
             "type": "Dryer",
             "brand": "SIEMENS",
@@ -3155,8 +3155,8 @@
     {
         "name": "Oven",
         "host": "oven",
-        "key": "{{ .HCPY_DEVICES_OVEN_KEY }}",
-        "iv": "{{ .HCPY_DEVICES_OVEN_IV }}",
+        "key": "{{ .OVEN_KEY }}",
+        "iv": "{{ .OVEN_IV }}",
         "description": {
             "type": "Oven",
             "brand": "NEFF",
@@ -4160,7 +4160,7 @@
     {
         "name": "Dishwasher",
         "host": "dishwasher",
-        "key": "{{ .HCPY_DEVICES_DISHWASHER_KEY }}",
+        "key": "{{ .DISHWASHER_KEY }}",
         "description": {
             "type": "Dishwasher",
             "brand": "NEFF",
