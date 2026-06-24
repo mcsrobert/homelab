@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app flaresolverr
+  name: flaresolverr
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      *app :
+      flaresolverr:
         pod:
           securityContext:
             runAsNonRoot: true
@@ -23,7 +23,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          *app :
+          flaresolverr:
             image:
               repository: ghcr.io/flaresolverr/flaresolverr
               tag: v3.5.0@sha256:139dfee1c6f89249c8d665d1333a42e8ec74ec0a86bc6bb1c8461e10d3a66a47
@@ -59,20 +59,20 @@ spec:
                 drop:
                   - ALL
     service:
-      *app :
+      flaresolverr:
         ports:
           http:
             port: *port
           metrics:
             port: *metricsPort
     serviceMonitor:
-      *app :
+      flaresolverr:
         service:
-          name: *app
+          name: flaresolverr
         endpoints:
           - port: metrics
     route:
-      *app :
+      flaresolverr:
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
         parentRefs:
