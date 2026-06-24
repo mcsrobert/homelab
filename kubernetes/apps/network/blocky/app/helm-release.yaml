@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app blocky
+  name: blocky
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      *app :
+      blocky:
         replicas: 4
         strategy: RollingUpdate
         annotations:
@@ -24,7 +24,7 @@ spec:
               whenUnsatisfiable: DoNotSchedule
               labelSelector:
                 matchLabels:
-                  app.kubernetes.io/name: *app
+                  app.kubernetes.io/name: blocky
           securityContext:
             runAsNonRoot: true
             runAsUser: &nobody 65534
@@ -32,7 +32,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          *app :
+          blocky:
             image:
               repository: ghcr.io/0xerr0r/blocky
               tag: v0.31.0@sha256:2e5696efe4f920a9c07efa5587650fb94e7c4dc68759a77debde3daaa1e30cdb
@@ -73,7 +73,7 @@ spec:
       #   globalMounts:
       #     - path: /app/cert
     service:
-      *app :
+      blocky:
         ports:
           http:
             port: 4000
@@ -94,14 +94,14 @@ spec:
             targetPort: *dnsPort
             protocol: UDP
     serviceMonitor:
-      *app :
+      blocky:
         service:
-          name: *app
+          name: blocky
         endpoints:
           - port: http
             path: /metrics
     route:
-      *app :
+      blocky:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Blocky
@@ -113,10 +113,10 @@ spec:
             namespace: network
             sectionName: websecure
         hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          - blocky.${CLUSTER_DOMAIN}
         rules:
           - backendRefs:
-              - identifier: *app
+              - identifier: blocky
             filters:
               - type: ExtensionRef
                 extensionRef:
