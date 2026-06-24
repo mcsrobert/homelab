@@ -12,7 +12,7 @@ spec:
   interval: 30m
   values:
     controllers:
-      app:
+      tailscale:
         annotations:
           reloader.stakater.com/auto: "true"
         serviceAccount:
@@ -23,7 +23,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          tailscale:
             image:
               repository: ghcr.io/tailscale/tailscale
               tag: v1.98.4@sha256:25cde9ad76020b0e29229136d0c38b5962e9a0e1774ffac9b0df68e4a37d6cf0
@@ -107,7 +107,7 @@ spec:
             port: *peerPort
             protocol: UDP
     serviceMonitor:
-      app:
+      tailscale:
         service:
           name: tailscale
         endpoints:
