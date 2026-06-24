@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app jellyfin
+  name: jellyfin
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      *app :
+      jellyfin:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -23,7 +23,7 @@ spec:
             fsGroup: 65537  # media
             fsGroupChangePolicy: OnRootMismatch
         containers:
-          *app :
+          jellyfin:
             image:
               repository: ghcr.io/jellyfin/jellyfin
               tag: 10.11.11@sha256:45f648c382a0c8b552582fcea40e95cb17c5d475473a891cba0eb7523fb92112
@@ -87,7 +87,7 @@ spec:
           - path: /usr/lib/aarch64-linux-gnu/libmali.so
             readOnly: true
     service:
-      *app :
+      jellyfin:
         ports:
           http:
             port: *port
@@ -95,7 +95,7 @@ spec:
           #   port: 7359
           #   protocol: UDP
     route:
-      *app :
+      jellyfin:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Jellyfin

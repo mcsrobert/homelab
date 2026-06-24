@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app bazarr
+  name: bazarr
 spec:
   chartRef:
     kind: OCIRepository
@@ -12,7 +12,7 @@ spec:
   interval: 30m
   values:
     controllers:
-      *app :
+      bazarr:
         pod:
           securityContext:
             runAsNonRoot: true
@@ -23,13 +23,13 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          *app :
+          bazarr:
             image:
               repository: ghcr.io/home-operations/bazarr
               tag: 1.5.6@sha256:79fc37491f55c7e24427bcd669bce3df2d7415ca432a47ce9d53cc5988af8411
             env:
               TZ: ${TIME_ZONE}
-              BAZARR__INSTANCE_NAME: *app
+              BAZARR__INSTANCE_NAME: "{{ .Release.Name }}"
               BAZARR__PORT: &port 6767
               BAZARR__APPLICATION_URL: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
               BAZARR__LOG_LEVEL: info
@@ -65,12 +65,12 @@ spec:
         server: ${NAS_IP}
         path: /volume1/media
     service:
-      *app :
+      bazarr:
         ports:
           http:
             port: *port
     route:
-      *app :
+      bazarr:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Bazarr
