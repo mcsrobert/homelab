@@ -90,6 +90,8 @@ options, as long as they offer enough features.
 
 ### Security
 
+- [OpenBao](https://openbao.org) - Manage, store, and distribute sensitive data
+  including secrets, certificates, and keys.
 - [External Secrets](https://external-secrets.io) - Syncs secrets from external
   providers, avoiding hardcoded credentials.
 - [Kyverno](https://kyverno.io) - Kubernetes-native policies for security and
@@ -115,7 +117,6 @@ prefer EU-based cloud services.
 | [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | |
 | [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (5TB) | ~€13/mo | |
 | [Let's Encrypt](https://letsencrypt.org/) | Certificates | Free | |
-| [Doppler](https://www.doppler.com/) | External Secrets | Free | See [#199](https://github.com/mcsrobert/homelab/issues/199) |
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
 | [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
