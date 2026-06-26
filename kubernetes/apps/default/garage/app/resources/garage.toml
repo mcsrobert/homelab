@@ -8,7 +8,7 @@ compression_level = 2
 
 rpc_bind_addr = "[::]:3901"
 rpc_public_addr = "127.0.0.1:3901"
-rpc_secret = "{{ .GARAGE_RPC_SECRET }}"
+rpc_secret = "{{ .RPC_SECRET }}"
 
 [s3_api]
 s3_region = "eu-west-1"
@@ -17,5 +17,5 @@ root_domain = ".s3.${CLUSTER_DOMAIN}"
 
 [admin]
 api_bind_addr = "[::]:3903"
-admin_token = "{{ .GARAGE_ADMIN_TOKEN }}"
-metrics_token = "{{ .GARAGE_METRICS_TOKEN }}"
+admin_token = "{{ .ADMIN_TOKEN }}"
+metrics_token = "{{ .METRICS_TOKEN }}"
