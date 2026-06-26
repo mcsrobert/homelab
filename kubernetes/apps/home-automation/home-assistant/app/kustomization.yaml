@@ -6,8 +6,8 @@ resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
 configMapGenerator:
-  - name: hass-configurator-config-tpl
+  - name: hass-configurator-config-template
     files:
       - settings.conf=./resources/hass-configurator-settings.json
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - ./kustomize-config.yaml

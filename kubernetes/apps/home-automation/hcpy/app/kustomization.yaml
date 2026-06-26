@@ -6,7 +6,7 @@ resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
 configMapGenerator:
-  - name: hcpy-config-tpl
+  - name: hcpy-config-template
     files:
       - config.ini=./resources/config.ini
       - devices.json=./resources/devices.json
