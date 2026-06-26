@@ -16,4 +16,4 @@ spec:
     limits:
       memory: 1Gi
   schedule: 0 * * * *
-  secretRef: renovate-github-secret
+  secretRef: renovate-github-token
