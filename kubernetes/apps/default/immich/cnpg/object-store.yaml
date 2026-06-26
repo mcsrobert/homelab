@@ -10,7 +10,7 @@ spec:
     endpointURL: http://garage.default.svc.cluster.local:3900
     s3Credentials:
       region:
-        name: &secret immich-garage-secret
+        name: &secret immich-garage-key
         key: REGION
       accessKeyId:
         name: *secret

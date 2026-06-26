@@ -24,7 +24,7 @@ spec:
         issuerUrl: https://authelia.${CLUSTER_DOMAIN}
         redirectUrl: https://renovate.${CLUSTER_DOMAIN}/auth/callback
         clientId: renovate-operator
-        existingSecret: renovate-operator-secret
+        existingSecret: renovate-operator-oidc
         additionalScopes:
           - groups
         fetchUserInfoGroups: true

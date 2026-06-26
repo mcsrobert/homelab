@@ -50,7 +50,7 @@ spec:
               SMTP_FROM_EMAIL: noreply@mail.${CLUSTER_DOMAIN}
             envFrom:
               - secretRef:
-                  name: mealie-secret
+                  name: mealie-env
             resources:
               requests:
                 memory: 384Mi
