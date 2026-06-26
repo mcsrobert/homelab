@@ -47,6 +47,8 @@ options, as long as they offer enough features.
 
 - [k3s](https://k3s.io) - Kubernetes distribution that is resource optimized and
   works well on ARM. Easier to play with the NPU than Talos.
+- [kube-vip](https://kube-vip.io) - Provides the cluster with a virtual IP for
+  the control plane.
 - [FluxCD](https://fluxcd.io) - GitOps for Kubernetes with native
   [SOPS](https://getsops.io) support.
 - [flux-operator](https://fluxoperator.dev) - Fully declarative FluxCD deployments.
