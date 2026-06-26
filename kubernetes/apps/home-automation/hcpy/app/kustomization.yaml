@@ -10,5 +10,5 @@ configMapGenerator:
     files:
       - config.ini=./resources/config.ini
       - devices.json=./resources/devices.json
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - ./kustomize-config.yaml
