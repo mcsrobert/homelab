@@ -44,13 +44,13 @@ spec:
               REDIS_HOSTNAME: immich-dragonfly
               REDIS_PASSWORD:
                 secretKeyRef:
-                  name: immich-dragonfly-secret
+                  name: immich-dragonfly-auth
                   key: password
               UPLOAD_LOCATION: &uploadPath /usr/src/app/upload
               IMMICH_TELEMETRY_INCLUDE: all
             envFrom: &envFrom
               - secretRef:
-                  name: immich-secret
+                  name: immich-env
             probes: &probes
               liveness: &probe
                 enabled: true

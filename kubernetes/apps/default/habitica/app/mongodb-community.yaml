@@ -36,7 +36,7 @@ spec:
     - name: habitica
       db: admin
       passwordSecretRef:
-        name: habitica-mongodb-secret
+        name: habitica-mongodb-auth
       roles:
         - name: readWrite
           db: habitica

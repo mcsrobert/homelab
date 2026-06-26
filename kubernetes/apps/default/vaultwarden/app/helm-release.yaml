@@ -41,7 +41,7 @@ spec:
               WEBSOCKET_ENABLED: true
             envFrom:
               - secretRef:
-                  name: vaultwarden-secret
+                  name: vaultwarden-env
             probes:
               liveness: &probe
                 enabled: true

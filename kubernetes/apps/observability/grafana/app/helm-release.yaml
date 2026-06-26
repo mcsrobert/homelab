@@ -13,8 +13,8 @@ spec:
     labels:
       grafana.home.arpa/instance: grafana
     admin:
-      existingSecret: grafana-admin-secret
-    envFromSecret: grafana-oauth-secret
+      existingSecret: grafana-admin
+    envFromSecret: grafana-env
     grafana.ini:
       analytics:
         check_for_updates: false

@@ -44,7 +44,7 @@ spec:
               METRICS_PORT: &metricsPort 9000
             envFrom:
               - secretRef:
-                  name: simple-mail-service-secret
+                  name: maddy-env
             probes:
               startup: &probe
                 enabled: true

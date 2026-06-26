@@ -35,7 +35,7 @@ spec:
               NODE_DB_URI:
                 valueFrom:
                   secretKeyRef:
-                    name: habitica-mongodb-secret
+                    name: habitica-mongodb-auth
                     key: uri
               INVITE_ONLY: true
               ADMIN_EMAIL: noreply@mail.${CLUSTER_DOMAIN}
