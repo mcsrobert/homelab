@@ -106,7 +106,7 @@ spec:
       enabled: true
       spec:
         externalURL: https://alertmanager.${CLUSTER_DOMAIN}
-        configSecret: alertmanager-config-secret
+        configSecret: alertmanager-config
         resources:
           requests:
             cpu: 25m
