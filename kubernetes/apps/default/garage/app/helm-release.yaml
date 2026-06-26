@@ -140,7 +140,7 @@ spec:
             authorization:
               type: Bearer
               credentials:
-                name: garage-metrics-token
+                name: garage-metrics
                 key: token
     route:
       garage:
