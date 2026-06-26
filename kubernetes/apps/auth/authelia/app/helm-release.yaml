@@ -5,11 +5,11 @@ kind: HelmRelease
 metadata:
   name: authelia
 spec:
-  interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  interval: 30m
   values:
     controllers:
       authelia:
@@ -25,13 +25,13 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          authelia:
             image:
               repository: ghcr.io/authelia/authelia
               tag: 4.39.20@sha256:1b363e9279e742397966333f364e0876ae02bf5c876de73e83af6d48c57ff51b
             envFrom:
               - secretRef:
-                  name: authelia-env-secret
+                  name: authelia-env
             env:
               X_AUTHELIA_CONFIG: /config/configuration.yaml
               X_AUTHELIA_CONFIG_FILTERS: template
@@ -71,7 +71,7 @@ spec:
         globalMounts:
           - path: /oidc/clients
     service:
-      app:
+      authelia:
         ports:
           http:
             port: 9091
@@ -81,13 +81,13 @@ spec:
             port: 9959
             protocol: HTTP
     serviceMonitor:
-      app:
+      authelia:
         serviceName: authelia
         endpoints:
           - port: metrics
             path: /metrics
     route:
-      app:
+      authelia:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Authelia
@@ -99,4 +99,4 @@ spec:
             namespace: network
             sectionName: websecure
         hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          - "authelia.${CLUSTER_DOMAIN}"
