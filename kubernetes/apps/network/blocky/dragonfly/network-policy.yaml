@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.36.1-standalone-strict/networkpolicy.json
 # This is a workaround for https://github.com/dragonflydb/dragonfly-operator/issues/495
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
