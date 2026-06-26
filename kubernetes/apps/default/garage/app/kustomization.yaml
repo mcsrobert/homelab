@@ -7,8 +7,8 @@ resources:
   - ./helm-release.yaml
   - ./http-scaled-object.yaml
 configMapGenerator:
-  - name: garage-config-tpl
+  - name: garage-config-template
     files:
       - garage.toml=./resources/garage.toml
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - ./kustomize-config.yaml
