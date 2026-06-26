@@ -6,8 +6,8 @@ resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
 configMapGenerator:
-  - name: alertmanager-ntfy-config-tpl
+  - name: alertmanager-ntfy-config-template
     files:
       - config.yaml=./resources/config.yaml
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - ./kustomize-config.yaml

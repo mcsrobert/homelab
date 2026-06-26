@@ -7,8 +7,8 @@ resources:
   - ./helm-release.yaml
   - ./oci-repository.yaml
 configMapGenerator:
-  - name: alertmanager-config-tpl
+  - name: alertmanager-config-template
     files:
       - alertmanager.yaml=./resources/alertmanager.yaml
-generatorOptions:
-  disableNameSuffixHash: true
+configurations:
+  - ./kustomize-config.yaml
