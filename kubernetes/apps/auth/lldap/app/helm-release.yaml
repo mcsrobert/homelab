@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app lldap
+  name: lldap
 spec:
   chartRef:
     kind: OCIRepository
@@ -12,7 +12,7 @@ spec:
   interval: 30m
   values:
     controllers:
-      *app :
+      lldap:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -25,7 +25,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          *app :
+          lldap:
             image:
               repository: ghcr.io/lldap/lldap
               tag: v0.6.3-alpine-rootless@sha256:ba2c50930ea998eefd5454aa678a7977448019248b1827da87d330df0b71c284
@@ -36,7 +36,7 @@ spec:
               LLDAP_LDAP_BASE_DN: ${LDAP_BASE_DN}
             envFrom:
               - secretRef:
-                  name: lldap-secret
+                  name: lldap-env
             probes:
               liveness: &probes
                 enabled: true
@@ -59,7 +59,7 @@ spec:
       data:
         existingClaim: lldap-data
     service:
-      *app :
+      lldap:
         ports:
           ldap:
             port: 389
@@ -72,7 +72,7 @@ spec:
             port: &uiPort 17170
             protocol: HTTP
     route:
-      *app :
+      lldap:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: LLDAP
@@ -90,10 +90,10 @@ spec:
               - name: lldap-ui
                 port: *uiPort
     networkpolicies:
-      *app :
+      lldap:
         podSelector:
           matchLabels:
-            app.kubernetes.io/name: *app
+            app.kubernetes.io/name: lldap
         policyTypes:
           - Ingress
         rules:
