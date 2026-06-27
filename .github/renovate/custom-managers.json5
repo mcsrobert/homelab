@@ -25,5 +25,14 @@
       depNameTemplate: 'ghcr.io/bjw-s-labs/helm/app-template',
       versioningTemplate: 'semver',
     },
+    {
+      description: 'Update YAML schema for Blocky configuration',
+      customType: 'regex',
+      managerFilePatterns: ['/blocky\/app\/resources\/config\\.ya?ml$/'],
+      matchStrings: ['0xerr0r\\.github\\.io/blocky/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/config\\.schema\\.json'],
+      datasourceTemplate: 'docker',
+      depNameTemplate: 'ghcr.io/0xerr0r/blocky',
+      versioningTemplate: 'semver',
+    },
   ]
 }
