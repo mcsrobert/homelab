@@ -67,11 +67,12 @@ spec:
         globalMounts:
           - path: /app/config.yml
             subPath: config.yaml
-      # cert:
-      #   type: secret
-      #   name: blocky-tls
-      #   globalMounts:
-      #     - path: /app/cert
+      list-cache:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteMany
+        size: 2Gi
+        globalMounts:
+          - path: /var/cache/blocky/lists
     service:
       blocky:
         ports:

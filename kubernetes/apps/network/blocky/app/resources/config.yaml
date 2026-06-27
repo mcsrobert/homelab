@@ -1,5 +1,5 @@
-# certFile: /app/cert/tls.crt
-# keyFile: /app/cert/tls.key
+---
+# yaml-language-server: $schema=https://0xerr0r.github.io/blocky/v0.32.1/config.schema.json
 ports:
   dns: 1053
   http: 4000
@@ -33,6 +33,11 @@ conditional:
     178.168.192.in-addr.arpa: ${FRITZBOX_IP}
 clientLookup:
   upstream: ${FRITZBOX_IP}
+customDNS:
+  mapping:
+    nas.${CLUSTER_DOMAIN}: ${NAS_IP}
+    bao.${CLUSTER_DOMAIN}: ${OPENBAO_IP},${OPENBAO_IPv6}
+    ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
 blocking:
   denylists:
     ads:
@@ -45,8 +50,6 @@ blocking:
     default:
       - ads
       - malware
-customDNS:
-  mapping:
-    nas.${CLUSTER_DOMAIN}: ${NAS_IP}
-    bao.${CLUSTER_DOMAIN}: ${OPENBAO_IP},${OPENBAO_IPv6}
-    ${CLUSTER_DOMAIN}: "${PROXY_IP},${PROXY_IPv6}"
+  loading:
+    downloads:
+      cachePath: /var/cache/blocky/lists
