@@ -37,17 +37,20 @@ spec:
               repository: ghcr.io/0xerr0r/blocky
               tag: v0.32.1@sha256:19d856a00569f24b6e295d95feec87d2c07c92f4ee60c3bf2324f1e4b5348e97
             probes:
-              liveness: &probes
+              liveness:
                 enabled: true
                 custom: true
                 spec:
                   tcpSocket:
                     port: &dnsPort 1053
-                  initialDelaySeconds: 20  # blocklist download on startup
-                  periodSeconds: 10
-                  timeoutSeconds: 5
-                  failureThreshold: 3
-              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  tcpSocket:
+                    port: *dnsPort
+                  periodSeconds: 5
+                  failureThreshold: 12
             resources:
               requests:
                 cpu: 10m
