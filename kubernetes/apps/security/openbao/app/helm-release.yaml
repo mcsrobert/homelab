@@ -18,7 +18,7 @@ spec:
       tlsDisable: false
     server:
       enabled: true
-
+      updateStrategyType: RollingUpdate
       statefulSet:
         annotations:
           reloader.stakater.com/auto: "true"
