@@ -38,8 +38,6 @@ spec:
                 cpu: 10m
               limits:
                 memory: 64Mi
-            # Apparently necessary to avoid some conflict in /dev?
-            # terminationMessagePath: /tmp/term
             securityContext:
               privileged: true
     service:
