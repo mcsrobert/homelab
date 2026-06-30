@@ -92,6 +92,7 @@ options, as long as they offer enough features.
 
 ### Security
 
+- [cert-manager](https://cert-manager.io) - X.509 certificate management.
 - [OpenBao](https://openbao.org) - Manage, store, and distribute sensitive data
   including secrets, certificates, and keys.
 - [External Secrets](https://external-secrets.io) - Syncs secrets from external
