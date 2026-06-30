@@ -17,7 +17,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:  # Docs: https://github.com/external-secrets/external-secrets/tree/main/deploy/charts/external-secrets
+  values:  # Docs: https://github.com/external-secrets/external-secrets/blob/main/deploy/charts/external-secrets/values.yaml
     resources:
       requests:
         cpu: 5m
@@ -38,5 +38,12 @@ spec:
           memory: 48Mi
         limits:
           memory: 96Mi
+      metrics:
+        service:
+          enabled: true
     serviceMonitor:
       enabled: true
+    grafanaDashboard:
+      enabled: true
+      annotations:
+        grafana_folder: security
