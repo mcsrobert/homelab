@@ -13,6 +13,10 @@ spec:
   values:
     controllers:
       homepage:
+        strategy: RollingUpdate
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
         annotations:
           reloader.stakater.com/auto: "true"
         serviceAccount:
@@ -28,7 +32,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          homepage:
             image:
               repository: ghcr.io/gethomepage/homepage
               tag: v1.13.2@sha256:a0b71c8e757298d02560186bab9fbe3fc2d375c523a62cc1019177b37e48aa28
@@ -71,17 +75,17 @@ spec:
         globalMounts:
           - path: /app/config
     service:
-      app:
+      homepage:
         ports:
           http:
             port: *port
     route:
-      app:
+      homepage:
         hostnames:
           - *host
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: homepage
         parentRefs:
           - name: traefik-gateway
             namespace: network
