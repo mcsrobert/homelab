@@ -18,6 +18,10 @@ spec:
           type: RuntimeDefault
     controllers:
       server:
+        strategy: RollingUpdate
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -27,7 +31,7 @@ spec:
             runAsGroup: &nfsGroup 65539
             fsGroup: *nfsGroup
         containers:
-          app:
+          immich-server:
             image:
               repository: ghcr.io/immich-app/immich-server
               tag: v2.7.5@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
@@ -67,6 +71,10 @@ spec:
                 drop:
                   - ALL
       machine-learning:
+        strategy: RollingUpdate
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
         annotations:
           reloader.stakater.com/auto: "true"
         # pod:
@@ -76,7 +84,7 @@ spec:
         #     fsGroup: 11110
         #   hostUsers: false
         containers:
-          app:
+          immich-machine-learning:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
               tag: v2.7.5-rknn@sha256:397aee8a2dc67fda0af410679ae977a9a2d749f743c97ed28c9f23c9d101cb44
