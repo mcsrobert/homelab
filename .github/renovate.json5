@@ -13,7 +13,7 @@
     ':dependencyDashboard',
     ':disableRateLimiting',
     ':enablePreCommit',
-    ':rebaseStalePrs',
+    ':separateMultipleMinorReleases',
   ],
   timezone: 'Europe/Amsterdam',
   dependencyDashboardTitle: 'Renovate Dashboard 🤖',

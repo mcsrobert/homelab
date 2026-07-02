@@ -1,6 +1,5 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  respectLatest: false,
   packageRules: [
     {
       description: 'Group and auto merge Dev & CI dependencies once a month',
