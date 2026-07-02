@@ -20,8 +20,11 @@ spec:
       enabled: true
       annotations:
         grafana_folder: observability
-    grafana:
-      enabled: false
+
+    defaultRules:
+      groups:
+        kube-scheduler:
+          enabled: false
 
     kubeScheduler:
       enabled: false
@@ -199,3 +202,6 @@ spec:
           memory: 24Mi
         limits:
           memory: 64Mi
+
+    grafana:
+      enabled: false
