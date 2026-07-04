@@ -5,7 +5,7 @@ kind: Cluster
 metadata:
   name: immich-cnpg
 spec:
-  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.0-0.5.3@sha256:267f6cbb32af6e109e138a143c7e9dd5d44d68433ec2303f0c30e745c788d1a9
+  imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.4-1.1.1@sha256:9c9246cb8ba0332f7e1115def71329410657237db8ef104160a479a89c7e03a2
   primaryUpdateStrategy: unsupervised
   instances: 2
   storage:
