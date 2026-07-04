@@ -42,11 +42,5 @@
       matchNewValue: '/^\\d{4}\\.\\d+\\.0$/',
       enabled: false,
     },
-    {
-      description: 'Disable until issue is resolved: https://github.com/k3s-io/k3s-ansible/pull/534',
-      matchPackageNames: ['k3s-io/k3s-ansible'],
-      matchNewValue: '1.2.0',
-      enabled: false,
-    },
   ]
 }
