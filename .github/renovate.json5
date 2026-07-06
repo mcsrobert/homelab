@@ -37,11 +37,5 @@
       matchDatasources: ['docker'],
       pinDigests: true,
     },
-    {
-      'description': 'Handle mixed Postgres and VectorChord versions (18.4-1.1.1)',
-      'matchDatasources': ['docker'],
-      'matchPackageNames': ['ghcr.io/tensorchord/cloudnative-vectorchord'],
-      'versioning': 'loose',
-    }
   ],
 }
