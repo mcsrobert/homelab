@@ -15,7 +15,7 @@ spec:
     - ensure: present
       name: vchord
       # renovate: datasource=docker depName=ghcr.io/tensorchord/cloudnative-vectorchord versioning=loose extractVersion=.+?-(?<version>.*)$
-      version: 1.1.1
+      version: 18.4
     - ensure: present
       name: cube
     - ensure: present
