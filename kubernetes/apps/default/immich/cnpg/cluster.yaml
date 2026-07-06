@@ -5,6 +5,7 @@ kind: Cluster
 metadata:
   name: immich-cnpg
 spec:
+  # renovate: datasource=docker versioning=loose
   imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.4-1.1.1@sha256:9c9246cb8ba0332f7e1115def71329410657237db8ef104160a479a89c7e03a2
   primaryUpdateStrategy: unsupervised
   instances: 2

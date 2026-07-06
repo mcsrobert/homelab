@@ -5,8 +5,15 @@
       description: 'Process annotated dependencies',
       customType: 'regex',
       managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/'],
-      matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: extractVersion=(?<extractVersionTemplate>\\S+))?\\n.*[:=]\\s*["\']?(?<currentValue>[^"\'\\s]+)["\']?'],
-      versioningTemplate: 'semver-coerced',
+      matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?(?:\\s+extractVersion=(?<extractVersionTemplate>\\S+))?\\n.*[:=]\\s*["\']?(?<currentValue>[^"\'\\s]+)["\']?'],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver-coerced{{/if}}',
+    },
+    {
+      description: 'Process Docker images with inline config and composite tags',
+      customType: 'regex',
+      managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/'],
+      matchStrings: ['datasource=(?<datasource>docker)(?:\\s+versioning=(?<versioning>\\S+))?\\n\\s*\\S+:\\s*["\']?(?<depName>[^\\s:]+):(?<currentValue>[^@\\s"\']+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?["\']?'],
+      versioningTemplate: '{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}',
     },
     {
       description: 'Update YAML schema for kubernetes manifests based on k3s version',
