@@ -2,11 +2,18 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   customManagers: [
     {
-      description: 'Process annotated dependencies',
+      description: 'Update annotated dependencies',
       customType: 'regex',
       managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/'],
       matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*[:=]\\s*["\']?(?<currentValue>[^"\'\\s]+)["\']?'],
       versioningTemplate: 'semver-coerced',
+    },
+    {
+      description: 'Update imageName field instead of the usual image field (for CNPG Cluster CRD)',
+      customType: 'regex',
+      managerFilePatterns: ['/cluster\\.ya?ml$/'],
+      matchStrings: ['imageName:\\s*["\']?(?<depName>[^\\s:@"\']+):(?<currentValue>[^@\\s"\']+)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?["\']?'],
+      datasourceTemplate: 'docker',
     },
     {
       description: 'Update YAML schema for kubernetes manifests based on k3s version',

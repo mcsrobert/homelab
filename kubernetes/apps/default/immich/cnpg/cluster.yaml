@@ -5,11 +5,10 @@ kind: Cluster
 metadata:
   name: immich-cnpg
 spec:
-  # NOTE: this is currently not managed by Renovate, due to the composite
-  # version tag. When the VecorChord version is updated, this should also be
-  # updated in ./database.yaml. Afterwards, two indexes need to be regenerated:
+  # NOTE: When upgrading, the following must be done:
   #
   # $ kubectl cnpg psql immich-cnpg -d app
+  # > ALTER EXTENSION vchord UPDATE;
   # > REINDEX INDEX face_index;
   # > REINDEX INDEX clip_index;
   #

@@ -37,5 +37,12 @@
       matchDatasources: ['docker'],
       pinDigests: true,
     },
+    {
+      description: 'Use 5 part versioning scheme for CNPG VectorChord image',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/tensorchord/cloudnative-vectorchord'],
+      versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)-(?<patch>\\d+)\\.(?<build>\\d+)\\.(?<revision>\\d+)$',
+      pinDigests: true,
+    },
   ],
 }
