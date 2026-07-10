@@ -10,8 +10,8 @@
         '.pre-commit-config.yaml',
       ],
       automerge: true,
-      automergeSchedule: ['on the 1st, 2nd, 3rd day of the month every weekday after 16:00 and before 19:00'],
-      schedule: ['on the 4th day of the month'],
+      automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
+      schedule: ['on thursday after 09:00 and before 12:00'],
       addLabels: ['renovate/automerge'],
     },
     {
@@ -26,8 +26,8 @@
       matchUpdateTypes: ['minor', 'patch', 'digest'],
       excludePackageNames: ['longhorn'],
       automerge: true,
-      automergeSchedule: ['on the 1st, 2nd, 3rd, 15th, 16th, 17th day of the month every weekday after 10:00 and before 15:00'],
-      schedule: ['on the 4th, 18th day of the month'],
+      automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
+      schedule: ['on thursday after 09:00 and before 12:00'],
       addLabels: ['renovate/automerge'],
     },
     {
