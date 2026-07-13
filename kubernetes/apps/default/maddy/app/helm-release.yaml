@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app maddy
+  name: maddy
 spec:
   interval: 30m
   chartRef:
@@ -12,7 +12,7 @@ spec:
     namespace: flux-system
   values:
     controllers:
-      smtp-relay:
+      maddy:
         replicas: 2
         strategy: RollingUpdate
         annotations:
@@ -32,9 +32,9 @@ spec:
               whenUnsatisfiable: DoNotSchedule
               labelSelector:
                 matchLabels:
-                  app.kubernetes.io/name: *app
+                  app.kubernetes.io/name: maddy
         containers:
-          app:
+          maddy:
             image:
               repository: ghcr.io/mcsrobert/maddy
               tag: 0.8.1-hotfix1@sha256:3599e254228ad1807076dd88a6a85d13cd0aeaebfaa4ebd9842dd589ff33879b
@@ -79,7 +79,7 @@ spec:
       tmp:
         type: emptyDir
     service:
-      app:
+      maddy:
         ports:
           smtp:
             port: *port
@@ -89,6 +89,6 @@ spec:
             port: *metricsPort
             protocol: HTTP
     serviceMonitor:
-      app:
+      maddy:
         endpoints:
           - port: metrics
