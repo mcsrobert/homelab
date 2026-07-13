@@ -80,7 +80,7 @@ spec:
           gethomepage.dev/description: Light LDAP implementation
           gethomepage.dev/group: Auth
         hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          - lldap.${CLUSTER_DOMAIN}
         parentRefs:
           - name: traefik-gateway
             namespace: network
