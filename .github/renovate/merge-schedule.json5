@@ -11,7 +11,7 @@
       ],
       automerge: true,
       automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
-      schedule: ['on thursday after 09:00 and before 12:00'],
+      schedule: ['on thursday after 07:00 and before 09:00'],
       addLabels: ['renovate/automerge'],
     },
     {
@@ -27,7 +27,7 @@
       excludePackageNames: ['longhorn'],
       automerge: true,
       automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
-      schedule: ['on thursday after 09:00 and before 12:00'],
+      schedule: ['on thursday after 07:00 and before 09:00'],
       addLabels: ['renovate/automerge'],
     },
     {

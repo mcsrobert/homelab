@@ -25,7 +25,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         containers:
-          app:
+          vaultwarden:
             image:
               repository: ghcr.io/dani-garcia/vaultwarden
               tag: 1.36.0@sha256:d626d04934cd1192ad8ced1adb975099fca78cec33ab467d2d3c923cde7f3b0c
@@ -67,7 +67,7 @@ spec:
       data:
         existingClaim: vaultwarden-data
     service:
-      app:
+      vaultwarden:
         ports:
           http:
             port: *port
@@ -88,12 +88,12 @@ spec:
                   kind: Middleware
                   name: auth-chain
             backendRefs:
-              - identifier: app
+              - identifier: vaultwarden
         parentRefs: &parentRefs
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
-      app:
+      vaultwarden:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Vaultwarden
@@ -105,5 +105,5 @@ spec:
           - *host
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: vaultwarden
         parentRefs: *parentRefs

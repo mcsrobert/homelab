@@ -99,4 +99,4 @@ spec:
             namespace: network
             sectionName: websecure
         hostnames:
-          - "authelia.${CLUSTER_DOMAIN}"
+          - authelia.${CLUSTER_DOMAIN}

@@ -44,7 +44,7 @@ spec:
                         values:
                           - raspberrypi
         containers:
-          app:
+          garage:
             image:
               repository: dxflrs/garage
               tag: v2.3.0@sha256:866bd13ed2038ba7e7190e840482bc27234c4afaf77be8cfa439ae088c1e4690
@@ -75,14 +75,14 @@ spec:
             runAsGroup: 7001
             fsGroup: 7001
         containers:
-          app:
+          garage-webui:
             image:
               repository: khairul169/garage-webui
               tag: 1.1.0@sha256:17c793551873155065bf9a022dabcde874de808a1f26e648d4b82e168806439c
             env:
               TZ: ${TIME_ZONE}
-              API_BASE_URL: http://garage.{{ .Release.Namespace }}.svc.cluster.local:3903
-              S3_ENDPOINT_URL: http://garage.{{ .Release.Namespace }}.svc.cluster.local:3900
+              API_BASE_URL: http://garage:3903
+              S3_ENDPOINT_URL: http://garage:3900
             resources:
               requests:
                 cpu: 5m
@@ -103,7 +103,7 @@ spec:
         existingClaim: garage-meta
         advancedMounts:
           garage:
-            app:
+            garage:
               - path: /meta
       data:
         type: nfs
@@ -111,7 +111,7 @@ spec:
         path: /volume1/garage
         advancedMounts:
           garage:
-            app:
+            garage:
               - path: /data
     service:
       garage:
