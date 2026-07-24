@@ -1,6 +1,6 @@
 [
     {
-        "name": "Washing Machine",
+        "name": "washing_machine",
         "host": "washer",
         "key": "{{ .WASHER_KEY }}",
         "iv": "{{ .WASHER_IV }}",
@@ -1649,7 +1649,7 @@
         }
     },
     {
-        "name": "Dryer",
+        "name": "dryer",
         "host": "dryer",
         "key": "{{ .DRYER_KEY }}",
         "iv": "{{ .DRYER_IV }}",
@@ -3153,7 +3153,7 @@
         }
     },
     {
-        "name": "Oven",
+        "name": "oven",
         "host": "oven",
         "key": "{{ .OVEN_KEY }}",
         "iv": "{{ .OVEN_IV }}",
@@ -4158,7 +4158,7 @@
         }
     },
     {
-        "name": "Dishwasher",
+        "name": "dishwasher",
         "host": "dishwasher",
         "key": "{{ .DISHWASHER_KEY }}",
         "description": {
