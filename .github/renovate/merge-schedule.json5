@@ -2,23 +2,25 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      description: 'Group and auto merge Dev & CI dependencies once a month',
-      groupName: 'Dev & CI dependencies',
+      description: 'Automatically pin digests whenever possible',
+      matchUpdateTypes: ['pinDigest'],
+      automerge: true,
+      addLabels: ['renovate/automerge'],
+    },
+    {
+      description: 'Auto merge Dev & CI dependencies once a month',
       matchFileNames: [
         '.github/**',
         'ansible/requirements.yml',
         '.pre-commit-config.yaml',
       ],
       automerge: true,
-      automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
-      schedule: ['on thursday after 07:00 and before 09:00'],
-      addLabels: ['renovate/automerge'],
-    },
-    {
-      description: 'Automatically pin digests whenever possible',
-      matchUpdateTypes: ['pinDigest'],
-      automerge: true,
-      addLabels: ['renovate/automerge'],
+      automergeSchedule: ['on thursday after 09:00 and before 18:00'],
+      schedule: ['on friday'],
+      addLabels: [
+        'renovate/automerge',
+        'renovate/dev-dependency',
+      ],
     },
     {
       description: 'Auto merge non-major releases twice a month',
@@ -27,7 +29,7 @@
       excludePackageNames: ['longhorn'],
       automerge: true,
       automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
-      schedule: ['on thursday after 07:00 and before 09:00'],
+      schedule: ['on thursday'],
       addLabels: ['renovate/automerge'],
     },
     {
