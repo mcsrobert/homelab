@@ -8,7 +8,7 @@
       addLabels: ['renovate/automerge'],
     },
     {
-      description: 'Auto merge Dev & CI dependencies once a month',
+      description: 'Auto merge Dev & CI dependencies',
       matchFileNames: [
         '.github/**',
         'ansible/requirements.yml',
@@ -23,7 +23,7 @@
       ],
     },
     {
-      description: 'Auto merge non-major releases twice a month',
+      description: 'Auto merge non-major releases',
       matchDatasources: ['docker', 'helm'],
       matchUpdateTypes: ['minor', 'patch', 'digest'],
       excludePackageNames: ['longhorn'],
