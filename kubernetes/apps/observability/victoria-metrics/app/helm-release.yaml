@@ -21,17 +21,19 @@ spec:
       annotations:
         grafana_folder: observability
 
-    defaultRules:
-      groups:
-        kube-scheduler:
-          enabled: false
-
     kubeScheduler:
-      enabled: false
+      enabled: true
+      endpoints: &endpoints
+        - 192.168.178.31
+        - 192.168.178.32
+        - 192.168.178.33
     kubeControllerManager:
-      enabled: false
+      enabled: true
+      endpoints: *endpoints
     kubeEtcd:
-      enabled: false
+      enabled: true
+      endpoints: *endpoints
+
     kubeDns:
       enabled: false # because coredns instead
     coreDns:
