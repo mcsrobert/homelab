@@ -21,17 +21,35 @@ spec:
       annotations:
         grafana_folder: observability
 
-    defaultRules:
-      groups:
-        kube-scheduler:
-          enabled: false
-
     kubeScheduler:
-      enabled: false
+      enabled: true
+      endpoints: &endpoints
+        - 192.168.178.31
+        - 192.168.178.32
+        - 192.168.178.33
+      vmScrape: &vmScrape
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                insecureSkipVerify: true
     kubeControllerManager:
-      enabled: false
+      enabled: true
+      endpoints: *endpoints
+      vmScrape: *vmScrape
     kubeEtcd:
-      enabled: false
+      enabled: true
+      endpoints: *endpoints
+      service:
+        enabled: true
+        port: &etcdPort 2381
+        targetPort: *etcdPort
+      serviceMonitor:
+        scheme: http
+        port: *etcdPort
+
     kubeDns:
       enabled: false # because coredns instead
     coreDns:
