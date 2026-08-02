@@ -46,6 +46,12 @@
         name: "{{ inventory_hostname }}"
       notify: Update /etc/hosts entry with hostname
 
+    - name: Ensure dependencies are installed
+      ansible.builtin.apt:
+        name:
+          - apparmor
+        state: present
+
     - name: Harden SSH Configuration
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
