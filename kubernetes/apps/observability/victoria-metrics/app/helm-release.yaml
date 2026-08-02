@@ -21,6 +21,8 @@ spec:
       annotations:
         grafana_folder: observability
 
+    # We need to configure the scheduler, controller manager and etcd
+    # due to k3s not using pods for these components
     kubeScheduler:
       enabled: true
       endpoints: &endpoints
@@ -42,13 +44,14 @@ spec:
     kubeEtcd:
       enabled: true
       endpoints: *endpoints
-      service:
-        enabled: true
-        port: &etcdPort 2381
-        targetPort: *etcdPort
-      serviceMonitor:
-        scheme: http
-        port: *etcdPort
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: http-metrics
+              scheme: https
+              tlsConfig:
+                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 
     kubeDns:
       enabled: false # because coredns instead
