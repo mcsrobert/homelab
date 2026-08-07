@@ -8,23 +8,7 @@
       addLabels: ['renovate/automerge'],
     },
     {
-      description: 'Auto merge Dev & CI dependencies',
-      matchFileNames: [
-        '.github/**',
-        'ansible/requirements.yml',
-        '.pre-commit-config.yaml',
-      ],
-      automerge: true,
-      automergeSchedule: ['on thursday after 09:00 and before 18:00'],
-      schedule: ['on friday'],
-      addLabels: [
-        'renovate/automerge',
-        'renovate/dev-dependency',
-      ],
-    },
-    {
-      description: 'Auto merge non-major releases',
-      matchDatasources: ['docker', 'helm'],
+      description: 'Automatically schedule and merge non-major releases',
       matchUpdateTypes: ['minor', 'patch', 'digest'],
       excludePackageNames: ['longhorn'],
       automerge: true,
