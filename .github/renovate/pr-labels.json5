@@ -36,6 +36,14 @@
     {
       matchManagers: ['github-actions'],
       addLabels: ['renovate/github-action']
-    }
+    },
+    {
+      matchFileNames: [
+        '.github/**',
+        'ansible/requirements.yml',
+        '.pre-commit-config.yaml',
+      ],
+      addLabels: ['renovate/dev-dependency'],
+    },
   ]
 }
