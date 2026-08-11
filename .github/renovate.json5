@@ -17,7 +17,6 @@
   timezone: 'Europe/Amsterdam',
   dependencyDashboardTitle: 'Renovate Dashboard 🤖',
   prConcurrentLimit: 0,
-  prTitleStrict: true,
   commitBodyTable: true,
   rebaseWhen: 'auto',
   platformCommit: 'enabled',
