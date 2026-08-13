@@ -2,12 +2,6 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      description: 'Automatically pin digests whenever possible',
-      matchUpdateTypes: ['pinDigest'],
-      automerge: true,
-      addLabels: ['renovate/automerge'],
-    },
-    {
       description: 'Automatically schedule and merge non-major releases',
       matchUpdateTypes: ['minor', 'patch', 'digest'],
       excludePackageNames: ['longhorn'],
