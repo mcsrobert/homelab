@@ -16,47 +16,30 @@ spec:
   values: # https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/#parameters
     fullnameOverride: victoria-metrics
 
-    defaultDashboards:
-      enabled: true
-      annotations:
-        grafana_folder: observability
-
-    # We need to configure the scheduler, controller manager and etcd
-    # due to k3s not using pods for these components
+    # k3s default config does not expose these
     kubeScheduler:
-      enabled: true
-      endpoints: &endpoints
-        - 192.168.178.31
-        - 192.168.178.32
-        - 192.168.178.33
-      vmScrape: &vmScrape
-        spec:
-          endpoints:
-            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-              port: http-metrics
-              scheme: https
-              tlsConfig:
-                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      enabled: false
     kubeControllerManager:
-      enabled: true
-      endpoints: *endpoints
-      vmScrape: *vmScrape
+      enabled: false
     kubeEtcd:
-      enabled: true
-      endpoints: *endpoints
-      vmScrape:
-        spec:
-          endpoints:
-            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
-              port: http-metrics
-              scheme: https
-              tlsConfig:
-                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-
+      enabled: false
     kubeDns:
-      enabled: false # because coredns instead
+      enabled: false
     coreDns:
       enabled: true
+
+    defaultRules:
+      groups:
+        kube-prometheus-general:
+          enabled: false
+        kube-scheduler:
+          enabled: false
+        kubernetes-system-scheduler:
+          enabled: false
+        kubernetes-system-controller-manager:
+          enabled: false
+        etcd:
+          enabled: false
 
     victoria-metrics-operator:
       fullnameOverride: victoria-metrics-operator
