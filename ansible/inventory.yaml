@@ -35,12 +35,6 @@ k3s_cluster:
 
       kube-controller-manager-arg:
         - node-cidr-mask-size-ipv6=112
-        - bind-address=0.0.0.0
-
-      kube-scheduler-arg:
-        - bind-address=0.0.0.0
-
-      etcd-expose-metrics: true
 
       disable:
         - servicelb
