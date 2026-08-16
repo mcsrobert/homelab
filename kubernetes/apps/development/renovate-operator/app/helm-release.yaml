@@ -18,7 +18,6 @@ spec:
     webhook:
       enabled: true
     auth:
-      defaultAllowedGroups: id_admin
       oidc:
         enabled: true
         issuerUrl: https://authelia.${CLUSTER_DOMAIN}
@@ -28,6 +27,10 @@ spec:
         additionalScopes:
           - groups
         fetchUserInfoGroups: true
+    authorization:
+      defaults:
+        adminGroups:
+          - id_admin
     route:
       enabled: true
       annotations:
