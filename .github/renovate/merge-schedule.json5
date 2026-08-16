@@ -11,6 +11,11 @@
       addLabels: ['renovate/automerge'],
     },
     {
+      description: 'Add a prefix to avoid conflicts with other updates',
+      matchUpdateTypes: ['pin'],
+      additionalBranchPrefix: 'pin-',
+    },
+    {
       description: 'Skip first minor release for Longhorn',
       matchPackageNames: ['longhorn'],
       matchNewValue: '/^\\d+\\.\\d+\\.0$/',
