@@ -18,7 +18,7 @@ jobs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Get Changed Files
         id: changed-files
@@ -32,7 +32,7 @@ jobs:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@54e4ba378e155ada619caafdc599e5c4d759ce5c # v2.8.7
@@ -58,7 +58,7 @@ jobs:
     if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@54e4ba378e155ada619caafdc599e5c4d759ce5c # v2.8.7
