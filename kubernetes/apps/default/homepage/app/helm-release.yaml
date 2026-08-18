@@ -46,6 +46,10 @@ spec:
               TZ: ${TIME_ZONE}
               LOG_TARGETS: stdout
               HOMEPAGE_ALLOWED_HOSTS: &host homepage.${CLUSTER_DOMAIN}
+              HOMEPAGE_EXTERNAL_URL: https://homepage.${CLUSTER_DOMAIN}
+              HOMEPAGE_AUTH_ENABLED: "true"
+              HOMEPAGE_OIDC_ISSUER: https://authelia.${CLUSTER_DOMAIN}
+              HOMEPAGE_OIDC_CLIENT_ID: homepage
             envFrom:
               - secretRef:
                   name: homepage-secret
