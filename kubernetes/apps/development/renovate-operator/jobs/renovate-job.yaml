@@ -7,7 +7,7 @@ metadata:
 spec:
   provider:
     name: github
-  image: renovate/renovate:44.25.0@sha256:39aaaf8be9dd9b5b59c8d4d6ae4b74d9836616e4718b5ad81808665191489f39
+  image: renovate/renovate:44.33.2@sha256:fe47c58a918726ecb9efa7837735e2a7c6eed44e0181ab2c7b14738b84df0a21
   parallelism: 5
   resources:
     requests:
