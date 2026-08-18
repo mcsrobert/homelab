@@ -19,8 +19,8 @@ jobs:
       yaml: ${{ steps.filter.outputs.yaml }}
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
           list-files: shell
@@ -40,7 +40,7 @@ jobs:
     if: ${{ needs.changes.outputs.ansible == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Run ansible-lint
         uses: ansible/ansible-lint@5fac056c45595896c973fbde871f01f6cb14d74c # v26.4.0
         with:
@@ -52,7 +52,7 @@ jobs:
   #   if: ${{ needs.changes.outputs.kubernetes == 'true' }}
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+  #     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   #     - name: Run kubeconform
   #       uses: docker://ghcr.io/yannh/kubeconform:v0.7.0
   #       with:
@@ -75,8 +75,8 @@ jobs:
     if: ${{ needs.changes.outputs.markdown == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
         with:
           globs: '${{ needs.changes.outputs.markdown_files }}'
           separator: ' '
@@ -86,7 +86,7 @@ jobs:
     if: ${{ needs.changes.outputs.yaml == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install yamllint
         run: pip install yamllint
       - name: Run yamllint
