@@ -38,7 +38,7 @@ jobs:
         uses: fluxcd/flux2/action@54e4ba378e155ada619caafdc599e5c4d759ce5c # v2.8.7
 
       - name: Run flux-local test
-        uses: allenporter/flux-local/action/test@4d666add25002f550dc0dbe8b2b2f25859169b34 # 8.2.0
+        uses: allenporter/flux-local/action/test@92d3a538c009c3fec120fbf50f6ef33b3e0a569c # 8.4.0
         with:
           path: kubernetes/cluster
           enable-helm: true
@@ -64,7 +64,7 @@ jobs:
         uses: fluxcd/flux2/action@54e4ba378e155ada619caafdc599e5c4d759ce5c # v2.8.7
 
       - name: Run flux-local diff
-        uses: allenporter/flux-local/action/diff@4d666add25002f550dc0dbe8b2b2f25859169b34 # 8.2.0
+        uses: allenporter/flux-local/action/diff@92d3a538c009c3fec120fbf50f6ef33b3e0a569c # 8.4.0
         id: diff
         with:
           path: kubernetes/cluster
