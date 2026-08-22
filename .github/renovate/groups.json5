@@ -22,5 +22,11 @@
       matchDepNames: ['/plugin-barman-cloud/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
+    {
+      groupName: 'Renovate',
+      matchDatasources: ['docker', 'pre-commit'],
+      matchDepNames: ['/renovate/'],
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+    },
   ]
 }
