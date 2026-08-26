@@ -4,7 +4,11 @@
     {
       description: 'Automatically schedule and merge non-major releases',
       matchUpdateTypes: ['minor', 'patch', 'digest'],
-      excludePackageNames: ['longhorn'],
+      excludePackageNames: [
+        'k3s-io/k3s',
+        'kubernetes/kubernetes',
+        'longhorn',
+      ],
       automerge: true,
       automergeSchedule: ['on tuesday and wednesday after 09:00 and before 18:00'],
       schedule: ['on thursday'],
