@@ -24,7 +24,7 @@
     },
     {
       groupName: 'Renovate',
-      matchDatasources: ['docker', 'pre-commit'],
+      matchDatasources: ['docker', 'github-releases'],
       matchDepNames: ['/renovate/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
