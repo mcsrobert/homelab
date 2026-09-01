@@ -2,20 +2,17 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      groupName: 'Flux',
-      matchDatasources: ['docker'],
-      matchDepNames: ['/flux-(operator|instance)/'],
+      groupName: 'Flux CD',
+      matchDepNames: ['/fluxcd/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
     {
       groupName: 'Plugin Barman Cloud',
-      matchDatasources: ['docker', 'helm'],
       matchDepNames: ['/plugin-barman-cloud/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
     {
       groupName: 'Renovate',
-      matchDatasources: ['docker', 'github-releases'],
       matchDepNames: ['/renovate/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
