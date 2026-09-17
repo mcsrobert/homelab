@@ -49,6 +49,7 @@ spec:
                   httpGet:
                     port: &habiticaPort 3000
                     path: /api/v3/status
+                  timeoutSeconds: 11
               readiness: *probe
             resources:
               requests:
