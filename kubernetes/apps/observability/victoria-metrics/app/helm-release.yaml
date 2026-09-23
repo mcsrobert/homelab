@@ -209,3 +209,29 @@ spec:
 
     grafana:
       enabled: false
+
+    extraRules:
+      custom-oom:
+        groups:
+          - name: custom.oom
+            rules:
+              - alert: KubeContainerOOMKilled
+                expr: |
+                  (kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1)
+                  and
+                  (time() - kube_pod_container_status_last_terminated_timestamp) < 600
+                for: 0m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Container {{ $labels.container }} in {{ $labels.namespace }}/{{ $labels.pod }} was OOMKilled"
+                  description: "Container was OOMKilled within the last 10 minutes."
+              - alert: KubeContainerOOMKillEvents
+                expr: |
+                  increase(container_oom_events_total[5m]) > 0
+                for: 0m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "OOM kill event(s) in {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }})"
+                  description: "cAdvisor recorded {{ $value }} OOM kill event(s) in the last 5 minutes."
