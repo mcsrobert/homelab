@@ -87,7 +87,7 @@ spec:
           immich-machine-learning:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: v3.1.0-rknn@sha256:e67845b1920ea395108f7e71b3a6f171205204daf700589af36efed427489395
+              tag: v3.2.2-rknn@sha256:3c902db164cb25ea395668949629cbb20e248803cc97fa63a2d38ab93a907f0a
             env:
               !!merge <<: *sharedEnv
               IMMICH_LOG_LEVEL: info
