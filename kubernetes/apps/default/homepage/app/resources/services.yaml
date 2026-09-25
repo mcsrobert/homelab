@@ -24,3 +24,11 @@
         app: tailscale
         namespace: network
         podSelector: app.kubernetes.io/name in (tailscale, tailscale-operator)
+- Kubernetes:
+    - OpenBao:
+        href: https://bao.${CLUSTER_DOMAIN}
+        description: Manage, store, and distribute sensitive data
+        icon: openbao
+        app: openbao
+        namespace: security
+        podSelector: app.kubernetes.io/name=openbao
