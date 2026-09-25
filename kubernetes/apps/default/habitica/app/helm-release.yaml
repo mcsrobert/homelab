@@ -28,7 +28,7 @@ spec:
           habitica:
             image:
               repository: docker.io/awinterstein/habitica-server
-              tag: 5.50.3@sha256:2a088ed75ec3cd443defa84b615dbd765bdd2ea75cba26f6ea0fecd28f69bf9f
+              tag: 5.50.6@sha256:964caa1adddda20b7e11116f0892339bd0c740e4c7d9e2253b7991a0a610d5f1
             env:
               TZ: ${TIME_ZONE}
               BASE_URL: https://habitica.${CLUSTER_DOMAIN}
