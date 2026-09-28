@@ -10,6 +10,7 @@ spec:
     kind: OCIRepository
     name: falco
   values: # https://github.com/falcosecurity/charts/blob/master/charts/falco/values.yaml
+    tty: true
     collectors:
       containerEngine:
         engines:
@@ -50,3 +51,27 @@ spec:
       enabled: true
     serviceMonitor:
       create: true
+    customRules:
+      kube-vip.yaml: |-
+        - rule: Packet socket created in container
+          exceptions:
+            - name: kube_vip_arp
+              fields:
+                - k8s.ns.name
+                - container.image.repository
+                - container.name
+                - proc.name
+                - proc.exepath
+                - evt.arg.type
+                - evt.arg.proto
+              comps: [=, =, =, =, =, =, =]
+              values:
+                - - kube-system
+                  - ghcr.io/kube-vip/kube-vip
+                  - kube-vip
+                  - kube-vip
+                  - /kube-vip
+                  - 2
+                  - 1544
+          override:
+            exceptions: append
