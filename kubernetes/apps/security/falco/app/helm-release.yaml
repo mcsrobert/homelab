@@ -35,6 +35,7 @@ spec:
       config:
         alertmanager:
           hostport: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
+          endpoint: /api/v2/alerts
       serviceMonitor:
         enabled: true
       prometheusRules:
