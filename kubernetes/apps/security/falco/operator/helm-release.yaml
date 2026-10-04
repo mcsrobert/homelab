@@ -1,0 +1,77 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: falco-operator
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: falco-operator
+  values: {} # https://github.com/falcosecurity/charts/blob/master/charts/falco-operator/values.yaml
+    # tty: true
+    # collectors:
+    #   containerEngine:
+    #     engines:
+    #       docker:
+    #         enabled: false
+    #       podman:
+    #         enabled: false
+    #       containerd:
+    #         enabled: true
+    #         sockets:
+    #           - /run/k3s/containerd/containerd.sock
+    #       lxc:
+    #         enabled: false
+    #       libvirt_lxc:
+    #         enabled: false
+    #       bpm:
+    #         enabled: false
+    #   kubernetes:
+    #     enabled: true
+    # falcosidekick:
+    #   enabled: true
+    #   replicaCount: 1
+    #   config:
+    #     alertmanager:
+    #       hostport: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
+    #       endpoint: /api/v2/alerts
+    #   serviceMonitor:
+    #     enabled: true
+    #   prometheusRules:
+    #     enabled: true
+    #   grafana:
+    #     dashboards:
+    #       enabled: true
+    #   webui:
+    #     enabled: true
+    #     replicaCount: 1
+    # metrics:
+    #   enabled: true
+    # serviceMonitor:
+    #   create: true
+    # customRules:
+    #   kube-vip.yaml: |-
+    #     - rule: Packet socket created in container
+    #       exceptions:
+    #         - name: kube_vip_arp
+    #           fields:
+    #             - k8s.ns.name
+    #             - container.image.repository
+    #             - container.name
+    #             - proc.name
+    #             - proc.exepath
+    #             - evt.arg.type
+    #             - evt.arg.proto
+    #           comps: [=, =, =, =, =, =, =]
+    #           values:
+    #             - - kube-system
+    #               - ghcr.io/kube-vip/kube-vip
+    #               - kube-vip
+    #               - kube-vip
+    #               - /kube-vip
+    #               - 2
+    #               - 1544
+    #       override:
+    #         exceptions: append
