@@ -28,8 +28,6 @@ spec:
       memory: 32Mi
     limits:
       memory: 256Mi  # minimum 256Mi per core
-  nodeSelector:
-    feature.node.kubernetes.io/dragonfly.capable: "true"
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
