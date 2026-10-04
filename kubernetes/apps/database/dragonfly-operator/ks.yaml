@@ -7,6 +7,8 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: kyverno
+    - name: node-feature-discovery
     - name: prometheus-operator-crds
   path: /kubernetes/apps/database/dragonfly-operator/app
   sourceRef:
