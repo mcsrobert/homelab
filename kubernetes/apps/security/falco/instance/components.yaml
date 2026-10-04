@@ -1,0 +1,49 @@
+---
+apiVersion: instance.falcosecurity.dev/v1alpha1
+kind: Component
+metadata:
+  name: falcosidekick
+spec:
+  component:
+    type: falcosidekick
+  replicas: 1
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: falcosidekick
+          env:
+            - name: ALERTMANAGER_HOSTPORT
+              value: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
+            - name: ALERTMANAGER_ENDPOINT
+              value: /api/v2/alerts
+---
+apiVersion: instance.falcosecurity.dev/v1alpha1
+kind: Component
+metadata:
+  name: falcosidekick-ui
+spec:
+  component:
+    type: falcosidekick-ui
+  replicas: 1
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: falcosidekick-ui
+          env:
+            - name: FALCOSIDEKICK_UI_DISABLEAUTH
+              value: "true"
+            - name: FALCOSIDEKICK_UI_REDIS_URL
+              value: falcosidekick-ui-dragonfly:6379
+            - name: FALCOSIDEKICK_UI_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: falcosidekick-ui-dragonfly-auth
+                  key: password
+# ---
+# apiVersion: instance.falcosecurity.dev/v1alpha1
+# kind: Component
+# metadata:
+#   name: falco-k8s-metacollector
+# spec:
+#   component:
+#     type: metacollector
