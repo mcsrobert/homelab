@@ -32,8 +32,6 @@ spec:
                 - get
                 - list
                 - watch
-                - update
-                - patch
             - apiGroups:
                 - dragonflydb.io
               resources:
@@ -42,8 +40,6 @@ spec:
                 - get
                 - list
                 - watch
-                - update
-                - patch
       serviceMonitor:
         enabled: true
 

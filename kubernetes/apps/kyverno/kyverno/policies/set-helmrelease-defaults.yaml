@@ -11,9 +11,7 @@ metadata:
       fields are not set in the manifest.
 spec:
   evaluation:
-    background:
-      enabled: true
-    admission:
+    mutateExisting:
       enabled: true
   matchConstraints:
     resourceRules:
