@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/mutatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: dragonfly-node-selector
+  annotations:
+    policies.kyverno.io/title: Dragonfly Node Selector
+    policies.kyverno.io/description: >-
+      Only schedule Dragonfly pods on nodes that support the required CPU
+      features. This policy automatically adds a nodeSelector with the
+      NodeFeatureRule label to the spec of Dragonfly CR.
+spec:
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["dragonflydb.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["dragonflies"]
+  mutations:
+    - patchType: ApplyConfiguration
+      applyConfiguration:
+        expression: |
+          Object{
+            spec: Object.spec{
+              nodeSelector: {
+                "feature.node.kubernetes.io/dragonfly.capable": "true"
+              }
+            }
+          }

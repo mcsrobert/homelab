@@ -29,5 +29,3 @@ spec:
       memory: 32Mi
     limits:
       memory: 256Mi  # min 256Mi per proactor_thread
-  nodeSelector:
-    feature.node.kubernetes.io/dragonfly.capable: "true"
