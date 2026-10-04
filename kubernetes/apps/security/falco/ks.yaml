@@ -3,15 +3,60 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: falco
+  name: falco-operator
   namespace: flux-system
 spec:
   dependsOn:
     - name: prometheus-operator-crds
-  path: /kubernetes/apps/security/falco/app
   sourceRef:
     kind: GitRepository
     name: flux-system
+  path: /kubernetes/apps/security/falco/operator
+  targetNamespace: security
+  interval: 30m
+  timeout: 5m
+  wait: true
+  prune: true
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: falco-dragonfly
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: dragonfly-operator
+    - name: external-secrets
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: /kubernetes/apps/security/falco/dragonfly
+  targetNamespace: &namespace security
+  interval: 30m
+  timeout: 5m
+  prune: true
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: StatefulSet
+      name: falcosidekick-ui-dragonfly
+      namespace: *namespace
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: falco
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: falco-operator
+    - name: falco-dragonfly
+    - name: prometheus-operator-crds
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: /kubernetes/apps/security/falco/instance
   targetNamespace: security
   interval: 30m
   timeout: 5m

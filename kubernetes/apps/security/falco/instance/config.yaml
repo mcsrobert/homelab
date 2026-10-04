@@ -1,0 +1,19 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Config
+metadata:
+  name: falco
+spec:
+  priority: 50
+  config:  # https://github.com/falcosecurity/falco/blob/master/falco.yaml
+    tty: true
+    json_output: true
+    json_include_output_property: true
+    http_output:
+      enabled: true
+      url: http://falcosidekick:2801
+    metrics:
+      enabled: true
+    webserver:
+      enabled: true
+      prometheus_metrics_enabled: true

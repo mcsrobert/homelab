@@ -3,12 +3,12 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
-  name: falco
+  name: falco-operator
 spec:
   interval: 1h
-  url: oci://ghcr.io/falcosecurity/charts/falco
+  url: oci://ghcr.io/falcosecurity/charts/falco-operator
   ref:
-    tag: 9.2.0
+    tag: 0.4.0-rc3
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
