@@ -17,3 +17,16 @@ spec:
     webserver:
       enabled: true
       prometheus_metrics_enabled: true
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Config
+metadata:
+  name: falco-raspberrypi
+spec:
+  priority: 90
+  config:  # https://github.com/falcosecurity/falco/blob/master/falco.yaml
+    engine:
+      kind: kmod
+  selector:
+    matchLabels:
+      kubernetes.io/hostname: raspberrypi
