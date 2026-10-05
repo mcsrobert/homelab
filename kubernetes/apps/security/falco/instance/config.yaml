@@ -14,6 +14,7 @@ spec:
       url: http://falcosidekick:2801
     metrics:
       enabled: true
+      interval: 1h
     webserver:
       enabled: true
       prometheus_metrics_enabled: true
