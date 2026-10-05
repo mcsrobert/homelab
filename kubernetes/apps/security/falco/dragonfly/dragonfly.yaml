@@ -7,10 +7,10 @@ metadata:
 spec:
   replicas: 1
   image: docker.dragonflydb.io/dragonflydb/dragonfly:v2.0.0@sha256:7426fdb31ddcf7bd9499b4205f36ebaa83b26149ba1609a0d5f8f474b3631233
-  authentication:
-    passwordFromSecret:
-      name: falcosidekick-ui-dragonfly-auth
-      key: password
+  # authentication:
+  #   passwordFromSecret:
+  #     name: falcosidekick-ui-dragonfly-auth
+  #     key: password
   env:
     - name: MAX_MEMORY
       valueFrom:
