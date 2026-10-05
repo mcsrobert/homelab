@@ -27,13 +27,18 @@ spec:
   replicas: 1
   podTemplateSpec:
     spec:
+      initContainers:
+        - name: wait-redis
+          env:
+            - name: REDIS_ADDR
+              value: &redisAddr falcosidekick-ui-dragonfly:6379
       containers:
         - name: falcosidekick-ui
           env:
             - name: FALCOSIDEKICK_UI_DISABLEAUTH
               value: "true"
             - name: FALCOSIDEKICK_UI_REDIS_URL
-              value: falcosidekick-ui-dragonfly:6379
+              value: *redisAddr
             - name: FALCOSIDEKICK_UI_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
