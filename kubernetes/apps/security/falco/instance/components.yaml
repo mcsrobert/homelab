@@ -39,11 +39,11 @@ spec:
               value: "true"
             - name: FALCOSIDEKICK_UI_REDIS_URL
               value: *redisAddr
-            - name: FALCOSIDEKICK_UI_REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: falcosidekick-ui-dragonfly-auth
-                  key: password
+            # - name: FALCOSIDEKICK_UI_REDIS_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: falcosidekick-ui-dragonfly-auth
+            #       key: password
 # ---
 # apiVersion: instance.falcosecurity.dev/v1alpha1
 # kind: Component
