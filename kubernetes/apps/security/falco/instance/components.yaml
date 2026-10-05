@@ -34,6 +34,7 @@ spec:
               value: &redisAddr falcosidekick-ui-dragonfly:6379
       containers:
         - name: falcosidekick-ui
+          args: []
           env:
             - name: FALCOSIDEKICK_UI_DISABLEAUTH
               value: "true"
