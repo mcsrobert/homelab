@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/networkpolicy.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: falcosidekick-ui-redis-ingress
+spec:
+  policyTypes: [Ingress]
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dragonfly
+      app: falcosidekick-ui-redis
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: falcosidekick-ui
+      ports:
+        - port: 6379
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: dragonfly-operator
+      ports:
+        - port: 6379
+        - port: 9999
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+      ports:
+        - port: 9999
