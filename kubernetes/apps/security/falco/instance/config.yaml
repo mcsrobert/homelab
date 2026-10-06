@@ -6,7 +6,6 @@ metadata:
 spec:
   priority: 50
   config:  # https://github.com/falcosecurity/falco/blob/master/falco.yaml
-    tty: true
     json_output: true
     json_include_output_property: true
     http_output:
