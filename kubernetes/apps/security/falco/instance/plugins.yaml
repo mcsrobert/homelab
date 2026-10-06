@@ -7,9 +7,8 @@ spec:
   ociArtifact:
     image:
       repository: falcosecurity/plugins/plugin/container
+      # renovate: datasource=docker depName=ghcr.io/falcosecurity/plugins/plugin/container
       tag: 0.7.5
-    registry:
-      name: ghcr.io
   config:
     initConfig:
       engines:
