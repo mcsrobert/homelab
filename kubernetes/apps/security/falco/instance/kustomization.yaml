@@ -7,3 +7,4 @@ resources:
   - ./config.yaml
   - ./falco.yaml
   - ./plugins.yaml
+  - ./rulesfile.yaml

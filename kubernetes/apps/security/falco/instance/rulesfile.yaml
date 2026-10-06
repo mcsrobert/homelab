@@ -1,0 +1,11 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: falco-rules
+spec:
+  ociArtifact:
+    image:
+      repository: falcosecurity/rules/falco-rules
+      # renovate: datasource=docker depName=ghcr.io/falcosecurity/rules/falco-rules
+      tag: 5.2.0
