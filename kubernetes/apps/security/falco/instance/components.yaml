@@ -14,8 +14,8 @@ spec:
           env:
             - name: ALERTMANAGER_HOSTPORT
               value: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
-            # - name: ALERTMANAGER_ENDPOINT
-            #   value: /api/v2/alerts
+            - name: ALERTMANAGER_ENDPOINT
+              value: /api/v2/alerts
             - name: WEBUI_URL
               value: http://falcosidekick-ui:2802
 ---
