@@ -6,5 +6,6 @@ resources:
   - ./components.yaml
   - ./config.yaml
   - ./falco.yaml
+  - ./http-route.yaml
   - ./plugins.yaml
   - ./rulesfile.yaml
