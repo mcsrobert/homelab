@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/fluxcd.controlplane.io/resourceset_v1.json
+# NOTE: we need to create this in each namespace for the Gateway API :(
+# I've opened an idea that perhaps a ReferenceGrant can be used for this
+# See: https://github.com/kubernetes-sigs/gateway-api/discussions/4340
+apiVersion: fluxcd.controlplane.io/v1
+kind: ResourceSet
+metadata:
+  name: middleware-per-namespace
+spec:
+  inputs:
+    - namespace: default
+    - namespace: flux-system
+    - namespace: home-automation
+    - namespace: longhorn-system
+    - namespace: network
+    - namespace: security
+  resources:
+    - apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: auth-chain
+        namespace: << inputs.namespace >>
+      spec:
+        chain:
+          middlewares:
+            - name: network-secure-headers@kubernetescrd
+            - name: network-forwardauth-authelia@kubernetescrd
+            - name: network-compress@kubernetescrd
