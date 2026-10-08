@@ -7,4 +7,3 @@ resources:
   # Apps
   - ./external-snapshotter/ks.yaml
   - ./gateway-api/ks.yaml
-  - ./node-feature-discovery/ks.yaml
