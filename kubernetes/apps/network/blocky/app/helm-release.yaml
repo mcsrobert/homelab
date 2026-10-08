@@ -112,6 +112,11 @@ spec:
           gethomepage.dev/icon: blocky
           gethomepage.dev/description: DNS proxy and ad-blocker written in Go
           gethomepage.dev/group: Network
+          gethomepage.dev/pod-selector: >-
+            app.kubernetes.io/instance in (
+              blocky,
+              blocky-dragonfly
+            )
         parentRefs:
           - name: traefik-gateway
             namespace: network
