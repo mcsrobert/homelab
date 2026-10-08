@@ -67,6 +67,7 @@ metadata:
 spec:
   dependsOn:
     - name: flux-instance
+    - name: kyverno
   path: /kubernetes/apps/flux-system/flux-operator/notifications
   sourceRef:
     kind: GitRepository

@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/generatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: GeneratingPolicy
+metadata:
+  name: generate-flux-alertmanager-providers
+spec:
+  evaluation:
+    synchronize:
+      enabled: true
+    generateExisting:
+      enabled: true
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['']
+        apiVersions: ['v1']
+        operations: ['CREATE']
+        resources: ['namespaces']
+  variables:
+    - name: namespaceName
+      expression: object.metadata.name
+    - name: manifests
+      expression: >-
+        [
+          {
+            "apiVersion": "notification.toolkit.fluxcd.io/v1beta3",
+            "kind": "Provider",
+            "metadata": {
+              "name": "alertmanager",
+              "namespace": variables.namespaceName
+            },
+            "spec": {
+              "type": "alertmanager",
+              "address": "http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093/api/v2/alerts/"
+            }
+          },
+          {
+            "apiVersion": "notification.toolkit.fluxcd.io/v1beta3",
+            "kind": "Alert",
+            "metadata": {
+              "name": "alertmanager",
+              "namespace": variables.namespaceName
+            },
+            "spec": {
+              "providerRef": {"name": "alertmanager"},
+              "eventSeverity": "error",
+              "eventSources": [
+                {"kind": "GitRepository", "name": "*"},
+                {"kind": "Kustomization", "name": "*"},
+                {"kind": "HelmRelease", "name": "*"}
+              ]
+            }
+          }
+        ]
+  generate:
+    - expression: generator.Apply(variables.namespaceName, variables.manifests)
