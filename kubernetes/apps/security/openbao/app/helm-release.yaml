@@ -5,14 +5,10 @@ kind: HelmRelease
 metadata:
   name: openbao
 spec:
+  chartRef:
+    kind: OCIRepository
+    name: openbao
   interval: 30m
-  chart:
-    spec:
-      chart: openbao
-      version: 0.30.0
-      sourceRef:
-        kind: HelmRepository
-        name: openbao
   values: # https://github.com/openbao/openbao-helm/blob/main/charts/openbao/values.yaml
     global:
       tlsDisable: false
