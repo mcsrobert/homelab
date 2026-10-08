@@ -57,6 +57,19 @@ spec:
                 - watch
                 - update
                 - patch
+            - apiGroups:
+                - notification.toolkit.fluxcd.io
+              resources:
+                - providers
+                - alerts
+              verbs:
+                - create
+                - get
+                - list
+                - watch
+                - update
+                - patch
+                - delete
       serviceMonitor:
         enabled: true
 
