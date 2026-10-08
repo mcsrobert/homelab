@@ -1,0 +1,38 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/gateway.networking.k8s.io/httproute_v1beta1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: falcosidekick-ui
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Falco
+    gethomepage.dev/icon: falco
+    gethomepage.dev/description: Cloud native security tool that provides runtime security across hosts, containers and Kubernetes
+    gethomepage.dev/group: Kubernetes
+    gethomepage.dev/pod-selector: >-
+      app.kubernetes.io/instance in (
+        falco,
+        falco-operator,
+        falcosidekick,
+        falcosidekick-ui
+        falcosidekick-ui-redis,
+      )
+spec:
+  hostnames:
+    - falco.${CLUSTER_DOMAIN}
+  rules:
+    - filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: traefik.io
+            kind: Middleware
+            name: auth-chain
+      backendRefs:
+        - kind: Service
+          name: falcosidekick-ui
+          port: 2802
+  parentRefs:
+    - name: traefik-gateway
+      namespace: network
+      sectionName: websecure
