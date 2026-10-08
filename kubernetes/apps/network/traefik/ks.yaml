@@ -11,10 +11,10 @@ spec:
     - name: gateway-api-crds
     - name: metallb-pools
     - name: prometheus-operator-crds
-  path: /kubernetes/apps/network/traefik/app
   sourceRef:
     kind: GitRepository
     name: flux-system
+  path: /kubernetes/apps/network/traefik/app
   targetNamespace: network
   prune: true
   interval: 15m
@@ -30,10 +30,11 @@ metadata:
 spec:
   dependsOn:
     - name: traefik
-  path: /kubernetes/apps/network/traefik/middleware
   sourceRef:
     kind: GitRepository
     name: flux-system
+  path: /kubernetes/apps/network/traefik/middleware
+  targetNamespace: network
   prune: true
   interval: 15m
   timeout: 5m
