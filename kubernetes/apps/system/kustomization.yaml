@@ -7,4 +7,5 @@ resources:
   # Apps
   - ./generic-device-plugin/ks.yaml
   - ./keda/ks.yaml
+  - ./node-feature-discovery/ks.yaml
   - ./reloader/ks.yaml
