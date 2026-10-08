@@ -1,15 +1,15 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/networkpolicy.json
+# NOTE: The wait-redis container for falcosidekick-ui cannot handle auth, so we use a policy to restrict access.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: falcosidekick-ui-redis-ingress
 spec:
-  policyTypes: [Ingress]
+  policyTypes: ['Ingress']
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: dragonfly
-      app: falcosidekick-ui-redis
+      app.kubernetes.io/instance: falcosidekick-ui-redis
   ingress:
     - from:
         - podSelector:
@@ -25,7 +25,6 @@ spec:
             matchLabels:
               app.kubernetes.io/name: dragonfly-operator
       ports:
-        - port: 6379
         - port: 9999
     - from:
         - namespaceSelector:
