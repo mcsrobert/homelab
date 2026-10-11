@@ -7,7 +7,7 @@ metadata:
   annotations:
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: Falco
-    gethomepage.dev/icon: falco
+    gethomepage.dev/icon: si-falco
     gethomepage.dev/description: Cloud native security tool that provides runtime security across hosts, containers and Kubernetes
     gethomepage.dev/group: Kubernetes
     gethomepage.dev/pod-selector: >-
