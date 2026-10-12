@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./components.yaml
   - ./config.yaml
+  - ./external-secret.yaml
   - ./falco.yaml
   - ./http-route.yaml
   - ./plugins.yaml

@@ -15,20 +15,14 @@ metadata:
         falco,
         falco-operator,
         falcosidekick,
-        falcosidekick-ui
-        falcosidekick-ui-redis,
+        falcosidekick-ui,
+        falcosidekick-ui-redis
       )
 spec:
   hostnames:
     - falco.${CLUSTER_DOMAIN}
   rules:
-    - filters:
-        - type: ExtensionRef
-          extensionRef:
-            group: traefik.io
-            kind: Middleware
-            name: auth-chain
-      backendRefs:
+    - backendRefs:
         - kind: Service
           name: falcosidekick-ui
           port: 2802

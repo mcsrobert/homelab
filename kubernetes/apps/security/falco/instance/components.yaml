@@ -32,8 +32,11 @@ spec:
       containers:
         - name: falcosidekick-ui
           env:
-            - name: FALCOSIDEKICK_UI_DISABLEAUTH
-              value: "true"
+            - name: FALCOSIDEKICK_UI_USER
+              valueFrom:
+                secretKeyRef:
+                  name: falcosidekick-ui-auth
+                  key: user
 # ---
 # apiVersion: instance.falcosecurity.dev/v1alpha1
 # kind: Component
