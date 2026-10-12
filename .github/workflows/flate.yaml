@@ -1,11 +1,13 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-name: Flux Local
+name: Flate
 
 on:
   pull_request:
     branches:
       - main
+
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -19,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Get Changed Files
         id: changed-files
@@ -33,16 +37,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@b9c17924adb533d3617ec7de97a7b0f4acc07b39 # v2.9.6
-
-      - name: Run flux-local test
-        uses: allenporter/flux-local/action/test@92d3a538c009c3fec120fbf50f6ef33b3e0a569c # 8.4.0
         with:
-          path: kubernetes/cluster
-          enable-helm: true
-          sources: flux-system
+          persist-credentials: false
+
+      - name: Setup Flate
+        uses: home-operations/flate/action@0.6.5
+        with:
+          cache: true
+
+      - name: Run flate test
+        run: flate test all --path kubernetes
 
   diff:
     needs: pre-job
@@ -52,35 +56,54 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        resources: ["helmrelease", "kustomization"]
+        resources: ["hr", "ks"]
       max-parallel: 4
       fail-fast: false
     if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@b9c17924adb533d3617ec7de97a7b0f4acc07b39 # v2.9.6
-
-      - name: Run flux-local diff
-        uses: allenporter/flux-local/action/diff@92d3a538c009c3fec120fbf50f6ef33b3e0a569c # 8.4.0
-        id: diff
         with:
-          path: kubernetes/cluster
-          live-branch: ${{ github.event.repository.default_branch }}
-          resource: ${{ matrix.resources }}
-          sources: flux-system
-          skip-invalid-kustomization-paths: true
+          persist-credentials: false
+
+      - name: Checkout Default Branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          path: base
+          persist-credentials: false
+
+      - name: Setup Flate
+        uses: home-operations/flate/action@0.6.5
+        with:
+          cache: true
+
+      - name: Run flate diff
+        id: diff
+        run: |
+          flate diff ${{ matrix.resources }} \
+            --path kubernetes \
+            --path-orig base/kubernetes \
+            --output github > "$RUNNER_TEMP/diff.txt"
+
+          if [ -s "$RUNNER_TEMP/diff.txt" ]; then
+            # GitHub comments are capped at 65,536 characters
+            {
+              echo '```diff'
+              head -c 65000 "$RUNNER_TEMP/diff.txt"
+              echo
+              echo '```'
+            } > "$RUNNER_TEMP/comment.md"
+            echo "has_diff=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Add Comment
-        if: ${{ steps.diff.outputs.diff != '' }}
+        if: ${{ steps.diff.outputs.has_diff == 'true' }}
         uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12
         continue-on-error: true
         with:
           message-id: ${{ github.event.pull_request.number }}/${{ matrix.resources }}
           message-failure: Diff was not successful
-          message: |-
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
+          message-path: ${{ runner.temp }}/comment.md
