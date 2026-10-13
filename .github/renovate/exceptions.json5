@@ -1,0 +1,11 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  packageRules: [
+    {
+      description: 'Falco artifacts registry syntax does not match helm-values manager',
+      matchManagers: ['helm-values'],
+      matchFileNames: ['kubernetes/**/falco*/**/{rulesfile,plugins}.yaml'],
+      enabled: false,
+    }
+  ]
+}
