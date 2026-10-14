@@ -99,6 +99,8 @@ options, as long as they offer enough features.
   providers, avoiding hardcoded credentials.
 - [Kyverno](https://kyverno.io) - Kubernetes-native policies for security and
   automation.
+- [Falco](https://falco.org) - Runtime security across hosts, containers and
+  Kubernetes.
 
 ### AuthN / AuthZ
 
@@ -118,7 +120,7 @@ prefer EU-based cloud services.
 | Service | Use | Cost | Notes |
 | ------- | --- | ---- | ----- |
 | [Cloudflare](https://www.cloudflare.com/products/registrar/) | Domain | ~€17/yr | |
-| [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (5TB) | ~€13/mo | |
+| [Hetzner Storage Box](https://www.hetzner.com/storage/storage-box/bx21/) | Remote backup (10TB) | ~€25/mo | |
 | [Let's Encrypt](https://letsencrypt.org/) | Certificates | Free | |
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
