@@ -45,6 +45,9 @@ jobs:
         with:
           cache: true
 
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Run flate test
         run: |
           unset FLATE_BASE
@@ -72,6 +75,9 @@ jobs:
         uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
         with:
           cache: true
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run flate diff
         id: diff
