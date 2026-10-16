@@ -49,7 +49,7 @@ spec:
               UPDATER_PERIOD: 24h
               UPDATER_VPN_SERVICE_PROVIDERS: protonvpn
               WIREGUARD_ADDRESSES: 10.2.0.2/32
-              WIREGUARD_MTU: 1420
+              WIREGUARD_MTU: 1360
             envFrom:
               - secretRef:
                   name: qbittorrent-gluetun-secret
