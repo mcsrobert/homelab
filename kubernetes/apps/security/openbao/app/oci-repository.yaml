@@ -8,7 +8,7 @@ spec:
   interval: 24h
   url: oci://ghcr.io/openbao/charts/openbao
   ref:
-    tag: 0.30.3
+    tag: 0.30.4
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
