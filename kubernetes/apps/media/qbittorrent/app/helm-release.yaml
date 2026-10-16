@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app qbittorrent
+  name: qbittorrent
 spec:
   chartRef:
     kind: OCIRepository
@@ -12,7 +12,7 @@ spec:
   interval: 30m
   values:
     controllers:
-      *app :
+      qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -20,30 +20,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
         initContainers:
-          coredns:
-            image:
-              repository: coredns/coredns
-              tag: 1.14.7@sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286
-            args: ["-conf", "/etc/coredns/Corefile"]
-            restartPolicy: Always
-            resources:
-              requests:
-                cpu: 5m
-                memory: 24Mi
-              limits:
-                memory: 48Mi
-            securityContext:
-              runAsUser: 65534
-              runAsGroup: 65534
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              # capabilities:
-              #   drop:
-              #     - ALL
-              #   add:
-              #     - NET_BIND
           gluetun:
-            dependsOn: coredns
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.41.3@sha256:fa19cc76b2af13d57a8d3dc3066f2ada061b1c761b8aecf989b3877c0486e027
@@ -60,7 +37,6 @@ spec:
               PGID: &gluetunGroup 6001
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
-              BLOCK_MALICIOUS: "off"
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: protonvpn
@@ -110,7 +86,7 @@ spec:
                   - NET_RAW
                   - SYS_MODULE  # Kernel space Wireguard
         containers:
-          *app :
+          qbittorrent:
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
@@ -151,38 +127,30 @@ spec:
         type: persistentVolumeClaim
         existingClaim: qbittorrent-config
         advancedMounts:
-          *app :
-            *app :
+          qbittorrent:
+            qbittorrent:
               - path: /config
       downloads:
         type: nfs
         server: ${NAS_IP}
         path: /volume1/media/Downloads
         advancedMounts:
-          *app :
-            *app :
+          qbittorrent:
+            qbittorrent:
               - path: /media/Downloads
       gluetun:
         type: persistentVolumeClaim
         existingClaim: gluetun-data
         advancedMounts:
-          *app :
+          qbittorrent:
             gluetun:
               - path: /gluetun
       tmpfs:
         type: emptyDir
         advancedMounts:
-          *app :
+          qbittorrent:
             gluetun:
               - path: /tmp/gluetun
-      coredns:
-        type: configMap
-        name: qbittorrent-coredns
-        advancedMounts:
-          *app :
-            coredns:
-              - path: /etc/coredns/Corefile
-                subPath: Corefile
       # Kernel space Wireguard
       # See: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/wireguard.md
       modules:
@@ -190,12 +158,12 @@ spec:
         hostPath: /lib/modules
         hostPathType: Directory
         advancedMounts:
-          *app :
+          qbittorrent:
             gluetun:
               - path: /lib/modules
                 readOnly: true
     service:
-      *app :
+      qbittorrent:
         ports:
           http:
             port: *port
@@ -204,7 +172,7 @@ spec:
           #   port: *metricsport
           #   protocol: HTTP
     route:
-      *app :
+      qbittorrent:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: qBittorrent
@@ -212,11 +180,11 @@ spec:
           gethomepage.dev/description: Lightweight, open-source bittorrent client
           gethomepage.dev/group: Media
           gethomepage.dev/widget.type: qbittorrent
-          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.url: https://qbittorrent.${CLUSTER_DOMAIN}
           gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_WEB_USERNAME}}`}}"
           gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_WEB_PASSWORD}}`}}"
         hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          - qbittorrent.${CLUSTER_DOMAIN}
         parentRefs:
           - name: traefik-gateway
             namespace: network
