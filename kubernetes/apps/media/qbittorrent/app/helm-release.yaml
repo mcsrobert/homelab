@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app qbittorrent
+  name: qbittorrent
 spec:
   chartRef:
     kind: OCIRepository
@@ -12,7 +12,7 @@ spec:
   interval: 30m
   values:
     controllers:
-      *app :
+      qbittorrent:
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -110,7 +110,7 @@ spec:
                   - NET_RAW
                   - SYS_MODULE  # Kernel space Wireguard
         containers:
-          *app :
+          qbittorrent:
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
@@ -151,35 +151,35 @@ spec:
         type: persistentVolumeClaim
         existingClaim: qbittorrent-config
         advancedMounts:
-          *app :
-            *app :
+          qbittorrent:
+            qbittorrent:
               - path: /config
       downloads:
         type: nfs
         server: ${NAS_IP}
         path: /volume1/media/Downloads
         advancedMounts:
-          *app :
-            *app :
+          qbittorrent:
+            qbittorrent:
               - path: /media/Downloads
       gluetun:
         type: persistentVolumeClaim
         existingClaim: gluetun-data
         advancedMounts:
-          *app :
+          qbittorrent:
             gluetun:
               - path: /gluetun
       tmpfs:
         type: emptyDir
         advancedMounts:
-          *app :
+          qbittorrent:
             gluetun:
               - path: /tmp/gluetun
       coredns:
         type: configMap
         name: qbittorrent-coredns
         advancedMounts:
-          *app :
+          qbittorrent:
             coredns:
               - path: /etc/coredns/Corefile
                 subPath: Corefile
@@ -190,12 +190,12 @@ spec:
         hostPath: /lib/modules
         hostPathType: Directory
         advancedMounts:
-          *app :
+          qbittorrent:
             gluetun:
               - path: /lib/modules
                 readOnly: true
     service:
-      *app :
+      qbittorrent:
         ports:
           http:
             port: *port
@@ -204,7 +204,7 @@ spec:
           #   port: *metricsport
           #   protocol: HTTP
     route:
-      *app :
+      qbittorrent:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: qBittorrent
@@ -212,11 +212,11 @@ spec:
           gethomepage.dev/description: Lightweight, open-source bittorrent client
           gethomepage.dev/group: Media
           gethomepage.dev/widget.type: qbittorrent
-          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          gethomepage.dev/widget.url: https://qbittorrent.${CLUSTER_DOMAIN}
           gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_WEB_USERNAME}}`}}"
           gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_WEB_PASSWORD}}`}}"
         hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+          - qbittorrent.${CLUSTER_DOMAIN}
         parentRefs:
           - name: traefik-gateway
             namespace: network
