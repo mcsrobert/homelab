@@ -37,6 +37,8 @@ spec:
               PGID: &gluetunGroup 6001
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${LAN_CIDR},${LAN_CIDRv6},${CLUSTER_CIDR},${CLUSTER_CIDRv6},${SERVICE_CIDR}
+              DNS_UPSTREAM_RESOLVERS: cloudflare,google,quad9
+              DNS_UPSTREAM_RESOLVER_TYPE: dot
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
               VPN_SERVICE_PROVIDER: protonvpn
