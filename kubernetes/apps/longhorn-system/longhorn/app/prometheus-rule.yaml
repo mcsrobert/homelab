@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: longhorn-volume-usage
+spec:
+  groups:
+    - name: longhorn.volumes
+      rules:
+        - alert: LonghornVolumeUsageHigh
+          expr: |
+            longhorn_volume_actual_size_bytes / longhorn_volume_capacity_bytes
+            >= 0.8
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Longhorn volume {{ $labels.volume }} is {{ $value | humanizePercentage }} full
+            description: >-
+              Volume {{ $labels.volume }} (PVC {{ $labels.pvc_namespace }}/{{ $labels.pvc }})
+              on node {{ $labels.node }} has reached {{ $value | humanizePercentage }} of its
+              capacity.
