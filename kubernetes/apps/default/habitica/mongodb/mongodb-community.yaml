@@ -25,13 +25,15 @@ spec:
         - metadata:
             name: data-volume
           spec:
-            accessModes: ["ReadWriteOnce"]
+            accessModes:
+              - ReadWriteOnce
             resources:
               requests:
                 storage: 2Gi
   security:
     authentication:
-      modes: ["SCRAM"]
+      modes:
+        - SCRAM
   users:
     - name: habitica
       db: admin
@@ -42,5 +44,10 @@ spec:
           db: habitica
       scramCredentialsSecretName: habitica-mongodb-scram
   additionalMongodConfig:
-    storage.wiredTiger.engineConfig.journalCompressor: zlib
-    storage.wiredTiger.engineConfig.cacheSizeGB: 0.25
+    setParameter:
+      diagnosticDataCollectionEnabled: false
+    storage:
+      wiredTiger:
+        engineConfig:
+          journalCompressor: zlib
+          cacheSizeGB: 0.25
