@@ -75,9 +75,9 @@ spec:
         resources:
           requests:
             cpu: 500m
-            memory: 2Gi
+            memory: 3Gi
           limits:
-            memory: 4Gi
+            memory: 6Gi
         # downsampling.period: 30d:1m,90d:5m,180d:30m,1y:1h,2y:4h,5y:12h,10y:1d
       ingress:
         enabled: false
@@ -162,15 +162,15 @@ spec:
           promscrape.maxScrapeSize: "32MB"
           promscrape.streamParse: "true"
         scrapeInterval: 20s
-        # inlineRelabelConfig:
-        #   - action: labeldrop
-        #     regex: beta_kubernetes_io_.*
-        #   - action: labeldrop
-        #     regex: node(_role)?_kubernetes_io_.*
-        #   - action: labeldrop
-        #     regex: feature_node_kubernetes_io_.*
-        #   - action: labeldrop
-        #     regex: p2p_k3s_cattle_io_enabled
+        inlineRelabelConfig:
+          - action: labeldrop
+            regex: beta_kubernetes_io_.*
+          - action: labeldrop
+            regex: node(_role)?_kubernetes_io_.*
+          - action: labeldrop
+            regex: feature_node_kubernetes_io_.*
+          - action: labeldrop
+            regex: p2p_k3s_cattle_io_enabled
         resources:
           requests:
             cpu: 500m
