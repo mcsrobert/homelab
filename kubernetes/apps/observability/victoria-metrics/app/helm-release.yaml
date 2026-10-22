@@ -27,19 +27,9 @@ spec:
       enabled: false
     coreDns:
       enabled: true
-
-    defaultRules:
-      groups:
-        kube-prometheus-general:
-          enabled: false
-        kube-scheduler:
-          enabled: false
-        kubernetes-system-scheduler:
-          enabled: false
-        kubernetes-system-controller-manager:
-          enabled: false
-        etcd:
-          enabled: false
+    # deployed separately
+    grafana:
+      enabled: false
 
     victoria-metrics-operator:
       fullnameOverride: victoria-metrics-operator
@@ -201,8 +191,23 @@ spec:
         limits:
           memory: 64Mi
 
-    grafana:
-      enabled: false
+    defaultDashboards:
+      enabled: true
+      annotations:
+        grafana_folder: observability
+
+    defaultRules:
+      groups:
+        kube-prometheus-general:
+          enabled: false
+        kube-scheduler:
+          enabled: false
+        kubernetes-system-scheduler:
+          enabled: false
+        kubernetes-system-controller-manager:
+          enabled: false
+        etcd:
+          enabled: false
 
     extraRules:
       custom-oom:
