@@ -4,24 +4,20 @@ route:
   group_by:
     - alertname
   routes:
-    - receiver: backup-email
+    - receiver: backup
       matchers:
         - alertname = "AlertmanagerClusterFailedToSendAlerts"
       repeat_interval: 4h
+    - receiver: heartbeat
+      matchers:
+        - alertname = "Watchdog"
+      group_wait: 0s
+      group_interval: 1m
+      repeat_interval: 1m
     - receiver: blackhole
       matchers:
-        - alertname =~ "Watchdog|InfoInhibitor"
+        - alertname = "InfoInhibitor"
 receivers:
-  - name: blackhole
-    webhook_configs: []
-  - name: backup-email
-    email_configs:
-      - to: ${ADMIN_EMAIL}
-        from: noreply@mail.${CLUSTER_DOMAIN}
-        smarthost: send.simplemailservice.eu:587
-        auth_username: "{{ .SMTP_USERNAME }}"
-        auth_password: "{{ .SMTP_PASSWORD }}"
-        require_tls: true
   - name: ntfy
     webhook_configs:
       - url: http://alertmanager-ntfy.observability.svc.cluster.local:8000/hook
@@ -29,3 +25,18 @@ receivers:
           basic_auth:
             username: "{{ .ALERTMANAGER_NTFY_USERNAME }}"
             password: "{{ .ALERTMANAGER_NTFY_PASSWORD }}"
+  - name: backup
+    email_configs:
+      - to: ${ADMIN_EMAIL}
+        from: noreply@mail.${CLUSTER_DOMAIN}
+        smarthost: send.simplemailservice.eu:587
+        auth_username: "{{ .SMTP_USERNAME }}"
+        auth_password: "{{ .SMTP_PASSWORD }}"
+        require_tls: true
+  - name: heartbeat
+    webhook_configs:
+      - url: "https://hc-ping.com/{{ .HEALTHCHECKSIO_UUID }}"
+        send_resolved: false
+        max_alerts: 1
+  - name: blackhole
+    webhook_configs: []
