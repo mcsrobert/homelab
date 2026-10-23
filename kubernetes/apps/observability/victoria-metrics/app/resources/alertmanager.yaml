@@ -4,12 +4,24 @@ route:
   group_by:
     - alertname
   routes:
-    - matchers:
+    - receiver: backup-email
+      matchers:
+        - alertname = "AlertmanagerClusterFailedToSendAlerts"
+      repeat_interval: 4h
+    - receiver: blackhole
+      matchers:
         - alertname =~ "Watchdog|InfoInhibitor"
-      receiver: blackhole
 receivers:
   - name: blackhole
     webhook_configs: []
+  - name: backup-email
+    email_configs:
+      - to: ${ADMIN_EMAIL}
+        from: noreply@mail.${CLUSTER_DOMAIN}
+        smarthost: send.simplemailservice.eu:587
+        auth_username: "{{ .SMTP_USERNAME }}"
+        auth_password: "{{ .SMTP_PASSWORD }}"
+        require_tls: true
   - name: ntfy
     webhook_configs:
       - url: http://alertmanager-ntfy.observability.svc.cluster.local:8000/hook
