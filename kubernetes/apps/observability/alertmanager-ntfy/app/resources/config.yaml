@@ -2,12 +2,12 @@
 # Docs: https://github.com/alexbakker/alertmanager-ntfy/blob/master/config.example.yml
 http:
   auth:
-    username: "{{ .HTTP_USERNAME }}"
-    password: "{{ .HTTP_PASSWORD }}"
+    username: "{{ .USERNAME }}"
+    password: "{{ .PASSWORD }}"
 ntfy:
   notification:
     # The topic can either be a hardcoded string or a gval expression that evaluates to a string
-    topic: "{{ .TOPIC }}"
+    topic: "{{ .NTFY_TOPIC }}"
     # Priority reference: https://docs.ntfy.sh/publish/#message-priority
     # Can either be a hardcoded string or a gval expression that evaluates to a string
     priority: |-
