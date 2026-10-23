@@ -40,7 +40,7 @@ spec:
               tag: 0.9.6@sha256:e1074e92a452b84d1135ebe8ab831c5f541d33dcbd39e38fab740a53bbf2f97c
             env:
               TZ: ${TIME_ZONE}
-              SMTP_PORT: &port 2525
+              PORT: &port 2525
               METRICS_PORT: &metricsPort 9000
             envFrom:
               - secretRef:
@@ -54,7 +54,7 @@ spec:
                     command:
                       - /bin/sh
                       - -c
-                      - "echo -e 'EHLO localhost\r\nQUIT\r\n' | nc -w 5 127.0.0.1 $SMTP_PORT"
+                      - "echo -e 'EHLO localhost\r\nQUIT\r\n' | nc -w 5 127.0.0.1 $PORT"
               readiness: *probe
               liveness: *probe
             resources:
