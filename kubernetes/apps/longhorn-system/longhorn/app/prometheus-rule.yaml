@@ -11,7 +11,7 @@ spec:
         - alert: LonghornVolumeUsageHigh
           expr: |
             longhorn_volume_actual_size_bytes / longhorn_volume_capacity_bytes
-            >= 0.8
+            >= 0.85
           for: 5m
           labels:
             severity: warning
@@ -19,6 +19,5 @@ spec:
             summary: >-
               Longhorn volume {{ $labels.volume }} is {{ $value | humanizePercentage }} full
             description: >-
-              Volume {{ $labels.volume }} (PVC {{ $labels.pvc_namespace }}/{{ $labels.pvc }})
-              on node {{ $labels.node }} has reached {{ $value | humanizePercentage }} of its
-              capacity.
+              Volume {{ $labels.volume }} ({{ $labels.pvc_namespace }}/{{ $labels.pvc }}) on node
+              {{ $labels.node }} has reached {{ $value | humanizePercentage }} of its capacity.
