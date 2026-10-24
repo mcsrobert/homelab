@@ -13,7 +13,10 @@
     },
     {
       groupName: 'Renovate',
-      matchDepNames: ['/renovate/'],
+      matchPackageNames: [
+        'renovate/renovate',
+        'renovatebot/pre-commit-hooks',
+      ],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
   ]
