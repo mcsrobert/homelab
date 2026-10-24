@@ -11,7 +11,7 @@ spec:
         - alert: LonghornVolumeUsageHigh
           expr: |
             longhorn_volume_actual_size_bytes / longhorn_volume_capacity_bytes
-            >= 0.85
+            >= 0.9
           for: 5m
           labels:
             severity: warning
