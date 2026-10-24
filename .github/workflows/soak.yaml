@@ -1,0 +1,17 @@
+name: soak
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: soak-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  soak:
+    if: github.actor == 'renovatebot-mcsrobert[bot]'
+    runs-on: ubuntu-latest
+    environment: soak-7d
+    steps:
+      - run: echo "soaked"
