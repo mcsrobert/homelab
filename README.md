@@ -126,6 +126,7 @@ prefer EU-based cloud services.
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
 | [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
 | [ntfy.sh](https://ntfy.sh) | Notifications | Free | |
+| [healthchecks.io](https://healthchecks.io) | Heartbeat monitor | Free | |
 
 ## Acknowledgements
 
