@@ -14,11 +14,10 @@ spec:
       - url: http://victoria-logs-server.{{ .Release.Namespace }}.svc.cluster.local:9428
     resources:
       limits:
-        cpu: 100m
         memory: 128Mi
       requests:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 10m
+        memory: 48Mi
     podMonitor:
       enabled: true
       vm: true
