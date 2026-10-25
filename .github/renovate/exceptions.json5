@@ -14,5 +14,19 @@
       versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)-(?<patch>\\d+)\\.(?<build>\\d+)\\.(?<revision>\\d+)$',
       pinDigests: true,
     },
+    {
+      description: 'Skip first minor release for Longhorn',
+      matchDatasources: ['flux'],
+      matchPackageNames: ['longhorn'],
+      matchNewValue: '/^\\d+\\.\\d+\\.0$/',
+      enabled: false,
+    },
+    {
+      description: 'Skip first monthly release for Home Assistant',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['ghcr.io/home-operations/home-assistant'],
+      matchNewValue: '/^\\d{4}\\.\\d+\\.0$/',
+      enabled: false,
+    },
   ]
 }
