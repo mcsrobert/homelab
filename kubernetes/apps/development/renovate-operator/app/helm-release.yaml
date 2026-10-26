@@ -31,6 +31,14 @@ spec:
       defaults:
         adminGroups:
           - id_admin
+    valkey:
+      enabled: true
+      auth:
+        enabled: false
+      metrics:
+        enabled: false
+        serviceMonitor:
+          enabled: false
     route:
       enabled: true
       annotations:
