@@ -10,20 +10,8 @@
         'longhorn',
       ],
       automerge: true,
-      automergeSchedule: ['on weekdays after 09:00 and before 18:00'],
+      automergeSchedule: ['every weekday after 09:00 and before 18:00'],
       addLabels: ['renovate/automerge'],
-    },
-    {
-      description: 'Skip first minor release for Longhorn',
-      matchPackageNames: ['longhorn'],
-      matchNewValue: '/^\\d+\\.\\d+\\.0$/',
-      enabled: false,
-    },
-    {
-      description: 'Skip first monthly release for Home Assistant',
-      matchPackageNames: ['ghcr.io/home-operations/home-assistant'],
-      matchNewValue: '/^\\d{4}\\.\\d+\\.0$/',
-      enabled: false,
     },
   ]
 }
