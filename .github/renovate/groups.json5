@@ -12,14 +12,6 @@
       schedule: ['on wednesday after 20:00 and before 22:00'],
     },
     {
-      groupName: 'Renovate',
-      matchPackageNames: [
-        'renovate/renovate',
-        'renovatebot/pre-commit-hooks',
-      ],
-      group: {commitMessageTopic: '{{{groupName}}} group'},
-    },
-    {
       groupName: 'Flux CD',
       matchDepNames: ['/fluxcd/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
