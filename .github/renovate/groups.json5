@@ -2,14 +2,14 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      groupName: 'Flux CD',
-      matchDepNames: ['/fluxcd/'],
-      group: {commitMessageTopic: '{{{groupName}}} group'},
-    },
-    {
-      groupName: 'Plugin Barman Cloud',
-      matchDepNames: ['/plugin-barman-cloud/'],
-      group: {commitMessageTopic: '{{{groupName}}} group'},
+      groupName: 'Dev Dependencies',
+      matchFileNames: [
+        '.github/**',
+        'ansible/requirements.yml',
+        '.pre-commit-config.yaml',
+      ],
+      group: {commitMessageTopic: '{{{groupName}}}'},
+      schedule: ['on wednesday after 20:00 and before 22:00'],
     },
     {
       groupName: 'Renovate',
@@ -17,6 +17,16 @@
         'renovate/renovate',
         'renovatebot/pre-commit-hooks',
       ],
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+    },
+    {
+      groupName: 'Flux CD',
+      matchDepNames: ['/fluxcd/'],
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+    },
+    {
+      groupName: 'Plugin Barman Cloud',
+      matchDepNames: ['/plugin-barman-cloud/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
     },
   ]
