@@ -1,9 +1,14 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    ':approveMajorUpdates',
+    ':separateMajorReleases',
+    ':separateMultipleMinorReleases',
+  ],
   packageRules: [
     {
       description: 'Automatically schedule and merge non-major releases',
-      matchUpdateTypes: ['minor', 'patch', 'digest'],
+      matchUpdateTypes: ['major', 'minor', 'patch', 'digest'],
       excludePackageNames: [
         'k3s-io/k3s',
         'kubernetes/kubernetes',
