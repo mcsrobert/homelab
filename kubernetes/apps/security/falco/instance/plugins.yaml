@@ -8,7 +8,7 @@ spec:
     image:
       repository: falcosecurity/plugins/plugin/container
       # renovate: datasource=docker depName=ghcr.io/falcosecurity/plugins/plugin/container
-      tag: 0.7.5
+      tag: 0.7.6
   config:
     initConfig:
       engines:
