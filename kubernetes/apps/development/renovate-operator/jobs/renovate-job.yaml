@@ -5,15 +5,18 @@ kind: RenovateJob
 metadata:
   name: renovate-github
 spec:
+  image: renovate/renovate:44.174.0@sha256:1d257740562b9533894202caecb07fa3709bc818d33068185c5a58e5126b26c3
+  extraEnv:
+    - name: RENOVATE_X_GITHUB_HOST_RULES
+      value: "true"
   provider:
     name: github
-  image: renovate/renovate:44.174.0@sha256:1d257740562b9533894202caecb07fa3709bc818d33068185c5a58e5126b26c3
+  schedule: 0 * * * *
   parallelism: 5
+  secretRef: renovate-github-token
   resources:
     requests:
       cpu: 500m
       memory: 512Mi
     limits:
       memory: 1Gi
-  schedule: 0 * * * *
-  secretRef: renovate-github-token
