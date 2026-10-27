@@ -1,17 +1,22 @@
-name: soak
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Renovate Soak
 on:
   pull_request:
     branches:
       - main
+
+permissions: {}
 
 concurrency:
   group: soak-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  soak-renovate:
+  soak:
     if: github.actor == 'renovatebot-mcsrobert[bot]'
     runs-on: ubuntu-latest
-    environment: soak-7d
+    environment: soak-6d
     steps:
-      - run: echo soaked
+      - name: Run Soak Test
+        run: echo "Soaked at $(date)"

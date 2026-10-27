@@ -8,18 +8,18 @@
         'ansible/requirements.yml',
         '.pre-commit-config.yaml',
       ],
-      group: {commitMessageTopic: '{{{groupName}}}'},
+      matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
       schedule: ['on wednesday after 20:00 and before 22:00'],
     },
     {
       groupName: 'Flux CD',
-      matchDepNames: ['/fluxcd/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/fluxcd/'],
     },
     {
       groupName: 'Plugin Barman Cloud',
-      matchDepNames: ['/plugin-barman-cloud/'],
       group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/plugin-barman-cloud/'],
     },
   ]
 }
