@@ -17,5 +17,11 @@
       schedule: ['every weekday after 20:00 and before 22:00'],
       addLabels: ['renovate/automerge'],
     },
+    {
+      description: 'Only schedule packages with frequent releases weekly',
+      matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
+      matchPackageNames: ['renovate/renovate'],
+      schedule: ['on wednesday after 20:00 and before 22:00'],
+    },
   ]
 }

@@ -12,15 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       ansible: ${{ steps.filter.outputs.ansible }}
-      kubernetes: ${{ steps.filter.outputs.kubernetes }}
-      kubernetes_files: ${{ steps.filter.outputs.kubernetes_files }}
+      # kubernetes: ${{ steps.filter.outputs.kubernetes }}
+      # kubernetes_files: ${{ steps.filter.outputs.kubernetes_files }}
       markdown: ${{ steps.filter.outputs.markdown }}
       markdown_files: ${{ steps.filter.outputs.markdown_files }}
       yaml: ${{ steps.filter.outputs.yaml }}
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
     steps:
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Filter Files
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
@@ -42,8 +46,10 @@ jobs:
     if: ${{ needs.changes.outputs.ansible == 'true' }}
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Run ansible-lint
         uses: ansible/ansible-lint@9bce2bfb8f4a984e6b13767bc0d6bf0a49492164 # v26.10.1
         with:
@@ -78,8 +84,12 @@ jobs:
     if: ${{ needs.changes.outputs.markdown == 'true' }}
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Run markdownlint
         uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
         with:
@@ -91,9 +101,14 @@ jobs:
     if: ${{ needs.changes.outputs.yaml == 'true' }}
     runs-on: ubuntu-latest
     steps:
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Install yamllint
         run: pip install yamllint
+
       - name: Run yamllint
         run: yamllint ${{ needs.changes.outputs.yaml_files }}
