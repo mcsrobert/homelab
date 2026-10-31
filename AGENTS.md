@@ -18,6 +18,13 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   PR descriptions.
 - Versions of images, charts and GitHub Actions are managed by Renovate. Do not
   bump them by hand unless asked.
+- Label every PR you open with the existing labels that match the change, such
+  as `bug` for fixes, `enhancement` for features, `documentation` for docs-only
+  changes, `security` for security work and `observability` for monitoring.
+  Run `gh label list` to see the names. Set them with `gh pr create --label` or
+  `gh pr edit --add-label`. Do not create new labels, and do not apply the
+  `renovate/*` or `type/*` labels, which Renovate manages. Leave the PR
+  unlabelled if no label fits.
 
 ## Layout
 
