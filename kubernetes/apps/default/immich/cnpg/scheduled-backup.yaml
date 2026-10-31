@@ -5,7 +5,7 @@ kind: ScheduledBackup
 metadata:
   name: immich-cnpg-scheduled-backup
 spec:
-  schedule: "0 0 0 * * *"
+  schedule: "0 30 1 * * *"
   backupOwnerReference: self
   cluster:
     name: immich-cnpg
