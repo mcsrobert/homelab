@@ -7,6 +7,8 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: external-secrets
+    - name: gateway-api-crds
     - name: longhorn
   path: /kubernetes/apps/auth/lldap/app
   sourceRef:

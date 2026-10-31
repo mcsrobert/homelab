@@ -7,10 +7,10 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: prometheus-operator-crds
     - name: cert-manager-issuers
     - name: external-secrets
     - name: gateway-api-crds
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/auth/authelia/app
   sourceRef:
     kind: GitRepository

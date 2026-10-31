@@ -9,9 +9,9 @@ spec:
   dependsOn:
     - name: blocky-dragonfly
     - name: external-secrets
+    - name: gateway-api-crds
     - name: metallb-pools
     - name: prometheus-operator-crds
-    - name: gateway-api-crds
   path: /kubernetes/apps/network/blocky/app
   sourceRef:
     kind: GitRepository
@@ -32,6 +32,7 @@ spec:
   dependsOn:
     - name: dragonfly-operator
     - name: external-secrets
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/network/blocky/dragonfly
   sourceRef:
     kind: GitRepository

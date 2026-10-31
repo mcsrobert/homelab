@@ -9,9 +9,10 @@ spec:
   dependsOn:
     - name: external-secrets
     - name: gateway-api-crds
-    - name: immich-dragonfly
     - name: immich-cnpg
+    - name: immich-dragonfly
     - name: longhorn
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/default/immich/app
   sourceRef:
     kind: GitRepository
@@ -58,6 +59,7 @@ spec:
   dependsOn:
     - name: dragonfly-operator
     - name: external-secrets
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/default/immich/dragonfly
   sourceRef:
     kind: GitRepository

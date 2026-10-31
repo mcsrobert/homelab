@@ -28,6 +28,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: external-secrets
     - name: renovate-operator
   path: /kubernetes/apps/development/renovate-operator/jobs
   sourceRef:
