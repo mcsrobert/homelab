@@ -9,7 +9,6 @@ spec:
   dependsOn:
     - name: gateway-api-crds
     - name: prometheus-operator-crds
-    - name: traefik-middleware
   path: /kubernetes/apps/observability/victoria-logs/app
   sourceRef:
     kind: GitRepository
