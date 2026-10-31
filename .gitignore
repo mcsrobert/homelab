@@ -17,3 +17,6 @@ config-example.conf
 
 # Ansible
 .ansible
+
+# Python
+.venv

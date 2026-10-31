@@ -2,6 +2,7 @@
 extends: default
 ignore: |
   *.sops.*
+  .venv/
 rules:
   indentation: enable
   line-length: disable
