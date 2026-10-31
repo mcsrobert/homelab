@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(~/.config/sops/**)",
+      "Bash(sops -d *)",
+      "Bash(sops decrypt *)",
+      "Bash(sops --decrypt *)",
+      "Bash(sops edit *)",
+      "Bash(git push origin main *)",
+      "Bash(git push origin main)",
+      "Bash(git push * main)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(kubectl apply *)",
+      "Bash(kubectl * apply *)",
+      "Bash(kubectl create *)",
+      "Bash(kubectl * create *)",
+      "Bash(kubectl edit *)",
+      "Bash(kubectl * edit *)",
+      "Bash(kubectl patch *)",
+      "Bash(kubectl * patch *)",
+      "Bash(kubectl replace *)",
+      "Bash(kubectl * replace *)",
+      "Bash(kubectl delete *)",
+      "Bash(kubectl * delete *)",
+      "Bash(kubectl scale *)",
+      "Bash(kubectl * scale *)",
+      "Bash(flux reconcile *)",
+      "Bash(flux * reconcile *)",
+      "Bash(helmfile apply *)",
+      "Bash(helmfile sync *)",
+      "Bash(helm install *)",
+      "Bash(helm upgrade *)",
+      "Bash(helm uninstall *)",
+      "Bash(ansible-playbook *)"
+    ]
+  }
+}
