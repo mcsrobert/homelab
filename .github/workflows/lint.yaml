@@ -7,8 +7,6 @@ permissions:
   contents: read
 
 env:
-  # renovate: datasource=pypi depName=ansible-lint
-  ANSIBLE_LINT_VERSION: 26.10.1
   # renovate: datasource=pypi depName=yamllint
   YAMLLINT_VERSION: 1.38.0
 
@@ -45,7 +43,6 @@ jobs:
               - 'mise.toml'
             ansible:
               - *workflow
-              - *toolchain
               - 'ansible/**'
             kubernetes:
               - added|modified: 'kubernetes/**'
@@ -73,25 +70,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup mise
-        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
-        with:
-          install_args: python uv
-
-      - name: Install ansible-lint
-        run: |
-          uv tool install \
-            --python "$(mise which python)" \
-            --with "ansible==$(mise current ansible)" \
-            --with-executables-from ansible-core \
-            "ansible-lint==${ANSIBLE_LINT_VERSION}"
-          uv tool dir --bin >> "${GITHUB_PATH}"
-
       - name: Run ansible-lint
-        working-directory: ansible
-        run: |
-          ansible-lint --version
-          ansible-lint
+        uses: ansible/ansible-lint@9bce2bfb8f4a984e6b13767bc0d6bf0a49492164 # v26.10.1
+        with:
+          working_directory: ansible
 
   # TODO: Should probably run on the output of flux local
   # kubeconform:
