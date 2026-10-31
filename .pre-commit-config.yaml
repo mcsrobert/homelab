@@ -47,6 +47,9 @@ repos:
     rev: v26.10.1
     hooks:
       - id: ansible-lint
+        # Git sets GIT_DIR for hooks run from a worktree, which leaks into
+        # ansible-galaxy's clone of k3s-ansible and breaks its checkout.
+        entry: env -u GIT_DIR ansible-lint
         args:
           - ansible/
         stages: [pre-push, manual]
