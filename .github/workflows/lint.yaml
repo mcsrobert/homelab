@@ -6,12 +6,10 @@ on: push
 permissions:
   contents: read
 
-# Pin every linter and the toolchain it runs on, so results only change
-# through a commit (and the linters re-run on it, see the filters below).
+# Pin every linter, so results only change through a commit (and the linters
+# re-run on it, see the filters below). The toolchain they run on (Python, uv
+# and ansible) comes from mise.toml.
 env:
-  PYTHON_VERSION: "3.14"
-  # renovate: datasource=pypi depName=ansible-core
-  ANSIBLE_CORE_VERSION: 2.21.5
   # renovate: datasource=pypi depName=ansible-lint
   ANSIBLE_LINT_VERSION: 26.10.1
   # renovate: datasource=pypi depName=yamllint
@@ -48,8 +46,11 @@ jobs:
           filters: |
             workflow: &workflow
               - '.github/workflows/lint.yaml'
+            toolchain: &toolchain
+              - 'mise.toml'
             ansible:
               - *workflow
+              - *toolchain
               - 'ansible/**'
             kubernetes:
               - added|modified: 'kubernetes/**'
@@ -63,6 +64,7 @@ jobs:
               - added|modified: '**/*.yml'
             yaml_config:
               - *workflow
+              - *toolchain
               - '.yamllint.yaml'
 
   ansible-lint:
@@ -78,22 +80,27 @@ jobs:
 
       # Not using the ansible/ansible-lint action: it leaves ansible-core and
       # its other dependencies unpinned, resolving the latest on every run.
-      - name: Setup uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Setup mise
+        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          install_args: python uv
 
+      # Install into one environment with the ansible version from mise.toml,
+      # as ansible-lint imports ansible-core.
       - name: Install ansible-lint
         run: |
           uv tool install \
-            --with "ansible-core==${ANSIBLE_CORE_VERSION}" \
+            --python "$(mise which python)" \
+            --with "ansible==$(mise current ansible)" \
             --with-executables-from ansible-core \
             "ansible-lint==${ANSIBLE_LINT_VERSION}"
-          ansible-lint --version
+          uv tool dir --bin >> "${GITHUB_PATH}"
 
       - name: Run ansible-lint
         working-directory: ansible
-        run: ansible-lint
+        run: |
+          ansible-lint --version
+          ansible-lint
 
   # TODO: Should probably run on the output of flux local
   # kubeconform:
@@ -147,13 +154,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Setup mise
+        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          install_args: python uv
 
       - name: Install yamllint
-        run: uv tool install "yamllint==${YAMLLINT_VERSION}"
+        run: |
+          uv tool install --python "$(mise which python)" "yamllint==${YAMLLINT_VERSION}"
+          uv tool dir --bin >> "${GITHUB_PATH}"
 
       - name: Run yamllint
         env:
