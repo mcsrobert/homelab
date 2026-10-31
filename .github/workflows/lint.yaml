@@ -6,6 +6,10 @@ on: push
 permissions:
   contents: read
 
+env:
+  # renovate: datasource=pypi depName=yamllint
+  YAMLLINT_VERSION: 1.38.0
+
 jobs:
 
   changes:
@@ -15,8 +19,10 @@ jobs:
       # kubernetes: ${{ steps.filter.outputs.kubernetes }}
       # kubernetes_files: ${{ steps.filter.outputs.kubernetes_files }}
       markdown: ${{ steps.filter.outputs.markdown }}
+      markdown_config: ${{ steps.filter.outputs.markdown_config }}
       markdown_files: ${{ steps.filter.outputs.markdown_files }}
       yaml: ${{ steps.filter.outputs.yaml }}
+      yaml_config: ${{ steps.filter.outputs.yaml_config }}
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
     steps:
 
@@ -31,15 +37,27 @@ jobs:
         with:
           list-files: shell
           filters: |
+            workflow: &workflow
+              - '.github/workflows/lint.yaml'
+            toolchain: &toolchain
+              - 'mise.toml'
             ansible:
+              - *workflow
               - 'ansible/**'
             kubernetes:
               - added|modified: 'kubernetes/**'
             markdown:
               - added|modified: '**/*.md'
+            markdown_config:
+              - *workflow
+              - '.markdownlint.json'
             yaml:
               - added|modified: '**/*.yaml'
               - added|modified: '**/*.yml'
+            yaml_config:
+              - *workflow
+              - *toolchain
+              - '.yamllint.yaml'
 
   ansible-lint:
     needs: changes
@@ -49,6 +67,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Run ansible-lint
         uses: ansible/ansible-lint@9bce2bfb8f4a984e6b13767bc0d6bf0a49492164 # v26.10.1
@@ -81,7 +101,7 @@ jobs:
 
   markdownlint:
     needs: changes
-    if: ${{ needs.changes.outputs.markdown == 'true' }}
+    if: ${{ needs.changes.outputs.markdown == 'true' || needs.changes.outputs.markdown_config == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -93,12 +113,12 @@ jobs:
       - name: Run markdownlint
         uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
         with:
-          globs: '${{ needs.changes.outputs.markdown_files }}'
+          globs: ${{ needs.changes.outputs.markdown_config == 'true' && '**/*.md' || needs.changes.outputs.markdown_files }}
           separator: ' '
 
   yamllint:
     needs: changes
-    if: ${{ needs.changes.outputs.yaml == 'true' }}
+    if: ${{ needs.changes.outputs.yaml == 'true' || needs.changes.outputs.yaml_config == 'true' }}
     runs-on: ubuntu-latest
     steps:
 
@@ -107,8 +127,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup mise
+        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
+        with:
+          install_args: python uv
+
       - name: Install yamllint
-        run: pip install yamllint
+        run: |
+          uv tool install --python "$(mise which python)" "yamllint==${YAMLLINT_VERSION}"
+          uv tool dir --bin >> "${GITHUB_PATH}"
 
       - name: Run yamllint
-        run: yamllint ${{ needs.changes.outputs.yaml_files }}
+        env:
+          LINT_ALL: ${{ needs.changes.outputs.yaml_config }}
+          YAML_FILES: ${{ needs.changes.outputs.yaml_files }}
+        run: |
+          if [[ "${LINT_ALL}" == "true" ]]; then
+            yamllint .
+          else
+            echo "${YAML_FILES}" | xargs yamllint
+          fi
