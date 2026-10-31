@@ -3,6 +3,8 @@
   hosts: k3s_cluster
   become: true
   serial: 1
+  vars:
+    drain_delegate: "{{ groups['server'] | difference([inventory_hostname]) | first }}"
   environment:
     K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
@@ -12,23 +14,21 @@
       ansible.builtin.apt:
         update_cache: true
 
-    - name: Ensure pip and venv are present
+    - name: Ensure pip and venv are present on the drain delegate
       ansible.builtin.apt:
         name:
           - python3-pip
           - python3-venv
         state: present
+      delegate_to: "{{ drain_delegate }}"
 
-    - name: Prepare venv with kubernetes
+    - name: Prepare venv with kubernetes on the drain delegate
       ansible.builtin.pip:
         name: kubernetes==35.0.0
         state: present
         virtualenv: /opt/ansible_venv
         virtualenv_command: /usr/bin/python3 -m venv
-
-    - name: Set the python interpreter to use the venv
-      ansible.builtin.set_fact:
-        ansible_python_interpreter: /opt/ansible_venv/bin/python
+      delegate_to: "{{ drain_delegate }}"
 
   tasks:
 
@@ -37,18 +37,26 @@
         upgrade: dist
         autoremove: true
         autoclean: true
-      register: apt_result
 
-    - name: Check if a reboot is required
-      ansible.builtin.stat:
-        path: /var/run/reboot-required
-      register: reboot_required_file
+    - name: Find kernel packages installed since the last boot
+      ansible.builtin.shell: >-
+        find /var/lib/dpkg/info -maxdepth 1
+        -name 'linux-image-*.list' -size +1k
+        -newermt "$(uptime -s)"
+      register: new_kernel_packages
+      changed_when: false
 
-    - name: Reboot when required
-      when: reboot_required_file.stat.exists
+    - name: Reboot into the new kernel
+      when: new_kernel_packages.stdout | length > 0
       block:
 
+        - name: Wait for Longhorn before draining
+          ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
+
         - name: Drain node before reboot
+          delegate_to: "{{ drain_delegate }}"
+          vars:
+            ansible_python_interpreter: /opt/ansible_venv/bin/python
           kubernetes.core.k8s_drain:
             name: "{{ inventory_hostname }}"
             state: drain
@@ -63,7 +71,10 @@
               - app!=csi-attacher
               - app!=csi-provisioner
               - longhorn.io/component!=instance-manager
-          failed_when: false
+          register: drain
+          until: drain is not failed
+          retries: 20
+          delay: 30
 
         - name: Reboot node for kernel updates
           ansible.builtin.reboot:
@@ -81,25 +92,31 @@
           retries: 15
           delay: 10
 
-        - name: Uncordon node
-          kubernetes.core.k8s_drain:
-            name: "{{ inventory_hostname }}"
-            state: uncordon
-          register: uncordon
-          until: uncordon is not failed
-          retries: 5
-          delay: 10
-
-        - name: Wait for attached Longhorn volumes to be healthy
+        - name: Wait for node to be Ready
+          delegate_to: "{{ drain_delegate }}"
+          vars:
+            ansible_python_interpreter: /opt/ansible_venv/bin/python
           kubernetes.core.k8s_info:
-            api_version: longhorn.io/v1beta2
-            kind: Volume
-            namespace: longhorn-system
-          register: longhorn_volumes
-          until: >-
-            longhorn_volumes.resources
-            | selectattr('status.state', 'eq', 'attached')
-            | rejectattr('status.robustness', 'eq', 'healthy')
-            | list | length == 0
-          retries: 60
-          delay: 30
+            api_version: v1
+            kind: Node
+            name: "{{ inventory_hostname }}"
+            wait: true
+            wait_condition:
+              type: Ready
+              status: "True"
+            wait_timeout: 300
+
+    - name: Uncordon node
+      delegate_to: "{{ drain_delegate }}"
+      vars:
+        ansible_python_interpreter: /opt/ansible_venv/bin/python
+      kubernetes.core.k8s_drain:
+        name: "{{ inventory_hostname }}"
+        state: uncordon
+      register: uncordon
+      until: uncordon is not failed
+      retries: 5
+      delay: 10
+
+    - name: Wait for Longhorn after uncordoning
+      ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
