@@ -5,7 +5,8 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
 
 ## Rules
 
-- Work on a branch and open a pull request. Never commit or push to `main`.
+- Always work in a git worktree on a branch and open a pull request. Never
+  commit or push to `main`, and do not edit the main checkout.
 - Git is the only way changes reach the cluster. Do not run anything that
   mutates live state: `kubectl apply/edit/patch/delete/scale`,
   `flux reconcile`, `helmfile apply`, `helm install/upgrade`, or
@@ -26,7 +27,9 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   it, for example because it creates a resource whose CRD comes from another
   Kustomization. If it can apply and will become ready on a later
   reconcile, such as an `HTTPRoute` that references a `Middleware` that does
-  not exist yet, do not add a `dependsOn`.
+  not exist yet, do not add a `dependsOn`. Health checks and `wait` only
+  affect when the Kustomization becomes ready, not whether it applies, so
+  they are not a reason to add one.
 - `ansible/`: host configuration, k3s, kube-vip, drivers.
 - `armbian/`: custom OS image build for the RK1 nodes.
 
