@@ -1,0 +1,81 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.33.0/cronjob-batch-v1.json
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: openbao-snapshot
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: openbao-snapshot
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 100
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: snapshot
+              # renovate: datasource=docker depName=quay.io/openbao/openbao
+              image: quay.io/openbao/openbao:2.7.1@sha256:6d2b93856e3fcf7b18ad855a0b51eaba474dc8b79cf554379ea32034797d2acf
+              command: ["/bin/sh", "-euc"]
+              args:
+                - |
+                  export BAO_TOKEN="$(bao write -field=token auth/kubernetes/login role=snapshot-role jwt="$(cat /var/run/secrets/openbao/token)")"
+                  file="/backup/openbao-$(date -u +%Y%m%dT%H%M%SZ).snap"
+                  bao operator raft snapshot save "${file}.tmp"
+                  mv "${file}.tmp" "${file}"
+                  find /backup -name 'openbao-*.snap' -mtime +${RETENTION_DAYS} -delete
+                  find /backup -name 'openbao-*.snap.tmp' -mmin +60 -delete
+                  ls -l /backup
+              env:
+                - name: BAO_ADDR
+                  value: https://openbao.security.svc.cluster.local:8200
+                - name: BAO_TLS_SERVER_NAME
+                  value: bao.${CLUSTER_DOMAIN}
+                - name: RETENTION_DAYS
+                  value: "14"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+                - name: token
+                  mountPath: /var/run/secrets/openbao
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: backup
+              nfs:
+                server: ${NAS_IP}
+                path: /volume1/openbao-backups
+            - name: token
+              projected:
+                sources:
+                  - serviceAccountToken:
+                      path: token
+                      expirationSeconds: 600
+            - name: tmp
+              emptyDir:
+                medium: Memory
+                sizeLimit: 16Mi
