@@ -185,7 +185,7 @@ spec:
               - podSelector: {}
               - namespaceSelector:
                   matchLabels:
-                    name: observability
+                    kubernetes.io/metadata.name: observability
                 podSelector:
                   matchLabels:
                     app.kubernetes.io/name: vmagent
