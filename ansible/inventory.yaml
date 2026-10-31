@@ -47,3 +47,8 @@ k3s_cluster:
       embedded-registry: true
 
       nonroot-devices: true
+
+      secrets-encryption: true
+
+      etcd-snapshot-schedule-cron: "0 */6 * * *"
+      etcd-snapshot-retention: 20
