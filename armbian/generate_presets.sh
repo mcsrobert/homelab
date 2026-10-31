@@ -1,17 +1,12 @@
 #!/bin/bash
-
 set -e
 
-PRESETS_TEMPLATE=./presets.template
-PRESETS_OUTPUT=./userpatches/overlay/root/.not_logged_in_yet
+PRESETS=./userpatches/overlay/root/.not_logged_in_yet
 
 export ROOT_PASSWORD=$(security find-generic-password -s rk1-armbian-k3s -a root -w)
 export USER_PASSWORD=$(security find-generic-password -s rk1-armbian-k3s -a user -w)
 
-if [ ! -f "$PRESETS_TEMPLATE" ]; then
-    echo "Error: Template not found at $PRESETS_TEMPLATE"
-    exit 1
-fi
+git update-index --skip-worktree "$PRESETS"
+git show "HEAD:$PRESETS" | envsubst '$ROOT_PASSWORD $USER_PASSWORD' > "$PRESETS"
 
-envsubst < "$PRESETS_TEMPLATE" > "$PRESETS_OUTPUT"
-echo "Successfully generated: $PRESETS_OUTPUT"
+echo "Successfully generated: $PRESETS"

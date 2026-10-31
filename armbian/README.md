@@ -1,10 +1,10 @@
 # Armbian
 
 This contains my [userpatches/](./userpatches/) folder to build Armbian for my
-RK1 nodes. To keep the $ROOT_PASSWORD out of the repo, I'm templating the
-presets used by `.not_yet_logged_in`.
-
-This is done with [generate_presets.sh](./generate_presets.sh). This can
+RK1 nodes. The committed
+[.not_logged_in_yet](./userpatches/overlay/root/.not_logged_in_yet) only
+holds placeholders. [generate_presets.sh](./generate_presets.sh) fills in the
+passwords from my keyring and tells git to ignore the local changes. This can
 probably be done with a hook, but I couldn't figure out how to get passwords
 from my keyring into the build environment.
 
