@@ -16,6 +16,13 @@
       datasourceTemplate: 'docker',
     },
     {
+      description: 'Update OCI plugin images in OpenBao HCL config',
+      customType: 'regex',
+      managerFilePatterns: ['/openbao\/app\/helm-release\\.ya?ml$/'],
+      matchStrings: ['image\\s*=\\s*"(?<depName>[^\\s:@"]+):(?<currentValue>[^@\\s"]+)@(?<currentDigest>sha256:[a-f0-9]{64})"'],
+      datasourceTemplate: 'docker',
+    },
+    {
       description: 'Update YAML schema for kubernetes manifests based on k3s version',
       customType: 'regex',
       managerFilePatterns: ['/\\.ya?ml$/'],
