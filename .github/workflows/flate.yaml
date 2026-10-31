@@ -48,7 +48,7 @@ jobs:
 
       - name: Run flate test
         run: |
-          unset FLATE_BASE
+          unset FLATE_BASE  # TODO: Remove once new release drops
           flate test all --path kubernetes
 
   diff:
@@ -78,6 +78,7 @@ jobs:
 
       - name: Run flate diff
         id: diff
+        continue-on-error: true  # TODO: Remove once new release drops
         run: |
           flate diff ${{ matrix.resources }} \
             --path kubernetes \
