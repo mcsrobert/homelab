@@ -6,9 +6,6 @@ on: push
 permissions:
   contents: read
 
-# Pin every linter, so results only change through a commit (and the linters
-# re-run on it, see the filters below). The toolchain they run on (Python, uv
-# and ansible) comes from mise.toml.
 env:
   # renovate: datasource=pypi depName=ansible-lint
   ANSIBLE_LINT_VERSION: 26.10.1
@@ -41,8 +38,6 @@ jobs:
         id: filter
         with:
           list-files: shell
-          # Changes to this workflow (linter versions) or to a linter's
-          # config re-run that linter against the whole repository.
           filters: |
             workflow: &workflow
               - '.github/workflows/lint.yaml'
@@ -78,15 +73,11 @@ jobs:
         with:
           persist-credentials: false
 
-      # Not using the ansible/ansible-lint action: it leaves ansible-core and
-      # its other dependencies unpinned, resolving the latest on every run.
       - name: Setup mise
         uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
         with:
           install_args: python uv
 
-      # Install into one environment with the ansible version from mise.toml,
-      # as ansible-lint imports ansible-core.
       - name: Install ansible-lint
         run: |
           uv tool install \
@@ -172,6 +163,5 @@ jobs:
           if [[ "${LINT_ALL}" == "true" ]]; then
             yamllint .
           else
-            # Files are shell-escaped by paths-filter; xargs unquotes them.
             echo "${YAML_FILES}" | xargs yamllint
           fi
