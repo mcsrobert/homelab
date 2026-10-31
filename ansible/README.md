@@ -21,7 +21,7 @@ The [playbooks/](./playbooks/) directory contains several playbook to run.
 A playbook can be run as follows:
 
 ```bash
-ansible-playbook playbooks/install.yaml
+ansible-playbook playbooks/site.yaml
 ```
 
 To just upgrade k3s, run:
