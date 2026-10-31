@@ -5,11 +5,15 @@ A collection a playbooks to manage the cluster. Wraps around the amazing
 
 ## How to install
 
-Before you can run the playbooks, you need to install the requirements.
+Ansible is installed by [mise](https://mise.jdx.dev) (see the root
+[README](../README.md#tooling)). Before you can run the playbooks, install the
+required collections:
 
 ```bash
-ansible-galaxy install -r requirements.yml
+mise run install-ansible-collections
 ```
+
+This also runs as part of `mise run setup`.
 
 ## How to run
 

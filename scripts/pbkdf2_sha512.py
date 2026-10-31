@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# dependencies = ["passlib==1.7.4"]
+# ///
 
 import argparse
 import base64

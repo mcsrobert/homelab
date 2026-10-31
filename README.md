@@ -25,6 +25,20 @@ This repository currently consists of 3 main directories:
   app has one or more FluxCD Kustomizations, which can depend on each other.
   For example: `apps/default/immich/cnpg/database.yaml`.
 
+## Tooling
+
+All CLI tools are pinned in [mise.toml](./mise.toml) and kept up to date by
+Renovate. To get started, install [mise](https://mise.jdx.dev), activate it in
+your shell and run:
+
+```bash
+mise trust
+mise install
+mise run setup
+```
+
+`mise tasks ls` lists the available tasks, such as `bootstrap-flux`.
+
 ## Hardware
 
 My homelab consists of a small k3s cluster and a NAS.

@@ -28,5 +28,11 @@
       matchNewValue: '/^\\d{4}\\.\\d+\\.0$/',
       enabled: false,
     },
+    {
+      description: 'Keep Python on 3.13 until ansible supports newer versions',
+      matchManagers: ['mise'],
+      matchDepNames: ['python'],
+      allowedVersions: '<3.14',
+    },
   ]
 }
