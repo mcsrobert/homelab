@@ -22,6 +22,12 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
 
 - `kubernetes/apps/<namespace>/<app>/`: apps reconciled by Flux. Follow an
   existing app such as `kubernetes/apps/default/habitica/`.
+- Add a Flux `dependsOn` only when the Kustomization would fail without it,
+  for example because it applies a resource whose CRD comes from another
+  Kustomization. Depend on the Kustomization that provides what is needed,
+  not on whatever creates the referenced object. Referencing an object by
+  name, such as a Traefik `Middleware` in an `HTTPRoute` filter, is not a
+  dependency.
 - `ansible/`: host configuration, k3s, kube-vip, drivers.
 - `armbian/`: custom OS image build for the RK1 nodes.
 
