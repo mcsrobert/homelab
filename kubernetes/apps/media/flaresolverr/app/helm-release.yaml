@@ -71,21 +71,3 @@ spec:
           name: flaresolverr
         endpoints:
           - port: metrics
-    route:
-      flaresolverr:
-        hostnames:
-          - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
-        parentRefs:
-          - name: traefik-gateway
-            namespace: network
-            sectionName: websecure
-        rules:
-          - backendRefs:
-              - identifier: flaresolverr
-                port: *port
-            filters:
-              - type: ExtensionRef
-                extensionRef:
-                  group: traefik.io
-                  kind: Middleware
-                  name: auth-chain

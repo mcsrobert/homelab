@@ -8,7 +8,6 @@ metadata:
 spec:
   dependsOn:
     - name: gateway-api-crds
-    - name: traefik-middleware
   path: /kubernetes/apps/media/flaresolverr/app
   sourceRef:
     kind: GitRepository
