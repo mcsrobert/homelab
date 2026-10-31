@@ -13,6 +13,7 @@ spec:
     - namespace: flux-system
     - namespace: home-automation
     - namespace: longhorn-system
+    - namespace: observability
     - namespace: network
     - namespace: security
   resources:

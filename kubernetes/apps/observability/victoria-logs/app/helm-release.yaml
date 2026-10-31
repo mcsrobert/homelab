@@ -34,6 +34,12 @@ spec:
           gethomepage.dev/pod-selector: app.kubernetes.io/name=victoria-logs-single
         hostnames:
           - victoria-logs.${CLUSTER_DOMAIN}
+        filters:
+          - type: ExtensionRef
+            extensionRef:
+              group: traefik.io
+              kind: Middleware
+              name: auth-chain
         extraRules:
           - filters:
               - type: RequestRedirect
