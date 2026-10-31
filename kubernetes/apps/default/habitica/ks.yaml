@@ -27,7 +27,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: external-secrets-stores
+    - name: external-secrets
     - name: mongodb-operator
   path: /kubernetes/apps/default/habitica/mongodb
   sourceRef:

@@ -50,7 +50,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: external-secrets-stores
+    - name: external-secrets
     - name: falco-dragonfly
     - name: falco-operator
     - name: gateway-api-crds

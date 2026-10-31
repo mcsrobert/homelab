@@ -7,7 +7,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: external-secrets-stores
+    - name: external-secrets
   path: /kubernetes/apps/home-automation/isponsorblocktv/app
   sourceRef:
     kind: GitRepository
