@@ -93,6 +93,12 @@ spec:
               - path:
                   type: Exact
                   value: /
+        filters: &authFilters
+          - type: ExtensionRef
+            extensionRef:
+              group: traefik.io
+              kind: Middleware
+              name: auth-chain
         parentRefs: &parentRefs
           - name: traefik-gateway
             namespace: network
@@ -122,6 +128,7 @@ spec:
           gethomepage.dev/pod-selector: app.kubernetes.io/name=vmalertmanager
         hostnames:
           - alertmanager.${CLUSTER_DOMAIN}
+        filters: *authFilters
         parentRefs: *parentRefs
 
     vmalert:
@@ -142,6 +149,7 @@ spec:
         enabled: true
         hostnames:
           - vm-alert.${CLUSTER_DOMAIN}
+        filters: *authFilters
         parentRefs: *parentRefs
 
     vmagent:
@@ -172,6 +180,7 @@ spec:
         enabled: true
         hostnames:
           - vm-agent.${CLUSTER_DOMAIN}
+        filters: *authFilters
         parentRefs: *parentRefs
 
     kube-state-metrics:

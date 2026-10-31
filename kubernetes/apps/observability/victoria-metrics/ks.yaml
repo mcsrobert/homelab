@@ -10,6 +10,7 @@ spec:
     - name: alertmanager-ntfy
     - name: external-secrets
     - name: gateway-api-crds
+    - name: traefik-middleware
   path: /kubernetes/apps/observability/victoria-metrics/app
   sourceRef:
     kind: GitRepository
