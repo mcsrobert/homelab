@@ -50,8 +50,10 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: falco-operator
+    - name: external-secrets-stores
     - name: falco-dragonfly
+    - name: falco-operator
+    - name: gateway-api-crds
     - name: prometheus-operator-crds
   sourceRef:
     kind: GitRepository

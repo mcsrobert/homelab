@@ -7,11 +7,12 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: external-secrets
+    - name: external-secrets-stores
     - name: gateway-api-crds
-    - name: immich-dragonfly
     - name: immich-cnpg
+    - name: immich-dragonfly
     - name: longhorn
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/default/immich/app
   sourceRef:
     kind: GitRepository
@@ -31,7 +32,7 @@ metadata:
 spec:
   dependsOn:
     - name: cloudnative-pg
-    - name: external-secrets
+    - name: external-secrets-stores
     - name: longhorn
     - name: plugin-barman-cloud
   path: /kubernetes/apps/default/immich/cnpg
@@ -57,7 +58,8 @@ metadata:
 spec:
   dependsOn:
     - name: dragonfly-operator
-    - name: external-secrets
+    - name: external-secrets-stores
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/default/immich/dragonfly
   sourceRef:
     kind: GitRepository

@@ -27,7 +27,7 @@ metadata:
 spec:
   dependsOn:
     - name: cert-manager
-    - name: external-secrets
+    - name: external-secrets-stores
   path: /kubernetes/apps/cert-manager/cert-manager/issuers
   sourceRef:
     kind: GitRepository

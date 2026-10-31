@@ -7,12 +7,12 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: external-secrets
+    - name: external-secrets-stores
+    - name: gateway-api-crds
     - name: generic-device-plugin
     - name: longhorn
     - name: mosquitto
     - name: node-feature-discovery
-    - name: gateway-api-crds
   path: /kubernetes/apps/home-automation/zigbee2mqtt/app
   sourceRef:
     kind: GitRepository

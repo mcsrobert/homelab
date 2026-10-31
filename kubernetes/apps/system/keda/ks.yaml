@@ -26,6 +26,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: gateway-api-crds
     - name: keda
   path: /kubernetes/apps/system/keda/add-ons-http
   sourceRef:

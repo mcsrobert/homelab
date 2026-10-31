@@ -8,10 +8,10 @@ metadata:
 spec:
   dependsOn:
     - name: blocky-dragonfly
-    - name: external-secrets
+    - name: external-secrets-stores
+    - name: gateway-api-crds
     - name: metallb-pools
     - name: prometheus-operator-crds
-    - name: gateway-api-crds
   path: /kubernetes/apps/network/blocky/app
   sourceRef:
     kind: GitRepository
@@ -31,7 +31,8 @@ metadata:
 spec:
   dependsOn:
     - name: dragonfly-operator
-    - name: external-secrets
+    - name: external-secrets-stores
+    - name: prometheus-operator-crds
   path: /kubernetes/apps/network/blocky/dragonfly
   sourceRef:
     kind: GitRepository

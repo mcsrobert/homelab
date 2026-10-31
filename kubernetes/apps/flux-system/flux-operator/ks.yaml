@@ -48,6 +48,7 @@ spec:
   dependsOn:
     - name: flux-operator
     - name: gateway-api-crds
+    - name: keda-add-ons-http
   path: /kubernetes/apps/flux-system/flux-operator/web
   sourceRef:
     kind: GitRepository

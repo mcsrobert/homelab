@@ -7,6 +7,8 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: gateway-api-crds
+    - name: longhorn
     - name: prometheus-operator-crds
   path: /kubernetes/apps/observability/victoria-logs/app
   sourceRef:

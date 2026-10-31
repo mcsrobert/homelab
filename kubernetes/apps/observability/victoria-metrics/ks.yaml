@@ -8,8 +8,9 @@ metadata:
 spec:
   dependsOn:
     - name: alertmanager-ntfy
-    - name: external-secrets
+    - name: external-secrets-stores
     - name: gateway-api-crds
+    - name: longhorn
   path: /kubernetes/apps/observability/victoria-metrics/app
   sourceRef:
     kind: GitRepository
