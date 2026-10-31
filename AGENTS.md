@@ -13,6 +13,8 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   `flux get`, `helm template`, `ansible-lint`.
 - Never read, print or commit secrets, including the age key and decrypted
   `*.sops.yaml` content.
+- Do not add "Generated with Claude Code" or similar tool attribution lines to
+  PR descriptions.
 - Versions of images, charts and GitHub Actions are managed by Renovate. Do not
   bump them by hand unless asked.
 
