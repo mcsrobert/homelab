@@ -19,21 +19,21 @@ spec:
   storage:
     size: 10Gi
     storageClass: longhorn-cnpg
-  bootstrap:
-    recovery:
-      source: garage-backups
+  #   bootstrap:
+  #     recovery:
+  #       source: garage-backups
   plugins:
     - name: barman-cloud.cloudnative-pg.io
       isWALArchiver: true
       parameters:
         barmanObjectName: immich-garage-store
-  externalClusters:
-    - name: garage-backups
-      plugin:
-        name: barman-cloud.cloudnative-pg.io
-        parameters:
-          barmanObjectName: immich-garage-store
-          serverName: immich-cnpg-v2
+  #   externalClusters:
+  #     - name: garage-backups
+  #       plugin:
+  #         name: barman-cloud.cloudnative-pg.io
+  #         parameters:
+  #           barmanObjectName: immich-garage-store
+  #           serverName: immich-cnpg
   postgresql:
     shared_preload_libraries:
       - vchord.so
