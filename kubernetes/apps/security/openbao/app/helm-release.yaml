@@ -48,7 +48,6 @@ spec:
           audit "file" "to-stdout" {
             options {
               file_path = "/dev/stdout"
-              log_raw   = "true"
             }
           }
 
