@@ -53,20 +53,37 @@
         state: present
 
     - name: Harden SSH Configuration
-      ansible.builtin.lineinfile:
-        path: /etc/ssh/sshd_config
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
-        state: present
-        validate: "sshd -t -f %s"
-      loop:
-        - { regexp: "^#?PermitRootLogin", line: "PermitRootLogin no" }
-        - { regexp: "^#?PasswordAuthentication", line: "PasswordAuthentication no" }
-        - { regexp: "^#?ChallengeResponseAuthentication", line: "ChallengeResponseAuthentication no" }
-        - { regexp: "^#?KbdInteractiveAuthentication", line: "KbdInteractiveAuthentication no" }
-        - { regexp: "^#?PermitEmptyPasswords", line: "PermitEmptyPasswords no" }
-        - { regexp: "^#?X11Forwarding", line: "X11Forwarding no" }
-      notify: Restart sshd
+      block:
+
+        - name: Install SSH hardening drop-in
+          ansible.builtin.copy:
+            dest: /etc/ssh/sshd_config.d/00-hardening.conf
+            owner: root
+            group: root
+            mode: "0644"
+            content: |
+              PermitRootLogin no
+              PasswordAuthentication no
+              ChallengeResponseAuthentication no
+              KbdInteractiveAuthentication no
+              PermitEmptyPasswords no
+              X11Forwarding no
+          notify: Restart sshd
+
+        - name: Validate sshd configuration
+          ansible.builtin.command: sshd -t
+          changed_when: false
+
+      rescue:
+
+        - name: Remove invalid SSH hardening drop-in
+          ansible.builtin.file:
+            path: /etc/ssh/sshd_config.d/00-hardening.conf
+            state: absent
+
+        - name: Fail after removing invalid SSH hardening drop-in
+          ansible.builtin.fail:
+            msg: sshd configuration is invalid, drop-in removed
 
     - name: Configure k3s registry mirror cache Spegel
       vars:
