@@ -57,8 +57,9 @@ spec:
             current_key    = "file:///openbao/secrets/unseal-20260606-1.key"
           }
 
-          plugin_directory     = "/openbao/plugins"
-          plugin_auto_download = true
+          plugin_directory         = "/openbao/plugins"
+          plugin_auto_download     = true
+          plugin_download_behavior = "continue"
 
           plugin "auth" "ldap" {
             image = "ghcr.io/openbao/openbao-plugin-auth-ldap:v0.2.0@sha256:5558107754c107961267e62ca6c64d27faf8b7f2c3db36195393d5397a83fbb8"
@@ -109,7 +110,7 @@ spec:
             request "enable-ldap-auth" {
               operation = "update"
               path      = "sys/auth/ldap"
-              data      = { type = "ldap" }
+              data      = { type = "ldap", config = { plugin_version = "latest" } }
             }
 
             request "configure-ldap-auth" {
