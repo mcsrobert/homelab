@@ -1,0 +1,39 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/validatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-pinned-images
+  annotations:
+    policies.kyverno.io/title: Require pinned container images
+    policies.kyverno.io/description: >-
+      Ensures every container image is referenced by both a tag and a digest
+      (<image>:<tag>@sha256:<digest>), so Renovate can track updates and the
+      exact image is reproducible.
+spec:
+  validationActions: ["Audit"]
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        operations: ["CREATE", "UPDATE"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["kube-system", "longhorn-system"]
+  variables:
+    - name: images
+      expression: >-
+        object.spec.containers.map(c, c.image) +
+        object.spec.?initContainers.orValue([]).map(c, c.image) +
+        object.spec.?ephemeralContainers.orValue([]).map(c, c.image)
+    - name: unpinned
+      expression: >-
+        variables.images.filter(i, !i.matches('^[^@]+:[^:/@]+@sha256:[a-f0-9]{64}$'))
+  validations:
+    - expression: size(variables.unpinned) == 0
+      messageExpression: >-
+        'Images must be pinned with a tag and digest (<image>:<tag>@sha256:<digest>): ' +
+        variables.unpinned.join(', ')

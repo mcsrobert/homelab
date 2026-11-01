@@ -9,7 +9,10 @@ spec:
   chartRef:
     kind: OCIRepository
     name: falco-operator
-  values: {} # https://github.com/falcosecurity/charts/blob/master/charts/falco-operator/values.yaml
+  values: # https://github.com/falcosecurity/charts/blob/master/charts/falco-operator/values.yaml
+    image:
+      repository: docker.io/falcosecurity/falco-operator
+      tag: 0.5.0-rc3@sha256:ba265e4ee6a0048fc3a529aa752b4348b592214537745998a500a53bf25799e4
     # tty: true
     # collectors:
     #   containerEngine:

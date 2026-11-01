@@ -12,8 +12,18 @@ spec:
   values: # https://github.com/openbao/openbao-helm/blob/main/charts/openbao/values.yaml
     global:
       tlsDisable: false
+    injector:
+      image:
+        registry: docker.io
+        repository: hashicorp/vault-k8s
+        tag: 1.7.6@sha256:55e27b080c9b0469fd420dfb3631243488c6319504b779423caa46c529a95490
+      agentImage: &image
+        registry: quay.io
+        repository: openbao/openbao
+        tag: 2.7.1@sha256:6d2b93856e3fcf7b18ad855a0b51eaba474dc8b79cf554379ea32034797d2acf
     server:
       enabled: true
+      image: *image
       updateStrategyType: RollingUpdate
       image:
         tag: "2.6.5"

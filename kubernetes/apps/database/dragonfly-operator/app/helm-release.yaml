@@ -15,6 +15,9 @@ spec:
     crds: CreateReplace
   values: # https://github.com/dragonflydb/dragonfly-operator/blob/main/charts/dragonfly-operator/values.yaml
     manager:
+      image:
+        repository: docker.dragonflydb.io/dragonflydb/operator
+        tag: v1.7.1@sha256:bc0067369a456810d00715d7292da32b82f6df491fd51d6c57f2b2b3193ab490
       extraArgs:
         # See: https://github.com/dragonflydb/dragonfly-operator/issues/258
         - --metrics-bind-address=0.0.0.0:8080
@@ -25,6 +28,10 @@ spec:
         limits:
           cpu: 500m
           memory: 64Mi
+    rbacProxy:
+      image:
+        repository: quay.io/brancz/kube-rbac-proxy
+        tag: v0.20.2@sha256:ad0fa9f0adc928b557663297bd22c610533960d77acdec289ce8a636f0ea2114
     serviceMonitor:
       enabled: true
     grafanaDashboard:

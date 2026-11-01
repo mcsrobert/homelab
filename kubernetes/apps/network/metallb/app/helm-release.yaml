@@ -19,6 +19,9 @@ spec:
     crds: CreateReplace
   values: # https://github.com/metallb/metallb/tree/main/charts/metallb#values
     controller:
+      image:
+        repository: quay.io/metallb/controller
+        tag: v0.16.1@sha256:f51ab515de9ccd20dc3dccb093e48df8adddac019326c456f449e55ba91b6420
       resources:
         requests:
           cpu: 25m
@@ -26,6 +29,9 @@ spec:
         limits:
           memory: 256Mi
     speaker:
+      image:
+        repository: quay.io/metallb/speaker
+        tag: v0.16.1@sha256:16561e96531e1852d5c229ad7fae6e994dcfa983ff7f4de6b6208b34a4e2ddbc
       resources:
         requests:
           cpu: 50m

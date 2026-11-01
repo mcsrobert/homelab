@@ -31,8 +31,21 @@ spec:
     grafana:
       enabled: false
 
+    syncJob:
+      image:
+        repository: ghcr.io/victoriametrics/sync-job
+        tag: v0.0.17@sha256:b6f233532a85cda65e645264d24f995e5ee97f88b60610643f01f170516f444b
+
     victoria-metrics-operator:
       fullnameOverride: victoria-metrics-operator
+      image:
+        repository: victoriametrics/operator
+        tag: v0.75.0@sha256:78da26b41a819093707be2ab6a65a5dc19f43d58ec52f30b49a545c2c6b7bd55
+      crds:
+        cleanup:
+          image:
+            repository: registry.k8s.io/kubectl
+            tag: v1.37.0@sha256:5ed410ebac5dc976cc717098994dcdb29bbbd38f6bd65f582311f5be4ba719cf
       operator:
         enable_converter_ownership: true
       env:
@@ -52,6 +65,9 @@ spec:
     vmsingle:
       enabled: true
       spec:
+        image:
+          repository: victoriametrics/victoria-metrics
+          tag: v1.154.0@sha256:4bd592341587d669b7f57d54bbb82bd21ac8675f4e24234b7703a7c0f85197d8
         retentionPeriod: 10d
         storage:
           storageClassName: longhorn-victoria-metrics
@@ -107,6 +123,9 @@ spec:
     alertmanager:
       enabled: true
       spec:
+        image:
+          repository: prom/alertmanager
+          tag: v0.34.0@sha256:690c7b525f4367aa91f73e2f91c632206d32e97c6384bdbf2fb7a861b420340d
         externalURL: https://alertmanager.${CLUSTER_DOMAIN}
         configSecret: alertmanager-config
         resources:
@@ -134,6 +153,9 @@ spec:
     vmalert:
       enabled: true
       spec:
+        image:
+          repository: victoriametrics/vmalert
+          tag: v1.154.0@sha256:f11d77f9ff68dfd63c871d0e59ae7b479f9c3fd0e8a685fef690fb88b794d938
         extraArgs:
           external.url: https://vm-alert.${CLUSTER_DOMAIN}
         evaluationInterval: 15s
@@ -155,6 +177,9 @@ spec:
     vmagent:
       enabled: true
       spec:
+        image:
+          repository: victoriametrics/vmagent
+          tag: v1.154.0@sha256:2a939a9df9c8591aa5447efcd21af8c4f2ecc60ca6a8e742ffd46b9c76ef7f17
         extraArgs:
           promscrape.maxScrapeSize: "32MB"
           promscrape.streamParse: "true"
@@ -184,6 +209,10 @@ spec:
         parentRefs: *parentRefs
 
     kube-state-metrics:
+      image:
+        registry: registry.k8s.io
+        repository: kube-state-metrics/kube-state-metrics
+        tag: v2.20.0@sha256:42cfe3723a5f058171c627537fb57a3ea0f26e4380fa18555a95cb1a1b4cfc5b
       resources:
         requests:
           cpu: 5m
@@ -192,6 +221,12 @@ spec:
           memory: 256Mi
 
     prometheus-node-exporter:
+      # renovate: datasource=docker depName=quay.io/prometheus/node-exporter
+      version: v1.12.1
+      image:
+        registry: quay.io
+        repository: prometheus/node-exporter
+        tag: v1.12.1@sha256:1b4e4438faca4dd7e001dd445d161a4a2091b0fededa84093b3a8dfeae1f1be0
       resources:
         requests:
           cpu: 10m

@@ -11,6 +11,9 @@ spec:
     name: reloader
   values: # https://github.com/stakater/Reloader/blob/master/deployments/kubernetes/chart/reloader/README.md#parameters
     fullnameOverride: reloader
+    image:
+      repository: ghcr.io/stakater/reloader
+      tag: v1.4.22@sha256:def2480040adc164b3a57340e77674eadfd88fb7f0593df25e93297f29c7fd7c
     reloader:
       reloadStrategy: annotations
       deployment:

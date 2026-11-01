@@ -15,6 +15,15 @@ spec:
     crds: CreateReplace
   values: # https://github.com/mogenius/renovate-operator/blob/main/charts/renovate-operator/values.yaml
     fullnameOverride: renovate-operator
+    image:
+      registry: ghcr.io
+      repository: mogenius/renovate-operator
+      tag: 6.5.1@sha256:892eec306b8ad0040046328ac7ed47fdcd28946e6e26fc9911f2d6d6c6055c70
+    crd:
+      image:
+        registry: registry.k8s.io
+        repository: kubectl
+        tag: v1.37.1@sha256:b7cab618e281b1ee7484e7b706a96e2135fbb6e072c2a573a7dab4e87d7f2385
     webhook:
       enabled: true
     auth:
@@ -33,6 +42,10 @@ spec:
           - id_admin
     valkey:
       enabled: true
+      image:
+        registry: docker.io
+        repository: valkey/valkey
+        tag: 9.1.2@sha256:418652cfb58ef879d4978c33553735d7147016032d5aefaa14c828e611eb9dfd
       auth:
         enabled: false
       metrics:
