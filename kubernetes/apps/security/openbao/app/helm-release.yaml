@@ -64,10 +64,6 @@ spec:
           plugin_auto_register     = true
           plugin_download_behavior = "continue"
 
-          plugin "auth" "ldap" {
-            image = "ghcr.io/openbao/openbao-plugin-auth-ldap:v0.2.0@sha256:5558107754c107961267e62ca6c64d27faf8b7f2c3db36195393d5397a83fbb8"
-          }
-
           initialize "bootstrap" {
 
             request "enable-kv-v2" {
