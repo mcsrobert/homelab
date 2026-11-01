@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: policy-reporter
+spec:
+  chart:
+    spec:
+      chart: policy-reporter
+      version: 3.11.2
+      sourceRef:
+        kind: HelmRepository
+        name: policy-reporter
+  interval: 1h
+  values:  # https://github.com/kyverno/policy-reporter/tree/main/charts/policy-reporter
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+
+    metrics:
+      enabled: true
+
+    monitoring:
+      enabled: true
+
+    ui:
+      enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
+      httproute:
+        enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Policy Reporter
+          gethomepage.dev/icon: kyverno
+          gethomepage.dev/description: Dashboard for Kyverno policy reports
+          gethomepage.dev/group: Kubernetes
+          gethomepage.dev/pod-selector: app.kubernetes.io/instance=policy-reporter
+        parentRefs:
+          - name: traefik-gateway
+            namespace: network
+            sectionName: websecure
+        hostnames:
+          - policy-reporter.${CLUSTER_DOMAIN}
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: traefik.io
+                  kind: Middleware
+                  name: auth-chain
