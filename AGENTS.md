@@ -27,6 +27,12 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   `gh pr edit --add-label`. Do not create new labels, and do not apply the
   `renovate/*` or `type/*` labels, which Renovate manages. Leave the PR
   unlabelled if no label fits.
+- After opening a pull request, wait for its CI checks to complete before
+  handing back or finishing. If a check fails because of your change, fix it
+  on the same branch, push, and wait for CI again. If a failure is unrelated
+  to your change, pre-existing or out of scope, do not add a fix to the PR:
+  open a separate PR when a fix is appropriate, or report it clearly to the
+  user.
 
 ## Layout
 
