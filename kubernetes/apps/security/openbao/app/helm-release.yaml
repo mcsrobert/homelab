@@ -15,6 +15,8 @@ spec:
     server:
       enabled: true
       updateStrategyType: RollingUpdate
+      image:
+        tag: "2.6.5"
       statefulSet:
         annotations:
           reloader.stakater.com/auto: "true"
@@ -59,6 +61,7 @@ spec:
 
           plugin_directory         = "/openbao/plugins"
           plugin_auto_download     = true
+          plugin_auto_register     = true
           plugin_download_behavior = "continue"
 
           plugin "auth" "ldap" {
