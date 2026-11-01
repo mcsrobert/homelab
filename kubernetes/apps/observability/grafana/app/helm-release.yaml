@@ -10,6 +10,14 @@ spec:
     name: grafana
   interval: 1h
   values: # https://github.com/grafana-community/helm-charts/blob/main/charts/grafana/values.yaml
+    image:
+      registry: docker.io
+      repository: grafana/grafana
+      tag: 13.2.4-distroless@sha256:ae3d3add290adbe6a88412229f5d76fd7bb82743050881698642d3d62f277e35
+    downloadDashboardsImage:
+      registry: docker.io
+      repository: curlimages/curl
+      tag: 8.23.0@sha256:3fb7e13e5d179a845c97d78204f3f1064d1907037f26a3ebf91710571151fd93
     labels:
       grafana.home.arpa/instance: grafana
     admin:
@@ -169,6 +177,10 @@ spec:
           gnetId: 16888
           revision: 11
     sidecar:
+      image:
+        registry: quay.io
+        repository: kiwigrid/k8s-sidecar
+        tag: 2.14.1@sha256:092dbe0c335fba9af414a27630ca68f34df6185784fa847d9954187e69dbfdd7
       dashboards:
         enabled: true
         searchNamespace: ALL

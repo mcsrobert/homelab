@@ -10,6 +10,9 @@ spec:
     name: victoria-logs-collector
   interval: 30m
   values: # https://docs.victoriametrics.com/helm/victoria-logs-collector/#parameters
+    image:
+      repository: victoriametrics/vlagent
+      tag: v1.53.0@sha256:a82f93ffecc153fb068606903e512368b070272739d823abe99fad0eff6e1849
     remoteWrite:
       - url: http://victoria-logs-server.{{ .Release.Namespace }}.svc.cluster.local:9428
     resources:

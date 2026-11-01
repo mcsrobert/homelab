@@ -14,6 +14,10 @@ spec:
   upgrade:
     crds: CreateReplace
   values: # https://github.com/traefik/traefik-helm-chart/blob/master/traefik/VALUES.md#values
+    image:
+      registry: docker.io
+      repository: traefik
+      tag: v3.7.16@sha256:1336e85aaed293bd63d005086e0dd013b04078b26aaeb1c18b26a2f928af7e65
     providers:
       kubernetesCRD:
         allowCrossNamespace: true  # needed for ForwardAuth and network-*@kubernetescrd chains
