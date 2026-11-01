@@ -5,8 +5,9 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
 
 ## Rules
 
-- Always work in a git worktree on a branch and open a pull request. Never
-  commit or push to `main`, and do not edit the main checkout.
+- Always work in a git worktree on a branch and open a pull request. Create
+  the worktree in a temp directory outside the repository, for example
+  `git worktree add -b <branch> "$(mktemp -d)" origin/main`.
 - Git is the only way changes reach the cluster. Do not run anything that
   mutates live state: `kubectl apply/edit/patch/delete/scale`,
   `flux reconcile`, `helmfile apply`, `helm install/upgrade`, or
@@ -45,3 +46,7 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
 
 Conventional commits with a scope, matching the history, for example
 `fix(habitica-mongodb): use double quotes`.
+
+Squash minor follow-up edits into the commit they amend instead of adding
+fixup commits. Distinct changes, such as a fix and a small feature, can stay
+as separate commits in one PR.
