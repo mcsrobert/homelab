@@ -45,6 +45,17 @@ spec:
             envFrom:
               - secretRef:
                   name: zigbee2mqtt-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                type: HTTP
+              readiness: *probe
+              startup:
+                enabled: true
+                type: HTTP
+                spec:
+                  periodSeconds: 5
+                  failureThreshold: 12
             resources:
               requests:
                 cpu: 50m
