@@ -7,10 +7,10 @@
     {
       description: 'Automatically schedule and merge releases',
       matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
-      excludePackageNames: [
-        'k3s-io/k3s',
-        'kubernetes/kubernetes',
-        'longhorn',
+      matchPackageNames: [
+        '!k3s-io/k3s',
+        '!kubernetes/kubernetes',
+        '!longhorn',
       ],
       automerge: true,
       automergeSchedule: ['every weekday after 09:00 and before 18:00'],
