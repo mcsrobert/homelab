@@ -1,0 +1,117 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: t3-code
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      shareProcessNamespace: true
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    controllers:
+      t3-code:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: t3-code
+        containers:
+          t3-code:
+            image:
+              repository: docker.io/library/node
+              tag: 26.13.0-trixie@sha256:6d2c7d5d074bf72f81ddc252b4fbb5d625bc028eeda49cb4b8c2ff8eda1ee617
+            command:
+              - /bin/sh
+              - /opt/t3-code/entrypoint.sh
+            env:
+              TZ: ${TIME_ZONE}
+              HOME: &home /home/node
+              PATH: /home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              NPM_CONFIG_PREFIX: /home/node/.local
+              # renovate: datasource=github-releases depName=pingdotgg/t3code
+              T3CODE_VERSION: v0.1.6
+              # renovate: datasource=github-releases depName=jdx/mise
+              MISE_VERSION: v2026.10.25
+              GH_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: t3-code-github
+                    key: GH_TOKEN
+              GIT_CONFIG_COUNT: "1"
+              GIT_CONFIG_KEY_0: credential.https://github.com.helper
+              GIT_CONFIG_VALUE_0: '!f() { test "$1" = get && printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f'
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    serviceAccount:
+      t3-code: {}
+    configMaps:
+      entrypoint:
+        data:
+          entrypoint.sh: |
+            set -eu
+
+            T3CODE_VERSION=$(printf '%s' "$T3CODE_VERSION" | sed 's/^v//')
+            export T3CODE_VERSION
+            t3_dir="$HOME/.t3/runtime/versions/$T3CODE_VERSION"
+            if [ "$(cat "$t3_dir/.install-complete" 2>/dev/null)" != "$T3CODE_VERSION" ]; then
+              curl -fsSL -o /tmp/t3-install.sh https://t3.codes/install.sh
+              sh /tmp/t3-install.sh
+            fi
+            mkdir -p "$HOME/.local/bin"
+            ln -sfn "$t3_dir/t3" "$HOME/.local/bin/t3"
+
+            mise_version=$(printf '%s' "$MISE_VERSION" | sed 's/^v//')
+            if ! mise --version 2>/dev/null | grep -q "^$mise_version "; then
+              curl -fsSL -o /tmp/mise-install.sh https://mise.run
+              sh /tmp/mise-install.sh
+            fi
+
+            mkdir -p "$HOME/workspace"
+            exec t3 serve "$HOME/workspace"
+    persistence:
+      home:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        size: 20Gi
+        retain: true
+        globalMounts:
+          - path: *home
+      entrypoint:
+        type: configMap
+        identifier: entrypoint
+        globalMounts:
+          - path: /opt/t3-code
+            readOnly: true
+      tmp:
+        type: emptyDir
+    networkpolicies:
+      deny-ingress:
+        controller: t3-code
+        policyTypes:
+          - Ingress
+        rules:
+          ingress: []
