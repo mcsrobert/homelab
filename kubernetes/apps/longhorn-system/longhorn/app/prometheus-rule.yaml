@@ -21,3 +21,17 @@ spec:
             description: >-
               Volume {{ $labels.volume }} ({{ $labels.pvc_namespace }}/{{ $labels.pvc }}) on node
               {{ $labels.node }} has reached {{ $value | humanizePercentage }} of its capacity.
+    - name: longhorn.backups
+      rules:
+        - alert: LonghornBackupFailed
+          expr: longhorn_backup_state{recurring_job!=""} == 4
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Longhorn backup of volume {{ $labels.volume }} failed
+            description: >-
+              Backup {{ $labels.backup }} of volume {{ $labels.volume }} (recurring job
+              {{ $labels.recurring_job }}) is in the Error state. Check the backup target and the
+              longhorn-manager logs.
