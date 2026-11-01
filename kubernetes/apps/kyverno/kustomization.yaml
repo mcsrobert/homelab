@@ -6,3 +6,4 @@ resources:
   - ./namespace.yaml
   # Apps
   - ./kyverno/ks.yaml
+  - ./policy-reporter/ks.yaml
