@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-backups
+spec:
+  groups:
+    - name: cnpg.backups
+      rules:
+        - alert: CNPGBackupFailed
+          expr: |
+            max by (namespace, job) (barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp)
+            > max by (namespace, job) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp)
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              CNPG cluster {{ $labels.job }} last backup failed
+            description: >-
+              The most recent barman-cloud backup of {{ $labels.job }} failed and no successful
+              backup has happened since.
+        - alert: CNPGBackupStale
+          expr: |
+            time() - max by (namespace, job) (barman_cloud_cloudnative_pg_io_last_available_backup_timestamp)
+            > 36 * 3600
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              CNPG cluster {{ $labels.job }} has no recent backup
+            description: >-
+              The last successful backup of {{ $labels.job }} was {{ $value | humanizeDuration }}
+              ago. The ScheduledBackup runs daily.
+        - alert: CNPGWalArchivingFailing
+          expr: |
+            max by (namespace, job) (cnpg_pg_stat_archiver_last_failed_time)
+            > max by (namespace, job) (cnpg_pg_stat_archiver_last_archived_time)
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              CNPG cluster {{ $labels.job }} is failing to archive WAL
+            description: >-
+              The last WAL archive attempt of {{ $labels.job }} failed and no segment has been
+              archived since. WAL accumulates on the primary volume until archiving recovers.
