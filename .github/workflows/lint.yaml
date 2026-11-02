@@ -37,8 +37,6 @@ jobs:
           filters: |
             workflow: &workflow
               - '.github/workflows/lint.yaml'
-            toolchain: &toolchain
-              - 'mise.toml'
             ansible:
               - *workflow
               - 'ansible/**'
@@ -52,7 +50,6 @@ jobs:
               - added|modified: '**/*.yml'
             yaml_config:
               - *workflow
-              - *toolchain
               - '.yamllint.yaml'
 
   ansible-lint:
@@ -99,15 +96,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup mise
-        uses: jdx/mise-action@6612f0ef07ed2a736cd1e00a94a065522dd41195 # v5.2.5
-        with:
-          install_args: python uv
-
       - name: Install yamllint
-        run: |
-          uv tool install --python "$(mise which python)" "yamllint==${YAMLLINT_VERSION}"
-          uv tool dir --bin >> "${GITHUB_PATH}"
+        run: pipx install "yamllint==${YAMLLINT_VERSION}"
 
       - name: Run yamllint
         env:
