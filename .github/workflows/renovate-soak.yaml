@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  soak:
+  renovate-soak:
     if: github.actor == 'renovatebot-mcsrobert[bot]'
     runs-on: ubuntu-latest
     environment: soak-6d
