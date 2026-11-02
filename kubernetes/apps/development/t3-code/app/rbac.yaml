@@ -1,0 +1,77 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/clusterrolebinding-rbac-v1.json
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: t3-code-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: t3-code
+    namespace: development
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/clusterrole-rbac-v1.json
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: t3-code-read-only
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - persistentvolumes
+    verbs: &readOnly
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - admissionregistration.k8s.io
+      - apiextensions.k8s.io
+      - apiregistration.k8s.io
+      - node.k8s.io
+      - rbac.authorization.k8s.io
+      - scheduling.k8s.io
+      - storage.k8s.io
+      - ai.mongodb.com
+      - artifact.falcosecurity.dev
+      - barmancloud.cnpg.io
+      - eventing.keda.sh
+      - gateway.networking.k8s.io
+      - groupsnapshot.storage.k8s.io
+      - helm.cattle.io
+      - http.keda.sh
+      - hub.traefik.io
+      - instance.falcosecurity.dev
+      - k3s.cattle.io
+      - keda.sh
+      - longhorn.io
+      - metallb.io
+      - mongodb.com
+      - mongodbcommunity.mongodb.com
+      - monitoring.coreos.com
+      - nfd.k8s-sigs.io
+      - postgresql.cnpg.io
+      - renovate-operator.mogenius.com
+      - snapshot.storage.k8s.io
+      - traefik.io
+    resources:
+      - "*"
+    verbs: *readOnly
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/clusterrolebinding-rbac-v1.json
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: t3-code-read-only
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: t3-code-read-only
+subjects:
+  - kind: ServiceAccount
+    name: t3-code
+    namespace: development
