@@ -17,7 +17,7 @@ env:
   KUBECONFORM_VERSION: v0.8.0
 
 jobs:
-  pre-job:
+  changes:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,10 +39,10 @@ jobs:
             kubernetes:
               - 'kubernetes/**'
 
-  test:
-    needs: pre-job
+  flate-test:
+    needs: changes
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    if: ${{ needs.changes.outputs.any_changed == 'true' }}
     steps:
 
       - name: Checkout
@@ -60,46 +60,8 @@ jobs:
           unset FLATE_BASE  # TODO: Remove once flate v0.7.0 lands (home-operations/flate#1148)
           flate test all --path kubernetes
 
-  kubeconform:
-    needs: pre-job
-    runs-on: ubuntu-latest
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
-    steps:
-
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0  # FLATE_BASE=main needs origin/main to resolve
-          persist-credentials: false
-
-      - name: Setup Flate
-        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
-        with:
-          cache: true
-
-      - name: Install kubeconform
-        run: |
-          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
-            | tar -xz -C "$RUNNER_TEMP" kubeconform
-          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-
-      - name: Run kubeconform
-        run: |
-          set -o pipefail
-          unset FLATE_BASE  # TODO: Remove once flate v0.7.0 lands (home-operations/flate#1148)
-          flate build all --path kubernetes --no-progress \
-            --api-versions gateway.networking.k8s.io/v1/HTTPRoute \
-            | sed -E 's/\.\.PLACEHOLDER_[A-Z0-9_]+\.\./placeholder.example.com/g' \
-            | kubeconform \
-              -strict \
-              -summary \
-              -ignore-missing-schemas \
-              -schema-location default \
-              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-              -schema-location 'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/{{.ResourceKind}}.json'
-
-  diff:
-    needs: pre-job
+  flate-diff:
+    needs: changes
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -109,7 +71,7 @@ jobs:
         resources: ["hr", "ks"]
       max-parallel: 4
       fail-fast: false
-    if: ${{ needs.pre-job.outputs.any_changed == 'true' }}
+    if: ${{ needs.changes.outputs.any_changed == 'true' }}
     steps:
 
       - name: Checkout
@@ -152,3 +114,41 @@ jobs:
           message-id: ${{ github.event.pull_request.number }}/${{ matrix.resources }}
           message-failure: Diff was not successful
           message-path: ${{ runner.temp }}/comment.md
+
+  kubeconform:
+    needs: changes
+    runs-on: ubuntu-latest
+    if: ${{ needs.changes.outputs.any_changed == 'true' }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0  # FLATE_BASE=main needs origin/main to resolve
+          persist-credentials: false
+
+      - name: Setup Flate
+        uses: home-operations/flate/action@631b76b69c4e58c6f4d1cb01e23616fa61aebafa # v0.6.5
+        with:
+          cache: true
+
+      - name: Install kubeconform
+        run: |
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar -xz -C "$RUNNER_TEMP" kubeconform
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Run kubeconform
+        run: |
+          set -o pipefail
+          unset FLATE_BASE  # TODO: Remove once flate v0.7.0 lands (home-operations/flate#1148)
+          flate build all --path kubernetes --no-progress \
+            --api-versions gateway.networking.k8s.io/v1/HTTPRoute \
+            | sed -E 's/\.\.PLACEHOLDER_[A-Z0-9_]+\.\./placeholder.example.com/g' \
+            | kubeconform \
+              -strict \
+              -summary \
+              -ignore-missing-schemas \
+              -schema-location default \
+              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+              -schema-location 'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/{{.ResourceKind}}.json'
