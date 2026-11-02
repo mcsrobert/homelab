@@ -36,6 +36,7 @@ spec:
   interval: 30m
   timeout: 3m
   retryInterval: 2m
+  wait: true
   prune: true
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
