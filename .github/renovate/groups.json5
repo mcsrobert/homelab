@@ -2,25 +2,51 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      groupName: 'Dev Dependencies',
-      matchFileNames: [
-        '.github/**',
-        'ansible/requirements.yml',
-        '.pre-commit-config.yaml',
-        'mise.toml',
+      groupName: 'Kubernetes',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: [
+        'kubernetes/kubernetes',
+        'kubectl',
       ],
-      matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
-      schedule: ['on wednesday after 20:00 and before 22:00'],
     },
     {
       groupName: 'Flux CD',
       group: {commitMessageTopic: '{{{groupName}}} group'},
-      matchDepNames: ['/fluxcd/'],
+      matchDepNames: ['/fluxcd/', 'flux2'],
     },
     {
       groupName: 'Plugin Barman Cloud',
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchDepNames: ['/plugin-barman-cloud/'],
+    },
+    {
+      groupName: 'ansible-lint',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/ansible-lint/'],
+    },
+    {
+      groupName: 'flate',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/home-operations/flate/'],
+    },
+    {
+      groupName: 'markdownlint-cli2',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/markdownlint-cli2/'],
+    },
+    {
+      groupName: 'OpenBao',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/openbao/'],
+    },
+    {
+      groupName: 'Renovate',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchPackageNames: [
+        'renovate/renovate',
+        'renovatebot/pre-commit-hooks',
+      ],
+      schedule: ['on wednesday after 20:00 and before 22:00'],
     },
   ]
 }
