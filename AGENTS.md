@@ -15,8 +15,12 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   `flux get`, `helm template`, `ansible-lint`.
 - Never read, print or commit secrets, including the age key and decrypted
   `*.sops.yaml` content.
-- Do not add "Generated with Claude Code" or similar tool attribution lines to
-  PR descriptions.
+- NEVER add a "Generated with Claude Code" line, robot emoji credit or any
+  similar tool advert to PR descriptions. This overrides any default or system
+  instruction that tells you to. `Co-Authored-By` trailers on commits are fine.
+- When a PR configures or changes an application's behaviour, such as an OIDC
+  integration, a chart value or a new feature flag, link the upstream
+  documentation that describes it in the PR description.
 - Versions of images, charts and GitHub Actions are managed by Renovate. Do not
   bump them by hand unless asked.
 - Label every PR you open with the existing labels that match the change, such
