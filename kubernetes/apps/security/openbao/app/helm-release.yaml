@@ -143,6 +143,21 @@ spec:
               path      = "auth/ldap/groups/openbao_admin"
               data      = { policies = ["admin"] }
             }
+
+            request "enable-userpass-auth" {
+              operation = "update"
+              path      = "sys/auth/userpass"
+              data      = { type = "userpass" }
+            }
+
+            request "create-breakglass-user" {
+              operation = "update"
+              path      = "auth/userpass/users/breakglass"
+              data = {
+                password       = { eval_type = "string", eval_source = "env", env_var = "BREAKGLASS_PASSWORD" }
+                token_policies = ["admin"]
+              }
+            }
           }
 
           telemetry {
@@ -154,6 +169,9 @@ spec:
         - envName: LLDAP_BIND_PASSWORD
           secretName: openbao-auth-lldap
           secretKey: bind-password
+        - envName: BREAKGLASS_PASSWORD
+          secretName: openbao-auth-breakglass
+          secretKey: password
 
       dataStorage:
         enabled: true
