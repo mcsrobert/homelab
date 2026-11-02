@@ -2,14 +2,6 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   packageRules: [
     {
-      groupName: 'Kubernetes',
-      group: {commitMessageTopic: '{{{groupName}}} group'},
-      matchDepNames: [
-        'kubernetes/kubernetes',
-        'kubectl',
-      ],
-    },
-    {
       groupName: 'Flux CD',
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchDepNames: ['/fluxcd/', 'flux2'],

@@ -23,14 +23,6 @@
       datasourceTemplate: 'docker',
     },
     {
-      description: 'Update YAML schema for kubernetes manifests based on k3s version',
-      customType: 'regex',
-      managerFilePatterns: ['/\\.ya?ml$/'],
-      matchStrings: ['yannh/kubernetes-json-schema/master/(?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
-      datasourceTemplate: 'github-releases',
-      depNameTemplate: 'kubernetes/kubernetes',
-    },
-    {
       description: 'Update YAML schema for helm releases with app-template chart',
       customType: 'regex',
       managerFilePatterns: ['/helm-?release\\.ya?ml$/'],
