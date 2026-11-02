@@ -1,16 +1,9 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Flate
-on:
-  pull_request:
-    branches:
-      - main
+on: workflow_call
 
 permissions: {}
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
 
 env:
   # renovate: datasource=github-releases depName=yannh/kubeconform

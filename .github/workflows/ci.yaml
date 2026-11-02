@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lint.yaml
+
+  flate:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/flate.yaml
+
+  ci:
+    if: ${{ always() }}
+    needs: [lint, flate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in ${RESULTS}; do
+            if [[ "${result}" != "success" && "${result}" != "skipped" ]]; then
+              echo "Failed: ${RESULTS}"
+              exit 1
+            fi
+          done
