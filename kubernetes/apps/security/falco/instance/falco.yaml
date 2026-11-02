@@ -6,6 +6,17 @@ metadata:
 spec:
   podTemplateSpec:
     spec:
+      # Falco cannot run on the RPi 4B yet, remove once the fix is released:
+      # https://github.com/falcosecurity/falco-operator/issues/449
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - raspberrypi
       containers:
         - name: falco
           tty: true
