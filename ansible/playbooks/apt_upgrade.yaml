@@ -3,6 +3,8 @@
   hosts: k3s_cluster
   become: true
   serial: 1
+  vars:
+    drain_delegate: "{{ groups['server'] | difference([inventory_hostname]) | first }}"
   environment:
     K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
@@ -12,23 +14,21 @@
       ansible.builtin.apt:
         update_cache: true
 
-    - name: Ensure pip and venv are present
+    - name: Ensure pip and venv are present on the drain delegate
       ansible.builtin.apt:
         name:
           - python3-pip
           - python3-venv
         state: present
+      delegate_to: "{{ drain_delegate }}"
 
-    - name: Prepare venv with kubernetes
+    - name: Prepare venv with kubernetes on the drain delegate
       ansible.builtin.pip:
         name: kubernetes==35.0.0
         state: present
         virtualenv: /opt/ansible_venv
         virtualenv_command: /usr/bin/python3 -m venv
-
-    - name: Set the python interpreter to use the venv
-      ansible.builtin.set_fact:
-        ansible_python_interpreter: /opt/ansible_venv/bin/python
+      delegate_to: "{{ drain_delegate }}"
 
   tasks:
 
@@ -49,6 +49,9 @@
       block:
 
         - name: Drain node before reboot
+          delegate_to: "{{ drain_delegate }}"
+          vars:
+            ansible_python_interpreter: /opt/ansible_venv/bin/python
           kubernetes.core.k8s_drain:
             name: "{{ inventory_hostname }}"
             state: drain
@@ -63,7 +66,6 @@
               - app!=csi-attacher
               - app!=csi-provisioner
               - longhorn.io/component!=instance-manager
-          failed_when: false
 
         - name: Reboot node for kernel updates
           ansible.builtin.reboot:
@@ -82,6 +84,9 @@
           delay: 10
 
         - name: Uncordon node
+          delegate_to: "{{ drain_delegate }}"
+          vars:
+            ansible_python_interpreter: /opt/ansible_venv/bin/python
           kubernetes.core.k8s_drain:
             name: "{{ inventory_hostname }}"
             state: uncordon
