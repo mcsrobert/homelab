@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/imagevalidatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: pin-image-digests
+  annotations:
+    policies.kyverno.io/title: Pin image digests
+    policies.kyverno.io/description: >-
+      Resolves image tags to digests when a pod is created, so chart-supplied
+      images keep following the chart version while running pods are pinned to
+      an immutable reference. Only applies to new pods, and admits the pod
+      unchanged if the registry cannot be reached. CloudNativePG images are
+      skipped because the operator rolls any instance whose image string differs
+      from its configured one.
+spec:
+  validationActions: ["Audit"]
+  failurePolicy: Ignore
+  webhookConfiguration:
+    timeoutSeconds: 20
+  autogen:
+    podControllers:
+      controllers: []
+  evaluation:
+    background:
+      enabled: false
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        operations: ["CREATE"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["kube-system", "longhorn-system"]
+  matchImageReferences:
+    - expression: "!ref.startsWith('ghcr.io/cloudnative-pg/')"
+  validationConfigurations:
+    mutateDigest: true
+    verifyDigest: false
+    required: false
+  attestors: []
+  validations:
+    - expression: "true"
