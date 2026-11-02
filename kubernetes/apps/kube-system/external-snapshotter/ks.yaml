@@ -25,6 +25,7 @@ spec:
   targetNamespace: kube-system
   interval: 30m
   timeout: 5m
+  wait: true
   prune: true
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
