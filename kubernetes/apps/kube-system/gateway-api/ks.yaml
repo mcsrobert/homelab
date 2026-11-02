@@ -25,4 +25,5 @@ spec:
   targetNamespace: kube-system
   interval: 30m
   timeout: 5m
+  wait: true
   prune: true
