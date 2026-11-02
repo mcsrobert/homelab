@@ -64,3 +64,10 @@ spec:
   timeout: 5m
   wait: true
   prune: true
+  healthCheckExprs:
+    - apiVersion: instance.falcosecurity.dev/v1alpha1
+      kind: Falco
+      current: has(status.conditions) && status.conditions.exists(e, e.type == 'Available' && e.status == 'True')
+    - apiVersion: instance.falcosecurity.dev/v1alpha1
+      kind: Component
+      current: has(status.conditions) && status.conditions.exists(e, e.type == 'Available' && e.status == 'True')
