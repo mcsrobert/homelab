@@ -62,6 +62,9 @@ spec:
         expose:
           default: true
         exposedPort: 443
+        http:
+          middlewares:
+            - network-chain@kubernetescrd
         http3:
           enabled: true
         forwardedHeaders: &trustedIPs

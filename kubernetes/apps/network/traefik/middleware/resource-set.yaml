@@ -25,6 +25,4 @@ spec:
       spec:
         chain:
           middlewares:
-            - name: network-secure-headers@kubernetescrd
             - name: network-forwardauth-authelia@kubernetescrd
-            - name: network-compress@kubernetescrd
