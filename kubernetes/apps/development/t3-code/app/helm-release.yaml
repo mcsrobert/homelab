@@ -109,9 +109,60 @@ spec:
       tmp:
         type: emptyDir
     networkpolicies:
-      deny-ingress:
+      t3-code:
         controller: t3-code
         policyTypes:
           - Ingress
+          - Egress
         rules:
           ingress: []
+          egress:
+            - to:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: kube-system
+                  podSelector:
+                    matchLabels:
+                      k8s-app: kube-dns
+              ports:
+                - port: 53
+                  protocol: UDP
+                - port: 53
+                  protocol: TCP
+            - to:
+                - ipBlock:
+                    cidr: 192.168.178.31/32
+                - ipBlock:
+                    cidr: 192.168.178.32/32
+                - ipBlock:
+                    cidr: 192.168.178.33/32
+              ports:
+                - port: 6443
+                  protocol: TCP
+            - to:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: network
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: traefik
+              ports:
+                - port: 8000
+                  protocol: TCP
+                - port: 8443
+                  protocol: TCP
+                - port: 8443
+                  protocol: UDP
+            - to:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+                    except:
+                      - ${LAN_CIDR}
+                      - ${CLUSTER_CIDR}
+                      - ${SERVICE_CIDR}
+                - ipBlock:
+                    cidr: ::/0
+                    except:
+                      - ${LAN_CIDRv6}
+                      - ${CLUSTER_CIDRv6}
+                      - ${SERVICE_CIDRv6}
