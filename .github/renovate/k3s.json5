@@ -1,0 +1,39 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  customManagers: [
+    {
+      description: 'Update YAML schema for kubernetes manifests based on k3s version',
+      customType: 'regex',
+      managerFilePatterns: ['/\\.ya?ml$/'],
+      matchStrings: ['yannh/kubernetes-json-schema/master/(?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'kubernetes/kubernetes',
+      packageNameTemplate: 'k3s-io/k3s',
+      extractVersionTemplate: '^(?<version>v\\d+\\.\\d+\\.\\d+)\\+k3s\\d+$',
+    },
+  ],
+  packageRules: [
+    {
+      description: 'Treat the +k3sN suffix as a real version component',
+      matchDepNames: ['k3s-io/k3s'],
+      versioning: 'regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>-rc\\d+)?\\+k3s(?<build>\\d+)$',
+    },
+    {
+      description: 'Only offer kubectl versions that k3s has released',
+      matchManagers: ['mise'],
+      matchDepNames: ['kubectl'],
+      overridePackageName: 'k3s-io/k3s',
+      extractVersion: '^v(?<version>\\d+\\.\\d+\\.\\d+)\\+k3s\\d+$',
+    },
+    {
+      description: 'Upgrade k3s, kubectl and schemas together. Automerge is excluded in merge-schedule.json5',
+      groupName: 'k3s',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: [
+        'k3s-io/k3s',
+        'kubernetes/kubernetes',
+        'kubectl',
+      ],
+    },
+  ],
+}
