@@ -12,6 +12,7 @@ spec:
     - namespace: default
     - namespace: flux-system
     - namespace: home-automation
+    - namespace: kyverno
     - namespace: longhorn-system
     - namespace: network
     - namespace: observability
