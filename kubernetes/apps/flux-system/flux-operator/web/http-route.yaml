@@ -15,13 +15,7 @@ spec:
   hostnames:
     - flux.${CLUSTER_DOMAIN}
   rules:
-    - filters:
-        - type: ExtensionRef
-          extensionRef:
-            group: traefik.io
-            kind: Middleware
-            name: auth-chain
-      backendRefs:
+    - backendRefs:
         - kind: Service
           name: keda-add-ons-http-interceptor-proxy
           namespace: system
