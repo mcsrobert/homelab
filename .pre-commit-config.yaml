@@ -1,5 +1,5 @@
 ---
-default_install_hook_types: [pre-commit, pre-push]
+default_install_hook_types: [pre-commit, pre-push, commit-msg]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -63,3 +63,10 @@ repos:
         files: ^kubernetes/
         pass_filenames: false
         stages: [pre-push, manual]
+
+      - id: conventional-commit
+        name: conventional commit with scope
+        entry: '\A(Merge |Revert "|(fixup|squash)! |(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(!?\([A-Za-z0-9._/-]+\)!?): \S)'
+        language: pygrep
+        args: [--multiline, --negate]
+        stages: [commit-msg]
