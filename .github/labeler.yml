@@ -1,0 +1,23 @@
+---
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**
+          - .pre-commit-config.yaml
+          - .yamllint.yaml
+          - .markdownlint.json
+
+documentation:
+  - changed-files:
+      - all-globs-to-all-files:
+          - "**/*.md"
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/security/**
+
+observability:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/**
