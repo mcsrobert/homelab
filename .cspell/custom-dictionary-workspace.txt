@@ -19,7 +19,6 @@ autoremove
 awinterstein
 barmancloud
 BAZARR
-behaviour
 binddn
 bindpass
 blackhole
