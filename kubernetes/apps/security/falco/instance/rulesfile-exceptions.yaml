@@ -18,3 +18,25 @@ spec:
         and user.uid = 0
         and container.id = "host"
         and fd.directory = "/var/log")
+    - rule: Packet socket created in container
+      exceptions:
+        - name: kube_vip_arp
+          fields:
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - evt.arg.type
+            - evt.arg.proto
+          comps: [=, =, =, =, =, =, =]
+          values:
+            - - kube-system
+              - ghcr.io/kube-vip/kube-vip
+              - kube-vip
+              - kube-vip
+              - /kube-vip
+              - 2
+              - 1544
+      override:
+        exceptions: append
