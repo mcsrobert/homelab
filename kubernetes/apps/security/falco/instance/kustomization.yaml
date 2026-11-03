@@ -9,4 +9,5 @@ resources:
   - ./falco.yaml
   - ./http-route.yaml
   - ./plugins.yaml
+  - ./rulesfile-exceptions.yaml
   - ./rulesfile.yaml
