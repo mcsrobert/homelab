@@ -5,12 +5,9 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
 
 ## Rules
 
-- Always work in a git worktree on a branch and open a pull request. Create
-  the worktree in a temp directory outside the repository, for example
-  `git worktree add -b <branch> "$(mktemp -d)" origin/main`.
-  Run `git fetch origin` first and base work on `origin/main`, not the local
-  `main`, so you start from the latest changes. Re-fetch before pushing or
-  opening the pull request, and rebase if `origin/main` has moved.
+- Branch from the latest `origin/main` (run `git fetch origin` first), not the
+  local `main`, and open a pull request. Work in a git worktree, not the main
+  checkout. Re-fetch before pushing and rebase if `origin/main` has moved.
 - Git is the only way changes reach the cluster. Do not run anything that
   mutates live state: `kubectl apply/edit/patch/delete/scale`,
   `flux reconcile`, `helmfile apply`, `helm install/upgrade`, or
@@ -20,7 +17,8 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   `*.sops.yaml` content.
 - When a PR configures or changes an application's behavior, such as an OIDC
   integration, a chart value or a new feature flag, link the upstream
-  documentation that describes it in the PR description.
+  documentation that describes it in the "Upstream docs" section of the PR
+  description.
 - Versions of images, charts and GitHub Actions are managed by Renovate. Do not
   bump them by hand unless asked.
 - Label every PR you open with the existing labels that match the change, such
@@ -28,9 +26,11 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   changes, `security` for security work, `observability` for monitoring and
   `ci` for workflow, pre-commit and linting changes. Run `gh label list` to
   see the names. Set them with `gh pr create --label` or
-  `gh pr edit --add-label`. Do not create new labels, and do not apply the
-  `renovate/*` or `type/*` labels, which Renovate manages. Leave the PR
-  unlabelled if no label fits.
+  `gh pr edit --add-label`. The labeler workflow adds `ci`, `documentation`,
+  `security` and `observability` from the changed paths, so only add the
+  others. Do not create new labels, and do not apply the `renovate/*` or
+  `type/*` labels, which Renovate manages. Leave the PR unlabelled if no label
+  fits.
 - After opening a pull request, wait for its CI checks to complete before
   handing back or finishing. If a check fails because of your change, fix it
   on the same branch, push, and wait for CI again. If a failure is unrelated
@@ -54,9 +54,10 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
 
 ## Commits
 
-Conventional commits with a scope, matching the history, for example
-`fix(habitica-mongodb): use double quotes`.
-
-Squash minor follow-up edits into the commit they amend instead of adding
-fixup commits. Distinct changes, such as a fix and a small feature, can stay
-as separate commits in one PR.
+- Conventional commits with a scope, matching the history, for example
+  `fix(habitica-mongodb): use double quotes`. The `commit-msg` hook rejects
+  anything else, so run `mise run setup` once per checkout to install the
+  hooks.
+- Squash minor follow-up edits into the commit they amend instead of adding
+  fixup commits. Distinct changes, such as a fix and a small feature, can stay
+  as separate commits in one PR.
