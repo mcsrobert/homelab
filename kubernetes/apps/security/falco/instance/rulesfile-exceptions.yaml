@@ -1,0 +1,20 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: falco-rules-exceptions
+spec:
+  # Lower values load first, so this must stay above falco-rules (50).
+  priority: 60
+  inlineRules:
+    - macro: allowed_clear_log_files
+      override:
+        condition: replace
+      condition: >
+        (proc.name = "armbian-ramlog"
+        and proc.exepath = "/usr/bin/bash"
+        and proc.pname = "armbian-ramlog"
+        and proc.cmdline = "armbian-ramlog /usr/lib/armbian/armbian-ramlog postrotate"
+        and user.uid = 0
+        and container.id = "host"
+        and fd.directory = "/var/log")
