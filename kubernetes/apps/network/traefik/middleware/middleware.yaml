@@ -6,11 +6,13 @@ metadata:
   name: secure-headers
 spec:
   headers:
-    frameDeny: true
     contentTypeNosniff: true
-    browserXssFilter: true
     stsSeconds: 31536000
     stsIncludeSubdomains: true
+    customResponseHeaders:
+      Server: ""
+      X-Powered-By: ""
+      X-Permitted-Cross-Domain-Policies: none
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
 apiVersion: traefik.io/v1alpha1
@@ -20,9 +22,17 @@ metadata:
 spec:
   compress:
     minResponseBodyBytes: 1024
-    excludedContentTypes:
-      - application/zip
-      - application/octet-stream
+    includedContentTypes:
+      - text/html
+      - text/css
+      - text/plain
+      - text/xml
+      - text/javascript
+      - application/javascript
+      - application/json
+      - application/xml
+      - application/wasm
+      - image/svg+xml
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/traefik.io/middleware_v1alpha1.json
 apiVersion: traefik.io/v1alpha1
