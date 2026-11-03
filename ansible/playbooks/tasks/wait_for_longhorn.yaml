@@ -1,0 +1,21 @@
+---
+- name: Wait for Longhorn volumes to be healthy
+  delegate_to: "{{ drain_delegate }}"
+  vars:
+    ansible_python_interpreter: /opt/ansible_venv/bin/python
+  kubernetes.core.k8s_info:
+    api_version: longhorn.io/v1beta2
+    kind: Volume
+    namespace: longhorn-system
+  register: longhorn_volumes
+  until: >-
+    longhorn_volumes is not failed
+    and longhorn_volumes.resources
+    | rejectattr('status.state', 'eq', 'detached')
+    | rejectattr('status.robustness', 'eq', 'healthy')
+    | list | length == 0
+    and longhorn_volumes.resources
+    | selectattr('status.robustness', 'eq', 'faulted')
+    | list | length == 0
+  retries: 60
+  delay: 30
