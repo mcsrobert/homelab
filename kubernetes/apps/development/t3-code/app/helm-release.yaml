@@ -1,0 +1,566 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: t3-code
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - raspberrypi
+      shareProcessNamespace: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    controllers:
+      t3-code:
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: t3-code
+        containers:
+          t3-code:
+            image:
+              repository: docker.io/library/node
+              tag: 26.13.0-trixie@sha256:6d2c7d5d074bf72f81ddc252b4fbb5d625bc028eeda49cb4b8c2ff8eda1ee617
+            command:
+              - /bin/sh
+              - /opt/t3-code/entrypoint.sh
+            env:
+              TZ: ${TIME_ZONE}
+              HOME: &homePath /home/node
+              PATH: /home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              NPM_CONFIG_PREFIX: /home/node/.local
+              GH_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: t3-code-github
+                    key: GH_TOKEN
+              MISE_GITHUB_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: t3-code-github
+                    key: GH_TOKEN
+              GIT_CONFIG_COUNT: "3"
+              GIT_CONFIG_KEY_0: credential.https://github.com.helper
+              GIT_CONFIG_VALUE_0: '!f() { test "$1" = get && printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f'
+              GIT_CONFIG_KEY_1: user.name
+              GIT_CONFIG_VALUE_1: Maurice Robert
+              GIT_CONFIG_KEY_2: user.email
+              GIT_CONFIG_VALUE_2: 42997116+mcsrobert@users.noreply.github.com
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: &t3Command
+                      - curl
+                      - -fsS
+                      - -o
+                      - /dev/null
+                      - --max-time
+                      - "5"
+                      - http://127.0.0.1:3773/.well-known/t3/environment
+                  periodSeconds: 10
+                  timeoutSeconds: 10
+                  failureThreshold: 12
+              liveness: &t3Probe
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: *t3Command
+                  periodSeconds: 10
+                  timeoutSeconds: 6
+                  failureThreshold: 3
+              readiness: *t3Probe
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+          tailscale:
+            image:
+              repository: ghcr.io/tailscale/tailscale
+              tag: v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              TZ: ${TIME_ZONE}
+              TS_HOSTNAME: t3-code
+              TS_USERSPACE: true
+              TS_AUTH_ONCE: true
+              TS_STATE_DIR: /var/lib/tailscale
+              TS_SOCKET: /var/run/tailscale/tailscaled.sock
+              TS_SERVE_CONFIG: /config/serve.json
+              TS_EXTRA_ARGS: --advertise-tags=tag:t3-code
+              TS_KUBE_SECRET: ""
+              TS_AUTHKEY: file:/etc/tailscale-auth/TS_AUTHKEY
+              TS_ENABLE_HEALTH_CHECK: true
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: &tsHealth
+                    port: 9002
+                    path: /healthz
+                  periodSeconds: 10
+                  failureThreshold: 12
+              liveness: &tsProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *tsHealth
+              readiness: *tsProbe
+            resources:
+              requests:
+                cpu: 5m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            securityContext:
+              runAsUser: 1001
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    serviceAccount:
+      t3-code: {}
+    rbac:
+      bindings:
+        view:
+          type: ClusterRoleBinding
+          roleRef:
+            kind: ClusterRole
+            name: view
+          subjects:
+            - identifier: t3-code
+        read-only:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: read-only
+          subjects:
+            - identifier: t3-code
+      roles:
+        read-only:
+          type: ClusterRole
+          rules:
+            - apiGroups:
+                - ""
+              resources:
+                - nodes
+                - persistentvolumes
+                - podtemplates
+              verbs: &readOnly
+                - get
+                - list
+                - watch
+            - apiGroups:
+                - admissionregistration.k8s.io
+              resources:
+                - mutatingadmissionpolicies
+                - mutatingadmissionpolicybindings
+                - mutatingwebhookconfigurations
+                - validatingadmissionpolicies
+                - validatingadmissionpolicybindings
+                - validatingwebhookconfigurations
+              verbs: *readOnly
+            - apiGroups:
+                - apiextensions.k8s.io
+              resources:
+                - customresourcedefinitions
+              verbs: *readOnly
+            - apiGroups:
+                - apiregistration.k8s.io
+              resources:
+                - apiservices
+              verbs: *readOnly
+            - apiGroups:
+                - certificates.k8s.io
+              resources:
+                - certificatesigningrequests
+              verbs: *readOnly
+            - apiGroups:
+                - coordination.k8s.io
+              resources:
+                - leases
+              verbs: *readOnly
+            - apiGroups:
+                - networking.k8s.io
+              resources:
+                - ingressclasses
+                - servicecidrs
+              verbs: *readOnly
+            - apiGroups:
+                - node.k8s.io
+              resources:
+                - runtimeclasses
+              verbs: *readOnly
+            - apiGroups:
+                - rbac.authorization.k8s.io
+              resources:
+                - clusterrolebindings
+                - clusterroles
+                - rolebindings
+                - roles
+              verbs: *readOnly
+            - apiGroups:
+                - scheduling.k8s.io
+              resources:
+                - priorityclasses
+              verbs: *readOnly
+            - apiGroups:
+                - storage.k8s.io
+              resources:
+                - csidrivers
+                - csinodes
+                - csistoragecapacities
+                - storageclasses
+                - volumeattachments
+                - volumeattributesclasses
+              verbs: *readOnly
+            - apiGroups:
+                - ai.mongodb.com
+              resources:
+                - voyageais
+              verbs: *readOnly
+            - apiGroups:
+                - artifact.falcosecurity.dev
+              resources:
+                - artifactnodes
+                - configs
+                - plugins
+                - rulesfiles
+              verbs: *readOnly
+            - apiGroups:
+                - barmancloud.cnpg.io
+              resources:
+                - objectstores
+              verbs: *readOnly
+            - apiGroups:
+                - cert-manager.io
+              resources:
+                - clusterissuers
+              verbs: *readOnly
+            - apiGroups:
+                - eventing.keda.sh
+              resources:
+                - cloudeventsources
+                - clustercloudeventsources
+              verbs: *readOnly
+            - apiGroups:
+                - external-secrets.io
+              resources:
+                - clusterexternalsecrets
+              verbs: *readOnly
+            - apiGroups:
+                - fluxcd.controlplane.io
+              resources:
+                - fluxinstances
+                - fluxreports
+              verbs: *readOnly
+            - apiGroups:
+                - gateway.networking.k8s.io
+              resources:
+                - backendtlspolicies
+                - gatewayclasses
+                - gateways
+                - grpcroutes
+                - httproutes
+                - listenersets
+                - referencegrants
+                - tcproutes
+                - tlsroutes
+                - udproutes
+              verbs: *readOnly
+            - apiGroups:
+                - groupsnapshot.storage.k8s.io
+              resources:
+                - volumegroupsnapshotclasses
+                - volumegroupsnapshotcontents
+                - volumegroupsnapshots
+              verbs: *readOnly
+            - apiGroups:
+                - http.keda.sh
+              resources:
+                - httpscaledobjects
+                - interceptorroutes
+              verbs: *readOnly
+            - apiGroups:
+                - instance.falcosecurity.dev
+              resources:
+                - components
+                - falcos
+              verbs: *readOnly
+            - apiGroups:
+                - k3s.cattle.io
+              resources:
+                - addons
+                - etcdsnapshotfiles
+              verbs: *readOnly
+            - apiGroups:
+                - keda.sh
+              resources:
+                - scaledjobs
+                - scaledobjects
+              verbs: *readOnly
+            - apiGroups:
+                - kyverno.io
+              resources:
+                - policyexceptions
+              verbs: *readOnly
+            - apiGroups:
+                - longhorn.io
+              resources:
+                - backingimagedatasources
+                - backingimagemanagers
+                - backingimages
+                - backupbackingimages
+                - backups
+                - backuptargets
+                - backupvolumes
+                - enginefrontends
+                - engineimages
+                - engines
+                - instancemanagers
+                - nodes
+                - orphans
+                - recurringjobs
+                - replicas
+                - settings
+                - shardgroups
+                - shards
+                - sharemanagers
+                - snapshots
+                - supportbundles
+                - systembackups
+                - systemrestores
+                - volumeattachments
+                - volumes
+              verbs: *readOnly
+            - apiGroups:
+                - metallb.io
+              resources:
+                - bfdprofiles
+                - bgpadvertisements
+                - communities
+                - configurationstates
+                - ipaddresspools
+                - l2advertisements
+                - servicebgpstatuses
+                - servicel2statuses
+              verbs: *readOnly
+            - apiGroups:
+                - mongodb.com
+              resources:
+                - clustermongodbroles
+                - mongodb
+                - mongodbmulticluster
+                - mongodbsearch
+                - mongodbusers
+                - opsmanagers
+              verbs: *readOnly
+            - apiGroups:
+                - mongodbcommunity.mongodb.com
+              resources:
+                - mongodbcommunity
+              verbs: *readOnly
+            - apiGroups:
+                - monitoring.coreos.com
+              resources:
+                - alertmanagers
+                - podmonitors
+                - probes
+                - prometheusrules
+                - servicemonitors
+              verbs: *readOnly
+            - apiGroups:
+                - nfd.k8s-sigs.io
+              resources:
+                - nodefeaturegroups
+                - nodefeaturerules
+                - nodefeatures
+              verbs: *readOnly
+            - apiGroups:
+                - postgresql.cnpg.io
+              resources:
+                - backups
+                - clusterimagecatalogs
+                - databaseroles
+                - databases
+                - failoverquorums
+                - imagecatalogs
+                - poolers
+                - publications
+                - scheduledbackups
+                - subscriptions
+              verbs: *readOnly
+            - apiGroups:
+                - renovate-operator.mogenius.com
+              resources:
+                - renovateprojects
+              verbs: *readOnly
+            - apiGroups:
+                - snapshot.storage.k8s.io
+              resources:
+                - volumesnapshotclasses
+                - volumesnapshotcontents
+                - volumesnapshots
+              verbs: *readOnly
+            - apiGroups:
+                - traefik.io
+              resources:
+                - ingressroutes
+                - ingressroutetcps
+                - ingressrouteudps
+                - middlewares
+                - middlewaretcps
+                - serverstransports
+                - serverstransporttcps
+                - tlsoptions
+                - tlsstores
+                - traefikservices
+              verbs: *readOnly
+    configMaps:
+      serve:
+        data:
+          serve.json: |
+            {
+              "TCP": {"443": {"HTTPS": true}},
+              "Web": {
+                "$${TS_CERT_DOMAIN}:443": {
+                  "Handlers": {"/": {"Proxy": "http://127.0.0.1:3773"}}
+                }
+              }
+            }
+    persistence:
+      home:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-no-backup
+        size: 20Gi
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: *homePath
+      entrypoint:
+        type: configMap
+        name: t3-code-entrypoint
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /opt/t3-code
+                readOnly: true
+      tmp:
+        type: emptyDir
+        sizeLimit: 5Gi
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /tmp
+      tailscale-state:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-no-backup
+        size: 100Mi
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /var/lib/tailscale
+      tailscale-run:
+        type: emptyDir
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /var/run/tailscale
+      tailscale-tmp:
+        type: emptyDir
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /tmp
+      tailscale-auth:
+        type: secret
+        name: t3-code-tailscale
+        defaultMode: 288
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /etc/tailscale-auth
+                readOnly: true
+      serve:
+        type: configMap
+        identifier: serve
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /config
+                readOnly: true
+    networkpolicies:
+      t3-code:
+        controller: t3-code
+        policyTypes:
+          - Ingress
+          - Egress
+        rules:
+          ingress: []
+          egress:
+            - to:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: kube-system
+                  podSelector:
+                    matchLabels:
+                      k8s-app: kube-dns
+              ports:
+                - port: 53
+                  protocol: UDP
+                - port: 53
+                  protocol: TCP
+            - to:
+                - ipBlock:
+                    cidr: ${RK1_1_IP}/32
+                - ipBlock:
+                    cidr: ${RK1_2_IP}/32
+                - ipBlock:
+                    cidr: ${RK1_3_IP}/32
+              ports:
+                - port: 6443
+                  protocol: TCP
+            - to:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+                    except:
+                      - 10.0.0.0/8
+                      - 100.64.0.0/10
+                      - 169.254.0.0/16
+                      - 172.16.0.0/12
+                      - 192.168.0.0/16

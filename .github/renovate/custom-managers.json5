@@ -4,7 +4,7 @@
     {
       description: 'Update annotated dependencies',
       customType: 'regex',
-      managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/'],
+      managerFilePatterns: ['/\\.ya?ml(\\.j2)?$/', '/\\.sh$/'],
       matchStrings: ['datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.*[:=]\\s*["\']?(?<currentValue>[^"\'\\s]+)["\']?'],
       versioningTemplate: 'semver-coerced',
     },

@@ -66,6 +66,14 @@ spec:
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
+          name: longhorn-no-backup
+        provisioner: driver.longhorn.io
+        allowVolumeExpansion: true
+        parameters:
+          numberOfReplicas: "3"
+      - apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
           name: longhorn-cnpg
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
