@@ -41,7 +41,8 @@ if ! mise --version 2>/dev/null | grep -q "^$mise_version "; then
   install -m 0755 "/tmp/$mise_asset" "$HOME/.local/bin/mise"
 fi
 
-mise use -g "gh@${GH_VERSION#v}" || echo "warning: installing gh failed" >&2
+gh_version=$(printf '%s' "$GH_VERSION" | sed 's/^v//')
+mise use -g "gh@$gh_version" || echo "warning: installing gh failed" >&2
 
 mkdir -p "$HOME/workspace"
 repo="$HOME/workspace/homelab"
