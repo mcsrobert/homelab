@@ -107,6 +107,51 @@ spec:
               capabilities:
                 drop:
                   - ALL
+          tailscale:
+            image:
+              repository: ghcr.io/tailscale/tailscale
+              tag: v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              TZ: ${TIME_ZONE}
+              TS_HOSTNAME: t3-code
+              TS_USERSPACE: true
+              TS_AUTH_ONCE: true
+              TS_STATE_DIR: /var/lib/tailscale
+              TS_SOCKET: /var/run/tailscale/tailscaled.sock
+              TS_SERVE_CONFIG: /config/serve.json
+              TS_EXTRA_ARGS: --advertise-tags=tag:t3-code
+              TS_KUBE_SECRET: ""
+              TS_AUTHKEY: file:/etc/tailscale-auth/TS_AUTHKEY
+              TS_ENABLE_HEALTH_CHECK: true
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: &tsHealth
+                    port: 9002
+                    path: /healthz
+                  periodSeconds: 10
+                  failureThreshold: 12
+              liveness: &tsProbe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *tsHealth
+              readiness: *tsProbe
+            resources:
+              requests:
+                cpu: 5m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            securityContext:
+              runAsUser: 1001
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
     serviceAccount:
       t3-code: {}
     rbac:
@@ -404,23 +449,81 @@ spec:
                 - tlsstores
                 - traefikservices
               verbs: *readOnly
+    configMaps:
+      serve:
+        data:
+          serve.json: |
+            {
+              "TCP": {"443": {"HTTPS": true}},
+              "Web": {
+                "$${TS_CERT_DOMAIN}:443": {
+                  "Handlers": {"/": {"Proxy": "http://127.0.0.1:3773"}}
+                }
+              }
+            }
     persistence:
       home:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
         storageClass: longhorn-no-backup
         size: 20Gi
-        globalMounts:
-          - path: *homePath
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: *homePath
       entrypoint:
         type: configMap
         name: t3-code-entrypoint
-        globalMounts:
-          - path: /opt/t3-code
-            readOnly: true
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /opt/t3-code
+                readOnly: true
       tmp:
         type: emptyDir
         sizeLimit: 5Gi
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /tmp
+      tailscale-state:
+        type: persistentVolumeClaim
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-no-backup
+        size: 100Mi
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /var/lib/tailscale
+      tailscale-run:
+        type: emptyDir
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /var/run/tailscale
+      tailscale-tmp:
+        type: emptyDir
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /tmp
+      tailscale-auth:
+        type: secret
+        name: t3-code-tailscale
+        defaultMode: 288
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /etc/tailscale-auth
+                readOnly: true
+      serve:
+        type: configMap
+        identifier: serve
+        advancedMounts:
+          t3-code:
+            tailscale:
+              - path: /config
+                readOnly: true
     networkpolicies:
       t3-code:
         controller: t3-code
