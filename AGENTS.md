@@ -9,10 +9,16 @@ GitOps homelab: a k3s cluster on ARM, reconciled by FluxCD from this repo. See
   local `main`, and open a pull request. Work in a git worktree, not the main
   checkout. Re-fetch before pushing and rebase if `origin/main` has moved.
 - Git is the only way changes reach the cluster. Do not run anything that
-  mutates live state: `kubectl apply/edit/patch/delete/scale`,
-  `flux reconcile`, `helmfile apply`, `helm install/upgrade`, or
-  `ansible-playbook`. Read-only commands are fine: `kubectl get/describe/logs`,
+  mutates live state (`kubectl apply/edit/patch/delete/scale`,
+  `flux reconcile`, `helmfile apply`, `helm install/upgrade`,
+  `ansible-playbook`) on your own initiative; change the manifests and open a
+  pull request instead. Read-only commands are fine: `kubectl get/describe/logs`,
   `flux get`, `helm template`, `ansible-lint`.
+- Run a live-state or remote command (`kubectl exec`, `ssh`, a mutating
+  `kubectl`, `flux` or `helm` command, `ansible-playbook`) only when the user
+  asks you to. `.claude/settings.json` lists these under `ask`, so each call
+  needs the user's approval. Approval for one command does not extend to the
+  next, and anything you change that way still has to land in git afterwards.
 - Never read, print or commit secrets, including the age key and decrypted
   `*.sops.yaml` content.
 - When a PR configures or changes an application's behavior, such as an OIDC
