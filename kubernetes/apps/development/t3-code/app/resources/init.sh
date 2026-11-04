@@ -2,7 +2,7 @@
 set -eu
 
 # renovate: datasource=github-releases depName=pingdotgg/t3code
-T3CODE_VERSION=v0.1.6
+T3CODE_VERSION=v0.1.7
 # renovate: datasource=github-releases depName=jdx/mise
 MISE_VERSION=v2026.10.25
 # renovate: datasource=github-releases depName=cli/cli
