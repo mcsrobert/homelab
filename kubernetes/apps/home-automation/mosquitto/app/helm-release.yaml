@@ -73,3 +73,28 @@ spec:
         ports:
           mqtt:
             port: 1883
+    networkpolicies:
+      mosquitto:
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: mosquitto
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            # The four users in mosquitto-passwd, all in this namespace.
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: hcpy
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: home-assistant
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: ring-mqtt
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: zigbee2mqtt
+              ports:
+                - port: 1883
