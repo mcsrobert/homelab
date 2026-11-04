@@ -39,6 +39,22 @@ spec:
             image:
               repository: ghcr.io/hcpy2-0/hcpy
               tag: v0.4.12@sha256:12c6033b31983c643685dd33a1804ef64aba422a01a9990d0e5356fbe7834ca9
+            probes:
+              # hcpy has no health endpoint, and it already exits on its own when it cannot reach
+              # mosquitto at startup. So only report readiness, never restart: the check passes while
+              # there is an ESTABLISHED TCP connection to the MQTT port (1883 = 0x075B in
+              # /proc/net/tcp, field 3 is the remote address, state 01 is ESTABLISHED).
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - awk
+                      - $4 == "01" && $3 ~ /:075B$/ { found = 1 } END { exit !found }
+                      - /proc/net/tcp
+                  periodSeconds: 30
+                  timeoutSeconds: 5
             resources:
               requests:
                 cpu: 5m
