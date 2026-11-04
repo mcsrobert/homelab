@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "OpenBao KV paths in ExternalSecret remoteRef.key"
+condition = "AND"
+regexTarget = "line"
+targetRules = ["generic-api-key"]
+paths = ['''^kubernetes/.+/external-secret\.ya?ml$''']
+regexes = ['''key:\s*[\w-]+(/[\w-]+)+\s*$''']

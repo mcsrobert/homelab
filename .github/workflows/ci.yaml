@@ -24,9 +24,15 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/flate.yaml
 
+  security:
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/security.yaml
+
   ci:
     if: ${{ always() }}
-    needs: [lint, flate]
+    needs: [lint, flate, security]
     runs-on: ubuntu-latest
     steps:
       - name: Check results

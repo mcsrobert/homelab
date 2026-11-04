@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   renovate-soak:
-    if: github.actor == 'renovatebot-mcsrobert[bot]'
+    if: startsWith(github.event.pull_request.head.ref, 'renovate/')
     runs-on: ubuntu-latest
     environment: soak-6d
     steps:

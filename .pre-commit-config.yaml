@@ -58,6 +58,18 @@ repos:
 
   - repo: local
     hooks:
+      - id: gitleaks
+        name: gitleaks
+        entry: gitleaks git --pre-commit --staged --redact --no-banner
+        language: system
+        pass_filenames: false
+
+      - id: zizmor
+        name: zizmor
+        entry: zizmor --offline
+        language: system
+        files: ^(\.github/(workflows|actions)/.+\.ya?ml|\.pre-commit-config\.yaml)$
+
       - id: flate-test
         name: flate test
         entry: flate test all --path kubernetes
