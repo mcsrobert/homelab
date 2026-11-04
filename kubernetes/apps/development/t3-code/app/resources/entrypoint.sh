@@ -46,10 +46,12 @@ mise use -g "gh@$gh_version" || echo "warning: installing gh failed" >&2
 
 mkdir -p "$HOME/workspace"
 # T3 Code syncs the repo to ~/homelab and creates worktrees under
-# ~/.t3/worktrees. MISE_TRUSTED_CONFIG_PATHS trusts both.
+# ~/.t3/worktrees. MISE_TRUSTED_CONFIG_PATHS trusts both. `mise run setup`
+# installs the pre-commit hooks (including the commit-msg check) into the
+# repo's git hooks directory, which the worktrees share.
 repo="$HOME/homelab"
 if [ -f "$repo/mise.toml" ]; then
-  (cd "$repo" && mise install && echo "mise install finished" || echo "warning: mise install failed" >&2) &
+  (cd "$repo" && mise install && mise run setup && echo "mise install and setup finished" || echo "warning: mise install or setup failed" >&2) &
 fi
 
 exec t3 serve "$HOME/workspace"
