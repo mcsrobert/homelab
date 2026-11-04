@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/networkpolicy.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-dragonfly-ingress
+spec:
+  policyTypes: ['Ingress']
+  podSelector:
+    matchLabels:
+      app: immich-dragonfly
+  ingress:
+    # The only client.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich
+              app.kubernetes.io/controller: server
+      ports:
+        - port: 6379
+    # Replication between Dragonfly pods.
+    - from:
+        - podSelector:
+            matchLabels:
+              app: immich-dragonfly
+    # The operator and vmagent use the admin port.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: dragonfly-operator
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+      ports:
+        - port: 9999
