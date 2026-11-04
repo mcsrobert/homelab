@@ -6,3 +6,4 @@ resources:
   - ./dragonfly.yaml
   - ./external-secret.yaml
   - ./pod-monitor.yaml
+  - ./network-policy.yaml
