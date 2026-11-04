@@ -6,7 +6,8 @@ metadata:
   name: auth
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
-    # Pod Security Admission, warn/audit only (nothing is rejected). Workloads here
-    # already meet baseline; restricted shows the remaining gap.
+    # Pod Security Admission: baseline is enforced. Warn and audit use restricted
+    # to show the remaining gap.
     pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/warn: restricted
