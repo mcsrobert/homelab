@@ -11,7 +11,7 @@ env:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
@@ -34,7 +34,7 @@ jobs:
 
   flate-test:
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.changes.outputs.any_changed == 'true' }}
     steps:
 
@@ -55,7 +55,7 @@ jobs:
 
   flate-diff:
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: write
@@ -110,7 +110,7 @@ jobs:
 
   kubeconform:
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.changes.outputs.any_changed == 'true' }}
     steps:
 
