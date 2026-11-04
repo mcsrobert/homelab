@@ -105,6 +105,28 @@
               mirrors:
                 "*":
 
+    - name: Configure Kubernetes API server audit logging
+      when: inventory_hostname in groups['server']
+      block:
+
+        # The log lives under /var/lib, not /var/log: Armbian keeps /var/log
+        # in a small ramlog.
+        - name: Ensure the audit log directory exists
+          ansible.builtin.file:
+            path: /var/lib/rancher/k3s/server/logs
+            state: directory
+            owner: root
+            group: root
+            mode: "0700"
+
+        - name: Install the API server audit policy
+          ansible.builtin.copy:
+            src: audit-policy.yaml
+            dest: /etc/rancher/k3s/audit-policy.yaml
+            owner: root
+            group: root
+            mode: "0600"
+
     - name: Raise inotify instance limit
       ansible.posix.sysctl:
         name: fs.inotify.max_user_instances
