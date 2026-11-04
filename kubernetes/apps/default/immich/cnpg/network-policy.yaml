@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/networkpolicy.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-cnpg-ingress
+spec:
+  policyTypes: ['Ingress']
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: immich-cnpg
+  ingress:
+    # The only client.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: immich
+              app.kubernetes.io/controller: server
+      ports:
+        - port: 5432
+    # Replication, and the instance status port, between the cluster pods and
+    # the operator.
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: immich-cnpg
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudnative-pg
+      ports:
+        - port: 5432
+        - port: 8000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+      ports:
+        - port: 9187
