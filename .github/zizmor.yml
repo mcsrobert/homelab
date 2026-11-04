@@ -3,6 +3,3 @@ rules:
   self-repository:
     ignore:
       - ci.yaml
-  bot-conditions:
-    ignore:
-      - renovate-soak.yaml:17
