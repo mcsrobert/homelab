@@ -7,6 +7,8 @@ ci:
           - .yamllint.yaml
           - .markdownlint.json
           - .github/zizmor.yml
+          - .gitleaks.toml
+          - .gitleaksignore
 
 documentation:
   - changed-files:
@@ -19,6 +21,8 @@ security:
           - kubernetes/apps/security/**
           - .github/workflows/security.yaml
           - .github/zizmor.yml
+          - .gitleaks.toml
+          - .gitleaksignore
 
 observability:
   - changed-files:
