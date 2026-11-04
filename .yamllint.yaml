@@ -8,6 +8,8 @@ rules:
   truthy:
     check-keys: false
   comments-indentation: disable
+  document-start:
+    level: error
   comments:
     min-spaces-from-content: 1
   braces:
