@@ -19,7 +19,7 @@ spec:
         containerd:
           enabled: true
           sockets:
-            - /host/run/k3s/containerd/containerd.sock
+            - /run/k3s/containerd/containerd.sock
         cri:
           enabled: false
         lxc:
