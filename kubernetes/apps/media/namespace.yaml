@@ -6,3 +6,8 @@ metadata:
   name: media
   labels:
     kustomize.toolkit.fluxcd.io/prune: disabled
+    # Pod Security Admission, warn/audit only (nothing is rejected). Some workloads
+    # here are privileged or use hostPath on purpose, so a warning flags what goes
+    # beyond baseline.
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline
