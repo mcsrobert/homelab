@@ -26,6 +26,10 @@ description = "Setup workspace"
 depends = ["install-helm-diff-plugin", "install-ansible-collections"]
 run = "pre-commit install"
 
+[tasks.t3-code-codex-login]
+description = "Sign in to Codex in the T3 Code pod"
+run = "kubectl exec -n development -it deployment/t3-code -c t3-code -- codex login --device-auth"
+
 [tasks.pbkdf2]
 description = "Generate a PBKDF2-SHA512 hash (options after --)"
 run = "uv run scripts/pbkdf2_sha512.py"
