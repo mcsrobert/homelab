@@ -45,12 +45,11 @@ gh_version=$(printf '%s' "$GH_VERSION" | sed 's/^v//')
 mise use -g "gh@$gh_version" || echo "warning: installing gh failed" >&2
 
 mkdir -p "$HOME/workspace"
-repo="$HOME/workspace/homelab"
-if [ ! -d "$repo/.git" ]; then
-  git clone https://github.com/mcsrobert/homelab "$repo" || echo "warning: cloning homelab failed" >&2
-fi
+# T3 Code syncs the repo to ~/homelab and creates worktrees under
+# ~/.t3/worktrees. MISE_TRUSTED_CONFIG_PATHS trusts both.
+repo="$HOME/homelab"
 if [ -f "$repo/mise.toml" ]; then
-  (cd "$repo" && mise trust && mise install && echo "mise install finished" || echo "warning: mise install failed" >&2) &
+  (cd "$repo" && mise install && echo "mise install finished" || echo "warning: mise install failed" >&2) &
 fi
 
 exec t3 serve "$HOME/workspace"

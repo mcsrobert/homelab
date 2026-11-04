@@ -51,6 +51,7 @@ spec:
               HOME: &homePath /home/node
               PATH: /home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
               NPM_CONFIG_PREFIX: /home/node/.local
+              MISE_TRUSTED_CONFIG_PATHS: /home/node/homelab:/home/node/.t3/worktrees
               GH_TOKEN:
                 valueFrom:
                   secretKeyRef:
