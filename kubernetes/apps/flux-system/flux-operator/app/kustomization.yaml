@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./helm-release.yaml
   - ./oci-repository.yaml
+  - ./prometheus-rule.yaml
 configMapGenerator:
   - name: flux-operator-helm-values
     files:
