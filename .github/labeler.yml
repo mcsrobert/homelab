@@ -6,6 +6,7 @@ ci:
           - .pre-commit-config.yaml
           - .yamllint.yaml
           - .markdownlint.json
+          - .github/zizmor.yml
 
 documentation:
   - changed-files:
@@ -16,6 +17,8 @@ security:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/security/**
+          - .github/workflows/security.yaml
+          - .github/zizmor.yml
 
 observability:
   - changed-files:
