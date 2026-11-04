@@ -577,6 +577,17 @@ spec:
                 - port: 53
                   protocol: TCP
             - to:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: observability
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vmauth
+                      app.kubernetes.io/instance: readonly
+              ports:
+                - port: 8427
+                  protocol: TCP
+            - to:
                 - ipBlock:
                     cidr: ${RK1_1_IP}/32
                 - ipBlock:
