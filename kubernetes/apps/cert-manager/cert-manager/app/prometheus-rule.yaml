@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cert-manager
+spec:
+  groups:
+    - name: cert-manager.controller
+      rules:
+        - alert: CertManagerDown
+          expr: absent(up{job="cert-manager", namespace="cert-manager"} == 1)
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              cert-manager is not being scraped
+            description: >-
+              No cert-manager controller target has been up for 30 minutes. New certificates cannot
+              be issued and existing ones cannot be renewed until it is back.
+    - name: cert-manager.certificates
+      rules:
+        # The certificate metrics carry the Certificate's own namespace as `namespace`, which
+        # clashes with the scrape target label, so it ends up as `exported_namespace`.
+        - alert: CertManagerCertificateNotReady
+          expr: |
+            max by (exported_namespace, name) (certmanager_certificate_ready_status{condition="True"}) == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} is not Ready
+            description: >-
+              Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} has not been Ready for
+              15 minutes. Check its CertificateRequest, Order and Challenge resources.
+        # Each Certificate has its own renewBefore, so compare against its renewal time instead of
+        # a fixed time to expiry. Renewal is retried with backoff, so allow a few days before
+        # alerting.
+        - alert: CertManagerCertificateRenewalOverdue
+          expr: |
+            time() - max by (exported_namespace, name) (certmanager_certificate_renewal_timestamp_seconds > 0)
+            > 3 * 24 * 3600
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} was not renewed on time
+            description: >-
+              Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} should have been
+              renewed {{ $value | humanizeDuration }} ago. Check its CertificateRequest, Order and
+              Challenge resources and the issuer.
+        - alert: CertManagerCertificateExpiringSoon
+          expr: |
+            max by (exported_namespace, name) (certmanager_certificate_expiration_timestamp_seconds > 0)
+            - time() < 7 * 24 * 3600
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: >-
+              Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} expires in less than 7 days
+            description: >-
+              Certificate {{ $labels.exported_namespace }}/{{ $labels.name }} expires in
+              {{ $value | humanizeDuration }} and has not been renewed. Clients will start to fail
+              once it expires.
