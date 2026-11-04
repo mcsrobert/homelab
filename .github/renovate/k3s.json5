@@ -9,7 +9,7 @@
       datasourceTemplate: 'github-releases',
       depNameTemplate: 'kubernetes/kubernetes',
       packageNameTemplate: 'k3s-io/k3s',
-      extractVersionTemplate: '^(?<version>v\\d+\\.\\d+\\.\\d+)\\+k3s\\d+$',
+      extractVersionTemplate: '^(?<version>v\\d+\\.\\d+\\.\\d+)(\\+k3s\\d+)?$',
     },
   ],
   packageRules: [
