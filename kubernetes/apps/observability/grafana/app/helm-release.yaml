@@ -166,6 +166,13 @@ spec:
         longhorn:
           gnetId: 16888
           revision: 11
+    downloadDashboards:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
     sidecar:
       dashboards:
         enabled: true
