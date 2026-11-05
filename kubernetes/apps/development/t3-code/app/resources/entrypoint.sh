@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 
+. /opt/t3-code/t3-path.sh
+
 mkdir -p "$HOME/workspace"
 # T3 Code syncs the repo to ~/homelab and creates worktrees under
 # ~/.t3/worktrees. MISE_TRUSTED_CONFIG_PATHS trusts both. `mise run setup`

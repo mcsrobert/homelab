@@ -48,7 +48,6 @@ spec:
               - /opt/t3-code/init.sh
             env:
               HOME: &homePath /home/node
-              PATH: &runtimePath /home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
               NPM_CONFIG_PREFIX: /home/node/.local
               DISABLE_AUTOUPDATER: "1"
               MISE_GITHUB_TOKEN:
@@ -71,7 +70,6 @@ spec:
             env:
               TZ: ${TIME_ZONE}
               HOME: *homePath
-              PATH: *runtimePath
               DISABLE_AUTOUPDATER: "1"
               CLAUDE_CODE_OAUTH_TOKEN:
                 valueFrom:
@@ -507,6 +505,15 @@ spec:
                 readOnly: true
             install:
               - path: /opt/t3-code
+                readOnly: true
+      login-path:
+        type: configMap
+        name: t3-code-entrypoint
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /etc/profile.d/t3-path.sh
+                subPath: t3-path.sh
                 readOnly: true
       tmp:
         type: emptyDir
