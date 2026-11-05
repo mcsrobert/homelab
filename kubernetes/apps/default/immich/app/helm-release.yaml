@@ -62,6 +62,7 @@ spec:
             resources:
               requests:
                 cpu: 50m
+                memory: 1Gi
               limits:
                 memory: 2Gi
             securityContext:
@@ -98,6 +99,7 @@ spec:
             resources:
               requests:
                 cpu: 100m
+                memory: 768Mi
               limits:
                 memory: 4Gi
                 # devic.es/npu: 1
