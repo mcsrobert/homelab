@@ -22,6 +22,7 @@
       matchPackageNames: [
         'renovate/renovate',
         'renovatebot/pre-commit-hooks',
+        'jdx/mise',
       ],
       schedule: ['on sunday after 20:00 and before 22:00'],
     }
