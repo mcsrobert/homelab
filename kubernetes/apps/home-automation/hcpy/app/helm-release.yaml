@@ -19,13 +19,13 @@ spec:
           # TODO: If I ever use Multus, remove these
           hostAliases:
             - ip: ${DISHWASHER_IP}
-              hostnames: [dishwasher]
+              hostnames: ["dishwasher"]
             - ip: ${OVEN_IP}
-              hostnames: [oven]
+              hostnames: ["oven"]
             - ip: ${WASHER_IP}
-              hostnames: [washer]
+              hostnames: ["washer"]
             - ip: ${DRYER_IP}
-              hostnames: [dryer]
+              hostnames: ["dryer"]
           securityContext:
             runAsNonRoot: true
             runAsUser: 12020

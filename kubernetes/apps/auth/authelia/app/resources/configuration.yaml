@@ -215,9 +215,9 @@ identity_providers:
           immich_quota:
             attribute: immich_quota
       grafana:
-        id_token: [email, name, groups, preferred_username]
+        id_token: ["email", "name", "groups", "preferred_username"]
       flux-web:
-        id_token: [email, name, groups]
+        id_token: ["email", "name", "groups"]
     scopes:
       immich:
         claims:

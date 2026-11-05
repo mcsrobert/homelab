@@ -20,7 +20,7 @@
 
 - name: Upgrade kube-vip
   hosts: server
-  tags: [upgrade, never]
+  tags: ["upgrade", "never"]
   become: true
   serial: 1
 
