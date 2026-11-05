@@ -13,6 +13,7 @@ spec:
   evaluation:
     mutateExisting:
       enabled: true
+    skipBackgroundRequests: false
   matchConstraints:
     resourceRules:
       - apiGroups: ["helm.toolkit.fluxcd.io"]
