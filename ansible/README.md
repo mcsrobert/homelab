@@ -6,7 +6,7 @@ A collection a playbooks to manage the cluster. Wraps around the amazing
 ## How to install
 
 Ansible is installed by [mise](https://mise.jdx.dev) (see the root
-[README](../README.md#tooling)). Before you can run the playbooks, install the
+[mise.toml](../mise.toml)). Before you can run the playbooks, install the
 required collections:
 
 ```bash
