@@ -7,4 +7,5 @@ resources:
   # Apps
   - ./external-secrets/ks.yaml
   - ./falco/ks.yaml
+  - ./openbao-rotation-exporter/ks.yaml
   - ./openbao/ks.yaml

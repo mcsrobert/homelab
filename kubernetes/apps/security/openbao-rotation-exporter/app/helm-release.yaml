@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openbao-rotation-exporter
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: openbao-rotation-exporter
+  values: # https://github.com/mcsrobert/openbao-rotation-exporter/blob/main/charts/openbao-rotation-exporter/README.md
+    config:
+      openbao:
+        address: https://bao.${CLUSTER_DOMAIN}
+        mount: homelab
+        auth:
+          kubernetes:
+            role: openbao-rotation-exporter
+      keys:
+        tailscale/auth-keys/t3-code: 90d
+    serviceMonitor:
+      interval: 5m
+      scrapeTimeout: 1m
+    networkPolicy:
+      enabled: true
+      from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
