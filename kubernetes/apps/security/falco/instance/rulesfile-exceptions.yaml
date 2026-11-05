@@ -7,6 +7,8 @@ spec:
   # Lower values load first, so this must stay above falco-rules (50).
   priority: 60
   inlineRules:
+    # Armbian's ramlog postrotate job runs on the RK1 host (not in a container)
+    # and truncates /var/log, which the stock log-clearing rule would flag.
     - macro: allowed_clear_log_files
       override:
         condition: replace
@@ -18,6 +20,8 @@ spec:
         and user.uid = 0
         and container.id = "host"
         and fd.directory = "/var/log")
+    # kube-vip opens a packet socket to send gratuitous ARP for the control-plane
+    # VIP, which is how it fails over between nodes.
     - rule: Packet socket created in container
       exceptions:
         - name: kube_vip_arp
