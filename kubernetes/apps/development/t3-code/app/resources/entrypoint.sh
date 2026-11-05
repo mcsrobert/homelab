@@ -13,4 +13,6 @@ if [ -f "$repo/mise.toml" ]; then
   (cd "$repo" && mise install && mise run setup && echo "mise install and setup finished" || echo "warning: mise install or setup failed" >&2) &
 fi
 
-exec t3 serve "$HOME/workspace"
+# `t3 serve` prints an admin pairing token and QR code to stdout on startup.
+# Keep that output out of container logs; stderr remains available for errors.
+exec t3 serve "$HOME/workspace" > /dev/null
