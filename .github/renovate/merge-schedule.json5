@@ -14,8 +14,16 @@
       ],
       automerge: true,
       automergeSchedule: ['every weekday after 09:00 and before 18:00'],
-      schedule: ['every weekday after 20:00 and before 22:00'],
+      schedule: ['after 20:00 and before 22:00'],
       addLabels: ['renovate/automerge'],
     },
+    {
+      description: 'Only schedule frequent releases once a week',
+      matchPackageNames: [
+        'renovate/renovate',
+        'renovatebot/pre-commit-hooks',
+      ],
+      schedule: ['on sunday after 20:00 and before 22:00'],
+    }
   ]
 }
