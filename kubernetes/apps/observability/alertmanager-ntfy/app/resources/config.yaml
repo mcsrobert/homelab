@@ -40,6 +40,15 @@ ntfy:
       headers:
         X-Click: |-
           {{ `{{ .GeneratorURL }}` }}
+        X-Actions: |-
+          {{ `{{- if eq .Status "firing" -}}
+          view, Triage in T3, ` }}{{ .T3_TRIAGE_URL }}{{ `?fingerprint={{ urlquery .Fingerprint -}}
+          &startsAt={{ urlquery (.StartsAt.Format "2006-01-02T15:04:05Z07:00") -}}
+          &summary={{ urlquery (index .Annotations "summary") -}}
+          {{- range $key, $value := .Labels -}}
+          &label.{{ urlquery $key }}={{ urlquery $value -}}
+          {{- end -}}
+          {{- end -}}` }}
   # Whether to forward alerts asynchronously. When enabled, a 202 status code is
   # returned immediately. When disabled, forwarding errors result in a 5xx status
   # code.
