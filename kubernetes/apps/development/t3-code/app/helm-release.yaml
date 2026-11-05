@@ -55,6 +55,12 @@ spec:
                   secretKeyRef:
                     name: t3-code-github
                     key: GH_TOKEN
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 1Gi
             securityContext: &runtimeSecurity
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -111,7 +117,7 @@ spec:
                       - http://127.0.0.1:3773/.well-known/t3/environment
                   periodSeconds: 10
                   timeoutSeconds: 10
-                  failureThreshold: 12
+                  failureThreshold: 30
               liveness: &t3Probe
                 enabled: true
                 custom: true
