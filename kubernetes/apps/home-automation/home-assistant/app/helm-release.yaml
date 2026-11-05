@@ -56,6 +56,20 @@ spec:
             image:
               repository: causticlab/hass-configurator-docker
               tag: 0.6.0@sha256:06f064f1b4a5b17d8095e8565ae334267c4af9c6eaae19b4da536959ea6498b8
+            env:
+              GH_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: hass-configurator-git-auth
+                    key: GH_TOKEN
+              GIT_TERMINAL_PROMPT: "0"
+              GIT_CONFIG_COUNT: "3"
+              GIT_CONFIG_KEY_0: credential.https://github.com.helper
+              GIT_CONFIG_VALUE_0: '!f() { test "$1" = get && test -n "$GH_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f'
+              GIT_CONFIG_KEY_1: user.name
+              GIT_CONFIG_VALUE_1: Maurice Robert
+              GIT_CONFIG_KEY_2: user.email
+              GIT_CONFIG_VALUE_2: 42997116+mcsrobert@users.noreply.github.com
             resources:
               requests:
                 cpu: 5m
@@ -86,9 +100,17 @@ spec:
               - path: /config
       tmp:
         type: emptyDir
+        sizeLimit: 1Gi
         advancedMounts:
           home-assistant:
             home-assistant:
+              - path: /tmp
+      hass-configurator-tmp:
+        type: emptyDir
+        sizeLimit: 256Mi
+        advancedMounts:
+          home-assistant:
+            hass-configurator:
               - path: /tmp
     service:
       home-assistant:
