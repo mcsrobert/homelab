@@ -11,5 +11,8 @@ configMapGenerator:
       - ./resources/entrypoint.sh
       - ./resources/init.sh
       - ./resources/t3-path.sh
+      - ./resources/triage.mjs
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

@@ -135,6 +135,43 @@ spec:
               limits:
                 memory: 4Gi
             securityContext: *runtimeSecurity
+          triage:
+            image: *runtimeImage
+            command:
+              - node
+              - /opt/t3-code/triage.mjs
+            env:
+              TZ: ${TIME_ZONE}
+              HOME: *homePath
+              PATH: /home/node/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+              TRIAGE_PORT: "3780"
+              TRIAGE_PROVIDER: claudeAgent
+              TRIAGE_MODEL: claude-opus-5-5
+            probes:
+              liveness: &triageProbe
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - curl
+                      - -fsS
+                      - -o
+                      - /dev/null
+                      - --max-time
+                      - "5"
+                      - http://127.0.0.1:3780/triage/healthz
+                  periodSeconds: 30
+                  timeoutSeconds: 6
+                  failureThreshold: 3
+              readiness: *triageProbe
+            resources:
+              requests:
+                cpu: 5m
+                memory: 64Mi
+              limits:
+                memory: 512Mi
+            securityContext: *runtimeSecurity
           tailscale:
             image:
               repository: ghcr.io/tailscale/tailscale
@@ -485,7 +522,10 @@ spec:
               "TCP": {"443": {"HTTPS": true}},
               "Web": {
                 "$${TS_CERT_DOMAIN}:443": {
-                  "Handlers": {"/": {"Proxy": "http://127.0.0.1:3773"}}
+                  "Handlers": {
+                    "/": {"Proxy": "http://127.0.0.1:3773"},
+                    "/triage": {"Proxy": "http://127.0.0.1:3780/triage"}
+                  }
                 }
               }
             }
@@ -501,6 +541,8 @@ spec:
               - path: *homePath
             install:
               - path: *homePath
+            triage:
+              - path: *homePath
       entrypoint:
         type: configMap
         name: t3-code-entrypoint
@@ -510,6 +552,9 @@ spec:
               - path: /opt/t3-code
                 readOnly: true
             install:
+              - path: /opt/t3-code
+                readOnly: true
+            triage:
               - path: /opt/t3-code
                 readOnly: true
       login-path:
@@ -529,6 +574,8 @@ spec:
             t3-code:
               - path: /tmp
             install:
+              - path: /tmp
+            triage:
               - path: /tmp
       tailscale-state:
         type: persistentVolumeClaim
