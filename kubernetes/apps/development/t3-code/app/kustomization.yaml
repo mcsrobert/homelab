@@ -10,5 +10,6 @@ configMapGenerator:
     files:
       - ./resources/entrypoint.sh
       - ./resources/init.sh
+      - ./resources/t3-path.sh
 generatorOptions:
   disableNameSuffixHash: true

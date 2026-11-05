@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 
+. /opt/t3-code/t3-path.sh
+
 # renovate: datasource=github-releases depName=pingdotgg/t3code
 T3CODE_VERSION=v0.1.6
 # renovate: datasource=github-releases depName=jdx/mise
