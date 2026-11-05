@@ -10,3 +10,4 @@ resources:
   - ./prometheus-operator-crds/ks.yaml
   - ./victoria-logs/ks.yaml
   - ./victoria-metrics/ks.yaml
+  - ./vmauth-readonly/ks.yaml
