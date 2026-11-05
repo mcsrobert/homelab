@@ -18,6 +18,12 @@ spec:
               value: /api/v2/alerts
             - name: WEBUI_URL
               value: http://falcosidekick-ui:2802
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
 ---
 apiVersion: instance.falcosecurity.dev/v1alpha1
 kind: Component
@@ -37,6 +43,12 @@ spec:
                 secretKeyRef:
                   name: falcosidekick-ui-auth
                   key: user
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
 ---
 apiVersion: instance.falcosecurity.dev/v1alpha1
 kind: Component
