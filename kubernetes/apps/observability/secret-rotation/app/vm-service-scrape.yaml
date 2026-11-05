@@ -1,0 +1,13 @@
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: secret-rotation
+spec:
+  selector:
+    matchLabels:
+      app: secret-rotation
+  endpoints:
+    - port: metrics
+      interval: 5m
+      scrapeTimeout: 1m

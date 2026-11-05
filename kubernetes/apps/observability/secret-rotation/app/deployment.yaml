@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secret-rotation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secret-rotation
+  template:
+    metadata:
+      labels:
+        app: secret-rotation
+    spec:
+      serviceAccountName: secret-rotation
+      containers:
+        - name: exporter
+          image: docker.io/library/node:26.13.0-trixie-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0f60368072
+          command: ["node", "/app/exporter.js"]
+          env:
+            - name: BAO_ADDR
+              value: "https://bao.${CLUSTER_DOMAIN}"
+          ports:
+            - name: metrics
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - "ALL"
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+      volumes:
+        - name: code
+          configMap:
+            name: secret-rotation-code
