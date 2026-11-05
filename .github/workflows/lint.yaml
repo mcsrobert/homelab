@@ -13,7 +13,7 @@ env:
 jobs:
 
   changes:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       ansible: ${{ steps.filter.outputs.ansible }}
       markdown: ${{ steps.filter.outputs.markdown }}
@@ -55,7 +55,7 @@ jobs:
   ansible-lint:
     needs: changes
     if: ${{ needs.changes.outputs.ansible == 'true' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
 
       - name: Checkout
@@ -71,7 +71,7 @@ jobs:
   markdownlint:
     needs: changes
     if: ${{ needs.changes.outputs.markdown == 'true' || needs.changes.outputs.markdown_config == 'true' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
 
       - name: Checkout
@@ -88,7 +88,7 @@ jobs:
   yamllint:
     needs: changes
     if: ${{ needs.changes.outputs.yaml == 'true' || needs.changes.outputs.yaml_config == 'true' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
 
       - name: Checkout
