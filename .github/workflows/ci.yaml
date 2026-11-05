@@ -32,7 +32,7 @@ jobs:
 
   ci:
     if: ${{ always() }}
-    needs: [lint, flate, security]
+    needs: ["lint", "flate", "security"]
     runs-on: ubuntu-26.04
     steps:
       - name: Check results

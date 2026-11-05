@@ -1,5 +1,5 @@
 ---
-default_install_hook_types: [pre-commit, pre-push, commit-msg]
+default_install_hook_types: ["pre-commit", "pre-push", "commit-msg"]
 default_language_version:
   node: lts
 
@@ -54,7 +54,7 @@ repos:
         entry: env -u GIT_DIR ansible-lint
         args:
           - ansible/
-        stages: [pre-push, manual]
+        stages: ["pre-push", "manual"]
 
   - repo: local
     hooks:
@@ -76,11 +76,11 @@ repos:
         language: system
         files: ^kubernetes/
         pass_filenames: false
-        stages: [pre-push, manual]
+        stages: ["pre-push", "manual"]
 
       - id: conventional-commit
         name: conventional commit with scope
         entry: '\A(Merge |Revert "|(fixup|squash)! |(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(!?\([A-Za-z0-9._/-]+\)!?): \S)'
         language: pygrep
-        args: [--multiline, --negate]
-        stages: [commit-msg]
+        args: ["--multiline", "--negate"]
+        stages: ["commit-msg"]
