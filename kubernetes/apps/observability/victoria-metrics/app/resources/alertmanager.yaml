@@ -17,6 +17,11 @@ route:
     - receiver: blackhole
       matchers:
         - alertname = "InfoInhibitor"
+    - receiver: ntfy
+      matchers:
+        - source = "falco"
+      group_by:
+        - rule
 receivers:
   - name: ntfy
     webhook_configs:
