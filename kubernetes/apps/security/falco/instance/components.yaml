@@ -37,11 +37,12 @@ spec:
                 secretKeyRef:
                   name: falcosidekick-ui-auth
                   key: user
-# ---
-# apiVersion: instance.falcosecurity.dev/v1alpha1
-# kind: Component
-# metadata:
-#   name: falco-k8s-metacollector
-# spec:
-#   component:
-#     type: metacollector
+---
+apiVersion: instance.falcosecurity.dev/v1alpha1
+kind: Component
+metadata:
+  name: metacollector
+spec:
+  component:
+    type: metacollector
+  replicas: 1
