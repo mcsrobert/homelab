@@ -7,6 +7,8 @@ spec:
   # Lower values load first, so this must stay above falco-rules (50).
   priority: 60
   inlineRules:
+    # Armbian's ramlog postrotate job runs on the RK1 host (not in a container)
+    # and truncates /var/log, which the stock log-clearing rule would flag.
     - macro: allowed_clear_log_files
       override:
         condition: replace
@@ -18,6 +20,8 @@ spec:
         and user.uid = 0
         and container.id = "host"
         and fd.directory = "/var/log")
+    # kube-vip opens a packet socket to send gratuitous ARP for the control-plane
+    # VIP, which is how it fails over between nodes.
     - rule: Packet socket created in container
       exceptions:
         - name: kube_vip_arp
@@ -40,3 +44,16 @@ spec:
               - 1544
       override:
         exceptions: append
+    # Expected Kubernetes API access, allowlisted per workload:
+    # - Homepage (default) reads pods, nodes, ingresses and HTTPRoutes for its widgets.
+    # - MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
+    # - Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
+    # - Longhorn snapshot recurring-job pods (longhorn-system) create snapshot resources every 15m.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "ghcr.io/gethomepage/homepage" and k8s.ns.name = "default")
+        or (container.image.repository = "quay.io/mongodb/mongodb-agent" and k8s.ns.name = "default" and proc.name = "readinessprobe")
+        or (container.name = "kube-rbac-proxy" and k8s.ns.name = "database")
+        or (container.name = "snapshot" and k8s.ns.name = "longhorn-system")
