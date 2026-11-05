@@ -9,7 +9,10 @@ spec:
   chartRef:
     kind: OCIRepository
     name: falco-operator
-  values: {} # https://github.com/falcosecurity/charts/blob/master/charts/falco-operator/values.yaml
+  values: # https://github.com/falcosecurity/charts/blob/master/charts/falco-operator/values.yaml
+    # Inline Rulesfiles such as falco-rules-exceptions declare no requirements,
+    # so enforce mode blocks them and their exceptions never load.
+    enforceRequirements: false
     # tty: true
     # collectors:
     #   containerEngine:
