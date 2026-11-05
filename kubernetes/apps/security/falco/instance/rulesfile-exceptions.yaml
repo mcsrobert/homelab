@@ -44,3 +44,16 @@ spec:
               - 1544
       override:
         exceptions: append
+    # Expected Kubernetes API access, allowlisted per workload:
+    # - Homepage (default) reads pods, nodes, ingresses and HTTPRoutes for its widgets.
+    # - MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
+    # - Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
+    # - Longhorn snapshot recurring-job pods (longhorn-system) create snapshot resources every 15m.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "ghcr.io/gethomepage/homepage" and k8s.ns.name = "default")
+        or (container.image.repository = "quay.io/mongodb/mongodb-agent" and k8s.ns.name = "default" and proc.name = "readinessprobe")
+        or (container.name = "kube-rbac-proxy" and k8s.ns.name = "database")
+        or (container.name = "snapshot" and k8s.ns.name = "longhorn-system")
