@@ -22,7 +22,7 @@ pre-commit = "4.7.0"
 python = "3.14.10"
 sops = "3.13.3"
 uv = "0.13.6"
-yq = "4.54.1"
+yq = "4.54.2"
 zizmor = "1.32.0"
 
 [tasks.setup]
