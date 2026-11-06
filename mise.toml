@@ -46,6 +46,23 @@ uv pip install --python "$(mise where ansible)/ansible/bin/python" --requirement
 ansible-galaxy collection install --requirements-file requirements.yml
 """
 
+# Arguments after `mise run <task> --`, such as --limit or --check, are passed
+# on to ansible-playbook.
+[tasks.ansible-site]
+description = "Configure the nodes and install k3s, one server at a time"
+dir = "{{ config_root }}/ansible"
+run = "ansible-playbook playbooks/site.yaml --forks=1"
+
+[tasks.ansible-upgrade-os]
+description = "Upgrade OS packages one node at a time, rebooting for a new kernel"
+dir = "{{ config_root }}/ansible"
+run = "ansible-playbook playbooks/apt_upgrade.yaml"
+
+[tasks.ansible-upgrade-k3s]
+description = "Upgrade k3s, one server at a time"
+dir = "{{ config_root }}/ansible"
+run = "ansible-playbook k3s.orchestration.upgrade"
+
 [tasks.install-helm-diff-plugin]
 description = "Install or upgrade Helm diff plugin"
 run = """

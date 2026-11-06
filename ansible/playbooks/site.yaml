@@ -8,7 +8,6 @@
 - name: Install RK3588 drivers
   import_playbook: ./rk3588_drivers.yaml
 
-# Before k3s: servers 2 and 3 join through the kube-vip address.
 - name: Configure kube-vip
   import_playbook: ./kube-vip.yaml
 
