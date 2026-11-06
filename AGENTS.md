@@ -164,7 +164,8 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
 ## Git and pull requests
 
 - Branch from the latest `origin/main` (`git fetch origin` first), not the
-  local `main`. Re-fetch before pushing and rebase if `origin/main` has moved.
+  local `main`. Whenever you update a PR, re-fetch and rebase the branch onto
+  `origin/main` before pushing.
 - Commit messages are conventional commits with a scope, matching the
   history, such as `fix(habitica-mongodb): use double quotes` or
   `feat(kyverno): audit pods for images without tag and digest`. The scope is
