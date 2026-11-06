@@ -130,8 +130,8 @@ structure. Good references:
   `ClusterSecretStore` `openbao`. Never commit a plain `Secret`.
 - SOPS is only for what has to exist before External Secrets runs:
   `cluster-secrets` and the OpenBao bootstrap secret.
-- You cannot write to OpenBao. When a change needs a new secret, tell the user
-  the OpenBao path and keys to create.
+- You cannot write to OpenBao. When a change needs a new secret, list the
+  OpenBao path and keys under "Manual steps" in the PR.
 
 ### Exposing and integrating apps
 
@@ -171,10 +171,9 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
   usually the app. The `commit-msg` hook rejects anything else.
 - Squash minor follow-up edits into the commit they amend. Distinct changes,
   such as a fix and a small feature, can stay separate commits in one PR.
-- Fill in the PR template. Under "Upstream docs", link the upstream
-  documentation for any application behavior the PR configures or changes,
-  such as an OIDC integration, a chart value or a feature flag, or write
-  "n/a".
+- Fill in every section of the PR template. Under "Upstream docs", link the
+  upstream documentation for any application behavior the PR configures or
+  changes, such as an OIDC integration, a chart value or a feature flag.
 - Label the PR with the existing labels that match: `bug` for fixes,
   `enhancement` for features. The labeler workflow adds `ci`, `documentation`,
   `security` and `observability` from the changed paths. Check
