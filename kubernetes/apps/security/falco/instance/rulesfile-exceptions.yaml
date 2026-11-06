@@ -48,7 +48,11 @@ spec:
     # - Homepage (default) reads pods, nodes, ingresses and HTTPRoutes for its widgets.
     # - MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
     # - Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
-    # - Longhorn snapshot recurring-job pods (longhorn-system) create snapshot resources every 15m.
+    # - Longhorn snapshot and backup recurring-job pods (longhorn-system) create snapshot and backup resources.
+    # - CloudNativePG operator (database) reconciles Cluster resources.
+    # - VictoriaMetrics operator config-init and config-reloader sidecars (observability) read config secrets.
+    # - Victoria Logs collector vlagent (observability) watches pods to label log streams.
+    # - T3 Code (development) runs read-only kubectl and flux commands for troubleshooting.
     - macro: k8s_containers
       override:
         condition: append
@@ -56,4 +60,8 @@ spec:
         or (container.image.repository = "ghcr.io/gethomepage/homepage" and k8s.ns.name = "default")
         or (container.image.repository = "quay.io/mongodb/mongodb-agent" and k8s.ns.name = "default" and proc.name = "readinessprobe")
         or (container.name = "kube-rbac-proxy" and k8s.ns.name = "database")
-        or (container.name = "snapshot" and k8s.ns.name = "longhorn-system")
+        or (container.name in ("snapshot", "backup") and k8s.ns.name = "longhorn-system")
+        or (container.image.repository = "ghcr.io/cloudnative-pg/cloudnative-pg" and k8s.ns.name = "database" and container.name = "manager")
+        or (container.image.repository = "docker.io/victoriametrics/operator" and k8s.ns.name = "observability" and container.name in ("config-init", "config-reloader"))
+        or (container.image.repository = "docker.io/victoriametrics/vlagent" and k8s.ns.name = "observability")
+        or (container.name = "t3-code" and k8s.ns.name = "development" and proc.name in ("kubectl", "flux"))
