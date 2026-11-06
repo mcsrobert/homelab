@@ -5,7 +5,13 @@ kind: Kustomization
 resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
+  - ./prometheus-rule.yaml
 configMapGenerator:
+  - name: home-assistant-config-reconciler
+    files:
+      - gitleaks.toml=./resources/reconciler/gitleaks.toml
+      - pre-commit=./resources/reconciler/pre-commit
+      - reconcile.py=./resources/reconciler/reconcile.py
   - name: hass-configurator-config-template
     files:
       - settings.conf=./resources/hass-configurator-settings.json

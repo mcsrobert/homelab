@@ -5,3 +5,5 @@ nameReference:
     fieldSpecs:
       - path: spec/target/template/templateFrom/configMap/name
         kind: ExternalSecret
+      - path: spec/values/persistence/config-reconciler-code/name
+        kind: HelmRelease

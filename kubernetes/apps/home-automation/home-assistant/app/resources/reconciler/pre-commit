@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+exec /scanner/gitleaks git --pre-commit --staged --redact --no-banner --ignore-gitleaks-allow --gitleaks-ignore-path /dev/null --config /opt/reconciler/gitleaks.toml

@@ -24,6 +24,24 @@ spec:
             fsGroupChangePolicy: OnRootMismatch
             seccompProfile:
               type: RuntimeDefault
+        initContainers:
+          config-scanner:
+            image:
+              repository: ghcr.io/gitleaks/gitleaks
+              tag: v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+            command: ["/bin/sh", "-ec"]
+            args: ['cp "$(command -v gitleaks)" /scanner/gitleaks']
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: [ALL]
         containers:
           home-assistant:
             image:
@@ -53,7 +71,7 @@ spec:
                 drop:
                   - ALL
           hass-configurator:
-            image:
+            image: &configuratorImage
               repository: causticlab/hass-configurator-docker
               tag: 0.6.0@sha256:06f064f1b4a5b17d8095e8565ae334267c4af9c6eaae19b4da536959ea6498b8
             env:
@@ -82,6 +100,37 @@ spec:
               capabilities:
                 drop:
                   - ALL
+          config-reconciler:
+            image: *configuratorImage
+            command: ["python3", "/opt/reconciler/reconcile.py"]
+            env:
+              MODE: observe
+              POLL_SECONDS: "60"
+              SETTLE_SECONDS: "10"
+              GH_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: hass-configurator-git-auth
+                    key: GH_TOKEN
+              HOME: /tmp
+            probes:
+              liveness: &reconcilerProbe
+                enabled: true
+                type: HTTP
+                path: /healthz
+                port: 9090
+              readiness: *reconcilerProbe
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: [ALL]
     persistence:
       home-assistant-config:
         existingClaim: home-assistant-config
@@ -89,8 +138,46 @@ spec:
           home-assistant:
             home-assistant:
               - path: /config
+            config-reconciler:
+              - path: /live
+                # Remove readOnly only in a reviewed deploy-mode rollout.
+                readOnly: true
             hass-configurator:
               - path: /home-assistant-config
+      config-reconciler-state:
+        type: persistentVolumeClaim
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        advancedMounts:
+          home-assistant:
+            config-reconciler:
+              - path: /state
+      config-reconciler-code:
+        type: configMap
+        name: home-assistant-config-reconciler
+        defaultMode: 365
+        advancedMounts:
+          home-assistant:
+            config-reconciler:
+              - path: /opt/reconciler
+      config-scanner:
+        type: emptyDir
+        sizeLimit: 64Mi
+        advancedMounts:
+          home-assistant:
+            config-scanner:
+              - path: /scanner
+            config-reconciler:
+              - path: /scanner
+                readOnly: true
+      config-reconciler-tmp:
+        type: emptyDir
+        sizeLimit: 64Mi
+        advancedMounts:
+          home-assistant:
+            config-reconciler:
+              - path: /tmp
       hass-configurator-config:
         type: secret
         name: hass-configurator-config
@@ -119,11 +206,22 @@ spec:
           http:
             port: 8123
             protocol: HTTP
+      config-reconciler:
+        controller: home-assistant
+        ports:
+          metrics:
+            port: 9090
       configurator:
         ports:
           http:
             port: 3218
             protocol: HTTP
+    serviceMonitor:
+      config-reconciler:
+        service:
+          identifier: config-reconciler
+        endpoints:
+          - port: metrics
     route:
       home-assistant:
         annotations:

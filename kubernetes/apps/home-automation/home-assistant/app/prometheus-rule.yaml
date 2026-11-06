@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: home-assistant-config-reconciler
+spec:
+  groups:
+    - name: home-assistant.config
+      rules:
+        - alert: HomeAssistantConfigReconcileFailed
+          expr: |
+            ha_config_state{reason!~"observing|ready|pending_review|deployment_disabled"} == 1
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Home Assistant configuration reconciliation is blocked
+            description: 'Reconciliation requires attention: {{ $labels.reason }}. Live files are preserved.'
+        - alert: HomeAssistantConfigPendingReview
+          expr: ha_config_pending_review == 1
+          for: 24h
+          labels:
+            severity: info
+          annotations:
+            summary: Home Assistant configuration edits await review
+            description: An open capture PR blocks deployment of approved configuration.
+        - alert: HomeAssistantConfigReconcilerUnavailable
+          expr: up{service="home-assistant-config-reconciler"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Home Assistant configuration reconciler is unavailable
+            description: Configuration observation and reconciliation are not running.
