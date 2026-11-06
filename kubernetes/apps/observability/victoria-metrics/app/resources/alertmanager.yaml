@@ -30,17 +30,17 @@ route:
       matchers:
         - severity = "critical"
 receivers:
-  # ntfy formats the Alertmanager payload itself with its built-in template.
-  # max_alerts keeps the rendered message under ntfy's 4096 byte limit, which
-  # ntfy answers with HTTP 400 when exceeded.
-  # https://ntfy.sh/docs/publish/#pre-defined-templates
+  # The in-cluster ntfy server formats the Alertmanager payload itself with its
+  # built-in template. max_alerts keeps the rendered message under ntfy's 4096
+  # byte limit, which ntfy answers with HTTP 400 when exceeded.
+  # https://docs.ntfy.sh/publish/#pre-defined-templates
   - name: ntfy
     webhook_configs:
-      - url: "https://ntfy.sh/{{ .NTFY_TOPIC }}?template=alertmanager"
+      - url: "http://ntfy.observability.svc.cluster.local/{{ .NTFY_TOPIC }}?template=alertmanager"
         max_alerts: 2
   - name: ntfy-urgent
     webhook_configs:
-      - url: "https://ntfy.sh/{{ .NTFY_TOPIC }}?template=alertmanager&priority=urgent"
+      - url: "http://ntfy.observability.svc.cluster.local/{{ .NTFY_TOPIC }}?template=alertmanager&priority=urgent"
         max_alerts: 2
   - name: backup
     email_configs:

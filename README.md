@@ -87,7 +87,7 @@ options, as long as they offer enough features.
   and store logs. Lighter alternative to Loki.
 - [Grafana](https://grafana.com) - UI to explore data and dashboards
 - [Alert Manager](https://prometheus.io/docs/alerting/latest/alertmanager/) -
-  Group, inhibit and silence alerts. Sends notifications to
+  Group, inhibit and silence alerts. Sends notifications to a self-hosted
   [ntfy](https://ntfy.sh).
 
 ### Security
@@ -125,7 +125,6 @@ prefer EU-based cloud services.
 | [Tailscale](https://tailscale.com/) | VPN without port forwarding | Free | |
 | [GitHub](https://github.com/) | Hosting of this repository + CI | Free | |
 | [Simple Mail Service](https://simplemailservice.eu) | SMTP | Free | |
-| [ntfy.sh](https://ntfy.sh) | Notifications | Free | |
 | [healthchecks.io](https://healthchecks.io) | Heartbeat monitor | Free | |
 
 ## Acknowledgements

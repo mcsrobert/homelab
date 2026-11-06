@@ -6,6 +6,7 @@ resources:
   - ./namespace.yaml
   # Apps
   - ./grafana/ks.yaml
+  - ./ntfy/ks.yaml
   - ./prometheus-operator-crds/ks.yaml
   - ./victoria-logs/ks.yaml
   - ./victoria-metrics/ks.yaml
