@@ -94,8 +94,13 @@ spec:
         addRoutersLabels: true
         addServicesLabels: true
         disableAPICheck: true  # required for flux-local
+        # Dedicated metrics Service: the metrics port is not exposed on the traefik Service
+        service:
+          enabled: true
         serviceMonitor:
           enabled: true
+          # Name the job after the chart's app label (traefik), not the metrics Service (traefik-metrics)
+          jobLabel: app.kubernetes.io/name
         prometheusRule:
           enabled: true
           rules:
