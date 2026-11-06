@@ -36,6 +36,14 @@ k3s_cluster:
       kube-controller-manager-arg:
         - node-cidr-mask-size-ipv6=112
 
+      # The policy file is installed by playbooks/configure.yaml.
+      kube-apiserver-arg:
+        - audit-policy-file=/etc/rancher/k3s/audit-policy.yaml
+        - audit-log-path=/var/lib/rancher/k3s/server/logs/audit.log
+        - audit-log-maxage=14
+        - audit-log-maxbackup=5
+        - audit-log-maxsize=50
+
       disable:
         - servicelb
         - traefik
