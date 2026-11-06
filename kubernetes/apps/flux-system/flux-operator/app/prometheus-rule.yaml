@@ -8,9 +8,26 @@ spec:
   groups:
     - name: flux.operator
       rules:
-        # Reconciliation failures are reported by the Flux notification controller (see
-        # notifications/). The operator emits the ResourceSet and FluxInstance events, so a
-        # dead operator is the one failure that stays silent there.
+        # Reconciliation failures are reported as they happen by the Flux notification controller
+        # (see notifications/). This catches what events miss: a resource that stays not Ready
+        # without emitting a new error event.
+        # flux_resource_info is exported by the Flux Operator for every Flux resource and is only
+        # refreshed with the FluxReport (every 5 minutes by default).
+        - alert: FluxResourceNotReady
+          expr: |
+            max by (kind, exported_namespace, name) (
+              flux_resource_info{ready!="True", suspended!="True"}
+            )
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Flux {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} is not Ready
+            description: >-
+              {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} has not been
+              Ready for an hour. Run `flux get all -A --status-selector ready=false` or describe
+              the resource for the reason.
         - alert: FluxOperatorDown
           expr: absent(up{job="flux-operator", namespace="flux-system"} == 1)
           for: 15m
@@ -20,6 +37,6 @@ spec:
             summary: >-
               Flux Operator metrics are missing
             description: >-
-              The Flux Operator has not been scraped for 15 minutes, so ResourceSet and FluxInstance
-              failures are no longer reported. Flux itself keeps reconciling as long as its
-              controllers run.
+              The Flux Operator has not been scraped for 15 minutes, so FluxResourceNotReady cannot
+              fire and ResourceSet and FluxInstance events are no longer emitted. Flux itself keeps
+              reconciling as long as its controllers run.
