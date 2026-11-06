@@ -12,7 +12,7 @@ GH_VERSION=v2.103.3
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 CLAUDE_VERSION=2.1.311
 # renovate: datasource=npm depName=@openai/codex
-CODEX_VERSION=0.166.0
+CODEX_VERSION=0.167.0
 
 # Stage T3 before switching the executable to the pinned version.
 t3_version=$(printf '%s' "$T3CODE_VERSION" | sed 's/^v//')
