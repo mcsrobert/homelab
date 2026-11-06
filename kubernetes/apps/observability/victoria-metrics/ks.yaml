@@ -7,7 +7,6 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: alertmanager-ntfy
     - name: external-secrets
     - name: gateway-api-crds
   path: /kubernetes/apps/observability/victoria-metrics/app

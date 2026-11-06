@@ -22,14 +22,26 @@ route:
         - source = "falco"
       group_by:
         - rule
+      routes:
+        - receiver: ntfy-urgent
+          matchers:
+            - severity = "critical"
+    - receiver: ntfy-urgent
+      matchers:
+        - severity = "critical"
 receivers:
+  # ntfy formats the Alertmanager payload itself with its built-in template.
+  # max_alerts keeps the rendered message under ntfy's 4096 byte limit, which
+  # ntfy answers with HTTP 400 when exceeded.
+  # https://ntfy.sh/docs/publish/#pre-defined-templates
   - name: ntfy
     webhook_configs:
-      - url: http://alertmanager-ntfy:8000/hook
-        http_config:
-          basic_auth:
-            username: "{{ .ALERTMANAGER_NTFY_USERNAME }}"
-            password: "{{ .ALERTMANAGER_NTFY_PASSWORD }}"
+      - url: "https://ntfy.sh/{{ .NTFY_TOPIC }}?template=alertmanager"
+        max_alerts: 2
+  - name: ntfy-urgent
+    webhook_configs:
+      - url: "https://ntfy.sh/{{ .NTFY_TOPIC }}?template=alertmanager&priority=urgent"
+        max_alerts: 2
   - name: backup
     email_configs:
       - to: ${ADMIN_EMAIL}
