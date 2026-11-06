@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
+  - ./persistent-volume.yaml
 configMapGenerator:
   - name: hass-configurator-config-template
     files:

@@ -65,7 +65,13 @@ spec:
                   - ALL
     persistence:
       data:
-        existingClaim: vaultwarden-data
+        type: persistentVolumeClaim
+        forceRename: &dataVolume vaultwarden-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 1Gi
+        volumeName: *dataVolume
     service:
       vaultwarden:
         ports:

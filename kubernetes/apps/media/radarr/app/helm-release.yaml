@@ -62,7 +62,13 @@ spec:
                   - ALL
     persistence:
       config:
-        existingClaim: radarr-config
+        type: persistentVolumeClaim
+        forceRename: &configVolume radarr-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 4Gi
+        volumeName: *configVolume
       media:
         type: nfs
         server: ${NAS_IP}

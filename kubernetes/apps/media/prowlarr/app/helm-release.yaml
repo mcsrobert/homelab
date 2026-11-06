@@ -61,7 +61,13 @@ spec:
                   - ALL
     persistence:
       config:
-        existingClaim: prowlarr-config
+        type: persistentVolumeClaim
+        forceRename: &configVolume prowlarr-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 1Gi
+        volumeName: *configVolume
       tmp:
         type: emptyDir
     service:

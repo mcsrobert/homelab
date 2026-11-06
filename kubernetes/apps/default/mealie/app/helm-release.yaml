@@ -74,7 +74,13 @@ spec:
                   - ALL
     persistence:
       data:
-        existingClaim: mealie-data
+        type: persistentVolumeClaim
+        forceRename: &dataVolume mealie-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 4Gi
+        volumeName: *dataVolume
         globalMounts:
           - path: /app/data
     service:
