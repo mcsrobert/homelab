@@ -111,6 +111,28 @@ spec:
                 token_policies                   = ["eso-readonly"]
               }
             }
+            request "write-secret-rotation-policy" {
+              operation = "update"
+              path      = "sys/policies/acl/secret-rotation"
+              data = {
+                policy = <<EOT
+                  path "homelab/metadata/*" { capabilities = ["read"] }
+                EOT
+              }
+            }
+
+            request "map-secret-rotation-role" {
+              operation = "update"
+              path      = "auth/kubernetes/role/secret-rotation"
+              data = {
+                bound_service_account_names      = ["secret-rotation"]
+                bound_service_account_namespaces = ["observability"]
+                token_ttl                        = "5m"
+                token_max_ttl                    = "5m"
+                token_policies                   = ["secret-rotation"]
+              }
+            }
+
             request "enable-ldap-auth" {
               operation = "update"
               path      = "sys/auth/ldap"
@@ -204,6 +226,12 @@ spec:
                 podSelector:
                   matchLabels:
                     app.kubernetes.io/name: vmagent
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: observability
+                podSelector:
+                  matchLabels:
+                    app: secret-rotation
               - ipBlock:
                   cidr: ${LAN_CIDR}
               - ipBlock:

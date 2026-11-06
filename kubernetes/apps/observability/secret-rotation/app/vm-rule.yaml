@@ -1,0 +1,32 @@
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: secret-rotation
+spec:
+  groups:
+    - name: secret-rotation
+      rules:
+        - alert: SecretRotationDue
+          expr: time() > openbao_secret_rotation_due_timestamp_seconds
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Secret rotation is due for {{ $labels.namespace }}/{{ $labels.externalsecret }}
+            description: OpenBao key {{ $labels.key }} has reached its configured rotation interval.
+        - alert: SecretRotationCollectionErrors
+          expr: openbao_secret_rotation_collection_errors > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Secret rotation metadata collection has errors
+            description: Check the secret-rotation exporter logs for the affected ExternalSecrets.
+        - alert: SecretRotationExporterDown
+          expr: absent(up{job="secret-rotation"}) or up{job="secret-rotation"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Secret rotation exporter is unavailable
