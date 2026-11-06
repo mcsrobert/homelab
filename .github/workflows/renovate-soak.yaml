@@ -1,22 +1,145 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Holds Renovate automerge with a pending "soak" commit status. Renovate only
+# automerges once every check is green. The soak counts from the first push
+# of the current update: a rebase adds the same lines and keeps the start
+# time, a newer version adds different lines and starts the soak again.
 name: Renovate Soak
 on:
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+  schedule:
+    - cron: "30 * * * *"
+  workflow_dispatch:
 
 permissions: {}
 
-concurrency:
-  group: soak-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
   renovate-soak:
-    if: startsWith(github.event.pull_request.head.ref, 'renovate/')
+    if: ${{ github.event_name != 'pull_request' || startsWith(github.head_ref, 'renovate/') }}
     runs-on: ubuntu-26.04
-    environment: soak-6d
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      SOAK_DAYS: 6
     steps:
-      - name: Run Soak Test
-        run: echo "Soaked at $(date)"
+      - name: Set soak status
+        shell: bash
+        run: |
+          # Hash of the lines a commit adds, which a rebase does not change. A
+          # file without a patch (binary or too large) hashes as the commit
+          # itself, so that commit never matches another one.
+          # shellcheck disable=SC2016 # $sha is a jq variable
+          fingerprint() {
+            gh api "repos/${GH_REPO}/commits/$1" --jq '[.sha as $sha | .files[] | .filename,
+              ((.patch // "+\($sha)") | split("\n")[] | select(startswith("+") and (startswith("+++") | not)))]
+              | join("\n")' | sha256sum
+          }
+
+          # Prints the time of the earliest push in the run of pushes that ends
+          # at the head and adds the same lines as the head. When no push
+          # matches, such as a head that is not in the history yet, it is now.
+          soak_start() {
+            local sha=$1 head push start i
+            local -a history
+            IFS=, read -ra history <<< "$2"
+            head=$(fingerprint "${sha}") || return 1
+            start=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            for (( i = ${#history[@]} - 1; i >= 0; i-- )); do
+              push=${history[i]%@*}
+              if [[ -z "${push}" ]] || { [[ "${push}" != "${sha}" ]] && [[ "$(fingerprint "${push}")" != "${head}" ]]; }; then
+                break
+              fi
+              start=${history[i]#*@}
+            done
+            echo "${start}"
+          }
+
+          # One line per PR: number, head, "<sha>@<time>" for every head the PR
+          # has had (oldest first), and the head's soak state and description.
+          # shellcheck disable=SC2016 # GraphQL and jq variables
+          prs=$(gh api graphql -f owner="${GH_REPO%/*}" -f name="${GH_REPO#*/}" -f query='
+            query($owner: String!, $name: String!) {
+              repository(owner: $owner, name: $name) {
+                pullRequests(states: OPEN, labels: ["renovate/automerge"], first: 100) {
+                  nodes {
+                    number
+                    createdAt
+                    headRefOid
+                    commits(last: 1) {
+                      nodes { commit { status { context(name: "soak") { state description } } } }
+                    }
+                    timelineItems(itemTypes: [HEAD_REF_FORCE_PUSHED_EVENT], last: 100) {
+                      pageInfo { hasPreviousPage }
+                      nodes {
+                        ... on HeadRefForcePushedEvent {
+                          createdAt
+                          beforeCommit { oid }
+                          afterCommit { oid }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' --jq '.data.repository.pullRequests.nodes[] | .timelineItems as $t
+              | (if ($t.nodes | length) == 0 then [[.headRefOid, .createdAt]]
+                 elif $t.pageInfo.hasPreviousPage then []
+                 else [[$t.nodes[0].beforeCommit.oid, .createdAt]] end
+                 + [$t.nodes[] | [.afterCommit.oid, .createdAt]]) as $pushes
+              | .commits.nodes[0].commit.status.context as $soak
+              | [.number, .headRefOid, ($pushes | map("\(.[0] // "")@\(.[1])") | join(",")),
+                 ($soak.state // "" | ascii_downcase), ($soak.description // "")]
+              | @tsv')
+
+          now=$(date +%s)
+          failed=0
+          fail() {
+            echo "::error::#${number}: $1"
+            failed=1
+          }
+          while IFS=$'\t' read -r number sha history state description; do
+            if [[ -z "${number}" || "${state}" == success || (-n "${PR_NUMBER}" && "${number}" != "${PR_NUMBER}") ]]; then
+              continue
+            fi
+
+            if [[ "${state}" == pending ]]; then
+              start=${description#Soaking since }
+            elif ! start=$(soak_start "${sha}" "${history}"); then
+              fail "cannot fingerprint ${sha}"
+              continue
+            fi
+            if ! started=$(date -d "${start}" +%s); then
+              fail "cannot parse soak start '${start}'"
+              continue
+            fi
+
+            if (( now >= started + SOAK_DAYS * 86400 )); then
+              new_state=success
+              new_description="Soaked for ${SOAK_DAYS} days"
+            else
+              new_state=pending
+              new_description="Soaking since ${start}"
+            fi
+
+            if [[ "${new_state} ${new_description}" != "${state} ${description}" ]]; then
+              if ! gh api "repos/${GH_REPO}/statuses/${sha}" \
+                -f state="${new_state}" -f context=soak -f description="${new_description}" > /dev/null; then
+                fail "cannot set status on ${sha}"
+                continue
+              fi
+              echo "#${number}: ${new_state}, ${new_description}"
+            fi
+          done <<< "${prs}"
+          exit "${failed}"
