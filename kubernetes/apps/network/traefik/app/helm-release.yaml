@@ -96,3 +96,39 @@ spec:
         disableAPICheck: true  # required for flux-local
         serviceMonitor:
           enabled: true
+        prometheusRule:
+          enabled: true
+          rules:
+            - alert: TraefikDown
+              expr: absent(up{job="traefik", namespace="network"} == 1)
+              for: 3m
+              labels:
+                severity: critical
+              annotations:
+                summary: >-
+                  Traefik is down
+                description: >-
+                  No Traefik replica has been scraped successfully for 3 minutes. Every
+                  HTTPRoute and ForwardAuth-protected service is likely unreachable.
+            # Traefik's `service` metric label clashes with the scrape target's `service` label
+            # and is exported as `exported_service`. Traefik itself answers 5xx when a backend
+            # has no ready endpoints, so this also catches apps that are down behind it.
+            - alert: TraefikServiceHighErrorRate
+              expr: |
+                (
+                  sum by (exported_service) (rate(traefik_service_requests_total{code=~"5.."}[10m]))
+                  /
+                  sum by (exported_service) (rate(traefik_service_requests_total[10m]))
+                  > 0.25
+                )
+                and
+                sum by (exported_service) (increase(traefik_service_requests_total{code=~"5.."}[10m])) >= 10
+              for: 10m
+              labels:
+                severity: warning
+              annotations:
+                summary: >-
+                  Traefik service {{ $labels.exported_service }} returns many 5xx responses
+                description: >-
+                  {{ $value | humanizePercentage }} of the requests to
+                  {{ $labels.exported_service }} failed with a 5xx status over the last 10 minutes.

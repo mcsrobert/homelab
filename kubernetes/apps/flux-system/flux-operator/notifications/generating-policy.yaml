@@ -46,8 +46,12 @@ spec:
               "eventSeverity": "error",
               "eventSources": [
                 {"kind": "GitRepository", "name": "*"},
+                {"kind": "OCIRepository", "name": "*"},
+                {"kind": "HelmRepository", "name": "*"},
                 {"kind": "Kustomization", "name": "*"},
-                {"kind": "HelmRelease", "name": "*"}
+                {"kind": "HelmRelease", "name": "*"},
+                {"kind": "ResourceSet", "name": "*"},
+                {"kind": "FluxInstance", "name": "*"}
               ]
             }
           }

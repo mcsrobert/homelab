@@ -232,8 +232,44 @@ spec:
     serverTelemetry:
       serviceMonitor:
         enabled: true
+      # The chart ships no default rules and renders nothing while `rules` is empty
       prometheusRules:
         enabled: true
+        rules:
+          - alert: OpenBaoDown
+            expr: absent(up{job="openbao-internal", namespace="security"} == 1)
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: >-
+                OpenBao is down
+              description: >-
+                OpenBao has not been scraped successfully for 5 minutes. It is either down or
+                refusing requests. External Secrets can no longer refresh secrets from it.
+          - alert: OpenBaoSealed
+            expr: vault_core_unsealed == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: >-
+                OpenBao is sealed
+              description: >-
+                OpenBao {{ $labels.pod }} has been sealed for 5 minutes. It should unseal itself
+                with the static seal key on start; check the logs and the openbao-secrets Secret.
+          - alert: OpenBaoAuditLogFailing
+            expr: increase(vault_audit_log_request_failure[10m]) > 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: >-
+                OpenBao is failing to write audit log entries
+              description: >-
+                OpenBao {{ $labels.pod }} failed to write {{ $value | humanize }} audit log
+                requests in the last 10 minutes. OpenBao rejects requests when no audit device
+                accepts them.
       grafanaDashboard:
         enabled: true
         extraAnnotations:
