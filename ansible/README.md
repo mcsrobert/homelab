@@ -7,13 +7,14 @@ A collection a playbooks to manage the cluster. Wraps around the amazing
 
 Ansible is installed by [mise](https://mise.jdx.dev) (see the root
 [mise.toml](../mise.toml)). Before you can run the playbooks, install the
-required collections:
+required controller-side Python dependencies and collections:
 
 ```bash
 mise run install-ansible-collections
 ```
 
-This also runs as part of `mise run setup`.
+This also runs as part of `mise run setup`. Run it again after upgrading Ansible
+to install the dependencies into the new Ansible environment.
 
 ## How to run
 
