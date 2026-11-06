@@ -39,9 +39,12 @@ description = "Generate a PBKDF2-SHA512 hash (options after --)"
 run = "uv run scripts/pbkdf2_sha512.py"
 
 [tasks.install-ansible-collections]
-description = "Install Ansible collections from requirements.yml"
+description = "Install Ansible dependencies and collections"
 dir = "{{ config_root }}/ansible"
-run = "ansible-galaxy collection install --requirements-file requirements.yml"
+run = """
+uv pip install --python "$(mise where ansible)/ansible/bin/python" --requirement requirements.txt
+ansible-galaxy collection install --requirements-file requirements.yml
+"""
 
 [tasks.install-helm-diff-plugin]
 description = "Install or upgrade Helm diff plugin"
