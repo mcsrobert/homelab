@@ -15,7 +15,7 @@ spec:
         - name: vip_arp
           value: "true"
         - name: port
-          value: "6443"
+          value: "{{ api_port }}"
         - name: vip_nodename
           valueFrom:
             fieldRef:
@@ -37,6 +37,7 @@ spec:
       resources:
         requests:
           cpu: 10m
+          memory: 24Mi
         limits:
           memory: 32Mi
       securityContext:
@@ -58,3 +59,8 @@ spec:
     - name: kubeconfig
       hostPath:
         path: /etc/rancher/k3s/k3s.yaml
+        # site.yaml writes this manifest before k3s creates k3s.yaml. Without
+        # a type, containerd would create a directory at the missing path and
+        # k3s could no longer write its kubeconfig there. With File, kubelet
+        # retries the pod until k3s has written the file.
+        type: File
