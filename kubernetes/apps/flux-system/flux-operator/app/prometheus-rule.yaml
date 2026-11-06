@@ -6,25 +6,11 @@ metadata:
   name: flux-operator
 spec:
   groups:
-    - name: flux.reconciliation
+    - name: flux.operator
       rules:
-        # flux_resource_info is exported by the Flux Operator for every Flux resource and is only
-        # refreshed with the FluxReport (every 5 minutes by default).
-        - alert: FluxResourceNotReady
-          expr: |
-            max by (kind, exported_namespace, name) (
-              flux_resource_info{ready!="True", suspended!="True"}
-            )
-          for: 30m
-          labels:
-            severity: warning
-          annotations:
-            summary: >-
-              Flux {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} is not Ready
-            description: >-
-              {{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} has not been
-              Ready for 30 minutes. Run `flux get all -A --status-selector ready=false` or
-              describe the resource for the reason.
+        # Reconciliation failures are reported by the Flux notification controller (see
+        # notifications/). The operator emits the ResourceSet and FluxInstance events, so a
+        # dead operator is the one failure that stays silent there.
         - alert: FluxOperatorDown
           expr: absent(up{job="flux-operator", namespace="flux-system"} == 1)
           for: 15m
@@ -34,5 +20,6 @@ spec:
             summary: >-
               Flux Operator metrics are missing
             description: >-
-              The Flux Operator has not been scraped for 15 minutes, so FluxResourceNotReady cannot
-              fire. Flux itself keeps reconciling as long as its controllers run.
+              The Flux Operator has not been scraped for 15 minutes, so ResourceSet and FluxInstance
+              failures are no longer reported. Flux itself keeps reconciling as long as its
+              controllers run.
