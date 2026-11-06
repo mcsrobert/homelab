@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/persistentvolume-v1.json
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: qbittorrent-config
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn-backup
+  volumeMode: Filesystem
+  csi:
+    driver: driver.longhorn.io
+    volumeHandle: qbittorrent-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gluetun-data
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  volumeMode: Filesystem
+  csi:
+    driver: driver.longhorn.io
+    volumeHandle: gluetun-data
