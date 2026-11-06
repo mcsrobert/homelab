@@ -10,7 +10,7 @@ MISE_VERSION=v2026.10.25
 # renovate: datasource=github-releases depName=cli/cli
 GH_VERSION=v2.103.3
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
-CLAUDE_VERSION=2.1.311
+CLAUDE_VERSION=2.1.319
 # renovate: datasource=npm depName=@openai/codex
 CODEX_VERSION=0.166.0
 
