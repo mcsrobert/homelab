@@ -46,7 +46,7 @@ repos:
 
   # See: https://github.com/ansible/ansible-lint/discussions/1256
   - repo: https://github.com/ansible/ansible-lint
-    rev: v26.10.1
+    rev: v26.11.0
     hooks:
       - id: ansible-lint
         # Git sets GIT_DIR for hooks run from a worktree, which leaks into
