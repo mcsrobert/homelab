@@ -194,23 +194,7 @@ spec:
           memory: 512Mi
 
       networkPolicy:
-        enabled: true
-        ingress:
-          - from:
-              - podSelector: {}
-              - namespaceSelector:
-                  matchLabels:
-                    kubernetes.io/metadata.name: observability
-                podSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: vmagent
-              - ipBlock:
-                  cidr: ${LAN_CIDR}
-              - ipBlock:
-                  cidr: ${LAN_CIDRv6}
-            ports:
-              - port: 8200
-                protocol: TCP
+        enabled: false
 
     injector:
       resources:

@@ -5,3 +5,4 @@ kind: Kustomization
 resources:
   - ./external-secret.yaml
   - ./mongodb-community.yaml
+  - ./network-policy.yaml

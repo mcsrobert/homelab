@@ -101,3 +101,32 @@ spec:
             sectionName: websecure
         hostnames:
           - authelia.${CLUSTER_DOMAIN}
+    networkpolicies:
+      authelia:
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: authelia
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            # Traefik forwards requests, including forwardAuth checks from the
+            # auth-chain middleware.
+            - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: network
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: traefik
+              ports:
+                - port: 9091
+            - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: observability
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vmagent
+              ports:
+                - port: 9959
