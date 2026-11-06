@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: blocky
+spec:
+  groups:
+    - name: blocky
+      # Downtime is left to TargetDown, KubePodNotReady and
+      # KubeDeploymentReplicasMismatch from the k8s stack.
+      rules:
+        - alert: BlockyHighErrorRate
+          expr: |
+            sum(rate(blocky_error_total[10m])) / sum(rate(blocky_query_total[10m])) > 0.25
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Blocky fails to answer many DNS queries
+            description: >-
+              {{ $value | humanizePercentage }} of the DNS queries over the last 10 minutes ended
+              in an error. Check the upstream resolvers and the Blocky logs.
