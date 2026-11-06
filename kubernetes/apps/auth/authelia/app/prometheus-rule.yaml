@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: authelia
+spec:
+  groups:
+    - name: authelia
+      # Downtime is left to TargetDown, KubePodNotReady and
+      # KubeDeploymentReplicasMismatch from the k8s stack.
+      rules:
+        - alert: AutheliaHighErrorRate
+          expr: |
+            (
+              sum(rate(authelia_request{code=~"5.."}[10m]))
+              /
+              sum(rate(authelia_request[10m]))
+              > 0.1
+            )
+            and
+            sum(increase(authelia_request{code=~"5.."}[10m])) >= 5
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Authelia returns many 5xx responses
+            description: >-
+              {{ $value | humanizePercentage }} of the requests to Authelia failed with a 5xx
+              status over the last 10 minutes.

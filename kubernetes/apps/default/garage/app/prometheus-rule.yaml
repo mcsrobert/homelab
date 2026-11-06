@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: garage
+spec:
+  groups:
+    - name: garage
+      # Downtime is left to TargetDown, KubePodNotReady and
+      # KubeDeploymentReplicasMismatch, and failing S3 writes to the CNPG and
+      # Longhorn backup alerts.
+      rules:
+        - alert: GarageBlockResyncErrors
+          expr: block_resync_errored_blocks > 0
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Garage has blocks that fail to resync
+            description: >-
+              {{ $value }} blocks have failed their last resync attempt for over an hour. This
+              should return to zero quickly; persistent errors point to data loss or a failing
+              disk.
