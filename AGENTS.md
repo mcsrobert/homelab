@@ -6,8 +6,8 @@ was chosen.
 
 ## Ground rules
 
-- Git is the only way changes reach the cluster. Change the manifests and open
-  a pull request. Never mutate live state on your own initiative
+- Git is the only way changes reach the cluster, through a merged pull
+  request. Never mutate live state on your own initiative
   (`kubectl apply/edit/patch/delete/scale/exec`, `flux reconcile`,
   `helm install/upgrade`, `helmfile apply`, `ansible-playbook`, `ssh`).
 - Run such a command only when the user asks for it. `.claude/settings.json`
@@ -166,7 +166,8 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
 - Branch from the latest `origin/main` (`git fetch origin` first), not the
   local `main`. Whenever you update a PR, re-fetch and rebase the branch onto
   `origin/main` before pushing.
-- Do not open a PR unless the user asks for one.
+- Commit to your local branch freely, but do not push or open a PR unless the
+  user asks for one.
 - Commit messages are conventional commits with a scope, matching the
   history, such as `fix(habitica-mongodb): use double quotes` or
   `feat(kyverno): audit pods for images without tag and digest`. The scope is
