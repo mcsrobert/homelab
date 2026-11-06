@@ -5,5 +5,5 @@ kind: Kustomization
 resources:
   - ./dragonfly.yaml
   - ./external-secret.yaml
-  - ./pod-monitor.yaml
   - ./network-policy.yaml
+  - ./pod-monitor.yaml

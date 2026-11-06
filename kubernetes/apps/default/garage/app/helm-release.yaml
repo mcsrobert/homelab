@@ -191,6 +191,14 @@ spec:
                       app.kubernetes.io/controller: webui
               ports:
                 - port: 3900
+            # Garage nodes communicate over the RPC port.
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/instance: garage
+                      app.kubernetes.io/controller: garage
+              ports:
+                - port: 3901
             # Admin API and metrics.
             - from:
                 - podSelector:

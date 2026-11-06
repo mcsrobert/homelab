@@ -6,6 +6,6 @@ resources:
   - ./cluster.yaml
   - ./database.yaml
   - ./external-secret.yaml
+  - ./network-policy.yaml
   - ./object-store.yaml
   - ./scheduled-backup.yaml
-  - ./network-policy.yaml
