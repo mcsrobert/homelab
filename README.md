@@ -87,8 +87,8 @@ options, as long as they offer enough features.
   and store logs. Lighter alternative to Loki.
 - [Grafana](https://grafana.com) - UI to explore data and dashboards
 - [Alert Manager](https://prometheus.io/docs/alerting/latest/alertmanager/) -
-  Group, inhibit and silence alerts. Sends notifications via
-  [alertmanager-ntfy](https://github.com/alexbakker/alertmanager-ntfy).
+  Group, inhibit and silence alerts. Sends notifications to
+  [ntfy](https://ntfy.sh).
 
 ### Security
 
