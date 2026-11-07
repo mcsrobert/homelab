@@ -1,3 +1,6 @@
 ---
 profile: production
 strict: true
+# SOPS ciphertext is not Ansible source and contains long encrypted values.
+exclude_paths:
+  - "**/*.sops.yaml"
