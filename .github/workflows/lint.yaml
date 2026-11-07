@@ -65,6 +65,9 @@ jobs:
 
       - name: Run ansible-lint
         uses: ansible/ansible-lint@9bce2bfb8f4a984e6b13767bc0d6bf0a49492164 # v26.10.1
+        env:
+          # Syntax checks do not need decrypted cluster credentials.
+          ANSIBLE_VARS_ENABLED: host_group_vars
         with:
           working_directory: ansible
 
