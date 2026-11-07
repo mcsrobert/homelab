@@ -1,0 +1,6 @@
+---
+- name: Validate fixed k3s token
+  import_playbook: ./validate-token.yaml
+
+- name: Upgrade k3s
+  import_playbook: k3s.orchestration.upgrade
