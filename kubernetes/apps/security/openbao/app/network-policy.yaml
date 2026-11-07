@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/networkpolicy.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: openbao-ingress
+spec:
+  policyTypes: ['Ingress']
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: openbao
+      component: server
+  ingress:
+    # External Secrets reaches OpenBao through its LoadBalancer address, and
+    # vmagent scrapes it.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: external-secrets
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmagent
+        # Tailscale forwards tailnet clients, which the subnet route exposes.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: tailscale
+        # The UI and CLI, through the LoadBalancer (externalTrafficPolicy:
+        # Local keeps the client address).
+        - ipBlock:
+            cidr: ${LAN_CIDR}
+        - ipBlock:
+            cidr: ${LAN_CIDRv6}
+      ports:
+        - port: 8200
+    # Raft and replication between OpenBao pods.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: openbao
+              component: server
+      ports:
+        - port: 8201
+        - port: 8202

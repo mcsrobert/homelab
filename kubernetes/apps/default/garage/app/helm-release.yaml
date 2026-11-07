@@ -169,3 +169,47 @@ spec:
           - name: traefik-gateway
             namespace: network
             sectionName: websecure
+    networkpolicies:
+      garage:
+        # The webui controller shares the app.kubernetes.io/name label.
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/instance: garage
+            app.kubernetes.io/controller: garage
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            # S3: the barman-cloud sidecar of the immich-cnpg pods, and the webui.
+            - from:
+                - podSelector:
+                    matchLabels:
+                      cnpg.io/cluster: immich-cnpg
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/instance: garage
+                      app.kubernetes.io/controller: webui
+              ports:
+                - port: 3900
+            # Garage nodes communicate over the RPC port.
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/instance: garage
+                      app.kubernetes.io/controller: garage
+              ports:
+                - port: 3901
+            # Admin API and metrics.
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/instance: garage
+                      app.kubernetes.io/controller: webui
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: observability
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vmagent
+              ports:
+                - port: 3903

@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/networkpolicy.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: habitica-mongodb-ingress
+spec:
+  policyTypes: ['Ingress']
+  podSelector:
+    matchLabels:
+      app: habitica-mongodb-svc
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: habitica
+        - podSelector:
+            matchLabels:
+              app: habitica-mongodb-svc
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: mongodb-operator
+      ports:
+        - port: 27017
