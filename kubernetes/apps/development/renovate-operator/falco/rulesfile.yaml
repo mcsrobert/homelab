@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: renovate-operator-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # Renovate operator schedules and manages Renovate jobs.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "ghcr.io/mogenius/renovate-operator" and k8s.ns.name = "development" and container.name = "renovate-operator" and proc.exepath = "/app/renovate-operator")
