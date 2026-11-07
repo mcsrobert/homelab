@@ -17,15 +17,11 @@ route:
     - receiver: blackhole
       matchers:
         - alertname = "InfoInhibitor"
-    - receiver: ntfy
+    - receiver: ntfy-falco
       matchers:
         - source = "falco"
       group_by:
         - rule
-      routes:
-        - receiver: ntfy-urgent
-          matchers:
-            - severity = "critical"
     - receiver: ntfy-urgent
       matchers:
         - severity = "critical"
@@ -41,6 +37,28 @@ receivers:
   - name: ntfy-urgent
     webhook_configs:
       - url: "https://ntfy.sh/{{ .NTFY_TOPIC }}?template=alertmanager&priority=urgent"
+        max_alerts: 2
+  # Falco alerts lack the Prometheus labels ntfy's alertmanager template
+  # expects, so they use an inline template instead. External Secrets renders
+  # this file as a Go template: each urlquery call URL-encodes the ntfy
+  # template that follows it into the t (title), p (priority) and m (message)
+  # query parameters. ntfy then renders those against the webhook payload.
+  # https://docs.ntfy.sh/publish/#inline-templating
+  - name: ntfy-falco
+    webhook_configs:
+      - url: >-
+          https://ntfy.sh/{{ .NTFY_TOPIC }}?tpl=1&tags=rotating_light&t={{ urlquery
+            "{{ (first .alerts).labels.rule }}"
+          }}&p={{ urlquery
+            "{{ if eq (first .alerts).labels.severity \"critical\" }}urgent{{ else }}default{{ end }}"
+          }}&m={{ urlquery
+            "{{ range .alerts }}"
+            "Node: {{ .labels.hostname }}\n"
+            "{{ if .labels.k8s_pod_name }}Pod: {{ .labels.k8s_ns_name }}/{{ .labels.k8s_pod_name }}\n{{ end }}"
+            "{{ .annotations.description }}\n\n"
+            "{{ end }}"
+          }}
+        send_resolved: false
         max_alerts: 2
   - name: backup
     email_configs:
