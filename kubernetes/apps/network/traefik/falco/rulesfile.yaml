@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: traefik-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # Traefik watches Gateway API and other routing resources.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "docker.io/library/traefik" and k8s.ns.name = "network" and container.name = "traefik" and proc.exepath = "/usr/local/bin/traefik")

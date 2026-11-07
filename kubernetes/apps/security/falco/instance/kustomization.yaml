@@ -3,11 +3,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ../../../default/immich/falco
+  - ../../../development/renovate-operator/falco
+  - ../../../network/traefik/falco
+  - ../../../system/keda/falco
+  - ../../../system/node-feature-discovery/falco
+  - ../../../system/reloader/falco
   - ./components.yaml
   - ./config.yaml
   - ./external-secret.yaml
   - ./falco.yaml
   - ./http-route.yaml
   - ./plugins.yaml
+  - ./rulesfile-artifact-operator.yaml
   - ./rulesfile-exceptions.yaml
   - ./rulesfile.yaml
