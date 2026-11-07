@@ -1,4 +1,7 @@
 ---
+- name: Validate fixed k3s token
+  import_playbook: ./validate-token.yaml
+
 # One server at a time, so the VIP always has a kube-vip left to hold it.
 - name: Install kube-vip
   hosts: server

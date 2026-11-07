@@ -1,0 +1,25 @@
+---
+k3s_cluster:
+  children:
+    server:
+      hosts:
+        turingpi-rk1-1:
+          ansible_host: 192.168.178.31
+        turingpi-rk1-2:
+          ansible_host: 192.168.178.32
+        turingpi-rk1-3:
+          ansible_host: 192.168.178.33
+    agent:
+      hosts:
+        raspberrypi:
+          ansible_host: 192.168.178.10
+
+turingpi_rk1:
+  hosts:
+    turingpi-rk1-1:
+    turingpi-rk1-2:
+    turingpi-rk1-3:
+
+raspberrypi:
+  hosts:
+    raspberrypi:

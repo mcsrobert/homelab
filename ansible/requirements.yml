@@ -15,3 +15,7 @@ collections:
   - name: kubernetes.core
     type: galaxy
     version: 6.6.0
+
+  - name: community.sops
+    type: galaxy
+    version: 2.5.0
