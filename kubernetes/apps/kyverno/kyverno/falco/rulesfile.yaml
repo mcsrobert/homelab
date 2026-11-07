@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: kyverno-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # Kyverno's admission controller watches and manages Kubernetes resources.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "reg.kyverno.io/kyverno/kyverno" and k8s.ns.name = "kyverno" and container.name = "kyverno" and proc.exepath = "/ko-app/kyverno")
