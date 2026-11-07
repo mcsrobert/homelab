@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: victoria-metrics-operator-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # The operator watches and reconciles Kubernetes resources.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "docker.io/victoriametrics/operator" and k8s.ns.name = "observability" and container.name = "operator" and proc.exepath = "/app")
