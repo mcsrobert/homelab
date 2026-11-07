@@ -11,6 +11,7 @@ spec:
     spec:
       containers:
         - name: falcosidekick
+          image: docker.io/falcosecurity/falcosidekick:2.35.1@sha256:a9bb60d2c7742febd912315ca1155839abc0199bf322c58d3adbb8b0849fadb9
           env:
             - name: ALERTMANAGER_HOSTPORT
               value: http://vmalertmanager-victoria-metrics.observability.svc.cluster.local:9093
