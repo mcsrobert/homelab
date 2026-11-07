@@ -107,14 +107,14 @@ spec:
     vmsingle:
       enabled: true
       spec:
-        retentionPeriod: 10d
+        retentionPeriod: 90d
         storage:
-          storageClassName: longhorn-victoria-metrics
+          storageClassName: longhorn-no-backup
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 192Gi
+              storage: 50Gi
         extraArgs:
           maxLabelsPerTimeseries: "100"
         resources:
@@ -213,7 +213,7 @@ spec:
         extraArgs:
           promscrape.maxScrapeSize: "32MB"
           promscrape.streamParse: "true"
-        scrapeInterval: 20s
+        scrapeInterval: 30s
         inlineRelabelConfig:
           # Unused buckets; retain sums/counts for rates and averages.
           - action: drop
