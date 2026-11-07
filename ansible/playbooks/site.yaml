@@ -1,4 +1,7 @@
 ---
+- name: Validate fixed k3s token
+  import_playbook: ./validate-token.yaml
+
 - name: Configure k3s_cluster
   import_playbook: ./configure.yaml
 

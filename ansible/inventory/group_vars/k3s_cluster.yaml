@@ -1,0 +1,8 @@
+---
+ansible_port: 22
+# renovate: datasource=github-releases depName=k3s-io/k3s
+k3s_version: v1.37.1+k3s1
+api_endpoint: 192.168.178.40
+
+cluster_context: homelab
+api_port: 6443

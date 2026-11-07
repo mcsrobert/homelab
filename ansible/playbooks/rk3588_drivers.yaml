@@ -1,6 +1,6 @@
 ---
 - name: Install RK3588 drivers
-  hosts: server
+  hosts: turingpi_rk1
   gather_facts: false
   become: true
   vars:
