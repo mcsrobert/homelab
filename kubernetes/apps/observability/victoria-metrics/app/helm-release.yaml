@@ -109,7 +109,7 @@ spec:
       spec:
         retentionPeriod: 90d
         storage:
-          storageClassName: longhorn-no-backup
+          storageClassName: longhorn-no-backup-single-replication
           accessModes:
             - ReadWriteOnce
           resources:
