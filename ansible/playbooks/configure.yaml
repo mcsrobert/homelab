@@ -23,7 +23,7 @@
       register: root_drive
       failed_when: "'nvme' not in root_drive.stdout"
       changed_when: false
-      when: inventory_hostname != 'raspberrypi'
+      when: "'turingpi_rk1' in group_names"
 
   tasks:
 

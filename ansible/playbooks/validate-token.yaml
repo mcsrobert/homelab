@@ -1,0 +1,21 @@
+---
+- name: Validate fixed k3s token before contacting nodes
+  hosts: k3s_cluster
+  gather_facts: false
+  any_errors_fatal: true
+  tags: always
+
+  pre_tasks:
+
+    - name: Require the existing cluster token
+      ansible.builtin.assert:
+        that:
+          - token is defined
+          - token is string
+          - token | length > 0
+          - token is match('^K10[0-9a-f]+::server:.+$')
+        fail_msg: >-
+          Define token in ansible/inventory/group_vars/k3s_cluster.sops.yaml
+          in the form K10<hex CA hash>::server:<passphrase>.
+          Follow the fixed cluster token runbook in ansible/README.md before running this playbook.
+        no_log: true

@@ -1,0 +1,29 @@
+---
+server_config_yaml: |
+  write-kubeconfig-mode: 600
+
+  cluster-cidr: 10.42.0.0/16,fda7:435:42::/108
+  service-cidr: 10.43.0.0/16,fda7:435:43::/112
+
+  kube-controller-manager-arg:
+    - node-cidr-mask-size-ipv6=112
+
+  # The policy file is installed by playbooks/configure.yaml.
+  kube-apiserver-arg:
+    - audit-policy-file=/etc/rancher/k3s/audit-policy.yaml
+    - audit-log-path=/var/lib/rancher/k3s/server/logs/audit.log
+    - audit-log-maxage=14
+    - audit-log-maxbackup=5
+    - audit-log-maxsize=50
+
+  disable:
+    - servicelb
+    - traefik
+    - local-storage
+
+  flannel-backend: wireguard-native
+  flannel-ipv6-masq: false
+
+  embedded-registry: true
+
+  nonroot-devices: true
