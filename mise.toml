@@ -63,6 +63,56 @@ description = "Upgrade k3s, one server at a time"
 dir = "{{ config_root }}/ansible"
 run = "ansible-playbook playbooks/upgrade.yaml"
 
+[tasks.ansible-rotate-token]
+description = "Rotate the k3s token, then restart the nodes with it one server at a time"
+confirm = "Rotate the k3s token and restart every node?"
+dir = "{{ config_root }}/ansible"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ $# -gt 0 ]; then
+  echo "ansible-rotate-token takes no arguments" >&2
+  exit 1
+fi
+
+file=inventory/group_vars/k3s_cluster.sops.yaml
+if ! git ls-files --error-unmatch "$file" >/dev/null 2>&1 ||
+  ! git diff --quiet HEAD -- "$file"; then
+  echo "Commit $file before rotating the token" >&2
+  exit 1
+fi
+
+old_token=$(sops decrypt --extract '["token"]' "$file")
+case $old_token in
+  K10*::server:*) ;;
+  *)
+    echo "The token in $file is not in the full K10...::server:... format" >&2
+    exit 1
+    ;;
+esac
+
+# Keep the CA hash, replace the passphrase. Write the new token before the
+# rotation so it is never only on the servers.
+passphrase=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
+printf '%s' "${old_token%%::server:*}::server:$passphrase" |
+  jq --raw-input . | sops set --value-stdin "$file" '["token"]'
+
+if ! K3S_OLD_TOKEN=$old_token ansible-playbook playbooks/rotate-token.yaml; then
+  echo "Rotation failed. $file holds the new token, git HEAD the old one." >&2
+  echo 'If the servers still accept the old token, run: git -C "$(git rev-parse --show-toplevel)" restore ansible/'"$file" >&2
+  exit 1
+fi
+
+if ! ansible-playbook k3s.orchestration.site --forks=1; then
+  echo "The servers use the new token now. Commit ansible/$file," >&2
+  echo "fix the failure and run mise run ansible-site." >&2
+  exit 1
+fi
+
+echo "Token rotated. Commit ansible/$file."
+"""
+
 [tasks.install-helm-diff-plugin]
 description = "Install or upgrade Helm diff plugin"
 run = """
