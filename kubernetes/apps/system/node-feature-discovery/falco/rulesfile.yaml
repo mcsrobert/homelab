@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: node-feature-discovery-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # The worker publishes node features.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "registry.k8s.io/nfd/node-feature-discovery" and k8s.ns.name = "system" and container.name = "worker" and proc.exepath = "/usr/bin/nfd-worker")

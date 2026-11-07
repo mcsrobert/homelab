@@ -1,0 +1,16 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: keda-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # KEDA manages and validates scaling resources.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "ghcr.io/kedacore/keda" and k8s.ns.name = "system" and container.name = "keda-operator" and proc.exepath = "/keda")
+        or (container.image.repository = "ghcr.io/kedacore/keda-admission-webhooks" and k8s.ns.name = "system" and container.name = "keda-admission-webhooks" and proc.exepath = "/keda-admission-webhooks")

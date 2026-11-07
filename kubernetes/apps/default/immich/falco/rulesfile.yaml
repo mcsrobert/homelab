@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: immich-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # The CloudNativePG instance manager maintains database instance state.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "ghcr.io/tensorchord/cloudnative-vectorchord" and k8s.ns.name = "default" and container.name = "postgres" and proc.exepath = "/controller/manager")
