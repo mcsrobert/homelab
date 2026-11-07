@@ -8,6 +8,7 @@
   pre_tasks:
 
     - name: Require the existing cluster token
+      no_log: true
       ansible.builtin.assert:
         that:
           - token is defined
@@ -18,4 +19,3 @@
           Define token in ansible/inventory/group_vars/k3s_cluster.sops.yaml
           in the form K10<hex CA hash>::server:<passphrase>.
           Follow the fixed cluster token runbook in ansible/README.md before running this playbook.
-        no_log: true
