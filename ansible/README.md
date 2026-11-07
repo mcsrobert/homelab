@@ -22,11 +22,12 @@ The [playbooks/](./playbooks/) directory contains the playbooks. Run them
 through the mise tasks in the root [mise.toml](../mise.toml), which pass the
 options they need:
 
-| Task                           | Runs                            |
-| ------------------------------ | ------------------------------- |
-| `mise run ansible-site`        | `playbooks/site.yaml --forks=1` |
-| `mise run ansible-upgrade-os`  | `playbooks/apt_upgrade.yaml`    |
-| `mise run ansible-upgrade-k3s` | `playbooks/upgrade.yaml`        |
+| Task                            | Runs                                                         |
+| ------------------------------- | ------------------------------------------------------------ |
+| `mise run ansible-site`         | `playbooks/site.yaml --forks=1`                              |
+| `mise run ansible-upgrade-os`   | `playbooks/apt_upgrade.yaml`                                 |
+| `mise run ansible-upgrade-k3s`  | `playbooks/upgrade.yaml`                                     |
+| `mise run ansible-rotate-token` | `playbooks/rotate-token.yaml`, then `k3s.orchestration.site` |
 
 Arguments after `--` are passed on to `ansible-playbook`, for example:
 
@@ -79,6 +80,24 @@ include decrypted values.
 short passwords: a brand-new cluster with self-signed CAs must initially use a
 short token because its CA hash does not yet exist. This runbook preserves an
 existing cluster, rather than bootstrapping a new one.
+
+## Rotate the cluster token
+
+```bash
+mise run ansible-rotate-token
+```
+
+The task keeps the CA hash of the current token and generates a new passphrase.
+It writes the new token to `k3s_cluster.sops.yaml` before anything touches the
+nodes, runs [`k3s token rotate`](https://docs.k3s.io/cli/token#rotate) on the
+first server and then `k3s.orchestration.site --forks=1`, which writes the new
+token to every node and restarts the servers one at a time, then the agents.
+Commit the updated SOPS file afterwards.
+
+If the rotation itself fails, the file holds the new token while the servers
+may still use the old one; the task prints how to restore it. Etcd snapshots
+taken before a rotation need the old token to restore. It stays in the git
+history of the encrypted file.
 
 ## Rebuild a node
 
