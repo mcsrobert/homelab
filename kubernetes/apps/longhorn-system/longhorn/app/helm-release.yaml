@@ -38,6 +38,11 @@ spec:
     metrics:
       serviceMonitor:
         enabled: true
+        metricRelabelings:
+          # client internals and one series per snapshot, which churns with every recurring job
+          - action: drop
+            sourceLabels: [__name__]
+            regex: longhorn_(rest_client|snapshot|workqueue)_.+
     extraObjects:
       - apiVersion: snapshot.storage.k8s.io/v1
         kind: VolumeSnapshotClass
@@ -71,6 +76,14 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "3"
+      - apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: longhorn-no-backup-single-replication
+        provisioner: driver.longhorn.io
+        allowVolumeExpansion: true
+        parameters:
+          numberOfReplicas: "1"
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:

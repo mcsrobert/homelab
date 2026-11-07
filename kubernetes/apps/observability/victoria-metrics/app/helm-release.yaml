@@ -27,6 +27,61 @@ spec:
       enabled: false
     coreDns:
       enabled: true
+
+    kubeApiServer:
+      vmScrape:
+        spec:
+          endpoints:
+            - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+              port: https
+              scheme: https
+              tlsConfig:
+                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                serverName: kubernetes
+              metricRelabelConfigs:
+                # large histograms that no rule or dashboard reads
+                - action: drop
+                  source_labels: [__name__]
+                  regex: (apiserver_request_duration_seconds|apiserver_request_body_size_bytes|apiserver_response_sizes|apiserver_storage_list_duration_seconds|apiserver_watch_cache_initialization_duration_seconds|apiserver_watch_cache_read_wait_seconds|apiserver_watch_events_dispatch_duration_seconds|apiserver_watch_events_sizes|apiserver_watch_list_duration_seconds|etcd_request_duration_seconds|scheduler_plugin_execution_duration_seconds)_bucket
+                # keep the buckets the SLO rules use (1, 5, 30) and a coarse set for quantiles
+                - action: drop
+                  source_labels: [__name__, le]
+                  regex: apiserver_request_sli_duration_seconds_bucket;(0.6|0.8|1.25|1.5|3|4|6|8|15|20|45)(\.0)?
+                # k3s serves one registry on every port, these already come from the kubelet job
+                - action: drop
+                  source_labels: [__name__]
+                  regex: (csi_operations|kubelet|kubeproxy|plugin_manager|prober|storage_operation|volume_manager)_.+
+
+    kubelet:
+      vmScrapes:
+        cadvisor:
+          spec:
+            metricRelabelConfigs:
+              # chart defaults, a list set here replaces them
+              - &dropUid
+                action: labeldrop
+                regex: (uid)
+              - &dropIdName
+                action: labeldrop
+                regex: (id|name)
+              - &dropRestClient
+                action: drop
+                source_labels: [__name__]
+                regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+              # per-device and kernel memory detail that no rule or dashboard reads
+              - action: drop
+                source_labels: [__name__]
+                regex: container_(blkio_device_usage_total|fs_(inodes_.+|io_.+|limit_bytes|read_seconds_total|reads_merged_total|sector_.+|write_seconds_total|writes_merged_total)|memory_(events_.+|failcnt|failures_total|file_.+|kernel_usage|mapped_file|max_usage_bytes|pgscan_total|pgsteal_total|total_.+|workingset_refault_.+))
+        kubelet:
+          spec:
+            metricRelabelConfigs:
+              - *dropUid
+              - *dropIdName
+              - *dropRestClient
+              # k3s serves the embedded control plane's metrics here too, the apiserver job already scrapes them
+              - action: drop
+                source_labels: [__name__]
+                regex: (aggregator|apiextensions|apiserver|authentication|authorization|etcd|field_validation|scheduler|watch_cache)_.+
     # deployed separately
     grafana:
       enabled: false
@@ -52,14 +107,14 @@ spec:
     vmsingle:
       enabled: true
       spec:
-        retentionPeriod: 10d
+        retentionPeriod: 90d
         storage:
-          storageClassName: longhorn-victoria-metrics
+          storageClassName: longhorn-no-backup-single-replication
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: 192Gi
+              storage: 50Gi
         extraArgs:
           maxLabelsPerTimeseries: "100"
         resources:
@@ -158,8 +213,21 @@ spec:
         extraArgs:
           promscrape.maxScrapeSize: "32MB"
           promscrape.streamParse: "true"
-        scrapeInterval: 20s
+        scrapeInterval: 30s
         inlineRelabelConfig:
+          # Unused buckets; retain sums/counts for rates and averages.
+          - action: drop
+            source_labels: [__name__]
+            regex: (rest_client_(request_size_bytes|response_size_bytes|rate_limiter_duration_seconds)|workqueue_work_duration_seconds)_bucket
+          # The API-server dashboard uses queue latency quantiles.
+          - action: drop
+            if: '{job!="apiserver"}'
+            source_labels: [__name__]
+            regex: workqueue_queue_duration_seconds_bucket
+          - action: drop
+            if: '{job="grafana"}'
+            source_labels: [__name__]
+            regex: grafana_.*_bucket
           - action: labeldrop
             regex: beta_kubernetes_io_.*
           - action: labeldrop
@@ -168,6 +236,9 @@ spec:
             regex: feature_node_kubernetes_io_.*
           - action: labeldrop
             regex: p2p_k3s_cattle_io_enabled
+          # same on every node or a copy of the node label
+          - action: labeldrop
+            regex: kubernetes_io_(arch|hostname|os)
         resources:
           requests:
             cpu: 500m
