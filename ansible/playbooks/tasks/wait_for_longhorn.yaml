@@ -1,8 +1,7 @@
 ---
 - name: Wait for Longhorn volumes to be healthy
-  delegate_to: "{{ drain_delegate }}"
-  vars:
-    ansible_python_interpreter: /opt/ansible_venv/bin/python
+  delegate_to: localhost
+  become: false
   kubernetes.core.k8s_info:
     api_version: longhorn.io/v1beta2
     kind: Volume

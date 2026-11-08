@@ -3,32 +3,59 @@
   hosts: k3s_cluster
   become: true
   serial: 1
-  vars:
-    drain_delegate: "{{ groups['server'] | difference([inventory_hostname]) | first }}"
-  environment:
-    K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  # Drain and uncordon run on the controller with the kubeconfig context that
+  # k3s.orchestration.site sets up there.
+  module_defaults:
+    group/kubernetes.core.k8s:
+      context: "{{ cluster_context }}"
+      kubeconfig: "{{ lookup('env', 'HOME') ~ '/.kube/config' }}"
 
   pre_tasks:
+
+    # Stop before the first node is upgraded when the controller cannot
+    # drain it.
+    - name: Check that the controller can reach the cluster
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Node
+      register: cluster_nodes
+      failed_when: false
+      until: cluster_nodes.resources is defined
+      retries: 5
+      delay: 10
+
+    - name: Fail if the cluster is unreachable or lacks these nodes
+      vars:
+        missing_nodes: >-
+          {{ ansible_play_hosts_all
+             | difference(cluster_nodes.resources | default([]) | map(attribute='metadata.name')) }}
+      ansible.builtin.assert:
+        that:
+          - cluster_nodes.resources is defined
+          - missing_nodes | length == 0
+        fail_msg: >-
+          The kubeconfig context "{{ cluster_context }}" cannot reach the cluster
+          or does not list every node of this play:
+          {{ cluster_nodes.msg | default('missing nodes: ' ~ (missing_nodes | join(', '))) }}
 
     - name: Update apt repo and cache
       ansible.builtin.apt:
         update_cache: true
 
-    - name: Ensure pip and venv are present on the drain delegate
-      ansible.builtin.apt:
-        name:
-          - python3-pip
-          - python3-venv
-        state: present
-      delegate_to: "{{ drain_delegate }}"
+    # One-off cleanup of the venv the drain used to run from on a server.
+    # Its setup also installed pip/venv via apt; keep those packages because
+    # they may be operator-installed or required by other packages.
+    # Delete this block once it has run on every server.
+    - name: Remove the old drain venv
+      when: "'server' in group_names"
+      block:
 
-    - name: Prepare venv with kubernetes on the drain delegate
-      ansible.builtin.pip:
-        name: kubernetes==35.0.0
-        state: present
-        virtualenv: /opt/ansible_venv
-        virtualenv_command: /usr/bin/python3 -m venv
-      delegate_to: "{{ drain_delegate }}"
+        - name: Remove the venv
+          ansible.builtin.file:
+            path: /opt/ansible_venv
+            state: absent
 
   tasks:
 
@@ -38,6 +65,8 @@
         autoremove: true
         autoclean: true
 
+    # Compare install times rather than uname -r: Armbian ships kernel
+    # rebuilds under the same version (6.1.115-vendor-rk35xx).
     - name: Find kernel packages installed since the last boot
       ansible.builtin.shell: >-
         find /var/lib/dpkg/info -maxdepth 1
@@ -45,44 +74,80 @@
         -newermt "$(uptime -s)"
       register: new_kernel_packages
       changed_when: false
+      check_mode: false
 
-    - name: Reboot into the new kernel
-      when: new_kernel_packages.stdout | length > 0
+    - name: Wait for Longhorn before draining
+      when: &reboot_due new_kernel_packages.stdout | length > 0
+      ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
+
+    # An unmarked cordon belongs to the operator; a marked one may be
+    # left over from an interrupted run and must be released by this play.
+    - name: Check whether the node is already cordoned
+      ansible.builtin.set_fact:
+        node_before_upgrade: >-
+          {{ cluster_nodes.resources
+             | selectattr('metadata.name', 'eq', inventory_hostname) | first }}
+
+    - name: Remember whether the node was cordoned before the upgrade
+      when: *reboot_due
+      ansible.builtin.set_fact:
+        node_was_cordoned: >-
+          {{ node_before_upgrade.spec.unschedulable | default(false)
+             and (node_before_upgrade.metadata.annotations | default({}))
+                 .get('homelab/apt-upgrade-cordon') != 'true' }}
+
+    - name: Drain and reboot the node
+      when: *reboot_due
       block:
 
-        - name: Wait for Longhorn before draining
-          ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
+        - name: Warn that the operator cordon will be preserved
+          ansible.builtin.debug:
+            msg: >-
+              WARNING: {{ inventory_hostname }} was cordoned by the operator
+              and will intentionally be left cordoned after this upgrade.
+          when: node_was_cordoned
+
+        - name: Mark the cordon as owned by this playbook
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s:
+            state: patched
+            merge_type: merge
+            definition:
+              apiVersion: v1
+              kind: Node
+              metadata:
+                name: "{{ inventory_hostname }}"
+                annotations:
+                  homelab/apt-upgrade-cordon: "true"
+          when: not node_was_cordoned
+
+        # Retry the drain and pod check together: k8s_drain can return
+        # successfully even when pods outlive wait_timeout. Budget at most
+        # ~13.5 minutes: 4 attempts of 180s plus 3 delays of 30s, excluding
+        # API request overhead.
+        - name: Reset drain attempts
+          ansible.builtin.set_fact:
+            node_drain_attempt: 0
 
         - name: Drain node before reboot
-          delegate_to: "{{ drain_delegate }}"
+          ansible.builtin.include_tasks: tasks/drain_node.yaml
           vars:
-            ansible_python_interpreter: /opt/ansible_venv/bin/python
-          kubernetes.core.k8s_drain:
-            name: "{{ inventory_hostname }}"
-            state: drain
-            delete_options:
-              delete_emptydir_data: true
-              ignore_daemonsets: true
-              force: true
-              terminate_grace_period: 60
-              wait_timeout: 300
-              wait_sleep: 15
-            pod_selectors:
-              - app!=csi-attacher
-              - app!=csi-provisioner
-              - longhorn.io/component!=instance-manager
-          register: drain
-          until: drain is not failed
-          retries: 20
-          delay: 30
+            node_drain_retries: 3
+            node_drain_delay: 30
 
-        - name: Reboot node for kernel updates
+        # An unreachable host skips rescue and always, which would leave the
+        # node drained. ignore_unreachable turns that into a result the next
+        # task can fail on, so the rescue runs.
+        - name: Reboot node
           ansible.builtin.reboot:
             msg: Reboot initiated by Ansible after package upgrades
             connect_timeout: 5
             reboot_timeout: 600
             pre_reboot_delay: 0
             post_reboot_delay: 0
+          register: reboot
+          ignore_unreachable: true
 
         - name: Wait for k3s service to be active
           ansible.builtin.systemd:
@@ -91,11 +156,17 @@
           until: k3s_service.status.ActiveState == "active"
           retries: 15
           delay: 10
+          ignore_unreachable: true
 
+        - name: Fail if the node became unreachable
+          ansible.builtin.fail:
+            msg: "{{ inventory_hostname }} became unreachable after the drain"
+          when: reboot is unreachable or k3s_service is unreachable
+
+        # Retry API errors, but let a Ready timeout fail immediately into rescue.
         - name: Wait for node to be Ready
-          delegate_to: "{{ drain_delegate }}"
-          vars:
-            ansible_python_interpreter: /opt/ansible_venv/bin/python
+          delegate_to: localhost
+          become: false
           kubernetes.core.k8s_info:
             api_version: v1
             kind: Node
@@ -105,18 +176,126 @@
               type: Ready
               status: "True"
             wait_timeout: 300
+          register: node_ready
+          until: >-
+            node_ready is not failed
+            or 'Failed to gather information about Node(s) even after waiting for '
+            in (node_ready.msg | default(''))
+          retries: 2
+          delay: 10
 
-    - name: Uncordon node
-      delegate_to: "{{ drain_delegate }}"
-      vars:
-        ansible_python_interpreter: /opt/ansible_venv/bin/python
-      kubernetes.core.k8s_drain:
-        name: "{{ inventory_hostname }}"
-        state: uncordon
-      register: uncordon
-      until: uncordon is not failed
-      retries: 5
-      delay: 10
+        - name: Uncordon node
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            state: uncordon
+          register: uncordon
+          until: uncordon is not failed
+          retries: 5
+          delay: 10
+          when: not node_was_cordoned
 
-    - name: Wait for Longhorn after uncordoning
+        - name: Remove the playbook cordon marker after uncordoning
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s: &clear_cordon_marker
+            state: patched
+            merge_type: merge
+            definition:
+              apiVersion: v1
+              kind: Node
+              metadata:
+                name: "{{ inventory_hostname }}"
+                annotations:
+                  homelab/apt-upgrade-cordon: null
+          register: clear_cordon_marker
+          until: clear_cordon_marker is not failed
+          retries: 5
+          delay: 10
+          when: not node_was_cordoned
+
+      rescue:
+
+        # Put a partly drained node back into service, then stop before the
+        # next node is touched.
+        - name: Uncordon node after a failed drain or reboot
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            state: uncordon
+          register: rescue_uncordon
+          until: rescue_uncordon is not failed
+          retries: 5
+          delay: 10
+          when: not node_was_cordoned
+
+        - name: Remove the playbook cordon marker after rescue uncordoning
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s: *clear_cordon_marker
+          register: rescue_clear_cordon_marker
+          until: rescue_clear_cordon_marker is not failed
+          retries: 5
+          delay: 10
+          when: not node_was_cordoned
+
+        - name: Stop the upgrade
+          ansible.builtin.fail:
+            msg: >-
+              "{{ ansible_failed_task.name }}" failed on {{ inventory_hostname }}
+              and the node was {{ 'left cordoned' if node_was_cordoned else 'uncordoned' }}:
+              {{ ansible_failed_result.msg | default('see the output above') }}
+
+    # A run interrupted after reboot leaves no pending kernel update, but
+    # its owned cordon still needs recovery. Do not drain or reboot again.
+    - name: Recover the playbook cordon after an interrupted reboot
+      when:
+        - new_kernel_packages.stdout | length == 0
+        - >-
+          (node_before_upgrade.metadata.annotations | default({}))
+          .get('homelab/apt-upgrade-cordon') == 'true'
+      block:
+
+        - name: Wait for the recovered node to be Ready
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Node
+            name: "{{ inventory_hostname }}"
+            wait: true
+            wait_condition:
+              type: Ready
+              status: "True"
+            wait_timeout: 300
+          register: recovered_node
+          until: >-
+            recovered_node is not failed
+            and recovered_node.resources | default([]) | length > 0
+          retries: 2
+          delay: 10
+
+        - name: Uncordon the recovered node
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s_drain:
+            name: "{{ inventory_hostname }}"
+            state: uncordon
+          register: recovered_uncordon
+          until: recovered_uncordon is not failed
+          retries: 5
+          delay: 10
+
+        - name: Remove the recovered playbook cordon marker
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s: *clear_cordon_marker
+          register: recovered_clear_cordon_marker
+          until: recovered_clear_cordon_marker is not failed
+          retries: 5
+          delay: 10
+
+    - name: Wait for Longhorn before the next node
       ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
