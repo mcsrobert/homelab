@@ -1,0 +1,15 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: habitica-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (container.image.repository = "quay.io/mongodb/mongodb-agent" and k8s.ns.name = "default" and proc.name = "readinessprobe" and container.name = "mongodb-agent" and k8s.pod.name startswith "habitica-mongodb-")

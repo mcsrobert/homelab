@@ -4,30 +4,17 @@ kind: Rulesfile
 metadata:
   name: falco-rules-exceptions
 spec:
-  # Lower values load first, so this must stay above falco-rules (50).
+  # Load after the upstream falco-rules (priority 50).
   priority: 60
+  # Keep only host-level exceptions here (including host-managed static pods).
+  # App-specific exceptions belong in that app's falco/rulesfile.yaml, applied
+  # by its own <app>-falco Flux Kustomization targeting security and depending
+  # on falco-operator. See system/keda/falco for an example.
+  # Scope exceptions to namespace, image repository and container, adding a
+  # stable workload pod prefix for shared sidecars (see dragonfly-operator/falco).
+  # Match the expected process/executable and event fields where available;
+  # verify ownership from manifests or events, not just comments or location.
   inlineRules:
-    # FlareSolverr patches and runs its bundled ChromeDriver to start Chromium.
-    - rule: Drop and execute new binary in container
-      exceptions:
-        - name: flaresolverr_chromedriver
-          fields:
-            - k8s.ns.name
-            - container.image.repository
-            - container.name
-            - proc.exepath
-            - proc.pname
-            - user.uid
-          comps: [=, =, =, =, =, =]
-          values:
-            - - media
-              - ghcr.io/flaresolverr/flaresolverr
-              - flaresolverr
-              - /app/chromedriver
-              - python
-              - 1000
-      override:
-        exceptions: append
     # Armbian's ramlog postrotate job runs on the RK1 host (not in a container)
     # and truncates /var/log, which the stock log-clearing rule would flag.
     - macro: allowed_clear_log_files
@@ -65,24 +52,3 @@ spec:
               - 1544
       override:
         exceptions: append
-    # Expected Kubernetes API access, allowlisted per workload:
-    # - Homepage (default) reads pods, nodes, ingresses and HTTPRoutes for its widgets.
-    # - MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
-    # - Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
-    # - Longhorn (longhorn-system) manager, CSI plugin, CSI provisioner and resizer, and recurring-job pods reconcile its CRDs and volumes.
-    # - CloudNativePG operator (database) reconciles Cluster resources.
-    # - VictoriaMetrics operator config-init and config-reloader sidecars (observability) read config secrets.
-    # - Victoria Logs collector vlagent (observability) watches pods to label log streams.
-    # - T3 Code (development) runs read-only kubectl and flux commands for troubleshooting.
-    - macro: k8s_containers
-      override:
-        condition: append
-      condition: >
-        or (container.image.repository = "ghcr.io/gethomepage/homepage" and k8s.ns.name = "default")
-        or (container.image.repository = "quay.io/mongodb/mongodb-agent" and k8s.ns.name = "default" and proc.name = "readinessprobe")
-        or (container.name = "kube-rbac-proxy" and k8s.ns.name = "database")
-        or (container.name in ("longhorn-manager", "longhorn-csi-plugin", "csi-provisioner", "csi-resizer", "snapshot", "backup") and k8s.ns.name = "longhorn-system")
-        or (container.image.repository = "ghcr.io/cloudnative-pg/cloudnative-pg" and k8s.ns.name = "database" and container.name = "manager")
-        or (container.image.repository = "docker.io/victoriametrics/operator" and k8s.ns.name = "observability" and container.name in ("config-init", "config-reloader"))
-        or (container.image.repository = "docker.io/victoriametrics/vlagent" and k8s.ns.name = "observability")
-        or (container.name = "t3-code" and k8s.ns.name = "development" and proc.name in ("kubectl", "flux"))

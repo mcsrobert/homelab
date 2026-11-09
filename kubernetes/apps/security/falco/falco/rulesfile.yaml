@@ -12,4 +12,4 @@ spec:
       override:
         condition: append
       condition: >
-        or (container.image.repository = "docker.io/falcosecurity/artifact-operator" and k8s.ns.name = "security" and container.name = "artifact-operator" and proc.exepath = "/usr/bin/manager")
+        or (container.image.repository = "docker.io/falcosecurity/artifact-operator" and k8s.ns.name = "security" and container.name = "artifact-operator" and k8s.pod.name startswith "falco-" and proc.exepath = "/usr/bin/manager")

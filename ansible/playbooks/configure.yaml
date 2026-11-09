@@ -137,6 +137,18 @@
         sysctl_file: /etc/sysctl.d/90-inotify.conf
         reload: true
 
+    - name: Limit read-ahead on USB disks
+      ansible.builtin.copy:
+        dest: /etc/udev/rules.d/99-usb-read-ahead.rules
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", SUBSYSTEMS=="usb", ATTR{queue/read_ahead_kb}="128"
+      notify:
+        - Reload udev rules
+        - Apply udev rules to USB disks
+
     - name: Check if Armbian ramlog config exists
       ansible.builtin.stat:
         path: /etc/default/armbian-ramlog
@@ -167,3 +179,19 @@
       ansible.builtin.service:
         name: armbian-ramlog
         state: restarted
+
+    - name: Reload udev rules
+      ansible.builtin.command: udevadm control --reload
+      changed_when: true
+
+    - name: Apply udev rules to USB disks
+      ansible.builtin.command:
+        argv:
+          - udevadm
+          - trigger
+          - --action=change
+          - --subsystem-match=block
+          - --sysname-match=sd[a-z]
+          - --property-match=ID_USB_DRIVER=uas
+          - --property-match=ID_USB_DRIVER=usb-storage
+      changed_when: true
