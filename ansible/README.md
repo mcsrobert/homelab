@@ -44,6 +44,12 @@ mise run ansible-upgrade-os -- --limit raspberrypi
 | OS packages | `mise run ansible-upgrade-os` upgrades one node at a time and drains and reboots a node when a kernel package was installed since its last boot. It drains and uncordons the node from the controller, using the `cluster_context` context in `~/.kube/config`, and stops before the first node when that context cannot reach the cluster. Before draining a node and before moving on to the next one, it waits for Longhorn volumes and for every Deployment and StatefulSet to be ready, and stops if they do not recover. |
 | kube-vip    | The image is pinned in [kube-vip.yaml.j2](./playbooks/templates/kube-vip.yaml.j2) (Renovate bumps it). Run `mise run ansible-site`, or `ansible-playbook playbooks/kube-vip.yaml` from this directory. It updates one server at a time and waits for the API server to answer on the VIP before it moves on.                                                                                                                                                                                                                   |
 
+The OS upgrade marks the cordons it sets, so a rerun after an interrupted run
+uncordons the node, and it leaves cordons you set yourself alone. When a step
+fails, it uncordons the node only if the node is Ready, then stops. The old
+drain venv in `/opt/ansible_venv` on the servers is no longer used and can be
+deleted by hand.
+
 ## Inventory and fixed cluster token
 
 [Inventory](./inventory/hosts.yaml) retains the `k3s_cluster`, `server` and
