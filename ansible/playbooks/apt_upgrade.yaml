@@ -1,58 +1,53 @@
 ---
+# A separate play without serial, so every host is checked before the first
+# one is upgraded.
+- name: Validate the controller before upgrading any host
+  hosts: k3s_cluster
+  gather_facts: false
+  become: false
+  any_errors_fatal: true
+  module_defaults: &kubernetes_defaults
+    group/kubernetes.core.k8s:
+      context: "{{ cluster_context }}"
+      kubeconfig: "{{ lookup('env', 'HOME') ~ '/.kube/config' }}"
+
+  tasks:
+
+    - name: Check that the controller can reach the node
+      delegate_to: localhost
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Node
+        name: "{{ inventory_hostname }}"
+      register: preflight_node
+      failed_when: false
+      until: preflight_node.resources is defined
+      retries: 5
+      delay: 10
+
+    - name: Fail if the cluster is unreachable or lacks this node
+      ansible.builtin.assert:
+        that:
+          - preflight_node.resources | default([]) | length > 0
+        fail_msg: >-
+          The kubeconfig context "{{ cluster_context }}" cannot reach the cluster
+          or has no node named {{ inventory_hostname }}:
+          {{ preflight_node.msg | default('node not found') }}
+
+
 - name: Upgrade remote host
   hosts: k3s_cluster
   become: true
   serial: 1
   # Drain and uncordon run on the controller with the kubeconfig context that
   # k3s.orchestration.site sets up there.
-  module_defaults:
-    group/kubernetes.core.k8s:
-      context: "{{ cluster_context }}"
-      kubeconfig: "{{ lookup('env', 'HOME') ~ '/.kube/config' }}"
+  module_defaults: *kubernetes_defaults
 
   pre_tasks:
-
-    # Stop before the first node is upgraded when the controller cannot
-    # drain it.
-    - name: Check that the controller can reach the cluster
-      delegate_to: localhost
-      become: false
-      kubernetes.core.k8s_info:
-        api_version: v1
-        kind: Node
-      register: cluster_nodes
-      failed_when: false
-      until: cluster_nodes.resources is defined
-      retries: 5
-      delay: 10
-
-    - name: Fail if the cluster is unreachable or lacks these nodes
-      vars:
-        missing_nodes: >-
-          {{ ansible_play_hosts_all
-             | difference(cluster_nodes.resources | default([]) | map(attribute='metadata.name')) }}
-      ansible.builtin.assert:
-        that:
-          - cluster_nodes.resources is defined
-          - missing_nodes | length == 0
-        fail_msg: >-
-          The kubeconfig context "{{ cluster_context }}" cannot reach the cluster
-          or does not list every node of this play:
-          {{ cluster_nodes.msg | default('missing nodes: ' ~ (missing_nodes | join(', '))) }}
 
     - name: Update apt repo and cache
       ansible.builtin.apt:
         update_cache: true
-
-    # One-off cleanup of the venv the drain used to run from. Earlier versions
-    # of this playbook created it on every node, not only on servers.
-    # Its setup also installed pip/venv via apt; keep those packages because
-    # they may be operator-installed or required by other packages.
-    # Delete this task once it has run on every node.
-    - name: Remove the old drain venv
-      ansible.builtin.file:
-        path: /opt/ansible_venv
-        state: absent
 
   tasks:
 
@@ -83,11 +78,20 @@
 
     # An unmarked cordon belongs to the operator; a marked one may be
     # left over from an interrupted run and must be released by this play.
-    - name: Check whether the node is already cordoned
+    # An unmarked cordon belongs to the operator; a marked one may be
+    # left over from an interrupted run and must be released by this play.
+    - name: Read the node before upgrading it
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Node
+        name: "{{ inventory_hostname }}"
+      register: current_node
+
+    - name: Remember the node before upgrading it
       ansible.builtin.set_fact:
-        node_before_upgrade: >-
-          {{ cluster_nodes.resources
-             | selectattr('metadata.name', 'eq', inventory_hostname) | first }}
+        node_before_upgrade: "{{ current_node.resources | first }}"
 
     - name: Remember whether the node was cordoned before the upgrade
       when: *reboot_due
@@ -218,6 +222,24 @@
 
       rescue:
 
+        - name: Check whether the failed node is Ready
+          delegate_to: localhost
+          become: false
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Node
+            name: "{{ inventory_hostname }}"
+          register: rescue_node
+          failed_when: false
+
+        - name: Decide whether the node can safely be uncordoned
+          ansible.builtin.set_fact:
+            rescue_node_ready: >-
+              {{ rescue_node.resources | default([])
+                 | map(attribute='status.conditions') | flatten
+                 | selectattr('type', 'eq', 'Ready')
+                 | selectattr('status', 'eq', 'True') | list | length > 0 }}
+
         # Put a partly drained node back into service, then stop before the
         # next node is touched.
         - name: Uncordon node after a failed drain or reboot
@@ -230,7 +252,7 @@
           until: rescue_uncordon is not failed
           retries: 5
           delay: 10
-          when: not node_was_cordoned
+          when: not node_was_cordoned and rescue_node_ready
 
         - name: Remove the playbook cordon marker after rescue uncordoning
           delegate_to: localhost
@@ -240,13 +262,13 @@
           until: rescue_clear_cordon_marker is not failed
           retries: 5
           delay: 10
-          when: not node_was_cordoned
+          when: not node_was_cordoned and rescue_node_ready
 
         - name: Stop the upgrade
           ansible.builtin.fail:
             msg: >-
               "{{ ansible_failed_task.name }}" failed on {{ inventory_hostname }}
-              and the node was {{ 'left cordoned' if node_was_cordoned else 'uncordoned' }}:
+              and the node was {{ 'uncordoned' if not node_was_cordoned and rescue_node_ready else 'left cordoned' }}:
               {{ ansible_failed_result.msg | default('see the output above') }}
 
     # A run interrupted after reboot leaves no pending kernel update, but
