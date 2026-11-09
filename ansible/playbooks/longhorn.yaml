@@ -4,12 +4,6 @@
   become: true
   gather_facts: false
 
-  handlers:
-
-    - name: Update initramfs
-      ansible.builtin.command: update-initramfs -u
-      changed_when: true
-
   tasks:
 
     - name: Populate service facts
@@ -43,7 +37,6 @@
         owner: root
         group: root
         mode: "0644"
-      notify: Update initramfs
 
     # See: https://longhorn.io/kb/troubleshooting-volume-with-multipath/
     - name: Disable and mask multipathd
