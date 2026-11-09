@@ -71,3 +71,50 @@ spec:
           name: flaresolverr
         endpoints:
           - port: metrics
+    networkpolicies:
+      flaresolverr:
+        controller: flaresolverr
+        policyTypes:
+          - Ingress
+          - Egress
+        rules:
+          ingress:
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: prowlarr
+              ports:
+                - port: *port
+            - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: observability
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vmagent
+              ports:
+                - port: *metricsPort
+          # FlareSolverr opens untrusted sites in Chromium, so it only reaches DNS
+          # and the internet, not the cluster or the LAN.
+          egress:
+            - to:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: kube-system
+                  podSelector:
+                    matchLabels:
+                      k8s-app: kube-dns
+              ports:
+                - port: 53
+                  protocol: UDP
+                - port: 53
+                  protocol: TCP
+            - to:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+                    except:
+                      - 10.0.0.0/8
+                      - 100.64.0.0/10
+                      - 169.254.0.0/16
+                      - 172.16.0.0/12
+                      - 192.168.0.0/16
