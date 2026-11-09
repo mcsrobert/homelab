@@ -77,6 +77,10 @@
       when: &reboot_due new_kernel_packages.stdout | length > 0
       ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
 
+    - name: Wait for workloads before draining
+      when: *reboot_due
+      ansible.builtin.include_tasks: tasks/wait_for_workloads.yaml
+
     # An unmarked cordon belongs to the operator; a marked one may be
     # left over from an interrupted run and must be released by this play.
     - name: Check whether the node is already cordoned
@@ -296,3 +300,15 @@
 
     - name: Wait for Longhorn before the next node
       ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
+
+    # Evicted pods can pass readiness once and then fail under load on their
+    # new node, so give them time before checking.
+    - name: Let workloads settle after the reboot
+      when:
+        - *reboot_due
+        - not ansible_check_mode
+      ansible.builtin.pause:
+        seconds: 120
+
+    - name: Wait for workloads before the next node
+      ansible.builtin.include_tasks: tasks/wait_for_workloads.yaml
