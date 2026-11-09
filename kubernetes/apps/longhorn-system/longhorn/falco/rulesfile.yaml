@@ -7,7 +7,7 @@ spec:
   # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Longhorn (longhorn-system) manager, CSI plugin, CSI provisioner and resizer, and recurring-job pods reconcile its CRDs and volumes.
+    # Longhorn (longhorn-system) manager, CSI plugin, CSI attacher, provisioner, resizer and snapshotter, and recurring-job pods reconcile its CRDs and volumes.
     - macro: k8s_containers
       override:
         condition: append
@@ -21,6 +21,10 @@ spec:
         and container.name = "longhorn-csi-plugin"
         and k8s.pod.name startswith "longhorn-csi-plugin-")
         or (k8s.ns.name = "longhorn-system"
+        and container.image.repository = "docker.io/longhornio/csi-attacher"
+        and container.name = "csi-attacher"
+        and k8s.pod.name startswith "csi-attacher-")
+        or (k8s.ns.name = "longhorn-system"
         and container.image.repository = "docker.io/longhornio/csi-provisioner"
         and container.name = "csi-provisioner"
         and k8s.pod.name startswith "csi-provisioner-")
@@ -29,6 +33,10 @@ spec:
         and container.name = "csi-resizer"
         and k8s.pod.name startswith "csi-resizer-")
         or (k8s.ns.name = "longhorn-system"
+        and container.image.repository = "docker.io/longhornio/csi-snapshotter"
+        and container.name = "csi-snapshotter"
+        and k8s.pod.name startswith "csi-snapshotter-")
+        or (k8s.ns.name = "longhorn-system"
         and container.image.repository = "docker.io/longhornio/longhorn-manager"
         and container.name = "snapshot"
         and k8s.pod.name startswith "snapshot-")
@@ -36,3 +44,15 @@ spec:
         and container.image.repository = "docker.io/longhornio/longhorn-manager"
         and container.name = "backup"
         and k8s.pod.name startswith "backup-")
+    # The instance manager's engine runs iscsiadm to attach volumes, and iscsiadm
+    # loads the iSCSI kernel modules (finit_module) while discovering targets.
+    - rule: Linux Kernel Module Injection Detected
+      override:
+        condition: append
+      condition: >
+        and not (k8s.ns.name = "longhorn-system"
+        and container.image.repository = "docker.io/longhornio/longhorn-instance-manager"
+        and container.name = "instance-manager"
+        and k8s.pod.name startswith "instance-manager-"
+        and proc.name = "iscsiadm"
+        and proc.exepath = "/usr/sbin/iscsiadm")
