@@ -1,0 +1,72 @@
+---
+- name: Drain the node and verify no evictable pods remain
+  block:
+
+    - name: Count drain attempts
+      ansible.builtin.set_fact:
+        node_drain_attempt: "{{ node_drain_attempt | int + 1 }}"
+
+    - name: Drain node
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_drain:
+        name: "{{ inventory_hostname }}"
+        state: drain
+        delete_options:
+          delete_emptydir_data: true
+          ignore_daemonsets: true
+          force: true
+          terminate_grace_period: 60
+          wait_timeout: 180
+          wait_sleep: 15
+        pod_selectors: &pod_selectors
+          - app!=csi-attacher
+          - app!=csi-provisioner
+          - longhorn.io/component!=instance-manager
+
+    # An omitted namespace queries all namespaces. Keep the same exclusions
+    # as the drain, including pods it deliberately leaves running.
+    - name: List pods still assigned to the node
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        field_selectors:
+          - "spec.nodeName={{ inventory_hostname }}"
+        label_selectors: *pod_selectors
+      register: node_drain_pods
+
+    - name: Fail if evictable pods remain on the node
+      # Check mode only simulates eviction, so pods are expected to remain.
+      when: not ansible_check_mode
+      ansible.builtin.assert:
+        that:
+          - node_drain_remaining_pods | length == 0
+        fail_msg: "Pods remain after draining: {{ node_drain_remaining_pods | join(', ') }}"
+      vars:
+        node_drain_remaining_pods: >-
+          {%- set remaining = namespace(pods=[]) %}
+          {%- for pod in node_drain_pods.resources %}
+          {%- set owners = pod.metadata.ownerReferences | default([]) | map(attribute='kind') | list %}
+          {%- if 'DaemonSet' not in owners
+                and 'kubernetes.io/config.mirror' not in (pod.metadata.annotations | default({}))
+                and pod.status.phase | default('') not in ['Succeeded', 'Failed'] %}
+          {%- set remaining.pods = remaining.pods + [pod.metadata.namespace ~ '/' ~ pod.metadata.name] %}
+          {%- endif %}
+          {%- endfor %}
+          {{- remaining.pods -}}
+
+  rescue:
+
+    - name: Fail when drain retries are exhausted
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.msg | default('Drain failed; see the output above') }}"
+      when: node_drain_attempt | int > node_drain_retries | int
+
+    - name: Wait before retrying the drain
+      ansible.builtin.pause:
+        seconds: "{{ node_drain_delay }}"
+
+    - name: Retry draining and checking the node
+      ansible.builtin.include_tasks: drain_node.yaml

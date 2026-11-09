@@ -1,0 +1,50 @@
+---
+- name: Wait for Deployments to be ready
+  delegate_to: localhost
+  become: false
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+  register: workload_status
+  vars: &workloads_not_ready
+    workloads_not_ready: >-
+      {%- set not_ready = namespace(names=[]) %}
+      {%- for workload in workload_status.resources | default([]) %}
+      {%- if workload.status.readyReplicas | default(0) < workload.spec.replicas | default(1) %}
+      {%- set not_ready.names = not_ready.names + [workload.metadata.namespace ~ '/' ~ workload.metadata.name] %}
+      {%- endif %}
+      {%- endfor %}
+      {{- not_ready.names -}}
+  failed_when: false
+  until: &workloads_ready workload_status.resources is defined and workloads_not_ready | length == 0
+  retries: 40
+  delay: 15
+
+- name: Fail if Deployments are not ready
+  vars: *workloads_not_ready
+  ansible.builtin.assert:
+    that: *workloads_ready
+    fail_msg: >-
+      Deployments not ready: {{ workloads_not_ready | join(', ') }}
+      {{ workload_status.msg | default('') }}
+
+- name: Wait for StatefulSets to be ready
+  delegate_to: localhost
+  become: false
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: StatefulSet
+  register: workload_status
+  vars: *workloads_not_ready
+  failed_when: false
+  until: *workloads_ready
+  retries: 40
+  delay: 15
+
+- name: Fail if StatefulSets are not ready
+  vars: *workloads_not_ready
+  ansible.builtin.assert:
+    that: *workloads_ready
+    fail_msg: >-
+      StatefulSets not ready: {{ workloads_not_ready | join(', ') }}
+      {{ workload_status.msg | default('') }}
