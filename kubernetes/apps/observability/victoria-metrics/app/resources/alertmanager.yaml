@@ -22,6 +22,15 @@ route:
         - source = "falco"
       group_by:
         - rule
+    # Flux notification-controller events; Prometheus alerts lack this label.
+    - receiver: ntfy-flux
+      matchers:
+        - alertname =~ "Flux.+"
+        - reportingcontroller =~ ".+"
+      group_by:
+        - alertname
+        - namespace
+        - name
     - receiver: ntfy-urgent
       matchers:
         - severity = "critical"
@@ -57,6 +66,23 @@ receivers:
             "{{ if .labels.k8s_pod_name }}Pod: {{ .labels.k8s_ns_name }}/{{ .labels.k8s_pod_name }}\n{{ end }}"
             "{{ .annotations.description }}\n\n"
             "{{ end }}"
+          }}
+        send_resolved: false
+        max_alerts: 2
+  # Flux event alerts name the object only in the kind, namespace and name
+  # labels and carry the error in a message annotation, none of which ntfy's
+  # alertmanager template shows. They never resolve on their own; Alertmanager
+  # only expires them after resolve_timeout, so resolved notifications would
+  # not mean the resource recovered. trunc keeps two long error messages under
+  # ntfy's 4096 byte limit.
+  # https://fluxcd.io/flux/components/notification/providers/#prometheus-alertmanager
+  - name: ntfy-flux
+    webhook_configs:
+      - url: >-
+          https://ntfy.sh/{{ .NTFY_TOPIC }}?tpl=1&t={{ urlquery
+            "{{ with first .alerts }}{{ .labels.kind }} {{ .labels.namespace }}/{{ .labels.name }}: {{ .labels.reason }}{{ end }}"
+          }}&m={{ urlquery
+            "{{ range .alerts }}{{ .annotations.message | trunc 1500 }}\n\n{{ end }}"
           }}
         send_resolved: false
         max_alerts: 2
