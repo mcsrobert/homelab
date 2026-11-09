@@ -89,8 +89,6 @@
             msg: sshd configuration is invalid, drop-in removed
 
     - name: Configure k3s registry mirror cache Spegel
-      vars:
-        k3s_config_dir: /etc/rancher/k3s/
       block:
 
         - name: Ensure k3s config directory exists
