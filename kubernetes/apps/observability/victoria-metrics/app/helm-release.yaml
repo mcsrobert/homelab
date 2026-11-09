@@ -289,6 +289,21 @@ spec:
           enabled: false
 
     extraRules:
+      custom-cache-pressure:
+        groups:
+          - name: custom.cache-pressure
+            rules:
+              - alert: KubeContainerFileCachePressure
+                expr: |
+                  (container_memory_usage_bytes{container!="",pod!=""} / on(namespace,pod,container) group_left kube_pod_container_resource_limits{resource="memory"} > 0.95)
+                  and on(namespace,pod,container) (container_memory_cache{container!="",pod!=""} > 10485760)
+                  and on(namespace,pod,container) (rate(container_fs_reads_bytes_total{container!="",pod!=""}[5m]) > 1048576)
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: Container {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) may be thrashing its file cache.
+                  description: Container memory usage has remained above 95% of its limit, with more than 10 MiB of file cache and sustained filesystem reads above 1 MiB/s. Check cgroup memory pressure and disk activity on {{ $labels.node }}.
       custom-oom:
         groups:
           - name: custom.oom
