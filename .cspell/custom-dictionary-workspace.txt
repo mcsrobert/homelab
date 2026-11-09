@@ -184,10 +184,8 @@ leaderelection
 leases
 letsencrypt
 libmali
-librga
 librknn
 librknnrt
-librockchip
 lineinfile
 LINUXFAMILY
 listenersets
