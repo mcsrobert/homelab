@@ -46,3 +46,25 @@ spec:
   timeout: 5m
   wait: true
   prune: true
+  patches:
+    - target:
+        group: apps
+        version: v1
+        kind: Deployment
+        name: snapshot-controller
+      patch: |-
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: snapshot-controller
+        spec:
+          template:
+            spec:
+              containers:
+                - name: snapshot-controller
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 64Mi
+                    limits:
+                      memory: 256Mi

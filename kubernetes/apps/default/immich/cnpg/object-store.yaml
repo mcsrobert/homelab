@@ -5,6 +5,13 @@ kind: ObjectStore
 metadata:
   name: immich-garage-store
 spec:
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 128Mi
+      limits:
+        memory: 1Gi
   configuration:
     destinationPath: s3://immich-cnpg-backups/
     endpointURL: http://garage.default.svc.cluster.local:3900
