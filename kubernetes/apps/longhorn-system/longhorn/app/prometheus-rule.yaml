@@ -20,3 +20,17 @@ spec:
               Backup {{ $labels.backup }} of volume {{ $labels.volume }} (recurring job
               {{ $labels.recurring_job }}) is in the Error state. Check the backup target and the
               longhorn-manager logs.
+        # Volumes outside the backup group report 0 and are left out.
+        - alert: LonghornBackupStale
+          expr: |
+            time() - max by (volume, pvc, pvc_namespace) (longhorn_volume_last_backup_at > 0)
+            > 36 * 3600
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: >-
+              Longhorn volume {{ $labels.volume }} has no recent backup
+            description: >-
+              The last backup of volume {{ $labels.volume }} (PVC {{ $labels.pvc_namespace }}/{{ $labels.pvc }})
+              was {{ $value | humanizeDuration }} ago. The backup recurring job runs daily.
