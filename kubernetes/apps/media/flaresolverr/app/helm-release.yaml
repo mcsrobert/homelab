@@ -54,7 +54,7 @@ spec:
                 memory: 2Gi
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
+              readOnlyRootFilesystem: false  # undetected-chromedriver patches /app/chromedriver in place
               capabilities:
                 drop:
                   - ALL
