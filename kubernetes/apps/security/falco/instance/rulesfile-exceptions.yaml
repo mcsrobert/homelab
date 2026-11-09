@@ -7,6 +7,61 @@ spec:
   # Lower values load first, so this must stay above falco-rules (50).
   priority: 60
   inlineRules:
+    # These controllers need API access after rescheduling as well as at startup.
+    # Match each executable within its own image, container and namespace;
+    # other processes in those containers must still trigger this rule.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: controller_api_clients
+          fields:
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [=, =, =, =, =]
+          values:
+            # OpenBao validates Kubernetes auth with TokenReview.
+            - - security
+              - quay.io/openbao/openbao
+              - openbao
+              - bao
+              - /usr/bin/bao
+            # The injector watches admission webhook configuration.
+            - - security
+              - docker.io/hashicorp/vault-k8s
+              - sidecar-injector
+              - vault-k8s
+              - /bin/vault-k8s
+            # HTTP add-on components watch routing and scaling resources.
+            - - system
+              - ghcr.io/kedacore/http-add-on-operator
+              - keda-add-ons-http-operator
+              - operator
+              - /ko-app/operator
+            - - system
+              - ghcr.io/kedacore/http-add-on-scaler
+              - keda-add-ons-http-external-scaler
+              - scaler
+              - /ko-app/scaler
+            - - system
+              - ghcr.io/kedacore/http-add-on-interceptor
+              - keda-add-ons-http-interceptor
+              - interceptor
+              - /ko-app/interceptor
+            # NFD master publishes labels; GC removes stale feature resources.
+            - - system
+              - registry.k8s.io/nfd/node-feature-discovery
+              - master
+              - nfd-master
+              - /usr/bin/nfd-master
+            - - system
+              - registry.k8s.io/nfd/node-feature-discovery
+              - gc
+              - nfd-gc
+              - /usr/bin/nfd-gc
+      override:
+        exceptions: append
     # FlareSolverr patches and runs its bundled ChromeDriver to start Chromium.
     - rule: Drop and execute new binary in container
       exceptions:
