@@ -164,6 +164,12 @@ spec:
       spec:
         externalURL: https://alertmanager.${CLUSTER_DOMAIN}
         configSecret: alertmanager-config
+        configReloaderResources:
+          requests:
+            cpu: 5m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
         resources:
           requests:
             cpu: 25m
