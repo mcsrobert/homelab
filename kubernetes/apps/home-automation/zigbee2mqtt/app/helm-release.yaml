@@ -78,7 +78,7 @@ spec:
         forceRename: &dataVolume zigbee2mqtt-data
         retain: true
         accessMode: ReadWriteOnce
-        storageClass: longhorn-backup
+        storageClass: longhorn
         size: 1Gi
         volumeName: *dataVolume
         globalMounts:

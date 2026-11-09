@@ -78,7 +78,7 @@ spec:
         forceRename: &dataVolume mealie-data
         retain: true
         accessMode: ReadWriteOnce
-        storageClass: longhorn-backup
+        storageClass: longhorn
         size: 4Gi
         volumeName: *dataVolume
         globalMounts:

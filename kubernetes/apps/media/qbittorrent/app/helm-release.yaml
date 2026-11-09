@@ -131,7 +131,7 @@ spec:
         forceRename: &configVolume qbittorrent-config
         retain: true
         accessMode: ReadWriteOnce
-        storageClass: longhorn-backup
+        storageClass: longhorn
         size: 2Gi
         volumeName: *configVolume
         advancedMounts:
