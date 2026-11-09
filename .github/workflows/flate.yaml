@@ -31,6 +31,10 @@ jobs:
           filters: |
             kubernetes:
               - 'kubernetes/**'
+              - 'scripts/flate.sh'
+              - '.github/workflows/flate.yaml'
+              - '.pre-commit-config.yaml'
+              - 'mise.toml'
 
   flate-test:
     needs: changes
@@ -41,6 +45,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Flate
@@ -49,9 +54,7 @@ jobs:
           cache: true
 
       - name: Run flate test
-        run: |
-          unset FLATE_BASE  # TODO: Remove once flate v0.7.0 lands (home-operations/flate#1148)
-          flate test all --path kubernetes
+        run: bash scripts/flate.sh test all --path kubernetes
 
   flate-diff:
     needs: changes
@@ -80,9 +83,8 @@ jobs:
 
       - name: Run flate diff
         id: diff
-        continue-on-error: true  # TODO: Remove once flate v0.7.0 lands (home-operations/flate#1148)
         run: |
-          flate diff ${{ matrix.resources }} \
+          bash scripts/flate.sh diff ${{ matrix.resources }} \
             --path kubernetes \
             --output github > "$RUNNER_TEMP/diff.txt"
 
@@ -117,7 +119,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0  # FLATE_BASE=main needs origin/main to resolve
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Flate
@@ -142,10 +144,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p "$RUNNER_TEMP/kubeconform-cache"
-          unset FLATE_BASE  # TODO: Remove once flate v0.7.0 lands (home-operations/flate#1148)
-          flate build all --path kubernetes --no-progress \
-            --api-versions gateway.networking.k8s.io/v1/HTTPRoute \
-            | sed -E 's/\.\.PLACEHOLDER_[A-Z0-9_]+\.\./placeholder.example.com/g' \
+          bash scripts/flate.sh build all --path kubernetes --no-progress \
             | kubeconform \
               -cache "$RUNNER_TEMP/kubeconform-cache" \
               -strict \

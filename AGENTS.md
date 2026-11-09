@@ -153,9 +153,13 @@ hooks, which lint on commit and run `flate test` and `ansible-lint` on push.
 
 ```sh
 pre-commit run --all-files                  # all commit-stage hooks
-flate test all --path kubernetes            # build every Flux Kustomization
+bash scripts/flate.sh test all --path kubernetes  # build every Flux Kustomization
 kustomize build kubernetes/apps/<ns>/<app>/app
 ```
+
+`scripts/flate.sh` supplies dummy domain, email and Flux Web OAuth values and
+the HTTPRoute API capability for offline validation. Use it for local builds
+and diffs too; it never decrypts SOPS files or reads OpenBao.
 
 CI on pull requests runs yamllint, markdownlint, ansible-lint, `flate test`,
 kubeconform against the rendered manifests, zizmor and gitleaks, and posts a

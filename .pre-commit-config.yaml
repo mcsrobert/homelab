@@ -72,9 +72,9 @@ repos:
 
       - id: flate-test
         name: flate test
-        entry: flate test all --path kubernetes
+        entry: bash scripts/flate.sh test all --path kubernetes
         language: system
-        files: ^kubernetes/
+        files: ^(kubernetes/|scripts/flate\.sh$|\.pre-commit-config\.yaml$|mise\.toml$)
         pass_filenames: false
         stages: ["pre-push", "manual"]
 
