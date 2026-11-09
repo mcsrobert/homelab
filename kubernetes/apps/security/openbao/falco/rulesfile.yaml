@@ -1,0 +1,36 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: openbao-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # OpenBao validates Kubernetes auth; the injector watches webhook configuration.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: openbao_api_clients
+          fields:
+            - k8s.pod.name
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [startswith, =, =, =, =, =]
+          values:
+            - - openbao-
+              - security
+              - quay.io/openbao/openbao
+              - openbao
+              - bao
+              - /usr/bin/bao
+            - - openbao-agent-injector-
+              - security
+              - docker.io/hashicorp/vault-k8s
+              - sidecar-injector
+              - vault-k8s
+              - /bin/vault-k8s
+      override:
+        exceptions: append

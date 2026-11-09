@@ -1,0 +1,32 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: flaresolverr-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # FlareSolverr patches and runs its bundled ChromeDriver to start Chromium.
+    - rule: Drop and execute new binary in container
+      exceptions:
+        - name: flaresolverr_chromedriver
+          fields:
+            - k8s.pod.name
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - proc.exepath
+            - proc.pname
+            - user.uid
+          comps: [startswith, =, =, =, =, =, =]
+          values:
+            - - flaresolverr-
+              - media
+              - ghcr.io/flaresolverr/flaresolverr
+              - flaresolverr
+              - /app/chromedriver
+              - python
+              - 1000
+      override:
+        exceptions: append
