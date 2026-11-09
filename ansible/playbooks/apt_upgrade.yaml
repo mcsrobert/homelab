@@ -44,18 +44,15 @@
       ansible.builtin.apt:
         update_cache: true
 
-    # One-off cleanup of the venv the drain used to run from on a server.
+    # One-off cleanup of the venv the drain used to run from. Earlier versions
+    # of this playbook created it on every node, not only on servers.
     # Its setup also installed pip/venv via apt; keep those packages because
     # they may be operator-installed or required by other packages.
-    # Delete this block once it has run on every server.
+    # Delete this task once it has run on every node.
     - name: Remove the old drain venv
-      when: "'server' in group_names"
-      block:
-
-        - name: Remove the venv
-          ansible.builtin.file:
-            path: /opt/ansible_venv
-            state: absent
+      ansible.builtin.file:
+        path: /opt/ansible_venv
+        state: absent
 
   tasks:
 
