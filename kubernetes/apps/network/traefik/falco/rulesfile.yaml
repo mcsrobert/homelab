@@ -12,4 +12,4 @@ spec:
       override:
         condition: append
       condition: >
-        or (container.image.repository = "docker.io/library/traefik" and k8s.ns.name = "network" and container.name = "traefik" and proc.exepath = "/usr/local/bin/traefik")
+        or (container.image.repository = "docker.io/library/traefik" and k8s.ns.name = "network" and container.name = "traefik" and proc.exepath = "/usr/local/bin/traefik" and k8s.pod.name startswith "traefik-")

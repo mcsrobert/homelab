@@ -12,5 +12,38 @@ spec:
       override:
         condition: append
       condition: >
-        or (container.image.repository = "ghcr.io/kedacore/keda" and k8s.ns.name = "system" and container.name = "keda-operator" and proc.exepath = "/keda")
-        or (container.image.repository = "ghcr.io/kedacore/keda-admission-webhooks" and k8s.ns.name = "system" and container.name = "keda-admission-webhooks" and proc.exepath = "/keda-admission-webhooks")
+        or (container.image.repository = "ghcr.io/kedacore/keda" and k8s.ns.name = "system" and container.name = "keda-operator" and proc.exepath = "/keda" and k8s.pod.name startswith "keda-operator-")
+        or (container.image.repository = "ghcr.io/kedacore/keda-admission-webhooks" and k8s.ns.name = "system" and container.name = "keda-admission-webhooks" and proc.exepath = "/keda-admission-webhooks" and k8s.pod.name startswith "keda-admission-webhooks-")
+    # HTTP add-on components watch routing and scaling resources.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: keda_api_clients
+          fields:
+            - k8s.pod.name
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [startswith, =, =, =, =, =]
+          values:
+            - - keda-add-ons-http-controller-manager-
+              - system
+              - ghcr.io/kedacore/http-add-on-operator
+              - keda-add-ons-http-operator
+              - operator
+              - /ko-app/operator
+            - - keda-add-ons-http-external-scaler-
+              - system
+              - ghcr.io/kedacore/http-add-on-scaler
+              - keda-add-ons-http-external-scaler
+              - scaler
+              - /ko-app/scaler
+            - - keda-add-ons-http-interceptor-
+              - system
+              - ghcr.io/kedacore/http-add-on-interceptor
+              - keda-add-ons-http-interceptor
+              - interceptor
+              - /ko-app/interceptor
+      override:
+        exceptions: append

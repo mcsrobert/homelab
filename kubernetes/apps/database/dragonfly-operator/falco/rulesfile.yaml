@@ -1,0 +1,18 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: dragonfly-operator-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
+    - macro: k8s_containers
+      override:
+        condition: append
+      condition: >
+        or (k8s.ns.name = "database"
+        and k8s.pod.name startswith "dragonfly-operator-"
+        and container.image.repository = "quay.io/brancz/kube-rbac-proxy"
+        and container.name = "kube-rbac-proxy")
