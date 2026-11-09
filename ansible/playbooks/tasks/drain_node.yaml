@@ -38,6 +38,8 @@
       register: node_drain_pods
 
     - name: Fail if evictable pods remain on the node
+      # Check mode only simulates eviction, so pods are expected to remain.
+      when: not ansible_check_mode
       ansible.builtin.assert:
         that:
           - node_drain_remaining_pods | length == 0
