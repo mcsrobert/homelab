@@ -14,7 +14,9 @@ mise run install-ansible-collections
 ```
 
 This also runs as part of `mise run setup`. Run it again after upgrading Ansible
-to install the dependencies into the new Ansible environment.
+to install the dependencies into the new Ansible environment. Collections
+install into `ansible/.ansible/collections`. Ansible still searches the default
+`~/.ansible/collections` and `/usr/share/ansible/collections` after it.
 
 ## How to run
 
