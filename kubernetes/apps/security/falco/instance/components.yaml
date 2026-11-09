@@ -36,6 +36,14 @@ spec:
   replicas: 1
   podTemplateSpec:
     spec:
+      initContainers:
+        - name: wait-redis
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
       containers:
         - name: falcosidekick-ui
           env:

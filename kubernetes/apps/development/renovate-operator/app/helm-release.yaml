@@ -33,6 +33,12 @@ spec:
           - id_admin
     valkey:
       enabled: true
+      initResources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
       auth:
         enabled: false
       metrics:
