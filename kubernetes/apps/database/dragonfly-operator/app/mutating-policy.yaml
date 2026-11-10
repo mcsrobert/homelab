@@ -33,29 +33,53 @@ spec:
 apiVersion: policies.kyverno.io/v1
 kind: MutatingPolicy
 metadata:
-  name: dragonfly-add-instance-label
+  # Workaround for the operator reserving the instance label without adding it to pods.
+  # https://github.com/dragonflydb/dragonfly-operator/issues/585#issuecomment-6766564397
+  name: dragonfly-add-pod-instance-label
   annotations:
-    policies.kyverno.io/title: Dragonfly Add Instance Label
+    policies.kyverno.io/title: Dragonfly Add Pod Instance Label
     policies.kyverno.io/description: >-
-      Automatically add the instance label to Dragonfly CRs.
+      Preserve instance selectors for Homepage, network policies and topology
+      spreading. The operator reserves the key in Dragonfly specs but does not
+      put it on pods. Copy its stable app label directly onto existing and new
+      pods, without restarting the OnDelete StatefulSets.
 spec:
+  evaluation:
+    mutateExisting:
+      enabled: true
+    skipBackgroundRequests: false
   matchConstraints:
     resourceRules:
-      - apiGroups: ["dragonflydb.io"]
-        apiVersions: ["v1alpha1"]
+      - apiGroups: [""]
+        apiVersions: ["v1"]
         operations: ["CREATE", "UPDATE"]
-        resources: ["dragonflies"]
+        resources: ["pods"]
+    objectSelector:
+      matchLabels:
+        app.kubernetes.io/name: dragonfly
+        app.kubernetes.io/part-of: dragonfly
   matchConditions:
+    - name: dragonfly-statefulset-pod
+      expression: >-
+        has(object.metadata.labels) &&
+        "app" in object.metadata.labels &&
+        has(object.metadata.ownerReferences) &&
+        object.metadata.ownerReferences.exists(owner,
+          owner.apiVersion == "apps/v1" &&
+          owner.kind == "StatefulSet" &&
+          has(owner.controller) && owner.controller &&
+          owner.name == object.metadata.labels["app"])
     - name: instance-label-missing
       expression: >-
-        !has(object.spec.labels) ||
-        !("app.kubernetes.io/instance" in object.spec.labels)
+        !("app.kubernetes.io/instance" in object.metadata.labels)
   mutations:
     - patchType: ApplyConfiguration
       applyConfiguration:
-        expression: >-
+        expression: |
           Object{
-            spec: Object.spec{
-              labels: {"app.kubernetes.io/instance": object.metadata.name}
+            metadata: Object.metadata{
+              labels: {
+                "app.kubernetes.io/instance": object.metadata.labels["app"]
+              }
             }
           }
