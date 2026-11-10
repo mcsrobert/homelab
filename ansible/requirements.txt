@@ -1,2 +1,2 @@
-kubernetes==35.0.0
+kubernetes==37.0.2
 netaddr
