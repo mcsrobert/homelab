@@ -9,6 +9,7 @@
       matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
       matchPackageNames: [
         '!k3s-io/k3s',
+        '!kubernetes',
         '!kubernetes/kubernetes',
         '!longhorn',
       ],
