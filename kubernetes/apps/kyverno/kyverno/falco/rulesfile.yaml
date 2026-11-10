@@ -13,3 +13,55 @@ spec:
         condition: append
       condition: >
         or (container.image.repository = "reg.kyverno.io/kyverno/kyverno" and k8s.ns.name = "kyverno" and container.name = "kyverno" and proc.exepath = "/ko-app/kyverno" and k8s.pod.name startswith "kyverno-admission-controller-")
+    # These controllers watch and reconcile resources through the Kubernetes API.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: kyverno_controller_api_clients
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [=, startswith, =, =, =, =]
+          values:
+            - - kyverno
+              - kyverno-background-controller-
+              - reg.kyverno.io/kyverno/background-controller
+              - controller
+              - background-cont
+              - /ko-app/background-controller
+            - - kyverno
+              - kyverno-cleanup-controller-
+              - reg.kyverno.io/kyverno/cleanup-controller
+              - controller
+              - cleanup-control
+              - /ko-app/cleanup-controller
+            - - kyverno
+              - kyverno-reports-controller-
+              - reg.kyverno.io/kyverno/reports-controller
+              - controller
+              - reports-control
+              - /ko-app/reports-controller
+        # Helm's post-upgrade hook migrates stored CRD resource versions.
+        - name: kyverno_resource_migration
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - proc.cmdline
+          comps: [=, startswith, =, =, =, =, startswith]
+          values:
+            - - kyverno
+              - kyverno-migrate-resources-
+              - reg.kyverno.io/kyverno/kyverno-cli
+              - kyverno-cli
+              - kubectl-kyverno
+              - /ko-app/kubectl-kyverno
+              - "kubectl-kyverno migrate --resource "
+      override:
+        exceptions: append
