@@ -199,9 +199,8 @@ spec:
           - Ingress
         rules:
           ingress:
-            # Traefik serves the route. The other media apps call the API directly.
+            # Web clients and media app integrations use the Traefik route.
             - from:
-                - podSelector: {}
                 - namespaceSelector:
                     matchLabels:
                       kubernetes.io/metadata.name: network
