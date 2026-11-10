@@ -13,3 +13,35 @@ spec:
         condition: append
       condition: >
         or (container.image.repository = "ghcr.io/tensorchord/cloudnative-vectorchord" and k8s.ns.name = "default" and container.name = "postgres" and proc.exepath = "/controller/manager" and k8s.pod.name startswith "immich-cnpg-")
+    # PostgreSQL invokes restore_command through a shell during standby recovery.
+    # Only allow the CNPG helper with hex WAL/history names and fixed destinations.
+    - rule: Run shell untrusted
+      exceptions:
+        - name: immich_cnpg_wal_restore
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - proc.pexepath
+            - proc.pcmdline
+            - user.uid
+            - proc.tty
+            - proc.cmdline
+          comps: [=, startswith, =, =, =, =, =, =, =, =, regex]
+          values:
+            - - "default"
+              - "immich-cnpg-"
+              - "ghcr.io/tensorchord/cloudnative-vectorchord"
+              - "postgres"
+              - "sh"
+              - "/usr/bin/dash"
+              - "/usr/lib/postgresql/18/bin/postgres"
+              - "postgres -D /var/lib/postgresql/data/pgdata"
+              - 26
+              - 0
+              - 'sh -c /controller/manager wal-restore --log-destination /controller/log/postgres[.]json ([0-9A-F]{24} pg_wal/RECOVERYXLOG|[0-9A-F]{8}[.]history pg_wal/RECOVERYHISTORY)'
+      override:
+        exceptions: append
