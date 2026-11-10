@@ -181,10 +181,13 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
 - Fill in every section of the PR template. Under "Upstream docs", link the
   upstream documentation for any application behavior the PR configures or
   changes, such as an OIDC integration, a chart value or a feature flag.
-- Label the PR with the existing labels that match: `bug` for fixes,
-  `enhancement` for features. The labeler workflow adds `ci`, `documentation`,
-  `security` and `observability` from the changed paths. Check
-  `gh label list`. Do not create labels or apply the Renovate-managed
+- Label the PR with the existing labels that match: `kind/bug` for fixes,
+  `kind/enhancement` for features and `kind/chore` for maintenance and cleanup.
+  The labeler workflow adds `kind/documentation`, `area/ansible`, `area/ci`,
+  `area/network`, `area/observability`, `area/security` and `area/storage`
+  from the changed paths. Add an existing area label manually when the
+  change belongs to that area but its path is not covered by the labeler.
+  Check `gh label list`. Do not create labels or apply the Renovate-managed
   `renovate/*` and `type/*` labels. Leave the PR unlabelled if nothing fits.
 - After opening the PR, wait for its CI checks to finish. Fix failures caused
   by your change on the same branch and wait again. Report unrelated or
