@@ -1,0 +1,36 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: policy-reporter-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # Reporter watches policy reports; the UI starts a Kubernetes controller manager.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: policy_reporter_api_clients
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [=, startswith, =, =, =, =]
+          values:
+            - - kyverno
+              - policy-reporter-
+              - ghcr.io/kyverno/policy-reporter
+              - policy-reporter
+              - policyreporter
+              - /app/policyreporter
+            - - kyverno
+              - policy-reporter-ui-
+              - ghcr.io/kyverno/policy-reporter-ui
+              - policy-reporter-ui
+              - policy-reporter
+              - /ko-app/policy-reporter-ui
+      override:
+        exceptions: append
