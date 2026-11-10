@@ -111,28 +111,6 @@ spec:
                 token_policies                   = ["eso-readonly"]
               }
             }
-            request "write-openbao-rotation-exporter-policy" {
-              operation = "update"
-              path      = "sys/policies/acl/openbao-rotation-exporter"
-              data = {
-                policy = <<EOT
-                  path "homelab/metadata/*" { capabilities = ["read"] }
-                EOT
-              }
-            }
-
-            request "map-openbao-rotation-exporter-role" {
-              operation = "update"
-              path      = "auth/kubernetes/role/openbao-rotation-exporter"
-              data = {
-                bound_service_account_names      = ["openbao-rotation-exporter"]
-                bound_service_account_namespaces = ["security"]
-                token_ttl                        = "5m"
-                token_max_ttl                    = "5m"
-                token_policies                   = ["openbao-rotation-exporter"]
-              }
-            }
-
             request "enable-ldap-auth" {
               operation = "update"
               path      = "sys/auth/ldap"
