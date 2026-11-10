@@ -1,5 +1,10 @@
 ---
-ci:
+area/ansible:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ansible/**
+
+area/ci:
   - changed-files:
       - any-glob-to-any-file:
           - .github/workflows/**
@@ -10,12 +15,26 @@ ci:
           - .gitleaks.toml
           - .gitleaksignore
 
-documentation:
+area/network:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/**
+          - kubernetes/apps/cert-manager/**
+          - kubernetes/apps/kube-system/gateway-api/**
+
+area/storage:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/longhorn-system/**
+          - kubernetes/apps/default/garage/**
+          - kubernetes/apps/**/scheduled-backup.yaml
+
+kind/documentation:
   - changed-files:
       - all-globs-to-all-files:
           - "**/*.md"
 
-security:
+area/security:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/security/**
@@ -24,7 +43,7 @@ security:
           - .gitleaks.toml
           - .gitleaksignore
 
-observability:
+area/observability:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/observability/**
