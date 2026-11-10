@@ -17,11 +17,24 @@ spec:
         auth:
           kubernetes:
             role: openbao-rotation-exporter
+            jwtFile: /var/run/secrets/openbao/token
       keys:
-        tailscale/auth-keys/t3-code: 90d
-    serviceMonitor:
-      interval: 5m
-      scrapeTimeout: 1m
+        tailscale/auth-keys/t3-code: 80d
+        tailscale/auth-keys/home-lan-router: 80d
+    serviceAccount:
+      automount: false
+    extraVolumes:
+      - name: openbao-token
+        projected:
+          sources:
+            - serviceAccountToken:
+                path: token
+                audience: openbao
+                expirationSeconds: 600
+    extraVolumeMounts:
+      - name: openbao-token
+        mountPath: /var/run/secrets/openbao
+        readOnly: true
     networkPolicy:
       enabled: true
       from:
