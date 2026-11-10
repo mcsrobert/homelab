@@ -11,6 +11,15 @@
       packageNameTemplate: 'k3s-io/k3s',
       extractVersionTemplate: '^(?<version>v\\d+\\.\\d+\\.\\d+)(\\+k3s\\d+)?$',
     },
+    {
+      description: 'Read the Python client version Y.Z.P as Kubernetes 1.Y.Z plus client patch P, so a new Kubernetes minor is a minor update. Pre-releases do not match and are skipped',
+      customType: 'regex',
+      managerFilePatterns: ['/requirements\\.txt$/'],
+      matchStrings: ['(^|\\n)kubernetes==(?<currentValue>\\d+\\.\\d+\\.\\d+)'],
+      datasourceTemplate: 'pypi',
+      depNameTemplate: 'kubernetes',
+      versioningTemplate: 'regex:^(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)$',
+    },
   ],
   packageRules: [
     {
@@ -31,13 +40,20 @@
       extractVersion: '^v(?<version>\\d+\\.\\d+\\.\\d+)\\+k3s\\d+$',
     },
     {
-      description: 'Upgrade k3s, kubectl and schemas together. Automerge is excluded in merge-schedule.json5',
+      description: 'Leave the Python client to the custom manager above. Its pep440 versioning would make a new Kubernetes minor a major update, and regex versioning would drop the == on update',
+      matchManagers: ['pip_requirements'],
+      matchDepNames: ['kubernetes'],
+      enabled: false,
+    },
+    {
+      description: 'Upgrade k3s, kubectl, the Python client and schemas together. Automerge is excluded in merge-schedule.json5',
       groupName: 'k3s',
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchDepNames: [
         'k3s-io/k3s',
         'kubernetes/kubernetes',
         'kubectl',
+        'kubernetes',
       ],
     },
   ],
