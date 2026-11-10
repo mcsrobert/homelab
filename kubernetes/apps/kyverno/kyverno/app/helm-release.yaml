@@ -58,6 +58,16 @@ spec:
                 - update
                 - patch
             - apiGroups:
+                - ""
+              resources:
+                - pods
+              verbs:
+                - get
+                - list
+                - watch
+                - update
+                - patch
+            - apiGroups:
                 - notification.toolkit.fluxcd.io
               resources:
                 - providers
