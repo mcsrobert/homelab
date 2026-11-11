@@ -24,6 +24,7 @@
         'renovate/renovate',
         'renovatebot/pre-commit-hooks',
         'jdx/mise',
+        'ghcr.io/grafana-community/helm-charts/grafana',
       ],
       schedule: ['on sunday after 20:00 and before 22:00'],
     }
