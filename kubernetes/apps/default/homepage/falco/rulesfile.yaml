@@ -13,18 +13,18 @@ spec:
         # PR #1251; retained Nov 5-6 events report the truncated Next.js process name.
         - name: homepage_api_clients
           fields:
-            - container.image.repository
             - k8s.ns.name
-            - container.name
             - k8s.pod.name
+            - container.image.repository
+            - container.name
             - proc.name
             - proc.exepath
-          comps: [=, =, =, startswith, =, =]
+          comps: [=, startswith, =, =, =, =]
           values:
-            - - ghcr.io/gethomepage/homepage
-              - default
-              - homepage
+            - - default
               - homepage-
+              - ghcr.io/gethomepage/homepage
+              - homepage
               - "next-server (v"
               - /usr/local/bin/node
       override:

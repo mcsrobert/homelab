@@ -19,8 +19,8 @@ spec:
             - container.name
             - proc.name
             - proc.exepath
-            - proc.pname
             - proc.cmdline
+            - proc.pname
             - user.uid
             - evt.arg.type
             - evt.arg.proto
@@ -32,8 +32,8 @@ spec:
               - home-assistant
               - python3
               - /usr/local/bin/python3.14
-              - catatonit
               - python3 -P -m homeassistant --config /config
+              - catatonit
               - 12000
               - 524291
               - 768

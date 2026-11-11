@@ -12,18 +12,18 @@ spec:
       exceptions:
         - name: immich_api_clients
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
-            - k8s.pod.name
-          comps: [=, =, =, =, startswith]
+          comps: [=, startswith, =, =, =]
           values:
-            - - ghcr.io/tensorchord/cloudnative-vectorchord
-              - default
+            - - default
+              - immich-cnpg-
+              - ghcr.io/tensorchord/cloudnative-vectorchord
               - postgres
               - /controller/manager
-              - immich-cnpg-
       override:
         exceptions: append
     # PostgreSQL invokes restore_command through a shell during standby recovery.
@@ -38,12 +38,12 @@ spec:
             - container.name
             - proc.name
             - proc.exepath
+            - proc.cmdline
+            - proc.tty
             - proc.pexepath
             - proc.pcmdline
             - user.uid
-            - proc.tty
-            - proc.cmdline
-          comps: [=, startswith, =, =, =, =, =, =, =, =, regex]
+          comps: [=, startswith, =, =, =, =, regex, =, =, =, =]
           values:
             - - default
               - immich-cnpg-
@@ -51,10 +51,10 @@ spec:
               - postgres
               - sh
               - /usr/bin/dash
+              - 'sh -c /controller/manager wal-restore --log-destination /controller/log/postgres[.]json ([0-9A-F]{24} pg_wal/RECOVERYXLOG|[0-9A-F]{8}[.]history pg_wal/RECOVERYHISTORY)'
+              - 0
               - /usr/lib/postgresql/18/bin/postgres
               - postgres -D /var/lib/postgresql/data/pgdata
               - 26
-              - 0
-              - 'sh -c /controller/manager wal-restore --log-destination /controller/log/postgres[.]json ([0-9A-F]{24} pg_wal/RECOVERYXLOG|[0-9A-F]{8}[.]history pg_wal/RECOVERYHISTORY)'
       override:
         exceptions: append

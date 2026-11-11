@@ -12,18 +12,18 @@ spec:
       exceptions:
         - name: renovate_operator_api_clients
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
-            - k8s.pod.name
-          comps: [=, =, =, =, startswith]
+          comps: [=, startswith, =, =, =]
           values:
-            - - ghcr.io/mogenius/renovate-operator
-              - development
+            - - development
+              - renovate-operator-
+              - ghcr.io/mogenius/renovate-operator
               - renovate-operator
               - /app/renovate-operator
-              - renovate-operator-
       override:
         exceptions: append
     # The chart's pre-install/pre-upgrade hook applies its CRDs to the API server.
@@ -31,19 +31,19 @@ spec:
       exceptions:
         - name: renovate_operator_crd_install_api
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
             - proc.args
-            - k8s.pod.name
-          comps: [=, =, =, =, =, startswith]
+          comps: [=, startswith, =, =, =, =]
           values:
-            - - registry.k8s.io/kubectl
-              - development
+            - - development
+              - renovate-operator-crd-install-
+              - registry.k8s.io/kubectl
               - kubectl
               - /bin/kubectl
               - apply --server-side --force-conflicts -f /crd
-              - renovate-operator-crd-install-
       override:
         exceptions: append

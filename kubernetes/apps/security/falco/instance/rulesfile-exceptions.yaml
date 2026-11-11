@@ -21,21 +21,21 @@ spec:
       exceptions:
         - name: armbian_ramlog_postrotate
           fields:
+            - container.id
             - proc.name
             - proc.exepath
-            - proc.pname
             - proc.cmdline
+            - proc.pname
             - user.uid
-            - container.id
             - fd.directory
           comps: [=, =, =, =, =, =, =]
           values:
-            - - armbian-ramlog
-              - /usr/bin/bash
+            - - host
               - armbian-ramlog
+              - /usr/bin/bash
               - armbian-ramlog /usr/lib/armbian/armbian-ramlog postrotate
+              - armbian-ramlog
               - 0
-              - host
               - /var/log
       override:
         exceptions: append
