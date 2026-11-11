@@ -12,17 +12,17 @@ spec:
       exceptions:
         - name: falco_api_clients
           fields:
-            - container.image.repository
             - k8s.ns.name
-            - container.name
             - k8s.pod.name
+            - container.image.repository
+            - container.name
             - proc.exepath
-          comps: [=, =, =, startswith, =]
+          comps: [=, startswith, =, =, =]
           values:
-            - - docker.io/falcosecurity/artifact-operator
-              - security
-              - artifact-operator
+            - - security
               - falco-
+              - docker.io/falcosecurity/artifact-operator
+              - artifact-operator
               - /usr/bin/manager
       override:
         exceptions: append

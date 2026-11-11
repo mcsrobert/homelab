@@ -12,17 +12,17 @@ spec:
       exceptions:
         - name: flaresolverr_chromedriver
           fields:
-            - k8s.pod.name
             - k8s.ns.name
+            - k8s.pod.name
             - container.image.repository
             - container.name
             - proc.exepath
             - proc.pname
             - user.uid
-          comps: [startswith, =, =, =, =, =, =]
+          comps: [=, startswith, =, =, =, =, =]
           values:
-            - - flaresolverr-
-              - media
+            - - media
+              - flaresolverr-
               - ghcr.io/flaresolverr/flaresolverr
               - flaresolverr
               - /app/chromedriver

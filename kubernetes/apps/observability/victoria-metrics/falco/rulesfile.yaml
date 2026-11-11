@@ -13,46 +13,46 @@ spec:
       exceptions:
         - name: victoria_metrics_operator_and_sync_api
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
-            - k8s.pod.name
-          comps: [=, =, =, =, startswith]
+          comps: [=, startswith, =, =, =]
           values:
-            - - docker.io/victoriametrics/operator
-              - observability
+            - - observability
+              - victoria-metrics-operator-
+              - docker.io/victoriametrics/operator
               - operator
               - /app
-              - victoria-metrics-operator-
-            - - ghcr.io/victoriametrics/sync-job
-              - observability
+            - - observability
+              - victoria-metrics-sync-job-
+              - ghcr.io/victoriametrics/sync-job
               - sync-job
               - /sync-job
-              - victoria-metrics-sync-job-
         - name: victoria_metrics_config_api
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
-            - k8s.pod.name
-          comps: [=, =, in, =, startswith]
+          comps: [=, startswith, =, in, =]
           values:
-            - - docker.io/victoriametrics/operator
-              - observability
-              - [config-init, config-reloader]
-              - /app
+            - - observability
               - vmagent-victoria-metrics-
-            - - docker.io/victoriametrics/operator
-              - observability
+              - docker.io/victoriametrics/operator
               - [config-init, config-reloader]
               - /app
+            - - observability
               - vmalert-victoria-metrics-
-            - - docker.io/victoriametrics/operator
-              - observability
+              - docker.io/victoriametrics/operator
               - [config-init, config-reloader]
               - /app
+            - - observability
               - vmalertmanager-victoria-metrics-
+              - docker.io/victoriametrics/operator
+              - [config-init, config-reloader]
+              - /app
       override:
         exceptions: append

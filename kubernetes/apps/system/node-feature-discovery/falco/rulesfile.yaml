@@ -12,18 +12,18 @@ spec:
       exceptions:
         - name: node_feature_discovery_worker_api
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
-            - k8s.pod.name
-          comps: [=, =, =, =, startswith]
+          comps: [=, startswith, =, =, =]
           values:
-            - - registry.k8s.io/nfd/node-feature-discovery
-              - system
+            - - system
+              - node-feature-discovery-worker-
+              - registry.k8s.io/nfd/node-feature-discovery
               - worker
               - /usr/bin/nfd-worker
-              - node-feature-discovery-worker-
       override:
         exceptions: append
     # The master publishes labels; GC removes stale feature resources.
@@ -31,22 +31,22 @@ spec:
       exceptions:
         - name: node_feature_discovery_api_clients
           fields:
-            - k8s.pod.name
             - k8s.ns.name
+            - k8s.pod.name
             - container.image.repository
             - container.name
             - proc.name
             - proc.exepath
-          comps: [startswith, =, =, =, =, =]
+          comps: [=, startswith, =, =, =, =]
           values:
-            - - node-feature-discovery-master-
-              - system
+            - - system
+              - node-feature-discovery-master-
               - registry.k8s.io/nfd/node-feature-discovery
               - master
               - nfd-master
               - /usr/bin/nfd-master
-            - - node-feature-discovery-gc-
-              - system
+            - - system
+              - node-feature-discovery-gc-
               - registry.k8s.io/nfd/node-feature-discovery
               - gc
               - nfd-gc

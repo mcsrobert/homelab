@@ -154,6 +154,8 @@ structure. Good references:
   `security/falco/instance/rulesfile-exceptions.yaml`.
 - Scope exceptions to the verified behavior that needs them, so unrelated
   activity remains covered.
+- Order fields by namespace, pod, image, container, process, parent, user, then
+  event/target.
 
 ## Validation
 

@@ -12,23 +12,23 @@ spec:
       exceptions:
         - name: keda_core_api_clients
           fields:
-            - container.image.repository
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
             - container.name
             - proc.exepath
-            - k8s.pod.name
-          comps: [=, =, =, =, startswith]
+          comps: [=, startswith, =, =, =]
           values:
-            - - ghcr.io/kedacore/keda
-              - system
+            - - system
+              - keda-operator-
+              - ghcr.io/kedacore/keda
               - keda-operator
               - /keda
-              - keda-operator-
-            - - ghcr.io/kedacore/keda-admission-webhooks
-              - system
+            - - system
+              - keda-admission-webhooks-
+              - ghcr.io/kedacore/keda-admission-webhooks
               - keda-admission-webhooks
               - /keda-admission-webhooks
-              - keda-admission-webhooks-
       override:
         exceptions: append
     # HTTP add-on components watch routing and scaling resources.
@@ -36,28 +36,28 @@ spec:
       exceptions:
         - name: keda_api_clients
           fields:
-            - k8s.pod.name
             - k8s.ns.name
+            - k8s.pod.name
             - container.image.repository
             - container.name
             - proc.name
             - proc.exepath
-          comps: [startswith, =, =, =, =, =]
+          comps: [=, startswith, =, =, =, =]
           values:
-            - - keda-add-ons-http-controller-manager-
-              - system
+            - - system
+              - keda-add-ons-http-controller-manager-
               - ghcr.io/kedacore/http-add-on-operator
               - keda-add-ons-http-operator
               - operator
               - /ko-app/operator
-            - - keda-add-ons-http-external-scaler-
-              - system
+            - - system
+              - keda-add-ons-http-external-scaler-
               - ghcr.io/kedacore/http-add-on-scaler
               - keda-add-ons-http-external-scaler
               - scaler
               - /ko-app/scaler
-            - - keda-add-ons-http-interceptor-
-              - system
+            - - system
+              - keda-add-ons-http-interceptor-
               - ghcr.io/kedacore/http-add-on-interceptor
               - keda-add-ons-http-interceptor
               - interceptor

@@ -13,35 +13,35 @@ spec:
         # Exact captured path; a tool upgrade alerts until its identity is verified.
         - name: t3_code_kubectl_api
           fields:
-            - container.name
             - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
             - proc.name
             - proc.exepath
-            - container.image.repository
-            - k8s.pod.name
-          comps: [=, =, =, =, =, startswith]
+          comps: [=, startswith, =, =, =, =]
           values:
-            - - t3-code
-              - development
+            - - development
+              - t3-code-
+              - docker.io/library/node
+              - t3-code
               - kubectl
               - /home/node/.local/share/mise/installs/kubectl/1.37.1/kubectl
-              - docker.io/library/node
-              - t3-code-
         # Disabled: PR #1253 allowed flux by name, without a captured executable.
         # Re-enable only after an API event establishes its process identity.
         # - name: t3_code_flux_api
         #   fields:
-        #     - container.name
         #     - k8s.ns.name
-        #     - proc.name
-        #     - container.image.repository
         #     - k8s.pod.name
-        #   comps: [=, =, =, =, startswith]
+        #     - container.image.repository
+        #     - container.name
+        #     - proc.name
+        #   comps: [=, startswith, =, =, =]
         #   values:
-        #     - - t3-code
-        #       - development
-        #       - flux
-        #       - docker.io/library/node
+        #     - - development
         #       - t3-code-
+        #       - docker.io/library/node
+        #       - t3-code
+        #       - flux
       override:
         exceptions: append

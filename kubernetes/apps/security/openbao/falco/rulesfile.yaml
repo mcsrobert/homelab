@@ -12,22 +12,22 @@ spec:
       exceptions:
         - name: openbao_api_clients
           fields:
-            - k8s.pod.name
             - k8s.ns.name
+            - k8s.pod.name
             - container.image.repository
             - container.name
             - proc.name
             - proc.exepath
-          comps: [startswith, =, =, =, =, =]
+          comps: [=, startswith, =, =, =, =]
           values:
-            - - openbao-
-              - security
+            - - security
+              - openbao-
               - quay.io/openbao/openbao
               - openbao
               - bao
               - /usr/bin/bao
-            - - openbao-agent-injector-
-              - security
+            - - security
+              - openbao-agent-injector-
               - docker.io/hashicorp/vault-k8s
               - sidecar-injector
               - vault-k8s

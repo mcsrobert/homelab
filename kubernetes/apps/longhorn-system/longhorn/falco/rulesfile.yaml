@@ -14,59 +14,59 @@ spec:
         - name: longhorn_api_clients
           fields:
             - k8s.ns.name
+            - k8s.pod.name
             - container.image.repository
             - container.name
-            - k8s.pod.name
             - proc.name
             - proc.exepath
-          comps: [=, =, =, startswith, =, =]
+          comps: [=, startswith, =, =, =, =]
           values:
             - - longhorn-system
+              - longhorn-manager-
               - docker.io/longhornio/longhorn-manager
               - longhorn-manager
-              - longhorn-manager-
               - longhorn-manage
               - /usr/local/sbin/longhorn-manager
             - - longhorn-system
+              - longhorn-csi-plugin-
               - docker.io/longhornio/longhorn-manager
               - longhorn-csi-plugin
-              - longhorn-csi-plugin-
               - longhorn-manage
               - /usr/local/sbin/longhorn-manager
             - - longhorn-system
+              - csi-attacher-
               - docker.io/longhornio/csi-attacher
               - csi-attacher
-              - csi-attacher-
               - csi-attacher
               - /csi-attacher
             - - longhorn-system
+              - csi-provisioner-
               - docker.io/longhornio/csi-provisioner
               - csi-provisioner
-              - csi-provisioner-
               - csi-provisioner
               - /csi-provisioner
             - - longhorn-system
+              - csi-resizer-
               - docker.io/longhornio/csi-resizer
               - csi-resizer
-              - csi-resizer-
               - csi-resizer
               - /csi-resizer
             - - longhorn-system
+              - csi-snapshotter-
               - docker.io/longhornio/csi-snapshotter
               - csi-snapshotter
-              - csi-snapshotter-
               - csi-snapshotter
               - /csi-snapshotter
             - - longhorn-system
+              - snapshot-
               - docker.io/longhornio/longhorn-manager
               - snapshot
-              - snapshot-
               - longhorn-manage
               - /usr/local/sbin/longhorn-manager
             - - longhorn-system
+              - backup-
               - docker.io/longhornio/longhorn-manager
               - backup
-              - backup-
               - longhorn-manage
               - /usr/local/sbin/longhorn-manager
       override:
@@ -78,17 +78,17 @@ spec:
         - name: longhorn_iscsi_modules
           fields:
             - k8s.ns.name
+            - k8s.pod.name
             - container.image.repository
             - container.name
-            - k8s.pod.name
             - proc.name
             - proc.exepath
-          comps: [=, =, =, startswith, =, =]
+          comps: [=, startswith, =, =, =, =]
           values:
             - - longhorn-system
+              - instance-manager-
               - docker.io/longhornio/longhorn-instance-manager
               - instance-manager
-              - instance-manager-
               - iscsiadm
               - /usr/sbin/iscsiadm
       override:

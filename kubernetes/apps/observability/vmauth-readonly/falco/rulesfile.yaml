@@ -15,14 +15,14 @@ spec:
     #     - name: vmauth_readonly_api_clients
     #       fields:
     #         - k8s.ns.name
+    #         - k8s.pod.name
     #         - container.image.repository
     #         - container.name
-    #         - k8s.pod.name
-    #       comps: [=, =, in, startswith]
+    #       comps: [=, startswith, =, in]
     #       values:
     #         - - observability
+    #           - vmauth-readonly-
     #           - docker.io/victoriametrics/operator
     #           - [config-init, config-reloader]
-    #           - vmauth-readonly-
     #   override:
     #     exceptions: append
