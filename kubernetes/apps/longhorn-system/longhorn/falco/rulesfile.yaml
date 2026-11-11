@@ -8,51 +8,88 @@ spec:
   priority: 60
   inlineRules:
     # Longhorn (longhorn-system) manager, CSI plugin, CSI attacher, provisioner, resizer and snapshotter, and recurring-job pods reconcile its CRDs and volumes.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        # PR #1263 and retained Nov 5-6 events; PR #1283 captured attacher/snapshotter paths.
+        - name: longhorn_api_clients
+          fields:
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - k8s.pod.name
+            - proc.name
+            - proc.exepath
+          comps: [=, =, =, startswith, =, =]
+          values:
+            - - longhorn-system
+              - docker.io/longhornio/longhorn-manager
+              - longhorn-manager
+              - longhorn-manager-
+              - longhorn-manage
+              - /usr/local/sbin/longhorn-manager
+            - - longhorn-system
+              - docker.io/longhornio/longhorn-manager
+              - longhorn-csi-plugin
+              - longhorn-csi-plugin-
+              - longhorn-manage
+              - /usr/local/sbin/longhorn-manager
+            - - longhorn-system
+              - docker.io/longhornio/csi-attacher
+              - csi-attacher
+              - csi-attacher-
+              - csi-attacher
+              - /csi-attacher
+            - - longhorn-system
+              - docker.io/longhornio/csi-provisioner
+              - csi-provisioner
+              - csi-provisioner-
+              - csi-provisioner
+              - /csi-provisioner
+            - - longhorn-system
+              - docker.io/longhornio/csi-resizer
+              - csi-resizer
+              - csi-resizer-
+              - csi-resizer
+              - /csi-resizer
+            - - longhorn-system
+              - docker.io/longhornio/csi-snapshotter
+              - csi-snapshotter
+              - csi-snapshotter-
+              - csi-snapshotter
+              - /csi-snapshotter
+            - - longhorn-system
+              - docker.io/longhornio/longhorn-manager
+              - snapshot
+              - snapshot-
+              - longhorn-manage
+              - /usr/local/sbin/longhorn-manager
+            - - longhorn-system
+              - docker.io/longhornio/longhorn-manager
+              - backup
+              - backup-
+              - longhorn-manage
+              - /usr/local/sbin/longhorn-manager
       override:
-        condition: append
-      condition: >
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/longhorn-manager"
-        and container.name = "longhorn-manager"
-        and k8s.pod.name startswith "longhorn-manager-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/longhorn-manager"
-        and container.name = "longhorn-csi-plugin"
-        and k8s.pod.name startswith "longhorn-csi-plugin-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/csi-attacher"
-        and container.name = "csi-attacher"
-        and k8s.pod.name startswith "csi-attacher-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/csi-provisioner"
-        and container.name = "csi-provisioner"
-        and k8s.pod.name startswith "csi-provisioner-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/csi-resizer"
-        and container.name = "csi-resizer"
-        and k8s.pod.name startswith "csi-resizer-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/csi-snapshotter"
-        and container.name = "csi-snapshotter"
-        and k8s.pod.name startswith "csi-snapshotter-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/longhorn-manager"
-        and container.name = "snapshot"
-        and k8s.pod.name startswith "snapshot-")
-        or (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/longhorn-manager"
-        and container.name = "backup"
-        and k8s.pod.name startswith "backup-")
+        exceptions: append
     # The instance manager's engine runs iscsiadm to attach volumes, and iscsiadm
     # loads the iSCSI kernel modules (finit_module) while discovering targets.
     - rule: Linux Kernel Module Injection Detected
+      exceptions:
+        - name: longhorn_iscsi_modules
+          fields:
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - k8s.pod.name
+            - proc.name
+            - proc.exepath
+          comps: [=, =, =, startswith, =, =]
+          values:
+            - - longhorn-system
+              - docker.io/longhornio/longhorn-instance-manager
+              - instance-manager
+              - instance-manager-
+              - iscsiadm
+              - /usr/sbin/iscsiadm
       override:
-        condition: append
-      condition: >
-        and not (k8s.ns.name = "longhorn-system"
-        and container.image.repository = "docker.io/longhornio/longhorn-instance-manager"
-        and container.name = "instance-manager"
-        and k8s.pod.name startswith "instance-manager-"
-        and proc.name = "iscsiadm"
-        and proc.exepath = "/usr/sbin/iscsiadm")
+        exceptions: append

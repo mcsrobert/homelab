@@ -8,14 +8,27 @@ spec:
   priority: 60
   inlineRules:
     # Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        # PR #1251; retained Nov 5-6 API events identify this proxy executable.
+        - name: dragonfly_operator_api_clients
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [=, startswith, =, =, =, =]
+          values:
+            - - database
+              - dragonfly-operator-
+              - quay.io/brancz/kube-rbac-proxy
+              - kube-rbac-proxy
+              - kube-rbac-proxy
+              - /usr/local/bin/kube-rbac-proxy
       override:
-        condition: append
-      condition: >
-        or (k8s.ns.name = "database"
-        and k8s.pod.name startswith "dragonfly-operator-"
-        and container.image.repository = "quay.io/brancz/kube-rbac-proxy"
-        and container.name = "kube-rbac-proxy")
+        exceptions: append
     # The operator manager watches Dragonfly resources and maintains its leader lease.
     - rule: Contact K8S API Server From Container
       exceptions:

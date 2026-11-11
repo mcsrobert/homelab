@@ -8,11 +8,24 @@ spec:
   priority: 60
   inlineRules:
     # The CloudNativePG instance manager maintains database instance state.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: immich_api_clients
+          fields:
+            - container.image.repository
+            - k8s.ns.name
+            - container.name
+            - proc.exepath
+            - k8s.pod.name
+          comps: [=, =, =, =, startswith]
+          values:
+            - - ghcr.io/tensorchord/cloudnative-vectorchord
+              - default
+              - postgres
+              - /controller/manager
+              - immich-cnpg-
       override:
-        condition: append
-      condition: >
-        or (container.image.repository = "ghcr.io/tensorchord/cloudnative-vectorchord" and k8s.ns.name = "default" and container.name = "postgres" and proc.exepath = "/controller/manager" and k8s.pod.name startswith "immich-cnpg-")
+        exceptions: append
     # PostgreSQL invokes restore_command through a shell during standby recovery.
     # Only allow the CNPG helper with hex WAL/history names and fixed destinations.
     - rule: Run shell untrusted
@@ -32,14 +45,14 @@ spec:
             - proc.cmdline
           comps: [=, startswith, =, =, =, =, =, =, =, =, regex]
           values:
-            - - "default"
-              - "immich-cnpg-"
-              - "ghcr.io/tensorchord/cloudnative-vectorchord"
-              - "postgres"
-              - "sh"
-              - "/usr/bin/dash"
-              - "/usr/lib/postgresql/18/bin/postgres"
-              - "postgres -D /var/lib/postgresql/data/pgdata"
+            - - default
+              - immich-cnpg-
+              - ghcr.io/tensorchord/cloudnative-vectorchord
+              - postgres
+              - sh
+              - /usr/bin/dash
+              - /usr/lib/postgresql/18/bin/postgres
+              - postgres -D /var/lib/postgresql/data/pgdata
               - 26
               - 0
               - 'sh -c /controller/manager wal-restore --log-destination /controller/log/postgres[.]json ([0-9A-F]{24} pg_wal/RECOVERYXLOG|[0-9A-F]{8}[.]history pg_wal/RECOVERYHISTORY)'

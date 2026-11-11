@@ -17,17 +17,28 @@ spec:
   inlineRules:
     # Armbian's ramlog postrotate job runs on the RK1 host (not in a container)
     # and truncates /var/log, which the stock log-clearing rule would flag.
-    - macro: allowed_clear_log_files
+    - rule: Clear Log Activities
+      exceptions:
+        - name: armbian_ramlog_postrotate
+          fields:
+            - proc.name
+            - proc.exepath
+            - proc.pname
+            - proc.cmdline
+            - user.uid
+            - container.id
+            - fd.directory
+          comps: [=, =, =, =, =, =, =]
+          values:
+            - - armbian-ramlog
+              - /usr/bin/bash
+              - armbian-ramlog
+              - armbian-ramlog /usr/lib/armbian/armbian-ramlog postrotate
+              - 0
+              - host
+              - /var/log
       override:
-        condition: replace
-      condition: >
-        (proc.name = "armbian-ramlog"
-        and proc.exepath = "/usr/bin/bash"
-        and proc.pname = "armbian-ramlog"
-        and proc.cmdline = "armbian-ramlog /usr/lib/armbian/armbian-ramlog postrotate"
-        and user.uid = 0
-        and container.id = "host"
-        and fd.directory = "/var/log")
+        exceptions: append
     # kube-vip opens a packet socket to send gratuitous ARP for the control-plane
     # VIP, which is how it fails over between nodes.
     - rule: Packet socket created in container

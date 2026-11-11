@@ -7,9 +7,41 @@ spec:
   # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # T3 Code (development) runs read-only kubectl and flux commands for troubleshooting.
-    - macro: k8s_containers
+    # T3 Code runs kubectl for troubleshooting (PR #1253, Nov 6 Falco events).
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        # Exact captured path; a tool upgrade alerts until its identity is verified.
+        - name: t3_code_kubectl_api
+          fields:
+            - container.name
+            - k8s.ns.name
+            - proc.name
+            - proc.exepath
+            - container.image.repository
+            - k8s.pod.name
+          comps: [=, =, =, =, =, startswith]
+          values:
+            - - t3-code
+              - development
+              - kubectl
+              - /home/node/.local/share/mise/installs/kubectl/1.37.1/kubectl
+              - docker.io/library/node
+              - t3-code-
+        # Disabled: PR #1253 allowed flux by name, without a captured executable.
+        # Re-enable only after an API event establishes its process identity.
+        # - name: t3_code_flux_api
+        #   fields:
+        #     - container.name
+        #     - k8s.ns.name
+        #     - proc.name
+        #     - container.image.repository
+        #     - k8s.pod.name
+        #   comps: [=, =, =, =, startswith]
+        #   values:
+        #     - - t3-code
+        #       - development
+        #       - flux
+        #       - docker.io/library/node
+        #       - t3-code-
       override:
-        condition: append
-      condition: >
-        or (container.name = "t3-code" and k8s.ns.name = "development" and proc.name in ("kubectl", "flux") and container.image.repository = "docker.io/library/node" and k8s.pod.name startswith "t3-code-")
+        exceptions: append
