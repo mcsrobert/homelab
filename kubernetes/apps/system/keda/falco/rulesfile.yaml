@@ -8,12 +8,29 @@ spec:
   priority: 60
   inlineRules:
     # KEDA manages and validates scaling resources.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: keda_core_api_clients
+          fields:
+            - container.image.repository
+            - k8s.ns.name
+            - container.name
+            - proc.exepath
+            - k8s.pod.name
+          comps: [=, =, =, =, startswith]
+          values:
+            - - ghcr.io/kedacore/keda
+              - system
+              - keda-operator
+              - /keda
+              - keda-operator-
+            - - ghcr.io/kedacore/keda-admission-webhooks
+              - system
+              - keda-admission-webhooks
+              - /keda-admission-webhooks
+              - keda-admission-webhooks-
       override:
-        condition: append
-      condition: >
-        or (container.image.repository = "ghcr.io/kedacore/keda" and k8s.ns.name = "system" and container.name = "keda-operator" and proc.exepath = "/keda" and k8s.pod.name startswith "keda-operator-")
-        or (container.image.repository = "ghcr.io/kedacore/keda-admission-webhooks" and k8s.ns.name = "system" and container.name = "keda-admission-webhooks" and proc.exepath = "/keda-admission-webhooks" and k8s.pod.name startswith "keda-admission-webhooks-")
+        exceptions: append
     # HTTP add-on components watch routing and scaling resources.
     - rule: Contact K8S API Server From Container
       exceptions:

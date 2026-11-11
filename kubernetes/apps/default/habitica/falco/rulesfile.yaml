@@ -8,8 +8,24 @@ spec:
   priority: 60
   inlineRules:
     # MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        # PR #1251 investigation captured this probe executable in Falco events.
+        - name: habitica_api_clients
+          fields:
+            - container.image.repository
+            - k8s.ns.name
+            - proc.name
+            - container.name
+            - k8s.pod.name
+            - proc.exepath
+          comps: [=, =, =, =, startswith, =]
+          values:
+            - - quay.io/mongodb/mongodb-agent
+              - default
+              - readinessprobe
+              - mongodb-agent
+              - habitica-mongodb-
+              - /opt/scripts/readinessprobe
       override:
-        condition: append
-      condition: >
-        or (container.image.repository = "quay.io/mongodb/mongodb-agent" and k8s.ns.name = "default" and proc.name = "readinessprobe" and container.name = "mongodb-agent" and k8s.pod.name startswith "habitica-mongodb-")
+        exceptions: append

@@ -8,8 +8,24 @@ spec:
   priority: 60
   inlineRules:
     # Victoria Logs collector vlagent (observability) watches pods to label log streams.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        # PR #1253; retained Nov 5-6 API events identify the collector executable.
+        - name: victoria_logs_api_clients
+          fields:
+            - container.image.repository
+            - k8s.ns.name
+            - container.name
+            - k8s.pod.name
+            - proc.name
+            - proc.exepath
+          comps: [=, =, =, startswith, =, =]
+          values:
+            - - docker.io/victoriametrics/vlagent
+              - observability
+              - vlagent
+              - victoria-logs-collector-
+              - vlagent-prod
+              - /vlagent-prod
       override:
-        condition: append
-      condition: >
-        or (container.image.repository = "docker.io/victoriametrics/vlagent" and k8s.ns.name = "observability" and container.name = "vlagent" and k8s.pod.name startswith "victoria-logs-collector-")
+        exceptions: append

@@ -8,11 +8,24 @@ spec:
   priority: 60
   inlineRules:
     # The worker publishes node features.
-    - macro: k8s_containers
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: node_feature_discovery_worker_api
+          fields:
+            - container.image.repository
+            - k8s.ns.name
+            - container.name
+            - proc.exepath
+            - k8s.pod.name
+          comps: [=, =, =, =, startswith]
+          values:
+            - - registry.k8s.io/nfd/node-feature-discovery
+              - system
+              - worker
+              - /usr/bin/nfd-worker
+              - node-feature-discovery-worker-
       override:
-        condition: append
-      condition: >
-        or (container.image.repository = "registry.k8s.io/nfd/node-feature-discovery" and k8s.ns.name = "system" and container.name = "worker" and proc.exepath = "/usr/bin/nfd-worker" and k8s.pod.name startswith "node-feature-discovery-worker-")
+        exceptions: append
     # The master publishes labels; GC removes stale feature resources.
     - rule: Contact K8S API Server From Container
       exceptions:
