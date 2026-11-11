@@ -148,20 +148,12 @@ structure. Good references:
 
 ### Falco exceptions
 
-- Express every Falco allowance as a named `exceptions` entry on the specific
-  `rule`, with `override.exceptions: append`. Do not add exclusions through
-  macro overrides or by appending to or replacing a rule's `condition`.
-- Keep app exceptions in the app's `falco/rulesfile.yaml`; keep host exceptions
-  in `security/falco/instance/rulesfile-exceptions.yaml`.
-- Use `fields`, `comps` and `values` tuples to preserve all match constraints.
-  Scope container exceptions to namespace, image repository and container,
-  plus the expected executable (`proc.exepath`) and stable workload pod prefix.
-  Add `proc.name` when known, preserving Falco's observed truncation. Establish
-  process identity from captured Falco events or verified entrypoints in prior
-  investigations; never infer it from a container name. Comment out allowances
-  without verified process identity so fresh events can establish it. Include
-  action and target fields when relevant. See
-  `security/openbao/falco/rulesfile.yaml` for an example.
+- Use named rule `exceptions` with `override.exceptions: append` and
+  `fields`/`comps`/`values`; never override macros or rule conditions.
+- Keep app exceptions in `<app>/falco/rulesfile.yaml` and host exceptions in
+  `security/falco/instance/rulesfile-exceptions.yaml`.
+- Scope exceptions to the verified behavior that needs them, so unrelated
+  activity remains covered.
 
 ## Validation
 
