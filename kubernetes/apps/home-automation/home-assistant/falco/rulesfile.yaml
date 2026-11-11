@@ -1,0 +1,42 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: home-assistant-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # DHCP discovery opens a Scapy packet socket after HA starts. Non-root HA
+    # lacks CAP_NET_RAW, so this fails with EPERM and the watcher stops quietly.
+    # Keep successful sockets and other processes or socket parameters visible.
+    - rule: Packet socket created in container
+      exceptions:
+        - name: home_assistant_denied_dhcp_socket
+          fields:
+            - k8s.ns.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - proc.pname
+            - proc.cmdline
+            - user.uid
+            - evt.arg.type
+            - evt.arg.proto
+            - evt.res
+          comps: [=, =, =, =, =, =, =, =, =, =, =]
+          values:
+            - - home-automation
+              - ghcr.io/home-operations/home-assistant
+              - home-assistant
+              - python3
+              - /usr/local/bin/python3.14
+              - catatonit
+              - python3 -P -m homeassistant --config /config
+              - 12000
+              - 524291
+              - 768
+              - EPERM
+      override:
+        exceptions: append
