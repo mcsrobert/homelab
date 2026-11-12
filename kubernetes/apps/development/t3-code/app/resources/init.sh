@@ -6,7 +6,7 @@ set -eu
 # renovate: datasource=github-releases depName=pingdotgg/t3code
 T3CODE_VERSION=v0.1.9
 # renovate: datasource=github-releases depName=jdx/mise
-MISE_VERSION=v2026.10.25
+MISE_VERSION=v2026.11.7
 # renovate: datasource=github-releases depName=cli/cli
 GH_VERSION=v2.103.3
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
