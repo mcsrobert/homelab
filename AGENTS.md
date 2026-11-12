@@ -192,6 +192,13 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
 - Fill in every section of the PR template. Under "Upstream docs", link the
   upstream documentation for any application behavior the PR configures or
   changes, such as an OIDC integration, a chart value or a feature flag.
+- When a PR resolves a tracked issue, create a formal GitHub link to the issue
+  through the Development sidebar or a closing keyword such as `Closes #123`
+  in the PR description. This also applies to existing Renovate PRs that fix
+  known dependency issues. A reference in a comment alone is not sufficient.
+  Verify the issue appears in the PR's `closingIssuesReferences`. Use a
+  closing link only when merging the PR should close the issue; otherwise,
+  cross-reference it and explain what work remains.
 - Label the PR with the existing labels that match: `kind/bug` for fixes,
   `kind/enhancement` for features and `kind/chore` for maintenance and cleanup.
   The labeler workflow adds `kind/documentation`, `area/ansible`, `area/ci`,
