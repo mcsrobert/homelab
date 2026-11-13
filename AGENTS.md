@@ -111,6 +111,8 @@ structure. Good references:
   `OCIRepository` in `flux-system`. When an app uses its own upstream chart
   instead, its `HelmRepository` or `OCIRepository` goes in the app's own
   directory.
+- Prefer an `OCIRepository` over an HTTP `HelmRepository` when the project
+  publishes official OCI charts.
 - Put values inline under `spec.values` in `helm-release.yaml`.
 - Leave out install/upgrade remediation, rollback and drift detection
   settings. The Kyverno policy `set-helmrelease-defaults` fills them in.
