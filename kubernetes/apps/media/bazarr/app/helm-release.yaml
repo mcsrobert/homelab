@@ -78,10 +78,21 @@ spec:
           gethomepage.dev/description: Subtitle manager
           gethomepage.dev/group: Media
           gethomepage.dev/widget.type: bazarr
-          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          # Authelia guards the route, so the widget calls the Service.
+          gethomepage.dev/widget.url: http://{{ .Release.Name }}.media.svc.cluster.local:6767
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_BAZARR_API_KEY}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+        rules:
+          # Bazarr has no login unless one is set in config.yaml on its volume.
+          - filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: traefik.io
+                  kind: Middleware
+                  name: auth-chain
+            backendRefs:
+              - identifier: bazarr
         parentRefs:
           - name: traefik-gateway
             namespace: network
@@ -93,7 +104,8 @@ spec:
           - Ingress
         rules:
           ingress:
-            # Web clients and media app integrations use the Traefik route.
+            # Web clients use the Traefik route. The homepage widget calls the
+            # API directly because the route requires an Authelia login.
             - from:
                 - namespaceSelector:
                     matchLabels:
@@ -101,5 +113,11 @@ spec:
                   podSelector:
                     matchLabels:
                       app.kubernetes.io/name: traefik
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: default
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: homepage
               ports:
                 - port: *port

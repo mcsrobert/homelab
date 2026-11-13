@@ -14,6 +14,7 @@ spec:
     - namespace: home-automation
     - namespace: kyverno
     - namespace: longhorn-system
+    - namespace: media
     - namespace: network
     - namespace: observability
     - namespace: security
