@@ -13,8 +13,24 @@ spec:
   values:
     controllers:
       maddy:
+        type: statefulset
         replicas: 2
+        podDisruptionBudget:
+          minAvailable: 1
         strategy: RollingUpdate
+        statefulset:
+          podManagementPolicy: Parallel
+          persistentVolumeClaimRetentionPolicy:
+            whenDeleted: Retain
+            whenScaled: Retain
+          # Each replica owns its queue; two processes must not share one queue directory.
+          volumeClaimTemplates:
+            - name: state
+              accessMode: ReadWriteOnce
+              storageClass: longhorn-no-backup
+              size: 1Gi
+              globalMounts:
+                - path: /var/lib/maddy
         annotations:
           reloader.stakater.com/auto: "true"
         pod:
@@ -90,5 +106,7 @@ spec:
             protocol: HTTP
     serviceMonitor:
       maddy:
+        service:
+          identifier: maddy
         endpoints:
           - port: metrics
