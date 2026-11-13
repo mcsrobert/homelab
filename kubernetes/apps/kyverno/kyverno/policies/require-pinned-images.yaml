@@ -9,8 +9,8 @@ metadata:
     policies.kyverno.io/description: >-
       Ensures every container image is referenced by both a tag and a digest
       (<image>:<tag>@sha256:<digest>), either in Git or through the
-      pin-image-digests policy. CloudNativePG images are excluded because that
-      policy has to skip them.
+      pin-image-digests policy. CloudNativePG images and the kyverno namespace
+      are excluded because that policy has to skip them.
 spec:
   validationActions: ["Audit"]
   autogen:
@@ -22,11 +22,14 @@ spec:
         apiVersions: ["v1"]
         resources: ["pods"]
         operations: ["CREATE", "UPDATE"]
+    # Kyverno keeps its own namespace out of its webhooks
+    # (config.excludeKyvernoNamespace), so pin-image-digests cannot pin the
+    # kyverno and policy-reporter pods.
     namespaceSelector:
       matchExpressions:
         - key: kubernetes.io/metadata.name
           operator: NotIn
-          values: ["kube-system", "longhorn-system"]
+          values: ["kube-system", "kyverno", "longhorn-system"]
   variables:
     - name: images
       expression: >-
