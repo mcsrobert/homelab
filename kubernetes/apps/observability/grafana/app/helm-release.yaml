@@ -171,6 +171,9 @@ spec:
           # renovate: datasource=grafana-dashboards
           gnetId: 16888
           revision: 14
+          datasource:
+            - name: DS_PROMETHEUS
+              value: Prometheus
     downloadDashboards:
       resources:
         requests:
