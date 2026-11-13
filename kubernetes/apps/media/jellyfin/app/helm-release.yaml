@@ -10,6 +10,15 @@ spec:
     kind: OCIRepository
     name: app-template
     namespace: flux-system
+  # Downgrades require restoring data from a backup after startup migrations.
+  # https://jellyfin.org/docs/general/administration/backup-and-restore/
+  install:
+    strategy:
+      name: RetryOnFailure
+  upgrade:
+    strategy:
+      name: RetryOnFailure
+    cleanupOnFail: false
   values:
     controllers:
       jellyfin:
