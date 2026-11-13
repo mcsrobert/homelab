@@ -144,7 +144,7 @@ spec:
         blocky:
           # renovate: datasource=grafana-dashboards
           gnetId: 13768
-          revision: 7
+          revision: 8
           datasource:
             - name: DS_PROMETHEUS
               value: Prometheus
