@@ -49,6 +49,10 @@ spec:
                   httpGet:
                     port: &habiticaPort 3000
                     path: /api/v3/status
+                    # Match the TLS-terminating proxy so forceSSL does not redirect the probe.
+                    httpHeaders:
+                      - name: X-Forwarded-Proto
+                        value: https
                   timeoutSeconds: 11
               readiness: *probe
             resources:
