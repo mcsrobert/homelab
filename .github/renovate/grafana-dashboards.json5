@@ -1,0 +1,29 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  customManagers: [
+    {
+      description: 'Update annotated Grafana.com dashboard revisions',
+      customType: 'regex',
+      managerFilePatterns: ['/grafana/app/helm-release\\.ya?ml$/'],
+      matchStrings: ['(?<depName>[a-zA-Z0-9_-]+):\\r?\\n(?<indentation>[ \\t]+)# renovate: datasource=grafana-dashboards\\r?\\n[ \\t]+gnetId: (?<packageName>\\d+)\\r?\\n[ \\t]+revision: (?<currentValue>\\d+)\\b'],
+      // Replacing revision digits globally would also change matching digits in gnetId.
+      autoReplaceStringTemplate: '{{{depName}}}:\n{{{indentation}}}# renovate: datasource=grafana-dashboards\n{{{indentation}}}gnetId: {{{packageName}}}\n{{{indentation}}}revision: {{{newValue}}}',
+      datasourceTemplate: 'custom.grafana-dashboards',
+      versioningTemplate: 'regex:^(?<major>\\d+)$',
+    },
+  ],
+  customDatasources: {
+    'grafana-dashboards': {
+      defaultRegistryUrlTemplate: 'https://grafana.com/api/dashboards/{{packageName}}',
+      format: 'json',
+      transformTemplates: ['{"releases":[{"version": $string(revision)}]}'],
+    },
+  },
+  packageRules: [
+    {
+      description: 'Review dashboard changes manually because panels and queries can change',
+      matchDatasources: ['custom.grafana-dashboards'],
+      automerge: false,
+    },
+  ],
+}
