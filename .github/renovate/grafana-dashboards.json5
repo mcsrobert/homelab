@@ -23,6 +23,11 @@
     {
       description: 'Review dashboard changes manually because panels and queries can change',
       matchDatasources: ['custom.grafana-dashboards'],
+      // Dashboard revisions are sequential numbers, not breaking software releases.
+      semanticCommitType: 'chore',
+      semanticCommitScope: 'grafana-dashboard',
+      commitMessagePrefix: '{{semanticCommitType}}({{semanticCommitScope}}):',
+      commitMessageTopic: '{{depName}} dashboard',
       automerge: false,
     },
   ],
