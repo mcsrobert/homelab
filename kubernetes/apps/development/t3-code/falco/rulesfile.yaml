@@ -10,7 +10,7 @@ spec:
     # T3 Code runs kubectl for troubleshooting (PR #1253, Nov 6 Falco events).
     - rule: Contact K8S API Server From Container
       exceptions:
-        # Exact captured path; a tool upgrade alerts until its identity is verified.
+        # Match mise-installed kubectl across tool upgrades.
         - name: t3_code_kubectl_api
           fields:
             - k8s.ns.name
@@ -19,14 +19,14 @@ spec:
             - container.name
             - proc.name
             - proc.exepath
-          comps: [=, startswith, =, =, =, =]
+          comps: [=, startswith, =, =, =, glob]
           values:
             - - development
               - t3-code-
               - docker.io/library/node
               - t3-code
               - kubectl
-              - /home/node/.local/share/mise/installs/kubectl/1.37.1/kubectl
+              - /home/node/.local/share/mise/installs/kubectl/*/kubectl
         # Disabled: PR #1253 allowed flux by name, without a captured executable.
         # Re-enable only after an API event establishes its process identity.
         # - name: t3_code_flux_api
