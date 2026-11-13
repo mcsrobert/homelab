@@ -1,0 +1,118 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: coredns-autoscaler
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  interval: 30m
+  values:
+    controllers:
+      autoscaler:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        serviceAccount:
+          identifier: autoscaler
+        pod:
+          automountServiceAccountToken: true
+          priorityClassName: system-cluster-critical
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65535
+            runAsGroup: 65535
+            seccompProfile:
+              type: RuntimeDefault
+        containers:
+          autoscaler:
+            image:
+              repository: registry.k8s.io/cpa/cluster-proportional-autoscaler
+              tag: v1.10.3@sha256:a4d0ab78d5e2ec356c981f361a5ff7012b21ad353b4a980e1ca30c11dda6564b
+            args:
+              - --namespace=$(POD_NAMESPACE)
+              - --configmap=coredns-autoscaler-config
+              - --target=deployment/coredns
+              - --logtostderr=true
+              - --v=2
+            env:
+              POD_NAMESPACE:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /last-poll
+                    port: 8080
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    serviceAccount:
+      autoscaler: {}
+    rbac:
+      bindings:
+        nodes:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: nodes
+          subjects:
+            - identifier: autoscaler
+        coredns:
+          type: RoleBinding
+          roleRef:
+            identifier: coredns
+          subjects:
+            - identifier: autoscaler
+      roles:
+        nodes:
+          type: ClusterRole
+          rules:
+            - apiGroups:
+                - ""
+              resources:
+                - nodes
+              verbs:
+                - list
+                - watch
+        coredns:
+          type: Role
+          rules:
+            - apiGroups:
+                - apps
+              resources:
+                - deployments/scale
+              resourceNames:
+                - coredns
+              verbs:
+                - get
+                - update
+            - apiGroups:
+                - ""
+              resources:
+                - configmaps
+              resourceNames:
+                - coredns-autoscaler-config
+              verbs:
+                - get
