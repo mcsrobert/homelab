@@ -21,6 +21,7 @@
     {
       description: 'Only schedule frequent releases once a week',
       matchPackageNames: [
+        'ghcr.io/grafana-community/helm-charts/grafana',
         'renovate/renovate',
         'renovatebot/pre-commit-hooks',
         'jdx/mise',
