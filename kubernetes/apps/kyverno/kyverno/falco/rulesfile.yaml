@@ -57,6 +57,23 @@ spec:
               - controller
               - reports-control
               - /ko-app/reports-controller
+        # The admission init container checks Kubernetes resources at startup.
+        - name: kyverno_init_api
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+          comps: [=, startswith, =, =, =, =]
+          values:
+            - - kyverno
+              - kyverno-admission-controller-
+              - reg.kyverno.io/kyverno/kyvernopre
+              - kyverno-pre
+              - kyverno-init
+              - /ko-app/kyverno-init
         # Helm's post-upgrade hook migrates stored CRD resource versions.
         - name: kyverno_resource_migration
           fields:

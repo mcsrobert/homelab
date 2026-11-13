@@ -1,0 +1,32 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: external-secrets-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # cert-controller manages webhook TLS and CA bundles via the API.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: external_secrets_cert_controller_api
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - proc.cmdline
+          comps: [=, startswith, =, =, =, =, startswith]
+          values:
+            - - security
+              - external-secrets-cert-controller-
+              - ghcr.io/external-secrets/external-secrets
+              - cert-controller
+              - external-secret
+              - /usr/bin/external-secrets
+              - "external-secret certcontroller "
+      override:
+        exceptions: append
