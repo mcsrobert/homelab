@@ -53,11 +53,11 @@ def parse_args():
 def get_valid_password(password):
     if password is None:
         if not sys.stdin.isatty():
-            password = sys.stdin.read()
+            # Drop only the line ending added by echo or a here-string.
+            password = sys.stdin.read().removesuffix("\n").removesuffix("\r")
         else:
             password = getpass.getpass("Enter password: ")
 
-    password = password.strip()
     if not password:
         print("Error: password cannot be empty", file=sys.stderr)
         sys.exit(1)
