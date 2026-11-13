@@ -12,6 +12,8 @@
         '!kubernetes',
         '!kubernetes/kubernetes',
         '!longhorn',
+        // Extension upgrades require SQL updates and reindexing.
+        '!ghcr.io/tensorchord/cloudnative-vectorchord',
       ],
       automerge: true,
       automergeSchedule: ['every weekday after 09:00 and before 18:00'],
