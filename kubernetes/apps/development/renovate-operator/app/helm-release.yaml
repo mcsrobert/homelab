@@ -65,6 +65,7 @@ spec:
       parentRefs:
         - name: traefik-gateway
           namespace: network
+          sectionName: websecure
     resources:
       requests:
         cpu: 10m
