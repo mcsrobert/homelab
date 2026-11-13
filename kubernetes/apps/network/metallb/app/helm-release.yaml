@@ -6,13 +6,9 @@ metadata:
   name: metallb
 spec:
   interval: 30m
-  chart:
-    spec:
-      chart: metallb
-      version: 0.16.2
-      sourceRef:
-        kind: HelmRepository
-        name: metallb
+  chartRef:
+    kind: OCIRepository
+    name: metallb
   install:
     crds: CreateReplace
   upgrade:
