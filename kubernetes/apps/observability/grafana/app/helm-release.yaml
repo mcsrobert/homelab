@@ -170,7 +170,7 @@ spec:
         longhorn:
           # renovate: datasource=grafana-dashboards
           gnetId: 16888
-          revision: 11
+          revision: 14
     downloadDashboards:
       resources:
         requests:
