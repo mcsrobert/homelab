@@ -21,6 +21,8 @@ spec:
         resources: ["helmreleases"]
         operations: ["CREATE", "UPDATE"]
   mutations:
+    # RetryOnFailure strategies are set per release and bypass remediation.
+    # With zero retries, do not add a final rollback/uninstall unless requested.
     - patchType: ApplyConfiguration
       applyConfiguration:
         expression: |
@@ -32,7 +34,9 @@ spec:
               install: Object.spec.install{
                 remediation: Object.spec.install.remediation{
                   retries: object.?spec.?install.?remediation.?retries.orValue(3),
-                  remediateLastFailure: object.?spec.?install.?remediation.?remediateLastFailure.orValue(true)
+                  remediateLastFailure: object.?spec.?install.?remediation.?remediateLastFailure.orValue(
+                    object.?spec.?install.?remediation.?retries.orValue(3) > 0
+                  )
                 }
               },
               upgrade: Object.spec.upgrade{
@@ -40,7 +44,9 @@ spec:
                 remediation: Object.spec.upgrade.remediation{
                   strategy: object.?spec.?upgrade.?remediation.?strategy.orValue("rollback"),
                   retries: object.?spec.?upgrade.?remediation.?retries.orValue(3),
-                  remediateLastFailure: object.?spec.?upgrade.?remediation.?remediateLastFailure.orValue(true)
+                  remediateLastFailure: object.?spec.?upgrade.?remediation.?remediateLastFailure.orValue(
+                    object.?spec.?upgrade.?remediation.?retries.orValue(3) > 0
+                  )
                 }
               },
               rollback: Object.spec.rollback{

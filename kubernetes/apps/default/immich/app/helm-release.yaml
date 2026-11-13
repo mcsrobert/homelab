@@ -10,6 +10,15 @@ spec:
     name: app-template
     namespace: flux-system
   interval: 30m
+  # Startup migrations cannot be undone by rolling back the Helm release.
+  # https://docs.immich.app/install/upgrading/#versioning-policy
+  install:
+    strategy:
+      name: RetryOnFailure
+  upgrade:
+    strategy:
+      name: RetryOnFailure
+    cleanupOnFail: false
   values:
     defaultPodOptions:
       securityContext:
