@@ -34,6 +34,31 @@ route:
     - receiver: ntfy-urgent
       matchers:
         - severity = "critical"
+# The kube-prometheus inhibit rules, which replacing the chart's default config
+# drops. InfoInhibitor fires while an info alert has no warning or critical
+# alert in its namespace, so info alerts only notify alongside one of those.
+# https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/alertmanager-secret.yaml
+inhibit_rules:
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity =~ "warning|info"
+    equal:
+      - namespace
+      - alertname
+  - source_matchers:
+      - severity = "warning"
+    target_matchers:
+      - severity = "info"
+    equal:
+      - namespace
+      - alertname
+  - source_matchers:
+      - alertname = "InfoInhibitor"
+    target_matchers:
+      - severity = "info"
+    equal:
+      - namespace
 receivers:
   # ntfy formats the Alertmanager payload itself with its built-in template.
   # max_alerts keeps the rendered message under ntfy's 4096 byte limit, which
