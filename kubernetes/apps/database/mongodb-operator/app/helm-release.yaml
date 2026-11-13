@@ -5,13 +5,9 @@ kind: HelmRelease
 metadata:
   name: mongodb-operator
 spec:
-  chart:
-    spec:
-      chart: mongodb-kubernetes
-      version: 1.15.0
-      sourceRef:
-        kind: HelmRepository
-        name: mongodb
+  chartRef:
+    kind: OCIRepository
+    name: mongodb-kubernetes
   interval: 30m
   install:
     crds: CreateReplace
