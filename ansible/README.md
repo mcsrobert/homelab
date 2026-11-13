@@ -6,10 +6,17 @@ A collection a playbooks to manage the cluster. Wraps around the amazing
 ## How to install
 
 Ansible is installed by [mise](https://mise.jdx.dev) (see the root
-[mise.toml](../mise.toml)). Before you can run the playbooks, install the
-required controller-side Python dependencies and collections:
+[mise.toml](../mise.toml)). It uses a private Python 3.14 runtime because
+[ansible-core 2.21 supports Python 3.12-3.14](https://docs.ansible.com/projects/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix),
+independently of the project's default Python. Mise 2026.10.25 or newer manages
+this tool-specific runtime without changing Python for other tools.
+
+Before you can run the playbooks, install Ansible and the required
+controller-side Python dependencies and collections. Run both commands again
+after pulling changes to Ansible's version or interpreter:
 
 ```bash
+mise install
 mise run install-ansible-collections
 ```
 
