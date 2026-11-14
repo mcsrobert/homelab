@@ -30,9 +30,15 @@ jobs:
       pull-requests: read
     uses: ./.github/workflows/security.yaml
 
+  t3-code-image:
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/t3-code-image.yaml
+
   ci:
     if: ${{ always() }}
-    needs: ["lint", "flate", "security"]
+    needs: ["lint", "flate", "security", "t3-code-image"]
     runs-on: ubuntu-26.04
     steps:
       - name: Check results
