@@ -11,6 +11,14 @@ spec:
   interval: 1h
   values:  # https://github.com/kyverno/policy-reporter/tree/main/charts/policy-reporter
 
+    # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests
+    # cannot pin these pods. The images are pinned here instead, and Renovate
+    # groups them with the chart (.github/renovate/groups.json5).
+    image:
+      registry: ghcr.io
+      repository: kyverno/policy-reporter
+      tag: 3.11.2@sha256:2b33409d34be3195f16d9ed2c89f8b58001aeec986b254ba6bb45323d6d1e884
+
     sqliteVolume:
       emptyDir:
         sizeLimit: 1Gi
@@ -37,6 +45,10 @@ spec:
       tmpVolume:
         emptyDir:
           sizeLimit: *tmpSizeLimit
+      image:
+        registry: ghcr.io
+        repository: kyverno/policy-reporter-ui
+        tag: 2.9.1@sha256:642762427ef5bc941b22f51f6e7c5c8f116a0635132239d11fc89826edbd3eaf
       resources:
         requests:
           cpu: 10m

@@ -15,11 +15,35 @@ spec:
     crds: CreateReplace
   values:  # https://github.com/kyverno/kyverno/tree/main/charts/kyverno#values
 
+    # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests
+    # cannot pin these pods. The images are pinned here instead, and Renovate
+    # groups them with the chart (.github/renovate/groups.json5).
+    crds:
+      migration:
+        image: &cliImage
+          registry: reg.kyverno.io
+          repository: kyverno/kyverno-cli
+          tag: v1.20.0@sha256:bd2b8b7c9d550ecf04e0bacaf351adce2f82ce67fd3f291075edcee7f8ab4ab4
+
+    upgrade:
+      legacyPolicyCheck:
+        image: *cliImage
+
     admissionController:
       replicas: 2
       sigstoreVolume:
         emptyDir:
           sizeLimit: &sigstoreSizeLimit 256Mi
+      initContainer:
+        image:
+          registry: reg.kyverno.io
+          repository: kyverno/kyvernopre
+          tag: v1.20.0@sha256:339067e083430e0c97007541bef9cfdbac89bee13f7228772c77ae8aead14b8b
+      container:
+        image:
+          registry: reg.kyverno.io
+          repository: kyverno/kyverno
+          tag: v1.20.0@sha256:9de49c5416ea536f00a205527197ac048abdf32c5a75d633cd9afff8928f359d
       rbac:
         clusterRole:
           extraResources:
@@ -43,6 +67,10 @@ spec:
         enabled: true
 
     backgroundController:
+      image:
+        registry: reg.kyverno.io
+        repository: kyverno/background-controller
+        tag: v1.20.0@sha256:c72df38320a48fc9de10f9d23d087a117853bb08207b7f60f6d1e8457fb3ddb7
       rbac:
         clusterRole:
           extraResources:
@@ -83,6 +111,10 @@ spec:
         enabled: true
 
     cleanupController:
+      image:
+        registry: reg.kyverno.io
+        repository: kyverno/cleanup-controller
+        tag: v1.20.0@sha256:0f9ce0c203561c52499e871a987ff987371f57385fcafe7af1a01dfd6db1feee
       serviceMonitor:
         enabled: true
 
@@ -90,6 +122,10 @@ spec:
       sigstoreVolume:
         emptyDir:
           sizeLimit: *sigstoreSizeLimit
+      image:
+        registry: reg.kyverno.io
+        repository: kyverno/reports-controller
+        tag: v1.20.0@sha256:f54e3cc106fadb1a615d0ec11c42f741f51d3580a5f70dfbe7bd7ec58864ef03
       serviceMonitor:
         enabled: true
 

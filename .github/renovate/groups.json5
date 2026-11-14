@@ -32,6 +32,16 @@
       matchDepNames: ['/openbao/'],
     },
     {
+      groupName: 'Kyverno',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['ghcr.io/kyverno/charts/kyverno', '/^reg\\.kyverno\\.io\\/kyverno\\//'],
+    },
+    {
+      groupName: 'Policy Reporter',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchDepNames: ['/kyverno\\/(charts\\/)?policy-reporter/'],
+    },
+    {
       groupName: 'Renovate',
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchPackageNames: [
