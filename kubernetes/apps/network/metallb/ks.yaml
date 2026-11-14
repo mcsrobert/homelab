@@ -34,3 +34,4 @@ spec:
   targetNamespace: network
   prune: true
   interval: 15m
+  timeout: 5m
