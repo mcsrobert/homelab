@@ -150,6 +150,7 @@ spec:
               - path: /gluetun
       tmpfs:
         type: emptyDir
+        sizeLimit: 256Mi
         advancedMounts:
           qbittorrent:
             gluetun:

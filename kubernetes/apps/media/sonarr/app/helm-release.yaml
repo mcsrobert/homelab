@@ -69,6 +69,7 @@ spec:
         path: /volume1/media
       tmp:
         type: emptyDir
+        sizeLimit: 1Gi
     service:
       sonarr:
         ports:

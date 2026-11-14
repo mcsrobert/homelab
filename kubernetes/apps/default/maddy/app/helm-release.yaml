@@ -94,6 +94,7 @@ spec:
             subPath: maddy.conf
       tmp:
         type: emptyDir
+        sizeLimit: 1Gi
     service:
       maddy:
         ports:
