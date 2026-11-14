@@ -42,6 +42,13 @@
       matchManagers: ['github-actions'],
       semanticCommitType: 'ci',
       semanticCommitScope: 'github-action',
+    },
+    {
+      // Flux stays in its group with the default scope, since that PR also
+      // updates the cluster tooling.
+      matchFileNames: ['containers/t3-code/**'],
+      matchDepNames: ['!fluxcd/flux2'],
+      semanticCommitScope: 't3-code-image',
     }
   ]
 }

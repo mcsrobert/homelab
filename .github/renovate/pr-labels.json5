@@ -30,7 +30,7 @@
       addLabels: ['renovate/ansible']
     },
     {
-      matchDatasources: ['github-releases', 'github-tags'],
+      matchDatasources: ['github-releases', 'github-release-attachments', 'github-tags'],
       addLabels: ['renovate/github-release']
     },
     {
