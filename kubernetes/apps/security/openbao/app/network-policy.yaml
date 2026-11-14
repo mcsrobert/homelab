@@ -23,6 +23,10 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: vmagent
+        # The OpenBao rotation exporter reads KV metadata.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: openbao-rotation-exporter
         # Tailscale forwards tailnet clients, which the subnet route exposes.
         - namespaceSelector:
             matchLabels:

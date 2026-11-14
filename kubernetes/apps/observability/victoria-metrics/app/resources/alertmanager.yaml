@@ -31,9 +31,20 @@ route:
         - alertname
         - namespace
         - name
+    - receiver: ntfy
+      matchers:
+        - alertname = "OpenBaoRotationDue"
+      repeat_interval: 72h
     - receiver: ntfy-urgent
       matchers:
         - severity = "critical"
+inhibit_rules:
+  - source_matchers:
+      - alertname = "OpenBaoDown"
+    target_matchers:
+      - alertname =~ "OpenBaoRotationCollectionStale|OpenBaoRotationKeyFailing"
+    equal:
+      - namespace
 receivers:
   # ntfy formats the Alertmanager payload itself with its built-in template.
   # max_alerts keeps the rendered message under ntfy's 4096 byte limit, which
