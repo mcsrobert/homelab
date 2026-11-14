@@ -23,7 +23,7 @@ spec:
           values:
             - - development
               - t3-code-
-              - docker.io/library/node
+              - ghcr.io/mcsrobert/t3-code
               - t3-code
               - kubectl
               - /home/node/.local/share/mise/installs/kubectl/*/kubectl
@@ -40,7 +40,7 @@ spec:
         #   values:
         #     - - development
         #       - t3-code-
-        #       - docker.io/library/node
+        #       - ghcr.io/mcsrobert/t3-code
         #       - t3-code
         #       - flux
       override:
