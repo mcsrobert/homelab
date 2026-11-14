@@ -25,6 +25,12 @@ stops Claude Code from updating itself; new versions come with a new image.
 `/etc/profile.d/t3-code.sh`, and the entrypoint starts the server by its
 absolute path. Nothing in the home volume can replace these tools.
 
+`KUBECONFIG` lists `~/.kube/config`, then
+[`kubeconfig.yaml`](./kubeconfig.yaml), which gives kubectl, helm and flux a
+`homelab` context for the pod's service account token. Without it, kubectl
+only uses that token when no connection flag is set; `--request-timeout`
+alone makes it try `localhost:8080`. A `~/.kube/config` takes precedence.
+
 Everything else stays writable in `/home/node`: T3 Code state and worktrees
 (`~/.t3`), agent settings and sessions (`~/.claude`, `~/.codex`), caches, and
 `npm install -g` packages (`~/.local`). Project tools, such as the ones in

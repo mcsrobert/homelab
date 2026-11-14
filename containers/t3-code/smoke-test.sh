@@ -19,6 +19,7 @@ run=(docker run --read-only --user 1000:1000 --cap-drop ALL
     echo "$tool: $("$tool" --version | head -n 1)"
   done
   bash -lc "[[ \$(command -v t3) == /opt/t3-code/bin/t3 ]]" || { echo "login shell PATH lacks /opt/t3-code/bin" >&2; exit 1; }
+  [[ -r ${KUBECONFIG##*:} ]] || { echo "default kubeconfig ${KUBECONFIG##*:} is missing" >&2; exit 1; }
 '
 
 name=t3-code-smoke-$$

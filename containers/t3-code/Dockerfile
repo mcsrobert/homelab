@@ -54,6 +54,7 @@ RUN npm ci --ignore-scripts --no-audit --no-fund --no-update-notifier \
 
 COPY --chmod=0755 codex.sh /opt/t3-code/bin/codex
 COPY --chmod=0755 entrypoint.sh /opt/t3-code/entrypoint.sh
+COPY --chmod=0644 kubeconfig.yaml /opt/t3-code/kubeconfig.yaml
 RUN chmod -R a+rX,go-w /opt/t3-code
 
 FROM docker.io/library/node:26.13.0-trixie@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725
@@ -64,11 +65,13 @@ COPY --chmod=0644 profile.sh /etc/profile.d/t3-code.sh
 
 # The baked tools come first so nothing in /home/node can replace them. The
 # user-writable npm prefix and the mise shims follow, then the system paths.
+# KUBECONFIG lets ~/.kube/config override the baked service account context.
 # DISABLE_UPDATES stops Claude Code from updating itself, also on request;
 # new versions arrive with a new image.
 ENV HOME=/home/node \
     PATH=/opt/t3-code/bin:/home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     NPM_CONFIG_PREFIX=/home/node/.local \
+    KUBECONFIG=/home/node/.kube/config:/opt/t3-code/kubeconfig.yaml \
     DISABLE_UPDATES=1
 
 USER 1000:1000
