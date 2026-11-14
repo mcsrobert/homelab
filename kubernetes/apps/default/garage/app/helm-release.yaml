@@ -100,7 +100,12 @@ spec:
             subPath: garage.toml
       meta:
         type: persistentVolumeClaim
-        existingClaim: garage-meta
+        forceRename: &metaVolume garage-meta
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 1Gi
+        volumeName: *metaVolume
         advancedMounts:
           garage:
             garage:

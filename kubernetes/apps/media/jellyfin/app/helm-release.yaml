@@ -66,7 +66,13 @@ spec:
               #     - SETGID
     persistence:
       config:
-        existingClaim: jellyfin-config
+        type: persistentVolumeClaim
+        forceRename: &configVolume jellyfin-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 8Gi
+        volumeName: *configVolume
         globalMounts:
           - path: /config
       media:

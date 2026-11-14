@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/persistentvolume-v1.json
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: &name zigbee2mqtt-data
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  claimRef:
+    name: *name
+    namespace: home-automation
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn
+  volumeMode: Filesystem
+  csi:
+    driver: driver.longhorn.io
+    volumeHandle: *name

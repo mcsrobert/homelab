@@ -74,7 +74,13 @@ spec:
               readOnlyRootFilesystem: true
     persistence:
       data:
-        existingClaim: zigbee2mqtt-data
+        type: persistentVolumeClaim
+        forceRename: &dataVolume zigbee2mqtt-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 1Gi
+        volumeName: *dataVolume
         globalMounts:
           - path: /app/data
     service:

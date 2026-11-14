@@ -128,7 +128,12 @@ spec:
     persistence:
       config:
         type: persistentVolumeClaim
-        existingClaim: qbittorrent-config
+        forceRename: &configVolume qbittorrent-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 2Gi
+        volumeName: *configVolume
         advancedMounts:
           qbittorrent:
             qbittorrent:
@@ -143,7 +148,12 @@ spec:
               - path: /media/Downloads
       gluetun:
         type: persistentVolumeClaim
-        existingClaim: gluetun-data
+        forceRename: &gluetunVolume gluetun-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 1Gi
+        volumeName: *gluetunVolume
         advancedMounts:
           qbittorrent:
             gluetun:
