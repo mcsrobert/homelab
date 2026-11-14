@@ -64,6 +64,7 @@ spec:
         existingClaim: prowlarr-config
       tmp:
         type: emptyDir
+        sizeLimit: 1Gi
     service:
       prowlarr:
         ports:

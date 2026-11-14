@@ -65,6 +65,7 @@ spec:
             subPath: config.json
       tmpfs:
         type: emptyDir
+        sizeLimit: 256Mi
         globalMounts:
           - path: /run
     service:

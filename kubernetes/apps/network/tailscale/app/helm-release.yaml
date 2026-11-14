@@ -77,10 +77,13 @@ spec:
     persistence:
       tmp:
         type: emptyDir
+        sizeLimit: 256Mi
       run:
         type: emptyDir
+        sizeLimit: &runSizeLimit 64Mi
       var-run-tailscale:
         type: emptyDir
+        sizeLimit: *runSizeLimit
         globalMounts:
           - path: /var/run/tailscale
       modules:

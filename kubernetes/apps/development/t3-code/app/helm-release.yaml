@@ -541,12 +541,14 @@ spec:
               - path: *tsStatePath
       tailscale-run:
         type: emptyDir
+        sizeLimit: 64Mi
         advancedMounts:
           t3-code:
             tailscale:
               - path: /var/run/tailscale
       tailscale-tmp:
         type: emptyDir
+        sizeLimit: 256Mi
         advancedMounts:
           t3-code:
             tailscale:

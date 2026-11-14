@@ -84,8 +84,10 @@ spec:
         path: /volume1/media
         globalMounts:
           - path: /media
+      # Holds the transcode scratch space as well as the image cache
       tmpfs:
         type: emptyDir
+        sizeLimit: 20Gi
         globalMounts:
           - path: /cache
       libmali:
