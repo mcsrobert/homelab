@@ -8,7 +8,7 @@ T3CODE_VERSION=v0.1.9
 # renovate: datasource=github-releases depName=jdx/mise
 MISE_VERSION=v2026.10.25
 # renovate: datasource=github-releases depName=cli/cli
-GH_VERSION=v2.103.3
+GH_VERSION=v2.104.0
 # renovate: datasource=npm depName=@anthropic-ai/claude-code
 CLAUDE_VERSION=2.1.311
 # renovate: datasource=npm depName=@openai/codex
