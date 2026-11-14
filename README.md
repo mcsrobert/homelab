@@ -10,7 +10,7 @@ OS image builds to automated dependency updates.
 
 ## Repository
 
-This repository currently consists of 3 main directories:
+This repository currently consists of 4 main directories:
 
 - [Armbian](./armbian): builds a custom image for the RK1 compute modules,
   based on the 6.1 BSP kernel for NPU support. Also pre-configures various
@@ -18,6 +18,11 @@ This repository currently consists of 3 main directories:
 
 - [Ansible](./ansible/): playbooks to configure hosts, install/upgrade packages,
   k3s, GPU/NPU drivers and kube-vip and more.
+
+- [Containers](./containers/): custom container images, built and tested in
+  pull requests and published to GHCR from `main` by GitHub Actions. For
+  example, [T3 Code](./containers/t3-code/) with its agent CLIs and the Flux
+  CLI baked in.
 
 - [Kubernetes](./kubernetes/): cluster bootstrap and manifests for FluxCD.
   Manifests are structured following:

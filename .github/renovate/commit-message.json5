@@ -42,6 +42,10 @@
       matchManagers: ['github-actions'],
       semanticCommitType: 'ci',
       semanticCommitScope: 'github-action',
+    },
+    {
+      matchFileNames: ['containers/t3-code/**'],
+      semanticCommitScope: 't3-code-image',
     }
   ]
 }
