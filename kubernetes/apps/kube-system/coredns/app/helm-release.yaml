@@ -30,7 +30,7 @@ spec:
           autoscaler:
             image:
               repository: registry.k8s.io/cpa/cluster-proportional-autoscaler
-              tag: v1.10.3@sha256:a4d0ab78d5e2ec356c981f361a5ff7012b21ad353b4a980e1ca30c11dda6564b
+              tag: v1.11.0@sha256:c1eac1db4ad72c27bbaf411d8a9a6a609e513bd09d72308027f24058f78ed6ad
             args:
               - --namespace=$(POD_NAMESPACE)
               - --configmap=coredns-autoscaler-config
