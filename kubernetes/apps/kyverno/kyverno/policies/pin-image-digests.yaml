@@ -30,13 +30,11 @@ spec:
         apiVersions: ["v1"]
         resources: ["pods"]
         operations: ["CREATE"]
-    # Kyverno already leaves its own namespace out of this webhook
-    # (config.excludeKyvernoNamespace); listed to match require-pinned-images.
     namespaceSelector:
       matchExpressions:
         - key: kubernetes.io/metadata.name
           operator: NotIn
-          values: ["kube-system", "kyverno", "longhorn-system"]
+          values: ["kube-system", "longhorn-system"]
   matchImageReferences:
     - expression: "!ref.startsWith('ghcr.io/cloudnative-pg/')"
   validationConfigurations:
