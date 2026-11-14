@@ -9,6 +9,13 @@
       versioningTemplate: 'semver-coerced',
     },
     {
+      description: 'Update annotated GitHub release assets and their SHA-256 in Dockerfiles',
+      customType: 'regex',
+      managerFilePatterns: ['/(^|/)Dockerfile$/'],
+      matchStrings: ['datasource=(?<datasource>github-release-attachments) depName=(?<depName>\\S+)\\nARG \\w+_VERSION=(?<currentValue>\\S+)\\nARG \\w+_SHA256=(?<currentDigest>[a-f0-9]{64})'],
+      versioningTemplate: 'semver-coerced',
+    },
+    {
       description: 'Update imageName field instead of the usual image field (for CNPG Cluster CRD)',
       customType: 'regex',
       managerFilePatterns: ['/cluster\\.ya?ml$/'],

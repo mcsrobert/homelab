@@ -25,6 +25,7 @@ was chosen.
 ```text
 ansible/                 Host configuration: k3s, kube-vip, drivers
 armbian/                 Custom OS image for the RK1 nodes
+containers/<image>/      Custom container images, published by GitHub Actions
 kubernetes/
   bootstrap/             helmfile that installs Flux before GitOps takes over
   cluster/ks.yaml        Root Flux Kustomizations: cluster-meta, cluster-apps

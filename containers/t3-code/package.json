@@ -1,0 +1,9 @@
+{
+  "name": "t3-code-image",
+  "private": true,
+  "description": "Agent CLIs baked into the T3 Code image. Renovate updates the versions and package-lock.json.",
+  "dependencies": {
+    "@anthropic-ai/claude-code": "2.1.311",
+    "@openai/codex": "0.166.0"
+  }
+}
