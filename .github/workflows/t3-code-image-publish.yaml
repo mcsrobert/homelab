@@ -1,0 +1,140 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Builds, smoke tests and publishes the T3 Code image from main to GHCR.
+# Pull requests build it through ci.yaml and t3-code-image.yaml instead.
+# Each run publishes an immutable <T3 Code version>.<run number> tag, such as
+# 0.1.9.4, so Renovate can order the builds of one T3 Code release.
+name: T3 Code Image Publish
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - containers/t3-code/**
+      - .github/workflows/t3-code-image-publish.yaml
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CONTEXT: containers/t3-code
+  IMAGE: ghcr.io/${{ github.repository_owner }}/t3-code
+
+jobs:
+  publish:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Read versions
+        id: version
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          arg() { sed -n "s/^ARG $1=v//p" "$CONTEXT/Dockerfile"; }
+          dependency() { jq -er --arg name "$1" '.dependencies[$name]' "$CONTEXT/package.json"; }
+          t3code=$(arg T3CODE_VERSION)
+          [[ $t3code =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Unexpected T3 Code version '${t3code}'"; exit 1; }
+          {
+            echo "version=${t3code}.${RUN_NUMBER}"
+            echo "description=T3 Code ${t3code} with mise $(arg MISE_VERSION), gh $(arg GH_VERSION), Flux $(arg FLUX_VERSION), Claude Code $(dependency @anthropic-ai/claude-code) and Codex $(dependency @openai/codex)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=sha,format=long
+          labels: |
+            org.opencontainers.image.title=T3 Code
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.description=${{ steps.version.outputs.description }}
+          annotations: |
+            org.opencontainers.image.title=T3 Code
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.description=${{ steps.version.outputs.description }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ env.CONTEXT }}
+          platforms: linux/arm64
+          load: true
+          provenance: false
+          tags: t3-code:test
+
+      - name: Smoke test
+        run: bash "$CONTEXT/smoke-test.sh" t3-code:test
+
+      - name: Log in to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # A re-run keeps its run number. Never re-point a published version;
+      # start a new run instead.
+      - name: Check that the version is new
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if docker buildx imagetools inspect "${IMAGE}:${VERSION}" > /dev/null 2>&1; then
+            echo "::error::${IMAGE}:${VERSION} already exists. Start a new run instead of re-running this one."
+            exit 1
+          fi
+
+      - name: Push
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ env.CONTEXT }}
+          platforms: linux/arm64
+          push: true
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+
+      - name: Attest build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      - name: Summary
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DESCRIPTION: ${{ steps.version.outputs.description }}
+        run: |
+          {
+            echo "Published \`${IMAGE}:${VERSION}@${DIGEST}\`"
+            echo
+            echo "${DESCRIPTION}"
+          } >> "$GITHUB_STEP_SUMMARY"

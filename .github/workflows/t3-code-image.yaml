@@ -1,0 +1,58 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Builds and smoke tests the T3 Code image from containers/t3-code for pull
+# requests, with a read-only token. t3-code-image-publish.yaml publishes it.
+name: T3 Code Image
+on: workflow_call
+
+permissions: {}
+
+jobs:
+  changes:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      any_changed: ${{ steps.filter.outputs.image }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Filter Files
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            image:
+              - 'containers/t3-code/**'
+              - '.github/workflows/t3-code-image.yaml'
+              - '.github/workflows/t3-code-image-publish.yaml'
+
+  build:
+    needs: changes
+    if: ${{ needs.changes.outputs.any_changed == 'true' }}
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: containers/t3-code
+          platforms: linux/arm64
+          load: true
+          provenance: false
+          tags: t3-code:test
+
+      - name: Smoke test
+        run: bash containers/t3-code/smoke-test.sh t3-code:test
