@@ -174,7 +174,8 @@ spec:
           secret:
             secretName: openbao-tls
         - name: plugins
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: 512Mi
 
       volumeMounts:
         - name: secrets

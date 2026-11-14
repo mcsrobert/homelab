@@ -16,6 +16,9 @@ spec:
   values: # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg#values
     crds:
       create: true
+    scratchData:
+      emptyDir:
+        sizeLimit: 512Mi
     resources:
       requests:
         cpu: 50m

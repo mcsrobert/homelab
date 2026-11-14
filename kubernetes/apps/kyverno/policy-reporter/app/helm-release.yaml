@@ -11,6 +11,14 @@ spec:
   interval: 1h
   values:  # https://github.com/kyverno/policy-reporter/tree/main/charts/policy-reporter
 
+    sqliteVolume:
+      emptyDir:
+        sizeLimit: 1Gi
+
+    tmpVolume:
+      emptyDir:
+        sizeLimit: &tmpSizeLimit 256Mi
+
     resources:
       requests:
         cpu: 10m
@@ -26,6 +34,9 @@ spec:
 
     ui:
       enabled: true
+      tmpVolume:
+        emptyDir:
+          sizeLimit: *tmpSizeLimit
       resources:
         requests:
           cpu: 10m

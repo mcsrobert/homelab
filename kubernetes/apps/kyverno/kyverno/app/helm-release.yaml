@@ -17,6 +17,9 @@ spec:
 
     admissionController:
       replicas: 2
+      sigstoreVolume:
+        emptyDir:
+          sizeLimit: &sigstoreSizeLimit 256Mi
       rbac:
         clusterRole:
           extraResources:
@@ -84,6 +87,9 @@ spec:
         enabled: true
 
     reportsController:
+      sigstoreVolume:
+        emptyDir:
+          sizeLimit: *sigstoreSizeLimit
       serviceMonitor:
         enabled: true
 

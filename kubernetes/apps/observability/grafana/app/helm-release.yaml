@@ -184,6 +184,7 @@ spec:
     sidecar:
       dashboards:
         enabled: true
+        sizeLimit: 256Mi
         searchNamespace: ALL
         label: grafana_dashboard
         folderAnnotation: grafana_folder
