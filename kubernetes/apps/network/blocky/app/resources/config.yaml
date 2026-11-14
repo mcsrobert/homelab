@@ -8,6 +8,8 @@ redis:
   password: "{{ .DRAGONFLY_PASSWORD }}"
 prometheus:
   enable: true
+pprof:
+  enable: false
 upstreams:
   groups:
     default:
