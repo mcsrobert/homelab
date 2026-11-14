@@ -78,8 +78,6 @@
 
     # An unmarked cordon belongs to the operator; a marked one may be
     # left over from an interrupted run and must be released by this play.
-    # An unmarked cordon belongs to the operator; a marked one may be
-    # left over from an interrupted run and must be released by this play.
     - name: Read the node before upgrading it
       delegate_to: localhost
       become: false
