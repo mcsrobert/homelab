@@ -38,51 +38,18 @@ spec:
           reloader.stakater.com/auto: "true"
         serviceAccount:
           identifier: t3-code
-        initContainers:
-          install:
-            image: &runtimeImage
-              repository: docker.io/library/node
-              tag: 26.13.0-trixie@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725
-            command:
-              - /bin/sh
-              - /opt/t3-code/init.sh
-            env:
-              HOME: &homePath /home/node
-              NPM_CONFIG_PREFIX: /home/node/.local
-              DISABLE_AUTOUPDATER: "1"
-              MISE_GITHUB_TOKEN:
-                valueFrom:
-                  secretKeyRef:
-                    name: t3-code-github
-                    key: GH_TOKEN
-            resources:
-              requests:
-                cpu: 100m
-                memory: 512Mi
-              limits:
-                memory: 1Gi
-            securityContext: &runtimeSecurity
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-                drop:
-                  - ALL
         containers:
           t3-code:
-            image: *runtimeImage
-            command:
-              - /bin/sh
-              - /opt/t3-code/entrypoint.sh
+            image:
+              repository: ghcr.io/mcsrobert/t3-code
+              tag: 0.1.9
             env:
               TZ: ${TIME_ZONE}
-              HOME: *homePath
-              DISABLE_AUTOUPDATER: "1"
               CLAUDE_CODE_OAUTH_TOKEN:
                 valueFrom:
                   secretKeyRef:
                     name: t3-code-claude
                     key: CLAUDE_CODE_OAUTH_TOKEN
-              NPM_CONFIG_PREFIX: /home/node/.local
               MISE_TRUSTED_CONFIG_PATHS: /home/node/homelab:/home/node/.t3/worktrees
               GH_TOKEN:
                 valueFrom:
@@ -134,7 +101,12 @@ spec:
                 memory: 2Gi
               limits:
                 memory: 6Gi
-            securityContext: *runtimeSecurity
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
           tailscale:
             image:
               repository: ghcr.io/tailscale/tailscale
@@ -498,37 +470,13 @@ spec:
         advancedMounts:
           t3-code:
             t3-code:
-              - path: *homePath
-            install:
-              - path: *homePath
-      entrypoint:
-        type: configMap
-        name: t3-code-entrypoint
-        advancedMounts:
-          t3-code:
-            t3-code:
-              - path: /opt/t3-code
-                readOnly: true
-            install:
-              - path: /opt/t3-code
-                readOnly: true
-      login-path:
-        type: configMap
-        name: t3-code-entrypoint
-        advancedMounts:
-          t3-code:
-            t3-code:
-              - path: /etc/profile.d/t3-path.sh
-                subPath: t3-path.sh
-                readOnly: true
+              - path: /home/node
       tmp:
         type: emptyDir
         sizeLimit: 5Gi
         advancedMounts:
           t3-code:
             t3-code:
-              - path: /tmp
-            install:
               - path: /tmp
       tailscale-state:
         type: persistentVolumeClaim
