@@ -27,5 +27,20 @@ spec:
               - manager
               - manager
               - /operator/manager_arm64
+        # Barman's instance sidecar contacts the API at startup.
+        - name: barman_instance_api_client
+          fields:
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - user.uid
+          comps: [=, =, =, =, =]
+          values:
+            - - ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar
+              - plugin-barman-cloud
+              - manager
+              - /manager
+              - 26
       override:
         exceptions: append
