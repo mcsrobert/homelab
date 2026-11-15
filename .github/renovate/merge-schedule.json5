@@ -16,6 +16,8 @@
         '!ghcr.io/tensorchord/cloudnative-vectorchord',
       ],
       automerge: true,
+      // Renovate must perform the merge to enforce automergeSchedule.
+      platformAutomerge: false,
       automergeSchedule: ['every weekday after 09:00 and before 18:00'],
       schedule: ['after 20:00 and before 22:00'],
       addLabels: ['renovate/automerge'],
@@ -29,7 +31,8 @@
         'jdx/mise',
         '@anthropic-ai/claude-code',
       ],
-      schedule: ['on sunday after 20:00 and before 22:00'],
+      // Six days of soak finish Thursday evening, before Friday's merge window.
+      schedule: ['on friday after 20:00 and before 22:00'],
     }
   ]
 }
