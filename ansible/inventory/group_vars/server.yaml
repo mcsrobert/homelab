@@ -17,9 +17,10 @@ server_config_yaml: |
     - audit-log-maxsize=50
 
   disable:
-    - servicelb
-    - traefik
-    - local-storage
+    - gateway-api-crd  # Gateway API CRDs are managed by Flux.
+    - servicelb  # MetalLB provides LoadBalancer services.
+    - traefik  # Traefik is managed by Flux.
+    - local-storage  # Longhorn provides persistent storage.
 
   flannel-backend: wireguard-native
   flannel-ipv6-masq: false
