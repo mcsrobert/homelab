@@ -74,8 +74,6 @@ FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501a
 
 COPY --from=build /opt/t3-code /opt/t3-code
 COPY --from=build /etc/mise /etc/mise
-# /etc/profile resets PATH for login shells, so restore it from profile.d.
-COPY --chmod=0644 containers/t3-code/profile.sh /etc/profile.d/t3-code.sh
 
 # The server tools come first, then the shims of the baseline tools, so
 # nothing in /home/node can replace them. A shim runs the version the current
@@ -93,6 +91,10 @@ ENV HOME=/home/node \
     KUBECONFIG=/home/node/.kube/config:/opt/t3-code/kubeconfig.yaml \
     DISABLE_UPDATES=1 \
     DISABLE_AUTOUPDATER=1
+
+# /etc/profile resets PATH for login shells, so restore it from profile.d,
+# written from the PATH above so the two cannot drift apart.
+RUN printf 'export PATH="%s"\n' "$PATH" > /etc/profile.d/t3-code.sh
 
 USER 1000:1000
 WORKDIR /home/node
