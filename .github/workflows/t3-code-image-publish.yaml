@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - containers/t3-code/**
+      - mise.toml
       - .github/workflows/t3-code-image-publish.yaml
   workflow_dispatch:
 
@@ -21,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CONTEXT: containers/t3-code
+  DIR: containers/t3-code
   IMAGE: ghcr.io/${{ github.repository_owner }}/t3-code
 
 jobs:
@@ -46,13 +47,16 @@ jobs:
         env:
           RUN_NUMBER: ${{ github.run_number }}
         run: |
-          arg() { sed -n "s/^ARG $1=v//p" "$CONTEXT/Dockerfile"; }
-          dependency() { jq -er --arg name "$1" '.dependencies[$name]' "$CONTEXT/package.json"; }
+          arg() { sed -n "s/^ARG $1=v//p" "$DIR/Dockerfile"; }
+          dependency() { jq -er --arg name "$1" '.dependencies[$name]' "$DIR/package.json"; }
+          # kubectl 1.37.2, flux2 2.10.0 and so on
+          baseline=$(python3 -I "$DIR/baseline-tools.py")
+          baseline=$(sed 's/=/ /g; s/ \([^ ]*\) / \1, /g' <<< "$baseline")
           t3code=$(arg T3CODE_VERSION)
           [[ $t3code =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Unexpected T3 Code version '${t3code}'"; exit 1; }
           {
             echo "version=${t3code}.${RUN_NUMBER}"
-            echo "description=T3 Code ${t3code} with mise $(arg MISE_VERSION), gh $(arg GH_VERSION), Flux $(arg FLUX_VERSION), Claude Code $(dependency @anthropic-ai/claude-code) and Codex $(dependency @openai/codex)"
+            echo "description=T3 Code ${t3code} with mise $(arg MISE_VERSION), gh $(arg GH_VERSION), Claude Code $(dependency @anthropic-ai/claude-code) and Codex $(dependency @openai/codex), plus ${baseline} from mise.toml"
           } >> "$GITHUB_OUTPUT"
 
       - name: Image metadata
@@ -99,14 +103,16 @@ jobs:
             exit 1
           fi
 
-      # Push the image by digest only, smoke test that digest and tag it
-      # afterwards, so the published tags point at exactly the tested build.
+      # Push by digest only, then smoke test and attest that digest before
+      # tagging it, so published versions are both tested and signed.
       - name: Build
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          context: ${{ env.CONTEXT }}
+          context: .
+          file: ${{ env.DIR }}/Dockerfile
           platforms: linux/arm64
+          secrets: github_token=${{ github.token }}
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
           provenance: mode=max
           sbom: true
@@ -116,7 +122,14 @@ jobs:
       - name: Smoke test
         env:
           DIGEST: ${{ steps.build.outputs.digest }}
-        run: bash "$CONTEXT/smoke-test.sh" "${IMAGE}@${DIGEST}"
+        run: bash "$DIR/smoke-test.sh" "${IMAGE}@${DIGEST}"
+
+      - name: Attest build provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
 
       # With a single source and no new annotations, imagetools copies the
       # index as is, so every tag keeps the tested digest.
@@ -130,13 +143,6 @@ jobs:
             [[ -n $tag ]] && args+=(--tag "$tag")
           done <<< "$TAGS"
           docker buildx imagetools create "${args[@]}" "${IMAGE}@${DIGEST}"
-
-      - name: Attest build provenance
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
-        with:
-          subject-name: ${{ env.IMAGE }}
-          subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
 
       - name: Summary
         env:
