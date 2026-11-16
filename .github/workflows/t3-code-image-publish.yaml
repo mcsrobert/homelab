@@ -68,7 +68,6 @@ jobs:
           images: ${{ env.IMAGE }}
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-            type=sha,format=long
           labels: |
             org.opencontainers.image.title=T3 Code
             org.opencontainers.image.version=${{ steps.version.outputs.version }}

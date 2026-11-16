@@ -119,9 +119,9 @@ filesystem, no capabilities and an empty home. It checks that:
 ## Versions
 
 Each publish gets its own immutable version, `<T3 Code version>.<run
-number>`, such as `0.1.9.4`, plus a `sha-<commit>` tag for the commit it was
-built from. No tag is ever moved: a re-run of a run that already published
-fails, so start a new run instead. The image's `version` and `description`
+number>`, such as `0.1.9.4`. The image's `revision` label names the commit
+it was built from. No tag is ever moved: a re-run of a run that already
+published fails, so start a new run instead. The image's `version` and `description`
 labels name the version of every baked tool.
 
 The run number keeps counting across T3 Code releases (`0.1.9.4` can be
