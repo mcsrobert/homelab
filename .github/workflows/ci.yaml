@@ -33,7 +33,6 @@ jobs:
   t3-code-image:
     permissions:
       contents: read
-      pull-requests: read
     uses: ./.github/workflows/t3-code-image.yaml
 
   ci:
