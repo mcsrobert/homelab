@@ -6,23 +6,24 @@ metadata:
 spec:
   # Load after the upstream falco-rules (priority 50).
   priority: 60
-  inlineRules: []
-    # The generated config sidecars read Secrets for vmauth configuration.
-    # Disabled: no retained investigation verifies these sidecars' process identity.
-    # Keep API access alerting until a Falco event establishes the executable.
-    # - rule: Contact K8S API Server From Container
-    #   exceptions:
-    #     - name: vmauth_readonly_api_clients
-    #       fields:
-    #         - k8s.ns.name
-    #         - k8s.pod.name
-    #         - container.image.repository
-    #         - container.name
-    #       comps: [=, startswith, =, in]
-    #       values:
-    #         - - observability
-    #           - vmauth-readonly-
-    #           - docker.io/victoriametrics/operator
-    #           - [config-init, config-reloader]
-    #   override:
-    #     exceptions: append
+  inlineRules:
+    # Config sidecars read/watch the generated configuration Secret via the API.
+    # Falco events on 2026-11-16 verified /app for both config containers.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: vmauth_readonly_api_clients
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.exepath
+          comps: [=, startswith, =, in, =]
+          values:
+            - - observability
+              - vmauth-readonly-
+              - docker.io/victoriametrics/operator
+              - [config-init, config-reloader]
+              - /app
+      override:
+        exceptions: append
