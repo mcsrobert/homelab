@@ -8,6 +8,7 @@ metadata:
 spec:
   dependsOn:
     - name: cert-manager
+    - name: gateway-api-crds
     - name: longhorn
     - name: prometheus-operator-crds
   path: /kubernetes/apps/security/openbao/app

@@ -38,6 +38,10 @@ spec:
             tls_key_file    = "/tls/tls.key"
             tls_min_version = "tls13"
 
+            # Traefik forwards the UI and CLI; log their address, not Traefik's.
+            x_forwarded_for_authorized_addrs   = "${CLUSTER_CIDR},${CLUSTER_CIDRv6}"
+            x_forwarded_for_reject_not_present = false
+
             telemetry {
               disable_hostname               = true
               unauthenticated_metrics_access = true
@@ -197,6 +201,31 @@ spec:
       networkPolicy:
         enabled: false
 
+      gateway:
+        httpRoute:
+          enabled: true
+          annotations:
+            gethomepage.dev/enabled: "true"
+            gethomepage.dev/name: OpenBao
+            gethomepage.dev/icon: openbao
+            gethomepage.dev/description: Manage, store, and distribute sensitive data
+            gethomepage.dev/group: Kubernetes
+            gethomepage.dev/pod-selector: app.kubernetes.io/name=openbao
+          hosts:
+            - bao.${CLUSTER_DOMAIN}
+          parentRefs:
+            - name: traefik-gateway
+              namespace: network
+              sectionName: websecure
+        tlsPolicy:
+          enabled: true
+          validation:
+            caCertificateRefs:
+              - group: ""
+                kind: Secret
+                name: openbao-tls
+            hostname: openbao.security.svc.cluster.local
+
     injector:
       resources:
         requests:
@@ -204,15 +233,6 @@ spec:
           memory: 32Mi
         limits:
           memory: 128Mi
-
-    ui:
-      enabled: true
-      annotations:
-        metallb.io/loadBalancerIPs: "${OPENBAO_IP},${OPENBAO_IPv6}"
-      serviceType: LoadBalancer
-      serviceIPFamilyPolicy: RequireDualStack
-      externalTrafficPolicy: Local
-      externalPort: 443
 
     serverTelemetry:
       serviceMonitor:

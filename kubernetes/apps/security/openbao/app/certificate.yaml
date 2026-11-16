@@ -3,12 +3,37 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
+  name: openbao-ca
+spec:
+  # Let's Encrypt needs a token read from OpenBao, so OpenBao cannot wait on it.
+  isCA: true
+  commonName: Homelab OpenBao CA
+  secretName: openbao-ca
+  duration: 87600h # 10y
+  privateKey:
+    algorithm: ECDSA
+    size: 384
+  issuerRef:
+    kind: Issuer
+    name: openbao-selfsigned
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
   name: openbao-cert
 spec:
   secretName: openbao-tls
-  commonName: &domain bao.${CLUSTER_DOMAIN}
+  # Names that in-cluster clients, the chart's BAO_ADDR and `bao` inside the pod use.
   dnsNames:
-    - *domain
+    - localhost
+    - openbao
+    - openbao.security
+    - openbao.security.svc
+    - openbao.security.svc.cluster.local
+  ipAddresses:
+    - 127.0.0.1
+    - ::1
   issuerRef:
-    kind: ClusterIssuer
-    name: letsencrypt-production
+    kind: Issuer
+    name: openbao-ca

@@ -11,7 +11,7 @@ spec:
       app.kubernetes.io/name: openbao
       component: server
   ingress:
-    # External Secrets reaches OpenBao through its LoadBalancer address, and
+    # External Secrets and Traefik reach OpenBao through its Service, and
     # vmagent scrapes it.
     - from:
         - podSelector:
@@ -23,19 +23,12 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: vmagent
-        # Tailscale forwards tailnet clients, which the subnet route exposes.
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
-              app.kubernetes.io/name: tailscale
-        # The UI and CLI, through the LoadBalancer (externalTrafficPolicy:
-        # Local keeps the client address).
-        - ipBlock:
-            cidr: ${LAN_CIDR}
-        - ipBlock:
-            cidr: ${LAN_CIDRv6}
+              app.kubernetes.io/name: traefik
       ports:
         - port: 8200
     # Raft and replication between OpenBao pods.
