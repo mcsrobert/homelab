@@ -17,6 +17,8 @@ server_config_yaml: |
     - audit-log-maxsize=50
 
   disable:
+    # Coordinate removal and Flux activation: kubernetes/apps/kube-system/metrics-server/MIGRATION.md
+    - metrics-server  # Flux takes over only after every server has restarted.
     - gateway-api-crd  # Gateway API CRDs are managed by Flux.
     - servicelb  # MetalLB provides LoadBalancer services.
     - traefik  # Traefik is managed by Flux.

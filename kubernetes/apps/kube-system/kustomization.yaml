@@ -8,3 +8,4 @@ resources:
   - ./coredns/ks.yaml
   - ./external-snapshotter/ks.yaml
   - ./gateway-api/ks.yaml
+  - ./metrics-server/ks.yaml
