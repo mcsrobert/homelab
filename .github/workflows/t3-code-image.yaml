@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Builds and smoke tests the T3 Code image from containers/t3-code for pull
 # requests, with a read-only token. t3-code-image-publish.yaml publishes it.
-# The image bakes the baseline tools from mise.toml, so changes to it rebuild.
+# The image bakes the baseline tools from mise.toml, so changes to them rebuild.
 name: T3 Code Image
 on: workflow_call
 
@@ -13,26 +13,20 @@ jobs:
     runs-on: ubuntu-26.04
     permissions:
       contents: read
-      pull-requests: read
     outputs:
-      any_changed: ${{ steps.filter.outputs.image }}
+      any_changed: ${{ steps.changes.outputs.changed }}
     steps:
 
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 2
           persist-credentials: false
 
-      - name: Filter Files
-        id: filter
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        with:
-          filters: |
-            image:
-              - 'containers/t3-code/**'
-              - 'mise.toml'
-              - '.github/workflows/t3-code-image.yaml'
-              - '.github/workflows/t3-code-image-publish.yaml'
+      # The checkout is the PR's merge commit, whose first parent is the base.
+      - name: Check for image changes
+        id: changes
+        run: echo "changed=$(bash containers/t3-code/image-changed.sh HEAD^1)" >> "$GITHUB_OUTPUT"
 
   build:
     needs: changes

@@ -84,9 +84,9 @@ alone makes it try `localhost:8080`. A `~/.kube/config` takes precedence.
 
 Renovate updates the versions in the `Dockerfile` together with their asset
 checksums, the npm packages together with `package-lock.json`, the base image
-digest, and the baseline tools in `mise.toml`. Do not edit them by hand. Every
-change to `mise.toml` rebuilds the image in its pull request and publishes a
-new version from `main`.
+digest, and the baseline tools in `mise.toml`. Do not edit them by hand. A change
+to a baseline tool in `mise.toml` rebuilds the image in its pull request and
+publishes a new version from `main`; other `mise.toml` changes do not.
 
 ## Build and publish
 
@@ -96,8 +96,9 @@ context to `mise.toml` and this directory. The workflow's read-only token is
 passed as a build secret, so mise's GitHub requests are not rate limited.
 
 - [`t3-code-image.yaml`](../../.github/workflows/t3-code-image.yaml) runs as
-  part of the `ci` check on pull requests that change the image or
-  `mise.toml`. It only builds and tests, with a read-only token.
+  part of the `ci` check on pull requests that change the image or a baseline
+  tool, as [`image-changed.sh`](./image-changed.sh) decides. It only builds
+  and tests, with a read-only token.
 - [`t3-code-image-publish.yaml`](../../.github/workflows/t3-code-image-publish.yaml)
   runs on pushes to `main` that change them. It pushes the image by digest
   with an SBOM, smoke tests that digest, adds signed build provenance, and

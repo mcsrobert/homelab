@@ -26,8 +26,39 @@ env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/t3-code
 
 jobs:
-  publish:
+  # The path filter above catches every mise.toml change. Only build when one
+  # changes a baseline tool, or on a manual run.
+  changes:
     if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check for image changes
+        id: changes
+        env:
+          BEFORE: ${{ github.event.before }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [[ $EVENT == push ]]; then
+            changed=$(bash "$DIR/image-changed.sh" "$BEFORE")
+          else
+            changed=true
+          fi
+          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: changes
+    if: ${{ needs.changes.outputs.changed == 'true' }}
     runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
