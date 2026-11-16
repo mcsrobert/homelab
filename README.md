@@ -21,8 +21,8 @@ This repository currently consists of 4 main directories:
 
 - [Containers](./containers/): custom container images, built and tested in
   pull requests and published to GHCR from `main` by GitHub Actions. For
-  example, [T3 Code](./containers/t3-code/) with its agent CLIs and the Flux
-  CLI baked in.
+  example, [T3 Code](./containers/t3-code/) with its agent CLIs and the
+  baseline cluster tools from `mise.toml` baked in.
 
 - [Kubernetes](./kubernetes/): cluster bootstrap and manifests for FluxCD.
   Manifests are structured following:

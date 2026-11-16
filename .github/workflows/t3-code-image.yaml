@@ -2,6 +2,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Builds and smoke tests the T3 Code image from containers/t3-code for pull
 # requests, with a read-only token. t3-code-image-publish.yaml publishes it.
+# The image bakes the baseline tools from mise.toml, so changes to it rebuild.
 name: T3 Code Image
 on: workflow_call
 
@@ -29,6 +30,7 @@ jobs:
           filters: |
             image:
               - 'containers/t3-code/**'
+              - 'mise.toml'
               - '.github/workflows/t3-code-image.yaml'
               - '.github/workflows/t3-code-image-publish.yaml'
 
@@ -48,8 +50,10 @@ jobs:
       - name: Build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
-          context: containers/t3-code
+          context: .
+          file: containers/t3-code/Dockerfile
           platforms: linux/arm64
+          secrets: github_token=${{ github.token }}
           load: true
           provenance: false
           tags: t3-code:test
