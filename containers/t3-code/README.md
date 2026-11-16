@@ -1,17 +1,17 @@
 # T3 Code image
 
 The container image for `kubernetes/apps/development/t3-code`. It bakes the
-T3 Code server and the tools it relies on into `/opt/t3-code`, so the pod no
-longer installs them into its home volume on every start.
+T3 Code server, the tools it relies on and a baseline of this repository's
+cluster tools into the image, so the pod no longer installs them into its
+home volume on every start.
 
-## Contents
+## Server tools
 
 | Path | Source | Pinned by |
 | --- | --- | --- |
 | `/opt/t3-code/bin/t3` | [T3 Code release][t3code] tarball | SHA-256 |
 | `/opt/t3-code/bin/mise` | [mise release][mise] binary | SHA-256 |
 | `/opt/t3-code/bin/gh` | [GitHub CLI release][gh] tarball | SHA-256 |
-| `/opt/t3-code/bin/flux` | [Flux CLI release][flux] tarball | SHA-256 |
 | `/opt/t3-code/bin/claude` | [`@anthropic-ai/claude-code`][claude] | lockfile |
 | `/opt/t3-code/bin/codex` | [`@openai/codex`][codex] | lockfile |
 
@@ -24,7 +24,55 @@ come with a new image.
 
 `/opt/t3-code/bin` comes first in `PATH`, also for login shells through
 `/etc/profile.d/t3-code.sh`, and the entrypoint starts the server by its
-absolute path. Nothing in the home volume can replace these tools.
+absolute path. Neither the home volume nor a project's mise config can
+replace these tools.
+
+## Baseline tools
+
+The tools agents run for most reviews and validations come from the
+repository's [`mise.toml`](../../mise.toml), which stays the only place their
+versions are pinned: kubectl, Flux (`flux2`), Helm, Kustomize, jq, yq,
+kubeconform and flate. `MISE_TOOLS` in the [`Dockerfile`](./Dockerfile)
+selects them. The build reads their versions from `mise.toml`, writes them to
+the system config `/etc/mise/config.toml`, and installs them with their shims
+into `/opt/t3-code/mise`. Tools that only some tasks need, such as Python,
+Ansible, SOPS or pre-commit, are left to `mise install` in each checkout.
+
+mise checks each download against what its registry declares for the tool:
+the checksum the publisher releases, and for some tools a GitHub attestation
+or Cosign signature. Unlike the server tools, no checksum is pinned in this
+repository, which has no `mise.lock`.
+
+### How tools resolve
+
+`PATH` lists, in order:
+
+1. `/opt/t3-code/bin`: the server tools.
+2. `/opt/t3-code/mise/shims`: shims for the baseline tools.
+3. `~/.local/bin`: `npm install -g` packages.
+4. `~/.local/share/mise/shims`: shims for the tools that projects install.
+5. The system paths.
+
+A shim runs the version that the mise config for the current directory
+selects. The system config selects the baseline, and this repository's
+`mise.toml` selects the same versions, so outside a project and in a checkout
+of `main` the shims run the baked copies. `MISE_SHARED_INSTALL_DIRS` makes
+mise look in `/opt/t3-code/mise/installs` after `~/.local/share/mise/installs`,
+and `mise install` skips what is baked.
+
+A worktree that pins another version, such as a Renovate branch with a newer
+kubectl, selects it on purpose: `mise install` puts it in
+`~/.local/share/mise`, and the shims run it only inside that worktree. A copy
+in the home also wins over the baked copy of the same version, so do not
+`mise install --force` a baseline version.
+
+### What stays writable
+
+Everything else in `/home/node`: T3 Code state and worktrees (`~/.t3`), agent
+settings and sessions (`~/.claude`, `~/.codex`), caches, `npm install -g`
+packages (`~/.local`) and the tools projects install with mise
+(`~/.local/share/mise`). Deleting `~/.local/share/mise` is safe; the next
+`mise install` restores what is not baked.
 
 `KUBECONFIG` lists `~/.kube/config`, then
 [`kubeconfig.yaml`](./kubeconfig.yaml), which gives kubectl, helm and flux a
@@ -32,37 +80,41 @@ absolute path. Nothing in the home volume can replace these tools.
 only uses that token when no connection flag is set; `--request-timeout`
 alone makes it try `localhost:8080`. A `~/.kube/config` takes precedence.
 
-Everything else stays writable in `/home/node`: T3 Code state and worktrees
-(`~/.t3`), agent settings and sessions (`~/.claude`, `~/.codex`), caches, and
-`npm install -g` packages (`~/.local`). Project tools, such as the ones in
-this repository's `mise.toml`, are installed by `mise install` in each
-checkout under `~/.local/share/mise`. Deleting that directory is safe; the
-next `mise install` restores it. The baked `flux` comes first in `PATH`, so
-its version should match `flux2` in `mise.toml`; Renovate's Flux CD group
-updates both in one pull request.
-
 ## Updates
 
 Renovate updates the versions in the `Dockerfile` together with their asset
-checksums, the npm packages together with `package-lock.json`, and the base
-image digest. Do not edit them by hand.
+checksums, the npm packages together with `package-lock.json`, the base image
+digest, and the baseline tools in `mise.toml`. Do not edit them by hand. Every
+change to `mise.toml` rebuilds the image in its pull request and publishes a
+new version from `main`.
 
 ## Build and publish
 
-Both workflows build `linux/arm64` on a native ARM runner and run
-[`smoke-test.sh`](./smoke-test.sh) against it: it checks that every tool
-resolves to `/opt/t3-code/bin` and that `t3 serve` becomes healthy as uid 1000
-with a read-only root filesystem.
+Both workflows build `linux/arm64` on a native ARM runner from the repository
+root. [`Dockerfile.dockerignore`](./Dockerfile.dockerignore) limits the
+context to `mise.toml` and this directory. The workflow's read-only token is
+passed as a build secret, so mise's GitHub requests are not rate limited.
 
 - [`t3-code-image.yaml`](../../.github/workflows/t3-code-image.yaml) runs as
-  part of the `ci` check on pull requests that change the image. It only
-  builds and tests, with a read-only token.
+  part of the `ci` check on pull requests that change the image or
+  `mise.toml`. It only builds and tests, with a read-only token.
 - [`t3-code-image-publish.yaml`](../../.github/workflows/t3-code-image-publish.yaml)
-  runs on pushes to `main`. It pushes the image by digest with an SBOM and a
-  signed build provenance attestation, smoke tests that digest, and only then
-  tags it, so every tag points at the tested build. A failed smoke test
-  leaves an untagged digest in the package. Run it by hand from `main` to
-  rebuild without a change.
+  runs on pushes to `main` that change them. It pushes the image by digest
+  with an SBOM and a signed build provenance attestation, smoke tests that
+  digest, and only then tags it, so every tag points at the tested build. A
+  failed smoke test leaves an untagged digest in the package. Run it by hand
+  from `main` to rebuild without a change.
+
+Both run [`smoke-test.sh`](./smoke-test.sh) as uid 1000 with a read-only root
+filesystem, no capabilities and an empty home. It checks that:
+
+- without a network, every server tool resolves to `/opt/t3-code/bin`, and
+  every baseline tool to its baked shim and the version `mise.toml` pins, also
+  in a login shell. [`baseline-tools.py`](./baseline-tools.py) reads the
+  expected tools and versions from the sources, not the image;
+- a project that pins another jq installs it into the home and runs it there,
+  while the baseline stays the default elsewhere;
+- `t3 serve` becomes healthy.
 
 ## Versions
 
@@ -93,6 +145,5 @@ as private.
 [t3code]: https://github.com/pingdotgg/t3code/releases
 [mise]: https://mise.jdx.dev/installing-mise.html
 [gh]: https://github.com/cli/cli/releases
-[flux]: https://fluxcd.io/flux/installation/#install-the-flux-cli
 [claude]: https://code.claude.com/docs/en/setup
 [codex]: https://github.com/openai/codex
