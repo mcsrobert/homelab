@@ -5,11 +5,3 @@ kind: Kustomization
 resources:
   - ./external-secret.yaml
   - ./helm-release.yaml
-configMapGenerator:
-  - name: t3-code-entrypoint
-    files:
-      - ./resources/entrypoint.sh
-      - ./resources/init.sh
-      - ./resources/t3-path.sh
-generatorOptions:
-  disableNameSuffixHash: true
