@@ -10,6 +10,21 @@ spec:
     name: app-template
     namespace: flux-system
   interval: 30m
+  # Kyverno excludes kube-system from its webhooks; mirror set-helmrelease-defaults here.
+  install:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+      remediateLastFailure: true
+  rollback:
+    cleanupOnFail: true
+  driftDetection:
+    mode: enabled
   values:
     controllers:
       autoscaler:

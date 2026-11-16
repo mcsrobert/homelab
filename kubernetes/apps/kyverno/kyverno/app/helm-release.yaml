@@ -9,10 +9,32 @@ spec:
     kind: OCIRepository
     name: kyverno
   interval: 1h
+  # Kyverno's namespace bypasses admission; keep defaults explicit for policy reporting.
+  # CRD/storage migrations need deliberate recovery rather than automatic rollback.
+  # https://kyverno.io/docs/installation/upgrading/
+  # RetryOnFailure bypasses the remediation fields retained for policy reporting.
   install:
     crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m
+    remediation:
+      retries: 3
+      remediateLastFailure: true
   upgrade:
     crds: CreateReplace
+    strategy:
+      name: RetryOnFailure
+      retryInterval: 5m
+    cleanupOnFail: false
+    remediation:
+      strategy: rollback
+      retries: 3
+      remediateLastFailure: true
+  rollback:
+    cleanupOnFail: true
+  driftDetection:
+    mode: enabled
   values:  # https://github.com/kyverno/kyverno/tree/main/charts/kyverno#values
 
     # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests
