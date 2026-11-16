@@ -120,6 +120,7 @@ jobs:
 
       - name: Smoke test
         env:
+          MISE_GITHUB_TOKEN: ${{ github.token }}
           DIGEST: ${{ steps.build.outputs.digest }}
         run: bash "$DIR/smoke-test.sh" "${IMAGE}@${DIGEST}"
 

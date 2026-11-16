@@ -48,16 +48,18 @@ baseline=$(python3 -I "$dir/baseline-tools.py")
     [[ $output == *"$version"* ]] || fail "$bin reports $output, not $version"
     echo "$bin: $output"
   done
-  bash -lc "[[ \$(command -v t3) == /opt/t3-code/bin/t3 && \$(command -v flux) == /opt/t3-code/mise/shims/flux ]]" ||
-    fail "login shell PATH lacks /opt/t3-code"
+  login_path=$(bash -lc "printf %s \"\$PATH\"")
+  [[ $login_path == "$PATH" ]] || fail "login shell PATH is $login_path, not $PATH"
   [[ -r ${KUBECONFIG##*:} ]] || fail "default kubeconfig ${KUBECONFIG##*:} is missing"
 '
 
 # A project that pins another version gets it from the writable home, while
 # the baseline stays the default everywhere else.
+# MISE_GITHUB_TOKEN, when set, keeps the jq download clear of GitHub's
+# unauthenticated rate limit.
 jq_baseline=$(tr ' ' '\n' <<< "$baseline" | sed -n 's/^jq=//p')
 # shellcheck disable=SC2016 # the script expands inside the container
-"${run[@]}" --rm --env JQ_BASELINE="$jq_baseline" --entrypoint /bin/bash "$image" -euo pipefail -c '
+"${run[@]}" --rm --env JQ_BASELINE="$jq_baseline" --env MISE_GITHUB_TOKEN --entrypoint /bin/bash "$image" -euo pipefail -c '
   fail() { echo "$*" >&2; exit 1; }
   alternate=1.7.1
   [[ $alternate != "$JQ_BASELINE" ]] || fail "pick an alternate jq other than the baseline $JQ_BASELINE"
