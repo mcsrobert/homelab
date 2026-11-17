@@ -15,8 +15,8 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # Renovate updates each version together with the SHA-256 of its asset.
 # renovate: datasource=github-release-attachments depName=pingdotgg/t3code
-ARG T3CODE_VERSION=v0.1.9
-ARG T3CODE_SHA256=52023bc5728a4dee4de361ad6fef7c236f1efb2742ff25e29d5c55e2fb662eea
+ARG T3CODE_VERSION=v0.1.10
+ARG T3CODE_SHA256=5ffbd224f53d0f827279825347a7ebf5a7ac98ad5c1347d47409f30aa2a1e425
 # renovate: datasource=github-release-attachments depName=jdx/mise
 ARG MISE_VERSION=v2026.10.25
 ARG MISE_SHA256=bb09e88b13164ca90691a5cc042726d079f0ba26ab55527344cb173c2e83c998
