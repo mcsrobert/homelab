@@ -42,6 +42,16 @@
       matchDepNames: ['/kyverno\\/(charts\\/)?policy-reporter/'],
     },
     {
+      groupName: 'T3 Code tools',
+      group: {commitMessageTopic: '{{{groupName}}} group'},
+      matchPackageNames: [
+        '@anthropic-ai/claude-code',
+        '@openai/codex',
+        'cli/cli',
+        'pingdotgg/t3code',
+      ],
+    },
+    {
       groupName: 'Renovate',
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchPackageNames: [

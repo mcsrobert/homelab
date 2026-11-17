@@ -12,14 +12,11 @@
         '!kubernetes',
         '!kubernetes/kubernetes',
         '!longhorn',
-        // Extension upgrades require SQL updates and reindexing.
         '!ghcr.io/tensorchord/cloudnative-vectorchord',
       ],
       automerge: true,
-      // Renovate must perform the merge to enforce automergeSchedule.
-      platformAutomerge: false,
-      automergeSchedule: ['every weekday after 09:00 and before 18:00'],
-      schedule: ['after 20:00 and before 22:00'],
+      schedule: ['after 02:00 and before 04:00'],
+      updateNotScheduled: false,
       addLabels: ['renovate/automerge'],
     },
     {
@@ -30,9 +27,11 @@
         'renovatebot/pre-commit-hooks',
         'jdx/mise',
         '@anthropic-ai/claude-code',
+        '@openai/codex',
+        'cli/cli',
+        'pingdotgg/t3code',
       ],
-      // Six days of soak finish Thursday evening, before Friday's merge window.
-      schedule: ['on friday after 20:00 and before 22:00'],
+      schedule: ['on friday after 02:00 and before 04:00'],
     }
   ]
 }
