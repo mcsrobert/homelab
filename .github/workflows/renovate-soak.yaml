@@ -1,12 +1,12 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Sets the "soak" commit status, a required check, on every pull request.
-# Renovate pull requests soak for SOAK_DAYS, other pull requests pass right
-# away. The soak counts from the first push of the current update: a rebase
-# adds the same lines and keeps the start time, a newer version adds
-# different lines and starts the soak again. The status only turns green on a
-# weekday between 09:00 and 18:00, so GitHub auto-merge merges updates in
-# that window.
+# Renovate pull requests soak for SOAK_DAYS unless they have the
+# renovate/skip-soak label, other pull requests pass right away. The soak
+# counts from the first push of the current update: a rebase adds the same
+# lines and keeps the start time, a newer version adds different lines and
+# starts the soak again. The status only turns green on a weekday between
+# 09:00 and 18:00, so GitHub auto-merge merges updates in that window.
 name: Renovate Soak
 on:
   pull_request:
@@ -70,8 +70,9 @@ jobs:
           }
 
           # One line per PR: number, head, "<sha>@<time>" for every head the PR
-          # has had (oldest first), whether it is a Renovate branch, and the
-          # head's soak state and description.
+          # has had (oldest first), whether it is a Renovate branch, whether it
+          # has the renovate/skip-soak label, and the head's soak state and
+          # description.
           # shellcheck disable=SC2016 # GraphQL and jq variables
           prs=$(gh api graphql -f owner="${GH_REPO%/*}" -f name="${GH_REPO#*/}" -f query='
             query($owner: String!, $name: String!) {
@@ -82,6 +83,7 @@ jobs:
                     createdAt
                     headRefName
                     headRefOid
+                    labels(first: 20) { nodes { name } }
                     commits(last: 1) {
                       nodes { commit { status { context(name: "soak") { state description } } } }
                     }
@@ -105,7 +107,7 @@ jobs:
                  + [$t.nodes[] | [.afterCommit.oid, .createdAt]]) as $pushes
               | .commits.nodes[0].commit.status.context as $soak
               | [.number, .headRefOid, ($pushes | map("\(.[0] // "")@\(.[1])") | join(",")),
-                 (.headRefName | startswith("renovate/")),
+                 (.headRefName | startswith("renovate/")), any(.labels.nodes[]; .name == "renovate/skip-soak"),
                  ($soak.state // "" | ascii_downcase), ($soak.description // "")]
               | @tsv')
 
@@ -117,7 +119,7 @@ jobs:
             echo "::error::#${number}: $1"
             failed=1
           }
-          while IFS=$'\t' read -r number sha history renovate state description; do
+          while IFS=$'\t' read -r number sha history renovate skip state description; do
             if [[ -z "${number}" || "${state}" == success || (-n "${PR_NUMBER}" && "${number}" != "${PR_NUMBER}") ]]; then
               continue
             fi
@@ -125,6 +127,14 @@ jobs:
             if [[ "${renovate}" != true ]]; then
               new_state=success
               new_description="No soak needed"
+            elif [[ "${skip}" == true ]]; then
+              if (( merge_window )); then
+                new_state=success
+                new_description="Soak skipped"
+              else
+                new_state=pending
+                new_description="Waiting for the merge window"
+              fi
             else
               if [[ "${state}" == pending && "${description}" == "Soaking since "* ]]; then
                 start=${description#Soaking since }
