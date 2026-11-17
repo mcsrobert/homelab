@@ -134,7 +134,8 @@ jobs:
           fi
 
       # Push by digest only, then smoke test and attest that digest before
-      # tagging it, so published versions are both tested and signed.
+      # tagging it, so published versions are both tested and signed. Recompress
+      # the base layers too: zstd level 9 reduces transfer and decoding costs.
       - name: Build
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -146,7 +147,7 @@ jobs:
           # Rewritten timestamps, from the Dockerfile's SOURCE_DATE_EPOCH, keep
           # each unchanged layer byte-identical, so nodes only pull the layers
           # an update changes.
-          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true,rewrite-timestamp=true
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true,compression=zstd,compression-level=9,force-compression=true,rewrite-timestamp=true
           provenance: mode=max
           sbom: true
           labels: ${{ steps.meta.outputs.labels }}
