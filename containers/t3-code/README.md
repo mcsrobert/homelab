@@ -122,6 +122,13 @@ not rewritten. The same setting dates the image config's `created` field
 1970-01-01; the `revision` label and the publish run tell when and from what
 it was built.
 
+Published images use OCI media types and zstd level 9 compression for every
+layer, including the Node base layers (`force-compression=true`), to reduce
+download size and decoding time. Recompression changes the base layers'
+compressed digests, so they are not shared with gzip copies of the Node image.
+The pull-request build uses a gzip Docker archive for local loading; the
+publish smoke test pulls and tests the actual zstd image by digest.
+
 Both run [`smoke-test.sh`](./smoke-test.sh) as uid 1000 with a read-only root
 filesystem, no capabilities and an empty home. It checks that:
 
