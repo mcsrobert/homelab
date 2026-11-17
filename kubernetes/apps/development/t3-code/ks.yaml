@@ -17,3 +17,22 @@ spec:
   interval: 30m
   timeout: 10m
   wait: true
+
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/kustomization-kustomize-v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: t3-code-falco
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: falco-operator
+  path: /kubernetes/apps/development/t3-code/falco
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  targetNamespace: security
+  interval: 30m
+  timeout: 5m
+  prune: true
