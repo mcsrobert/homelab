@@ -35,6 +35,7 @@ baseline=$(python3 -I "$dir/baseline-tools.py")
       helm) bin=helm args=(version --short) ;;
       kustomize) bin=kustomize args=(version) ;;
       jq | yq) bin=$tool args=(--version) ;;
+      ripgrep) bin=rg args=(--version) ;;
       kubeconform) bin=kubeconform args=(-v) ;;
       github:home-operations/flate) bin=flate args=(--version) ;;
       *) fail "smoke-test.sh has no version check for $tool" ;;

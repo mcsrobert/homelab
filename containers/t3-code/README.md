@@ -2,8 +2,8 @@
 
 The container image for `kubernetes/apps/development/t3-code`. It bakes the
 T3 Code server, the tools it relies on and a baseline of this repository's
-cluster tools into the image, so the pod no longer installs them into its
-home volume on every start.
+development and cluster tools into the image, so the pod no longer installs
+them into its home volume on every start.
 
 ## Server tools
 
@@ -32,11 +32,12 @@ replace these tools.
 The tools agents run for most reviews and validations come from the
 repository's [`mise.toml`](../../mise.toml), which stays the only place their
 versions are pinned: kubectl, Flux (`flux2`), Helm, Kustomize, jq, yq,
-kubeconform and flate. `MISE_TOOLS` in the [`Dockerfile`](./Dockerfile)
-selects them. The build reads their versions from `mise.toml`, writes them to
-the system config `/etc/mise/config.toml`, and installs them with their shims
-into `/opt/t3-code/mise`. Tools that only some tasks need, such as Python,
-Ansible, SOPS or pre-commit, are left to `mise install` in each checkout.
+kubeconform, flate and ripgrep (`rg`). `MISE_TOOLS` in the
+[`Dockerfile`](./Dockerfile) selects them. The build reads their versions from
+`mise.toml`, writes them to the system config `/etc/mise/config.toml`, and
+installs them with their shims into `/opt/t3-code/mise`. Tools that only some
+tasks need, such as Python, Ansible, SOPS or pre-commit, are left to
+`mise install` in each checkout.
 
 mise checks each download against what its registry declares for the tool:
 the checksum the publisher releases, and for some tools a GitHub attestation
