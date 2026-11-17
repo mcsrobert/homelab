@@ -1,0 +1,48 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: t3-code-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # The read-only service account supports cluster inspection with the bundled
+    # kubectl, Flux and Helm clients. Match only their image-installed paths;
+    # allow the version directory to change when Renovate updates the image.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: t3_code_api_clients
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - user.uid
+          comps: [=, startswith, =, =, =, glob, =]
+          values:
+            - - &namespace development
+              - &pod t3-code-
+              - &image ghcr.io/mcsrobert/t3-code
+              - &container t3-code
+              - kubectl
+              - /opt/t3-code/mise/installs/kubectl/*/kubectl
+              - &uid 1000
+            - - *namespace
+              - *pod
+              - *image
+              - *container
+              - flux
+              - /opt/t3-code/mise/installs/flux2/*/flux
+              - *uid
+            - - *namespace
+              - *pod
+              - *image
+              - *container
+              - helm
+              - /opt/t3-code/mise/installs/helm/*/linux-arm64/helm
+              - *uid
+      override:
+        exceptions: append
