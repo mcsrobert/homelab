@@ -14,8 +14,8 @@ ARG T3CODE_SHA256=52023bc5728a4dee4de361ad6fef7c236f1efb2742ff25e29d5c55e2fb662e
 ARG MISE_VERSION=v2026.10.25
 ARG MISE_SHA256=bb09e88b13164ca90691a5cc042726d079f0ba26ab55527344cb173c2e83c998
 # renovate: datasource=github-release-attachments depName=cli/cli
-ARG GH_VERSION=v2.103.3
-ARG GH_SHA256=ee32df2323c8847f5fac6cb6b4b69ca75828e9329a8f22f677021f7b3306ce63
+ARG GH_VERSION=v2.104.0
+ARG GH_SHA256=cb34cefc6f4e77b90731374a2b737516bb8f3033c6ca46aa949e5344f68069e3
 # Baseline tools from the repository's mise.toml, which pins their versions.
 ARG MISE_TOOLS="kubectl flux2 helm kustomize jq yq kubeconform github:home-operations/flate"
 
