@@ -84,13 +84,17 @@ COPY --from=build /etc/mise /etc/mise
 # KUBECONFIG lets ~/.kube/config override the baked service account context.
 # DISABLE_UPDATES and DISABLE_AUTOUPDATER stop Claude Code from updating
 # itself, also on request; new versions arrive with a new image.
+# LANG selects UTF-8 instead of the POSIX locale, so terminals, git and Python
+# handle non-ASCII text. Debian's libc-bin ships C.UTF-8, so no locales package
+# is needed.
 ENV HOME=/home/node \
     PATH=/opt/t3-code/bin:/opt/t3-code/mise/shims:/home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     MISE_SHARED_INSTALL_DIRS=/opt/t3-code/mise/installs \
     NPM_CONFIG_PREFIX=/home/node/.local \
     KUBECONFIG=/home/node/.kube/config:/opt/t3-code/kubeconfig.yaml \
     DISABLE_UPDATES=1 \
-    DISABLE_AUTOUPDATER=1
+    DISABLE_AUTOUPDATER=1 \
+    LANG=C.UTF-8
 
 # /etc/profile resets PATH for login shells, so restore it from profile.d,
 # written from the PATH above so the two cannot drift apart.

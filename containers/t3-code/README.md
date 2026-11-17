@@ -27,6 +27,10 @@ come with a new image.
 absolute path. Neither the home volume nor a project's mise config can
 replace these tools.
 
+`LANG` is `C.UTF-8`, a UTF-8 locale that Debian's `libc-bin` package ships, so
+the shell, git and Python handle non-ASCII text instead of falling back to
+`POSIX`. The image installs no locales package.
+
 ## Baseline tools
 
 The tools agents run for most reviews and validations come from the
