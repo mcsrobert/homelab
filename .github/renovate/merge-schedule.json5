@@ -20,6 +20,12 @@
       addLabels: ['renovate/automerge'],
     },
     {
+      description: 'Merge the T3 Code image without a soak',
+      matchPackageNames: ['ghcr.io/mcsrobert/t3-code'],
+      schedule: ['at any time'],
+      addLabels: ['renovate/skip-soak'],
+    },
+    {
       description: 'Only schedule frequent releases once a week',
       matchPackageNames: [
         'ghcr.io/grafana-community/helm-charts/grafana',
