@@ -2,6 +2,13 @@
 # Everything lives in /opt/t3-code and /etc/mise, outside /home/node, so the
 # home volume cannot shadow it. Build it from the repository root, which
 # provides mise.toml; Dockerfile.dockerignore limits the context.
+
+# BuildKit takes this as the build's SOURCE_DATE_EPOCH. With the exporter
+# option rewrite-timestamp=true it clamps the file timestamps in every layer
+# this build adds, so a layer whose files did not change keeps its digest from
+# one build to the next. It also sets the image config's created date.
+ARG SOURCE_DATE_EPOCH=0
+
 FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725 AS build
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -24,8 +31,7 @@ WORKDIR /download
 RUN curl -fsSLo t3.tar.gz "https://github.com/pingdotgg/t3code/releases/download/${T3CODE_VERSION}/t3-${T3CODE_VERSION#v}-linux-arm64.tar.gz" \
     && echo "${T3CODE_SHA256}  t3.tar.gz" | sha256sum -c - \
     && mkdir -p /opt/t3-code/bin /opt/t3-code/server \
-    && tar -xzf t3.tar.gz -C /opt/t3-code/server --strip-components=1 --no-same-owner \
-    && ln -s ../server/t3 /opt/t3-code/bin/t3
+    && tar -xzf t3.tar.gz -C /opt/t3-code/server --strip-components=1 --no-same-owner
 
 RUN curl -fsSLo mise "https://github.com/jdx/mise/releases/download/${MISE_VERSION}/mise-${MISE_VERSION}-linux-arm64" \
     && echo "${MISE_SHA256}  mise" | sha256sum -c - \
@@ -58,22 +64,36 @@ RUN --mount=type=secret,id=github_token \
 # npm ci checks every package against the integrity hashes in the lockfile,
 # and npm audit checks their registry signatures. Lifecycle scripts are
 # skipped: Claude's postinstall only copies the native binary over a
-# placeholder, so link the binary directly instead.
+# placeholder, so the final stage links the binary directly instead.
 WORKDIR /opt/t3-code/npm
 COPY containers/t3-code/package.json containers/t3-code/package-lock.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund --no-update-notifier \
-    && npm audit signatures --no-update-notifier \
-    && ln -s ../npm/node_modules/@anthropic-ai/claude-code-linux-arm64/claude /opt/t3-code/bin/claude
+    && npm audit signatures --no-update-notifier
 
-COPY --chmod=0755 containers/t3-code/codex.sh /opt/t3-code/bin/codex
-COPY --chmod=0755 containers/t3-code/entrypoint.sh /opt/t3-code/entrypoint.sh
-COPY --chmod=0644 containers/t3-code/kubeconfig.yaml /opt/t3-code/kubeconfig.yaml
+# The final stage copies only these two scopes, so fail the build when a
+# dependency lands anywhere else instead of shipping an incomplete tree.
+RUN stray=$(find node_modules -mindepth 1 -maxdepth 1 ! -name @openai ! -name @anthropic-ai ! -name .bin ! -name .package-lock.json) \
+    && [[ -z $stray ]] || { echo "npm installed packages outside the copied scopes: ${stray}" >&2; exit 1; }
+
 RUN chmod -R a+rX,go-w /opt/t3-code /etc/mise
 
 FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725
 
-COPY --from=build /opt/t3-code /opt/t3-code
+# One layer per tool, or per group of tools for the baseline, so an update
+# only downloads the layers it changes. Layers are pulled by digest, so their
+# order does not change that; it only limits how many layers above a changed
+# one a node has to unpack again, which is why the most often updated tools
+# come last. The npm manifests and lockfiles stay in the build stage.
+COPY --from=build /opt/t3-code/bin/gh /opt/t3-code/bin/gh
 COPY --from=build /etc/mise /etc/mise
+COPY --from=build /opt/t3-code/mise /opt/t3-code/mise
+COPY --from=build /opt/t3-code/server /opt/t3-code/server
+COPY --from=build /opt/t3-code/bin/mise /opt/t3-code/bin/mise
+COPY --from=build /opt/t3-code/npm/node_modules/@openai /opt/t3-code/npm/node_modules/@openai
+COPY --from=build /opt/t3-code/npm/node_modules/@anthropic-ai /opt/t3-code/npm/node_modules/@anthropic-ai
+COPY --chmod=0755 containers/t3-code/codex.sh /opt/t3-code/bin/codex
+COPY --chmod=0755 containers/t3-code/entrypoint.sh /opt/t3-code/entrypoint.sh
+COPY --chmod=0644 containers/t3-code/kubeconfig.yaml /opt/t3-code/kubeconfig.yaml
 
 # The server tools come first, then the shims of the baseline tools, so
 # nothing in /home/node can replace them. A shim runs the version the current
@@ -96,9 +116,12 @@ ENV HOME=/home/node \
     DISABLE_AUTOUPDATER=1 \
     LANG=C.UTF-8
 
-# /etc/profile resets PATH for login shells, so restore it from profile.d,
-# written from the PATH above so the two cannot drift apart.
-RUN printf 'export PATH="%s"\n' "$PATH" > /etc/profile.d/t3-code.sh
+# Link the server and Claude's native binary into bin. /etc/profile resets
+# PATH for login shells, so restore it from profile.d, written from the PATH
+# above so the two cannot drift apart.
+RUN ln -s ../server/t3 /opt/t3-code/bin/t3 \
+    && ln -s ../npm/node_modules/@anthropic-ai/claude-code-linux-arm64/claude /opt/t3-code/bin/claude \
+    && printf 'export PATH="%s"\n' "$PATH" > /etc/profile.d/t3-code.sh
 
 USER 1000:1000
 WORKDIR /home/node

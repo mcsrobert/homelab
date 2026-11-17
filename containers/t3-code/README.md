@@ -111,6 +111,17 @@ passed as a build secret, so mise's GitHub requests are not rate limited.
   digest in the package, so a retry can finish before the version is published.
   Run it by hand from `main` to rebuild without a change.
 
+The final stage copies each tool into its own layer, and the baseline tools
+into one, with the most often updated last. Layers are pulled by digest, so
+an update only downloads the layers it changes, such as Claude Code's, instead
+of the whole `/opt/t3-code`. The `ARG SOURCE_DATE_EPOCH=0` in the
+[`Dockerfile`](./Dockerfile) and `rewrite-timestamp=true` in both workflows
+clamp every file timestamp in the layers the build adds, so a tool that did
+not change keeps its layer digest in the next version. Base image layers are
+not rewritten. The same setting dates the image config's `created` field
+1970-01-01; the `revision` label and the publish run tell when and from what
+it was built.
+
 Both run [`smoke-test.sh`](./smoke-test.sh) as uid 1000 with a read-only root
 filesystem, no capabilities and an empty home. It checks that:
 
@@ -118,6 +129,9 @@ filesystem, no capabilities and an empty home. It checks that:
   every baseline tool to its baked shim and the version `mise.toml` pins, also
   in a login shell. [`baseline-tools.py`](./baseline-tools.py) reads the
   expected tools and versions from the sources, not the image;
+- no file under `/opt/t3-code` or `/etc/mise` is newer than the epoch, which
+  would mean the timestamps were not clamped and every build gets new layer
+  digests;
 - a project that pins another jq installs it into the home and runs it there,
   while the baseline stays the default elsewhere;
 - `t3 serve` becomes healthy.

@@ -13,14 +13,21 @@ run=(docker run --read-only --user 1000:1000 --cap-drop ALL
 
 # kubectl=1.37.2 and so on, from the Dockerfile and mise.toml, not the image.
 baseline=$(python3 -I "$dir/baseline-tools.py")
+# The Dockerfile's SOURCE_DATE_EPOCH, which every file in its layers is clamped to.
+epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
+[[ $epoch =~ ^[0-9]+$ ]] || { echo "Dockerfile has no numeric SOURCE_DATE_EPOCH default" >&2; exit 1; }
 
 # Without a network, each server tool must resolve to its baked copy, and each
 # baseline tool to its baked shim and the mise.toml version in the baked
 # installs, not one installed in the home.
 # shellcheck disable=SC2016 # the script expands inside the container
-"${run[@]}" --rm --network none --env BASELINE="$baseline" --env MISE_OFFLINE=1 \
+"${run[@]}" --rm --network none --env BASELINE="$baseline" --env EPOCH="$epoch" --env MISE_OFFLINE=1 \
   --entrypoint /bin/bash "$image" -euo pipefail -c '
   fail() { echo "$*" >&2; exit 1; }
+  # BuildKit only logs a warning when it cannot rewrite a layer, and the layer
+  # then gets a new digest with every build.
+  newer=$(find /opt/t3-code /etc/mise /etc/profile.d/t3-code.sh -newermt "@$EPOCH" | head -n 5)
+  [[ -z $newer ]] || fail "files newer than SOURCE_DATE_EPOCH $EPOCH, so layer digests change with every build: $newer"
   for tool in t3 mise gh claude codex; do
     path=$(command -v "$tool")
     [[ $path == "/opt/t3-code/bin/$tool" ]] || fail "$tool resolves to $path"
