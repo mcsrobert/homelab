@@ -27,6 +27,25 @@ spec:
               - manager
               - manager
               - /operator/manager_arm64
+        # Observed Nov 17 after the Barman update: the operator watches K8s resources.
+        - name: barman_operator_api_client
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - user.uid
+          comps: [=, startswith, =, =, =, =, =]
+          values:
+            - - database
+              - plugin-barman-cloud-
+              - ghcr.io/cloudnative-pg/plugin-barman-cloud
+              - barman-cloud
+              - manager
+              - /manager
+              - 10001
         # Barman's instance sidecar contacts the API at startup.
         - name: barman_instance_api_client
           fields:
