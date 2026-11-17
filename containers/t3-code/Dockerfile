@@ -9,7 +9,7 @@
 # one build to the next. It also sets the image config's created date.
 ARG SOURCE_DATE_EPOCH=0
 
-FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725 AS build
+FROM docker.io/library/node:26.13.1@sha256:e18c3ccdf7d71619990b0e85639f506e2028a95410999cab24cc373cbd10e0ac AS build
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -77,7 +77,7 @@ RUN stray=$(find node_modules -mindepth 1 -maxdepth 1 ! -name @openai ! -name @a
 
 RUN chmod -R a+rX,go-w /opt/t3-code /etc/mise
 
-FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725
+FROM docker.io/library/node:26.13.1@sha256:e18c3ccdf7d71619990b0e85639f506e2028a95410999cab24cc373cbd10e0ac
 
 # One layer per tool, or per group of tools for the baseline, so an update
 # only downloads the layers it changes. Layers are pulled by digest, so their
