@@ -295,7 +295,7 @@ spec:
           enabled: false
 
     extraRules:
-      custom-cache-pressure:
+      custom:
         groups:
           - name: custom.cache-pressure
             rules:
@@ -312,8 +312,6 @@ spec:
                 annotations:
                   summary: Container {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) may be thrashing its file cache.
                   description: Container memory usage has remained above 95% of its limit, with more than 10 MiB of file cache and sustained filesystem reads above 1 MiB/s. Where available, memory PSI must show more than 1% stalled time over 5 minutes. Check cgroup memory pressure and disk activity on {{ $labels.node }}.
-      custom-oom:
-        groups:
           - name: custom.oom
             rules:
               - alert: KubeContainerOOMKilled
