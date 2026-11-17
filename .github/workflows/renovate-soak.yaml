@@ -5,8 +5,9 @@
 # renovate/skip-soak label, other pull requests pass right away. The soak
 # counts from the first push of the current update: a rebase adds the same
 # lines and keeps the start time, a newer version adds different lines and
-# starts the soak again. The status only turns green on a weekday between
-# 09:00 and 18:00, so GitHub auto-merge merges updates in that window.
+# starts the soak again. A soaked status only turns green on a weekday
+# between 09:00 and 18:00, so GitHub auto-merge merges soaked updates in that
+# window.
 name: Renovate Soak
 on:
   pull_request:
@@ -128,13 +129,8 @@ jobs:
               new_state=success
               new_description="No soak needed"
             elif [[ "${skip}" == true ]]; then
-              if (( merge_window )); then
-                new_state=success
-                new_description="Soak skipped"
-              else
-                new_state=pending
-                new_description="Waiting for the merge window"
-              fi
+              new_state=success
+              new_description="Soak skipped"
             else
               if [[ "${state}" == pending && "${description}" == "Soaking since "* ]]; then
                 start=${description#Soaking since }

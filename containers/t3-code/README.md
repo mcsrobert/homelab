@@ -96,8 +96,9 @@ publishes a new version from `main`; other `mise.toml` changes do not.
 Renovate opens the pull request that bumps the image in the HelmRelease on its
 first run after a new version is published, and labels it `renovate/skip-soak`.
 [`renovate-soak.yaml`](../../.github/workflows/renovate-soak.yaml) then passes
-its soak check in the next weekday merge window instead of after six days,
-because everything the image bakes in already soaked in its own pull request.
+its soak check right away instead of after six days, so it merges once its
+checks pass, because everything the image bakes in already soaked in its own
+pull request.
 
 ## Build and publish
 
