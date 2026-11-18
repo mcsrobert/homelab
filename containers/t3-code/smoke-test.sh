@@ -26,7 +26,7 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
   fail() { echo "$*" >&2; exit 1; }
   # BuildKit only logs a warning when it cannot rewrite a layer, and the layer
   # then gets a new digest with every build.
-  newer=$(find /opt/t3-code /etc/mise /etc/profile.d/t3-code.sh -newermt "@$EPOCH" | head -n 5)
+  newer=$(find /opt/t3-code /etc/mise /etc/gitconfig /etc/profile.d/t3-code.sh -newermt "@$EPOCH" | head -n 5)
   [[ -z $newer ]] || fail "files newer than SOURCE_DATE_EPOCH $EPOCH, so layer digests change with every build: $newer"
   for tool in t3 mise gh claude codex; do
     path=$(command -v "$tool")
@@ -59,6 +59,35 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
   login_path=$(bash -lc "printf %s \"\$PATH\"")
   [[ $login_path == "$PATH" ]] || fail "login shell PATH is $login_path, not $PATH"
   [[ -r ${KUBECONFIG##*:} ]] || fail "default kubeconfig ${KUBECONFIG##*:} is missing"
+
+  # No Helm environment overrides or saved trust state: new configs under the
+  # image defaults must load, and a config outside them must still need trust.
+  for project in "$HOME/homelab" "$HOME/.t3/worktrees/smoke"; do
+    mkdir -p "$project"
+    printf "[env]\nT3_CODE_SMOKE_TRUST = \"trusted\"\n" > "$project/mise.toml"
+    value=$(cd "$project" && mise env --dotenv)
+    [[ $value == *T3_CODE_SMOKE_TRUST=trusted* ]] || fail "mise did not load $project/mise.toml"
+  done
+  mkdir /tmp/untrusted
+  cp "$HOME/homelab/mise.toml" /tmp/untrusted/
+  if (cd /tmp/untrusted && mise env --dotenv) < /dev/null > /dev/null 2>&1; then
+    fail "mise trusted a config outside the default directories"
+  fi
+
+  # Exercise the credential protocol with a dummy token only, without a network.
+  credentials=$(printf "protocol=https\nhost=github.com\n\n" | GH_TOKEN=smoke-test-token git credential fill)
+  [[ $credentials == *"username=x-access-token"* && $credentials == *"password=smoke-test-token"* ]] || fail "GitHub helper did not use the runtime token"
+  if printf "protocol=https\nhost=example.invalid\n\n" | GH_TOKEN=smoke-test-token GIT_TERMINAL_PROMPT=0 git credential fill > /dev/null 2>&1; then
+    fail "GitHub helper supplied credentials for another host"
+  fi
+  git init --quiet /tmp/git-smoke
+  git -C /tmp/git-smoke remote add smoke https://github.com/owner/repo.git
+  for url in git@github.com:owner/repo.git ssh://git@github.com/owner/repo.git https://github.com/owner/repo.git; do
+    git -C /tmp/git-smoke remote set-url smoke "$url"
+    rewritten=$(git -C /tmp/git-smoke remote get-url smoke)
+    [[ $rewritten == https://github.com/owner/repo.git ]] || fail "Git did not rewrite $url to HTTPS"
+  done
+  echo "mise trust and GitHub defaults work without Helm configuration"
 '
 
 # A project that pins another version gets it from the writable home, while
