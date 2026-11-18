@@ -50,7 +50,6 @@ spec:
                   secretKeyRef:
                     name: t3-code-claude
                     key: CLAUDE_CODE_OAUTH_TOKEN
-              MISE_TRUSTED_CONFIG_PATHS: /home/node/homelab:/home/node/.t3/worktrees
               GH_TOKEN:
                 valueFrom:
                   secretKeyRef:
@@ -61,17 +60,11 @@ spec:
                   secretKeyRef:
                     name: t3-code-github
                     key: GH_TOKEN
-              GIT_CONFIG_COUNT: "5"
-              GIT_CONFIG_KEY_0: credential.https://github.com.helper
-              GIT_CONFIG_VALUE_0: '!f() { test "$1" = get && printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; }; f'
-              GIT_CONFIG_KEY_1: user.name
-              GIT_CONFIG_VALUE_1: Maurice Robert
-              GIT_CONFIG_KEY_2: user.email
-              GIT_CONFIG_VALUE_2: 42997116+mcsrobert@users.noreply.github.com
-              GIT_CONFIG_KEY_3: url.https://github.com/.insteadOf
-              GIT_CONFIG_VALUE_3: "git@github.com:"
-              GIT_CONFIG_KEY_4: url.https://github.com/.insteadOf
-              GIT_CONFIG_VALUE_4: "ssh://git@github.com/"
+              GIT_CONFIG_COUNT: "2"
+              GIT_CONFIG_KEY_0: user.name
+              GIT_CONFIG_VALUE_0: Maurice Robert
+              GIT_CONFIG_KEY_1: user.email
+              GIT_CONFIG_VALUE_1: 42997116+mcsrobert@users.noreply.github.com
             probes:
               startup:
                 enabled: true
