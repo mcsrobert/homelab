@@ -1,6 +1,6 @@
 # T3 Code server with its agent CLIs and the baseline cluster tools baked in.
-# Everything lives in /opt/t3-code and /etc/mise, outside /home/node, so the
-# home volume cannot shadow it. Build it from the repository root, which
+# Tools and system config live outside /home/node so the home volume cannot
+# shadow them. Build it from the repository root, which
 # provides mise.toml; Dockerfile.dockerignore limits the context.
 
 # BuildKit takes this as the build's SOURCE_DATE_EPOCH. With the exporter
@@ -94,6 +94,7 @@ COPY --from=build /opt/t3-code/npm/node_modules/@anthropic-ai /opt/t3-code/npm/n
 COPY --chmod=0755 containers/t3-code/codex.sh /opt/t3-code/bin/codex
 COPY --chmod=0755 containers/t3-code/entrypoint.sh /opt/t3-code/entrypoint.sh
 COPY --chmod=0644 containers/t3-code/kubeconfig.yaml /opt/t3-code/kubeconfig.yaml
+COPY --chmod=0644 containers/t3-code/gitconfig /etc/gitconfig
 
 # The server tools come first, then the shims of the baseline tools, so
 # nothing in /home/node can replace them. A shim runs the version the current
@@ -101,6 +102,8 @@ COPY --chmod=0644 containers/t3-code/kubeconfig.yaml /opt/t3-code/kubeconfig.yam
 # baseline. mise looks for that version in ~/.local/share/mise, then in the
 # baked installs. The user-writable npm prefix and the shims of tools that
 # only projects install follow, then the system paths.
+# Trust the homelab checkout and T3 Code worktrees, including new worktrees,
+# without prompting. Other paths still require explicit mise trust.
 # KUBECONFIG lets ~/.kube/config override the baked service account context.
 # DISABLE_UPDATES and DISABLE_AUTOUPDATER stop Claude Code from updating
 # itself, also on request; new versions arrive with a new image.
@@ -110,6 +113,7 @@ COPY --chmod=0644 containers/t3-code/kubeconfig.yaml /opt/t3-code/kubeconfig.yam
 ENV HOME=/home/node \
     PATH=/opt/t3-code/bin:/opt/t3-code/mise/shims:/home/node/.local/bin:/home/node/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     MISE_SHARED_INSTALL_DIRS=/opt/t3-code/mise/installs \
+    MISE_TRUSTED_CONFIG_PATHS=/home/node/homelab:/home/node/.t3/worktrees \
     NPM_CONFIG_PREFIX=/home/node/.local \
     KUBECONFIG=/home/node/.kube/config:/opt/t3-code/kubeconfig.yaml \
     DISABLE_UPDATES=1 \

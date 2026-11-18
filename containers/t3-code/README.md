@@ -31,6 +31,18 @@ replace these tools.
 the shell, git and Python handle non-ASCII text instead of falling back to
 `POSIX`. The image installs no locales package.
 
+## Git defaults
+
+[`gitconfig`](./gitconfig) is installed at `/etc/gitconfig`, outside the home
+volume. Its GitHub credential helper reads `GH_TOKEN` at runtime; no token is
+stored in the image. GitHub SSH URLs (`git@github.com:` and
+`ssh://git@github.com/`) are rewritten to HTTPS so clones use that helper
+without needing an SSH key. Other hosts are unchanged.
+
+These are system defaults. Git's user, repository and command configuration
+can customize them. The deployment supplies the commit author name and email,
+tokens and time zone at runtime.
+
 ## Baseline tools
 
 The tools agents run for most reviews and validations come from the
@@ -79,6 +91,10 @@ packages (`~/.local`) and the tools projects install with mise
 (`~/.local/share/mise`). Deleting `~/.local/share/mise` is safe; the next
 `mise install` restores what is not baked.
 
+`MISE_TRUSTED_CONFIG_PATHS` trusts mise configs in `/home/node/homelab` and
+`/home/node/.t3/worktrees`, including future worktrees. Other locations still
+need explicit trust. The deployment can override these image defaults.
+
 `KUBECONFIG` lists `~/.kube/config`, then
 [`kubeconfig.yaml`](./kubeconfig.yaml), which gives kubectl, helm and flux a
 `homelab` context for the pod's service account token. Without it, kubectl
@@ -99,6 +115,12 @@ first run after a new version is published, and labels it `renovate/skip-soak`.
 its soak check right away instead of after six days, so it merges once its
 checks pass, because everything the image bakes in already soaked in its own
 pull request.
+
+The HelmRelease temporarily retains its mise trust paths, GitHub credential
+helper and URL rewrites so the currently pinned image keeps working. Once
+Renovate deploys an image containing these defaults, remove those environment
+entries in a follow-up and keep only the Git author entries, renumbering them
+and updating `GIT_CONFIG_COUNT`.
 
 ## Build and publish
 
@@ -148,6 +170,10 @@ filesystem, no capabilities and an empty home. It checks that:
   digests;
 - a project that pins another jq installs it into the home and runs it there,
   while the baseline stays the default elsewhere;
+- mise loads configs in the checkout and worktree directories without a trust
+  prompt, while a config outside those directories still needs trust;
+- Git uses a dummy runtime token for GitHub only and rewrites both forms of
+  GitHub SSH URL to HTTPS without contacting a remote;
 - `t3 serve` becomes healthy.
 
 ## Versions

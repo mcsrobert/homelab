@@ -1,0 +1,8 @@
+# The token is supplied at runtime; only the helper logic is baked in.
+[credential "https://github.com"]
+    helper = "!f() { test \"$1\" = get && printf 'username=x-access-token\\npassword=%s\\n' \"$GH_TOKEN\"; }; f"
+
+# GitHub clones use the HTTPS token instead of requiring an SSH key.
+[url "https://github.com/"]
+    insteadOf = git@github.com:
+    insteadOf = ssh://git@github.com/
