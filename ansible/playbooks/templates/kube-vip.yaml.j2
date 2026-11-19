@@ -24,8 +24,6 @@ spec:
           value: "{{ api_endpoint }}"
         - name: vip_subnet
           value: "24"
-        - name: vip_interface
-          value: "{{ ansible_facts.default_ipv4.interface }}"
         - name: cp_enable
           value: "true"
         - name: cp_namespace
