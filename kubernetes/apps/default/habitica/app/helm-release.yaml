@@ -42,19 +42,44 @@ spec:
               EMAIL_SERVER_URL: maddy.default.svc.cluster.local
               EMAIL_SERVER_PORT: 2525
             probes:
-              liveness: &probe
+              # API v4 serves the v3 routes and adds /ready, so every probe uses it.
+              liveness:
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
                     port: &habiticaPort 3000
-                    path: /api/v3/status
+                    path: /api/v4/status
                     # Match the TLS-terminating proxy so forceSSL does not redirect the probe.
-                    httpHeaders:
+                    httpHeaders: &httpHeaders
                       - name: X-Forwarded-Proto
                         value: https
                   timeoutSeconds: 11
-              readiness: *probe
+              # /api/v4/ready answers 503 until Mongoose is connected to MongoDB, unlike
+              # /api/v4/status. Mongoose never retries a failed initial connection, so a pod
+              # that starts before MongoDB or cluster DNS is reachable (a cluster-wide reboot)
+              # buffers every query until it times out. Only a restart recovers it, which the
+              # startup probe forces.
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    port: *habiticaPort
+                    path: /api/v4/ready
+                    httpHeaders: *httpHeaders
+                  timeoutSeconds: 11
+                  periodSeconds: 5
+                  failureThreshold: 24
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    port: *habiticaPort
+                    path: /api/v4/ready
+                    httpHeaders: *httpHeaders
+                  timeoutSeconds: 11
             resources:
               requests:
                 cpu: 25m
