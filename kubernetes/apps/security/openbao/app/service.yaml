@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.2-standalone-strict/service.json
+apiVersion: v1
+kind: Service
+metadata:
+  name: openbao-proxy
+spec:
+  selector:
+    app.kubernetes.io/name: openbao
+    app.kubernetes.io/instance: openbao
+    component: server
+  ports:
+    - name: https
+      port: 8203
+      targetPort: 8203
+      appProtocol: https

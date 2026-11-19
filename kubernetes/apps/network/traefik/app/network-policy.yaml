@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.2-standalone-strict/networkpolicy.json
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: traefik-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: traefik
+      app.kubernetes.io/instance: traefik-network
+  policyTypes: [Ingress]
+  ingress:
+    # Shared HTTP, HTTPS, HTTP/3, health and metrics entrypoints.
+    - ports:
+        - port: 8000
+        - port: 8080
+        - port: 8443
+        - port: 8443
+          protocol: UDP
+        - port: 9100
+    # The OpenBao entrypoint preserves the old LoadBalancer's access policy.
+    - from:
+        - ipBlock:
+            cidr: ${LAN_CIDR}
+        - ipBlock:
+            cidr: ${LAN_CIDRv6}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: tailscale
+      ports:
+        - port: 8444

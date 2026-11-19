@@ -51,8 +51,17 @@ spec:
         type: LoadBalancer
         ipFamilyPolicy: RequireDualStack
         externalTrafficPolicy: Local
+      additionalServices:
+        openbao:
+          annotations:
+            metallb.io/loadBalancerIPs: "${OPENBAO_IP},${OPENBAO_IPv6}"
+          spec:
+            type: LoadBalancer
+            ipFamilyPolicy: RequireDualStack
+            externalTrafficPolicy: Local
     ports:
       web:
+        asDefault: true
         port: &webPort 8000
         expose:
           default: true
@@ -64,6 +73,7 @@ spec:
               scheme: https
               permanent: true
       websecure:
+        asDefault: true
         port: &websecurePort 8443
         expose:
           default: true
@@ -73,6 +83,18 @@ spec:
             - network-chain@kubernetescrd
         http3:
           enabled: true
+      openbao:
+        port: &openbaoPort 8444
+        expose:
+          openbao: true
+        exposedPort: 443
+        # Match the chart default for web and websecure, so rollouts drain this entrypoint too.
+        transport:
+          lifeCycle:
+            requestAcceptGraceTimeout: 5s
+        http:
+          middlewares:
+            - network-chain@kubernetescrd
     gateway:
       listeners:
         web:
@@ -85,8 +107,19 @@ spec:
           protocol: HTTPS
           namespacePolicy:
             from: All
-          certificateRefs:
+          certificateRefs: &wildcardCertificate
             - name: ${CLUSTER_DOMAIN/./-}-tls
+          mode: Terminate
+        openbao:
+          port: *openbaoPort
+          protocol: HTTPS
+          hostname: bao.${CLUSTER_DOMAIN}
+          namespacePolicy:
+            from: Selector
+            selector:
+              matchLabels:
+                kubernetes.io/metadata.name: security
+          certificateRefs: *wildcardCertificate
           mode: Terminate
     metrics:
       prometheus:

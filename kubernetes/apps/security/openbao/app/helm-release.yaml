@@ -38,14 +38,22 @@ spec:
             tls_key_file    = "/tls/tls.key"
             tls_min_version = "tls13"
 
-            # Traefik forwards the UI and CLI; log their address, not Traefik's.
-            x_forwarded_for_authorized_addrs   = "${CLUSTER_CIDR},${CLUSTER_CIDRv6}"
-            x_forwarded_for_reject_not_present = false
-
             telemetry {
               disable_hostname               = true
               unauthenticated_metrics_access = true
             }
+          }
+
+          # Only Traefik can reach this listener. Direct clients use port 8200.
+          listener "tcp" {
+            address         = "[::]:8203"
+
+            tls_cert_file   = "/tls/tls.crt"
+            tls_key_file    = "/tls/tls.key"
+            tls_min_version = "tls13"
+
+            x_forwarded_for_authorized_addrs   = "${CLUSTER_CIDR},${CLUSTER_CIDRv6}"
+            x_forwarded_for_reject_not_present = false
           }
 
           storage "raft" {
@@ -202,23 +210,13 @@ spec:
         enabled: false
 
       gateway:
-        httpRoute:
-          enabled: true
-          annotations:
-            gethomepage.dev/enabled: "true"
-            gethomepage.dev/name: OpenBao
-            gethomepage.dev/icon: openbao
-            gethomepage.dev/description: Manage, store, and distribute sensitive data
-            gethomepage.dev/group: Kubernetes
-            gethomepage.dev/pod-selector: app.kubernetes.io/name=openbao
-          hosts:
-            - bao.${CLUSTER_DOMAIN}
-          parentRefs:
-            - name: traefik-gateway
-              namespace: network
-              sectionName: websecure
         tlsPolicy:
           enabled: true
+          targetRefs:
+            - group: ""
+              kind: Service
+              name: openbao-proxy
+              sectionName: https
           validation:
             caCertificateRefs:
               - group: ""

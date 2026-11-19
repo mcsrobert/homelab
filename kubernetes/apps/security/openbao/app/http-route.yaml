@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: openbao
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: OpenBao
+    gethomepage.dev/icon: openbao
+    gethomepage.dev/description: Manage, store, and distribute sensitive data
+    gethomepage.dev/group: Kubernetes
+    gethomepage.dev/pod-selector: app.kubernetes.io/name=openbao
+spec:
+  hostnames:
+    - bao.${CLUSTER_DOMAIN}
+  parentRefs:
+    - name: traefik-gateway
+      namespace: network
+      sectionName: openbao
+  rules:
+    - backendRefs:
+        - name: openbao-proxy
+          port: 8203
