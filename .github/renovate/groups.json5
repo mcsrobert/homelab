@@ -50,10 +50,14 @@
         'cli/cli',
         'pingdotgg/t3code',
       ],
+      schedule: ['on friday after 02:00 and before 04:00'],
     },
     {
-      groupName: 'Renovate',
-      group: {commitMessageTopic: '{{{groupName}}} group'},
+      groupName: 'Renovate {{newMajor}}.{{newMinor}}.x',
+      group: {
+        branchTopic: 'renovate-{{newMajor}}.{{newMinor}}.x',
+        commitMessageTopic: '{{{groupName}}} group',
+      },
       matchPackageNames: [
         'renovate/renovate',
         'renovatebot/pre-commit-hooks',
