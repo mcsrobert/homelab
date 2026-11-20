@@ -44,12 +44,7 @@
     {
       groupName: 'T3 Code tools',
       group: {commitMessageTopic: '{{{groupName}}} group'},
-      matchPackageNames: [
-        '@anthropic-ai/claude-code',
-        '@openai/codex',
-        'cli/cli',
-        'pingdotgg/t3code',
-      ],
+      matchFileNames: ['containers/t3-code/**'],
       schedule: ['on friday after 02:00 and before 04:00'],
     },
     {
