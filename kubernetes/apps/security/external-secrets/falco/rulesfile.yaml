@@ -7,9 +7,28 @@ spec:
   # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # cert-controller manages webhook TLS and CA bundles via the API.
     - rule: Contact K8S API Server From Container
       exceptions:
+        # The main controller watches ExternalSecrets and reconciles Kubernetes Secrets.
+        - name: external_secrets_controller_api
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.name
+            - proc.exepath
+            - proc.cmdline
+          comps: [=, startswith, =, =, =, =, =]
+          values:
+            - - security
+              - external-secrets-
+              - ghcr.io/external-secrets/external-secrets
+              - external-secrets
+              - external-secret
+              - /usr/bin/external-secrets
+              - "external-secret --concurrent=1 --metrics-addr=:8080 --loglevel=info --zap-time-encoding=epoch"
+        # cert-controller manages webhook TLS and CA bundles via the API.
         - name: external_secrets_cert_controller_api
           fields:
             - k8s.ns.name
