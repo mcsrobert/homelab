@@ -1,0 +1,43 @@
+---
+apiVersion: artifact.falcosecurity.dev/v1alpha1
+kind: Rulesfile
+metadata:
+  name: flux-controllers-api-exceptions
+spec:
+  # Load after the upstream falco-rules (priority 50).
+  priority: 60
+  inlineRules:
+    # These Flux controllers use the Kubernetes API to watch and reconcile resources.
+    - rule: Contact K8S API Server From Container
+      exceptions:
+        - name: flux_controller_api_clients
+          fields:
+            - k8s.ns.name
+            - k8s.pod.name
+            - container.image.repository
+            - container.name
+            - proc.exepath
+          comps: [=, startswith, =, =, =]
+          values:
+            - - &namespace flux-system
+              - helm-controller-
+              - ghcr.io/fluxcd/helm-controller
+              - &container manager
+              - /usr/local/bin/helm-controller
+            - - *namespace
+              - kustomize-controller-
+              - ghcr.io/fluxcd/kustomize-controller
+              - *container
+              - /usr/local/bin/kustomize-controller
+            - - *namespace
+              - notification-controller-
+              - ghcr.io/fluxcd/notification-controller
+              - *container
+              - /usr/local/bin/notification-controller
+            - - *namespace
+              - source-controller-
+              - ghcr.io/fluxcd/source-controller
+              - *container
+              - /usr/local/bin/source-controller
+      override:
+        exceptions: append
