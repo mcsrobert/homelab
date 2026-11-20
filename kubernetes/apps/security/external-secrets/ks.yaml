@@ -27,7 +27,6 @@ metadata:
 spec:
   dependsOn:
     - name: external-secrets
-    - name: openbao
   path: /kubernetes/apps/security/external-secrets/stores
   sourceRef:
     kind: GitRepository
