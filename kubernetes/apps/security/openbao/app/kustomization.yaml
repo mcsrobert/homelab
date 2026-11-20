@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./certificate.yaml
   - ./helm-release.yaml
+  - ./issuer.yaml
   - ./network-policy.yaml
   - ./oci-repository.yaml
   - ./secret.sops.yaml

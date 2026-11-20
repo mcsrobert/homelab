@@ -30,18 +30,33 @@ spec:
           disable_mlock = true
           api_addr      = "https://bao.${CLUSTER_DOMAIN}"
 
+          # In-cluster clients: External Secrets, vmagent and the CLI in the pod.
+          # Private CA, so it never waits for Let's Encrypt.
           listener "tcp" {
             address         = "[::]:8200"
             cluster_address = "[::]:8201"
 
-            tls_cert_file   = "/tls/tls.crt"
-            tls_key_file    = "/tls/tls.key"
+            tls_cert_file   = "/tls/internal/tls.crt"
+            tls_key_file    = "/tls/internal/tls.key"
             tls_min_version = "tls13"
+            # Reloads the certificate when the files change, checking every 30s.
+            # Reloader misses Secret updates made while it is not running.
+            tls_auto_reload = true
 
             telemetry {
               disable_hostname               = true
               unauthenticated_metrics_access = true
             }
+          }
+
+          # People on bao.${CLUSTER_DOMAIN}, through the LoadBalancer.
+          listener "tcp" {
+            address = "[::]:8443"
+
+            tls_cert_file   = "/tls/public/tls.crt"
+            tls_key_file    = "/tls/public/tls.key"
+            tls_min_version = "tls13"
+            tls_auto_reload = true
           }
 
           storage "raft" {
@@ -154,6 +169,10 @@ spec:
             disable_hostname          = true
           }
 
+      extraEnvironmentVars:
+        # The chart points BAO_ADDR at the in-cluster listener.
+        BAO_CACERT: /tls/internal/ca.crt
+
       extraSecretEnvironmentVars:
         - envName: LLDAP_BIND_PASSWORD
           secretName: openbao-auth-lldap
@@ -170,7 +189,10 @@ spec:
         - name: secrets
           secret:
             secretName: openbao-secrets
-        - name: tls
+        - name: internal-tls
+          secret:
+            secretName: openbao-internal-tls
+        - name: public-tls
           secret:
             secretName: openbao-tls
         - name: plugins
@@ -181,8 +203,11 @@ spec:
         - name: secrets
           mountPath: /openbao/secrets
           readOnly: true
-        - name: tls
-          mountPath: /tls
+        - name: internal-tls
+          mountPath: /tls/internal
+          readOnly: true
+        - name: public-tls
+          mountPath: /tls/public
           readOnly: true
         - name: plugins
           mountPath: /openbao/plugins
@@ -213,6 +238,7 @@ spec:
       serviceIPFamilyPolicy: RequireDualStack
       externalTrafficPolicy: Local
       externalPort: 443
+      targetPort: 8443
 
     serverTelemetry:
       serviceMonitor:
