@@ -3,7 +3,54 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
+  name: openbao-ca
+spec:
+  isCA: true
+  commonName: Homelab OpenBao CA
+  secretName: openbao-ca
+  duration: 87600h # 10y
+  privateKey:
+    algorithm: ECDSA
+    size: 384
+  issuerRef:
+    kind: Issuer
+    name: openbao-selfsigned
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: openbao-internal-cert
+spec:
+  # For the in-cluster listener. External Secrets reads the Cloudflare token
+  # through it, so it cannot wait for Let's Encrypt.
+  secretName: openbao-internal-tls
+  # The Service names, and BAO_ADDR inside the pod.
+  dnsNames:
+    - localhost
+    - openbao
+    - openbao.security
+    - openbao.security.svc
+    - openbao.security.svc.cluster.local
+  ipAddresses:
+    - 127.0.0.1
+    - ::1
+  issuerRef:
+    kind: Issuer
+    name: openbao-ca
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/certificate_v1.json
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
   name: openbao-cert
+  annotations:
+    # Writes a self-signed placeholder until Let's Encrypt issues, so OpenBao
+    # can start on a new cluster before it has handed out the Cloudflare token.
+    # cert-manager reports the placeholder as Ready. If the order fails, it
+    # only tries again at the placeholder's renewal time, 60 days later;
+    # `cmctl renew` retries right away.
+    cert-manager.io/issue-temporary-certificate: "true"
 spec:
   secretName: openbao-tls
   commonName: &domain bao.${CLUSTER_DOMAIN}
