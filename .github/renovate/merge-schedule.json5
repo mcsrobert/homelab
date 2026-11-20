@@ -1,7 +1,8 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
-    ':separateMajorReleases',
+    ':separateMultipleMajorReleases',
+    ':separateMultipleMinorReleases',
   ],
   packageRules: [
     {
@@ -16,7 +17,6 @@
       ],
       automerge: true,
       schedule: ['after 02:00 and before 04:00'],
-      updateNotScheduled: false,
       addLabels: ['renovate/automerge'],
     },
     {
@@ -25,19 +25,5 @@
       schedule: ['at any time'],
       addLabels: ['renovate/skip-soak'],
     },
-    {
-      description: 'Only schedule frequent releases once a week',
-      matchPackageNames: [
-        'ghcr.io/grafana-community/helm-charts/grafana',
-        'renovate/renovate',
-        'renovatebot/pre-commit-hooks',
-        'jdx/mise',
-        '@anthropic-ai/claude-code',
-        '@openai/codex',
-        'cli/cli',
-        'pingdotgg/t3code',
-      ],
-      schedule: ['on friday after 02:00 and before 04:00'],
-    }
-  ]
+  ],
 }
