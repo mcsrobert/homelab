@@ -475,6 +475,20 @@ spec:
           t3-code:
             t3-code:
               - path: /tmp
+      cache:
+        type: emptyDir
+        sizeLimit: 4Gi
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /home/node/.cache
+      npm-cache:
+        type: emptyDir
+        sizeLimit: 2Gi
+        advancedMounts:
+          t3-code:
+            t3-code:
+              - path: /home/node/.npm
       tailscale-state:
         type: persistentVolumeClaim
         accessMode: ReadWriteOnce
