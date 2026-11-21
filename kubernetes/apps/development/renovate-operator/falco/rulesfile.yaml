@@ -48,7 +48,8 @@ spec:
       override:
         exceptions: append
     # The homelab Renovate job installs Node and npm through Containerbase
-    # before regenerating the T3 Code lockfile.
+    # before regenerating the T3 Code lockfile. Allow the Node and npm version
+    # segments to change when Renovate updates the toolchains.
     - rule: Drop and execute new binary in container
       exceptions:
         - name: renovate_homelab_npm
@@ -64,45 +65,56 @@ spec:
             - user.uid
             - proc.cwd
             - proc.cmdline
-          comps: [=, startswith, =, =, =, =, =, =, =, =, glob]
+          comps: [=, startswith, =, =, glob, =, =, =, =, =, glob]
           values:
-            - - development
-              - renovate-github-mcsrobert-homelab-
-              - docker.io/renovate/renovate
-              - renovate
-              - /opt/containerbase/tools/node/26.13.1/bin/node
+            - - &renovate_ns development
+              - &renovate_pod renovate-github-mcsrobert-homelab-
+              - &renovate_image docker.io/renovate/renovate
+              - &renovate_container renovate
+              - &renovate_node /opt/containerbase/tools/node/*/bin/node
               - node
               - install-tool
               - npm
               - &renovate_uid 12021
               - /tmp/
-              - node /opt/containerbase/tools/node/26.13.1/bin/npm --version
-            - - development
-              - renovate-github-mcsrobert-homelab-
-              - docker.io/renovate/renovate
-              - renovate
-              - /opt/containerbase/tools/node/26.13.1/bin/node
+              - node /opt/containerbase/tools/node/*/bin/npm --version
+            - - *renovate_ns
+              - *renovate_pod
+              - *renovate_image
+              - *renovate_container
+              - *renovate_node
               - node
               - install-tool
               - install-tool
               - *renovate_uid
               - /opt/containerbase/
               - >-
-                node /opt/containerbase/tools/node/26.13.1/bin/npm install npm@12.2.3
-                --save-exact --no-audit --prefix /opt/containerbase/tools/npm/12.2.3/26.13.1
+                node /opt/containerbase/tools/node/*/bin/npm install npm@*
+                --save-exact --no-audit --prefix /opt/containerbase/tools/npm/*/*
                 --cache /tmp/containerbase-npm-?????? -d
-            - - development
-              - renovate-github-mcsrobert-homelab-
-              - docker.io/renovate/renovate
-              - renovate
-              - /opt/containerbase/tools/node/26.13.1/bin/node
+            - - *renovate_ns
+              - *renovate_pod
+              - *renovate_image
+              - *renovate_container
+              - *renovate_node
+              - node
+              - install-tool
+              - npm
+              - *renovate_uid
+              - /tmp/
+              - node /opt/containerbase/tools/npm/*/*/bin/npm --version
+            - - *renovate_ns
+              - *renovate_pod
+              - *renovate_image
+              - *renovate_container
+              - *renovate_node
               - node
               - npm
               - npm
               - *renovate_uid
               - /tmp/repos/github/mcsrobert/homelab/containers/t3-code/
               - >-
-                node /opt/containerbase/tools/npm/12.2.3/26.13.1/bin/npm install
+                node /opt/containerbase/tools/npm/*/*/bin/npm install
                 --package-lock-only --no-audit --ignore-scripts
       override:
         exceptions: append
