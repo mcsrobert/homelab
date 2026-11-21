@@ -22,6 +22,10 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: vmagent
+        # The OpenBao rotation reminders CronJob reads KV v2 metadata.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: openbao-rotation-reminders
       ports:
         - port: 8200
     # The UI and CLI, through the LoadBalancer (externalTrafficPolicy: Local
