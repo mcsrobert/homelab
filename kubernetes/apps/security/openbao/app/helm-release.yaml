@@ -126,6 +126,32 @@ spec:
                 token_policies                   = ["eso-readonly"]
               }
             }
+
+            request "write-rotation-reminders-policy" {
+              operation = "update"
+              path      = "sys/policies/acl/openbao-rotation-reminders"
+              data = {
+                policy = <<EOT
+                  path "homelab/metadata" { capabilities = ["list"] }
+                  path "homelab/metadata/*" { capabilities = ["list", "read"] }
+                  path "auth/token/revoke-self" { capabilities = ["update"] }
+                EOT
+              }
+            }
+
+            request "map-rotation-reminders-role" {
+              operation = "update"
+              path      = "auth/kubernetes/role/openbao-rotation-reminders"
+              data = {
+                bound_service_account_names      = ["openbao-rotation-reminders"]
+                bound_service_account_namespaces = ["security"]
+                audience                         = "openbao"
+                token_ttl                        = "5m"
+                token_max_ttl                    = "5m"
+                token_policies                   = ["openbao-rotation-reminders"]
+              }
+            }
+
             request "enable-ldap-auth" {
               operation = "update"
               path      = "sys/auth/ldap"

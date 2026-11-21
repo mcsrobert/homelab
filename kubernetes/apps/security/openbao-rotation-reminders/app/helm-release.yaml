@@ -1,0 +1,23 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &name openbao-rotation-reminders
+spec:
+  interval: 30m
+  releaseName: *name
+  chartRef:
+    kind: OCIRepository
+    name: *name
+  values:
+    timeZone: ${TIME_ZONE}
+    openbao:
+      address: https://openbao.security.svc.cluster.local:8200
+      uiUrl: https://bao.${CLUSTER_DOMAIN}
+      tls:
+        caSecretName: openbao-internal-tls
+    ntfy:
+      existingSecret: openbao-rotation-reminders-ntfy
+    networkPolicy:
+      enabled: true
