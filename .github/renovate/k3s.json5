@@ -48,8 +48,6 @@
     {
       description: 'Upgrade k3s, kubectl, the Python client and schemas together. Automerge is excluded in merge-schedule.json5',
       groupName: 'k3s',
-      // The Python client's version omits Kubernetes' major component.
-      separateMultipleMinor: false,
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchDepNames: [
         'k3s-io/k3s',
