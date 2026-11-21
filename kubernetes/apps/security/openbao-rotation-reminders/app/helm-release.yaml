@@ -1,0 +1,151 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/app-template-5.3.0/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openbao-rotation-reminders
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+    namespace: flux-system
+  values:
+    controllers:
+      openbao-rotation-reminders:
+        type: cronjob
+        cronjob:
+          schedule: "0 9 * * *"
+          timeZone: ${TIME_ZONE}
+          concurrencyPolicy: Forbid
+          startingDeadlineSeconds: 300
+          activeDeadlineSeconds: 120
+          backoffLimit: 1
+          successfulJobsHistory: 3
+          failedJobsHistory: 3
+        serviceAccount:
+          identifier: &name openbao-rotation-reminders
+        pod:
+          automountServiceAccountToken: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+        containers:
+          checker:
+            image:
+              repository: docker.io/library/python
+              tag: 3.15.2-alpine@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd
+            command:
+              - python3
+              - -I
+              - -B
+              - /scripts/check-rotation.py
+            env:
+              TZ: ${TIME_ZONE}
+              OPENBAO_ADDR: https://openbao.security.svc.cluster.local:8200
+              OPENBAO_MOUNT: homelab
+              OPENBAO_CA_FILE: /etc/openbao/ca.crt
+              OPENBAO_K8S_ROLE: *name
+              OPENBAO_JWT_FILE: /var/run/secrets/openbao/token
+              OPENBAO_UI_URL: https://bao.${CLUSTER_DOMAIN}
+              NTFY_URL: https://ntfy.sh
+              NTFY_TOPIC:
+                valueFrom:
+                  secretKeyRef:
+                    name: openbao-rotation-reminders-ntfy
+                    key: NTFY_TOPIC
+              DEFAULT_EXPIRES_WARN_BEFORE: 14d
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    serviceAccount:
+      *name : {}
+    persistence:
+      script:
+        type: configMap
+        name: openbao-rotation-reminders-script
+        globalMounts:
+          - path: /scripts
+            readOnly: true
+      openbao-ca:
+        type: secret
+        name: openbao-internal-tls
+        items:
+          - key: ca.crt
+            path: ca.crt
+        globalMounts:
+          - path: /etc/openbao
+            readOnly: true
+      openbao-token:
+        type: custom
+        volumeSpec:
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  audience: openbao
+                  expirationSeconds: 600
+        globalMounts:
+          - path: /var/run/secrets/openbao
+            readOnly: true
+    networkpolicies:
+      openbao-rotation-reminders:
+        controller: openbao-rotation-reminders
+        policyTypes:
+          - Ingress
+          - Egress
+        rules:
+          ingress: []
+          egress:
+            - to:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: kube-system
+                  podSelector:
+                    matchLabels:
+                      k8s-app: kube-dns
+              ports:
+                - port: 53
+                  protocol: UDP
+                - port: 53
+                  protocol: TCP
+            - to:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: openbao
+                      component: server
+              ports:
+                - port: 8200
+                  protocol: TCP
+            # Send reminder digests to ntfy.sh without reaching cluster or LAN peers.
+            - to:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+                    except:
+                      - 10.0.0.0/8
+                      - 100.64.0.0/10
+                      - 169.254.0.0/16
+                      - 172.16.0.0/12
+                      - 192.168.0.0/16
+                - ipBlock:
+                    cidr: "::/0"
+                    except:
+                      - "::1/128"
+                      - "fc00::/7"
+                      - "fe80::/10"
+              ports:
+                - port: 443
+                  protocol: TCP
