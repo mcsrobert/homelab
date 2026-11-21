@@ -80,7 +80,7 @@ spec:
           - matches:
               - path:
                   type: PathPrefix
-                  value: /admin/
+                  value: /admin
             filters:
               - type: ExtensionRef
                 extensionRef:
