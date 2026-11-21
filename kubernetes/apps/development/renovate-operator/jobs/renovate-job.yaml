@@ -5,7 +5,7 @@ kind: RenovateJob
 metadata:
   name: renovate-github
 spec:
-  image: renovate/renovate:44.174.0@sha256:1d257740562b9533894202caecb07fa3709bc818d33068185c5a58e5126b26c3
+  image: renovate/renovate:44.231.0@sha256:6af21713f5d09425e949f175a9851cf335ece1fcea58abf122cadda82504a7b0
   extraEnv:
     - name: RENOVATE_X_GITHUB_HOST_RULES
       value: "true"
