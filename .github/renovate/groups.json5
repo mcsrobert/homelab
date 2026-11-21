@@ -55,7 +55,6 @@
         'renovatebot/pre-commit-hooks',
       ],
       schedule: ['on friday after 02:00 and before 04:00'],
-      separateMultipleMinor: false,
     },
   ]
 }

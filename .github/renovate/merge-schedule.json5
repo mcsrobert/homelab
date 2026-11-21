@@ -2,9 +2,13 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: [
     ':separateMultipleMajorReleases',
-    ':separateMultipleMinorReleases',
   ],
   packageRules: [
+    {
+      description: 'Keep separate minor release streams for selected fast-moving packages',
+      matchPackageNames: ['ghcr.io/grafana-community/helm-charts/grafana'],
+      separateMultipleMinor: true,
+    },
     {
       description: 'Automatically schedule and merge releases',
       matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
