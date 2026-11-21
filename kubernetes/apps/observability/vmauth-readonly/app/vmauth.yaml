@@ -4,8 +4,9 @@
 # writes and admin calls on the same port as queries, so only the query
 # endpoints listed below are proxied and unmatched paths are rejected. Paths are
 # anchored regexes; they avoid `.*` so that `..` cannot reach other endpoints.
-# Reachable in-cluster at http://vmauth-readonly.observability.svc:8427 and only
-# from pods whose NetworkPolicy allows it (currently t3-code).
+# Reachable in-cluster at http://vmauth-readonly.observability.svc:8427, only
+# from the clients allowed in network-policy.yaml (t3-code, plus vmagent for
+# scrapes). A new client needs an ingress rule there and egress on its own side.
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAuth
 metadata:
