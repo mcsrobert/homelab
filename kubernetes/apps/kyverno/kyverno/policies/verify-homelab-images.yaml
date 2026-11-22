@@ -1,0 +1,60 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/imagevalidatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
+metadata:
+  name: verify-homelab-images
+  annotations:
+    policies.kyverno.io/title: Verify homelab image attestations
+    policies.kyverno.io/description: >-
+      Requires container images under ghcr.io/mcsrobert/ to carry a verified
+      GitHub Actions SLSA v1 provenance attestation built from a workflow on
+      main or a release tag under github.com/mcsrobert. Fails open on transient
+      registry or transparency log outages so existing workloads can restart.
+spec:
+  validationActions: ["Deny"]
+  failurePolicy: Ignore
+  webhookConfiguration:
+    timeoutSeconds: 20
+  autogen:
+    podControllers:
+      controllers: []
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        operations: ["CREATE", "UPDATE"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["kube-system", "longhorn-system"]
+  matchImageReferences:
+    - expression: "ref.startsWith('ghcr.io/mcsrobert/')"
+  attestations:
+    - name: slsa
+      intoto:
+        type: https://slsa.dev/provenance/v1
+  attestors:
+    - name: github
+      cosign:
+        keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subjectRegExp: "^https://github\\.com/mcsrobert/[^/]+/\\.github/workflows/[^@]+@refs/(heads/main|tags/.+)$"
+        ctlog:
+          url: https://rekor.sigstore.dev
+  validationConfigurations:
+    mutateDigest: false
+    verifyDigest: true
+    required: true
+  validations:
+    - expression: >-
+        (images.containers + images.initContainers + images.ephemeralContainers).all(image,
+          verifyAttestationSignatures(image, attestations.slsa, [attestors.github]) > 0 &&
+          extractPayload(image, attestations.slsa).predicate.buildDefinition.buildType == "https://actions.github.io/buildtypes/workflow/v1"
+        )
+      message: >-
+        Images under ghcr.io/mcsrobert/ must have a valid GitHub Actions SLSA v1
+        provenance attestation from main or a release tag.

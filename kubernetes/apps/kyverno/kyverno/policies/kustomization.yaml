@@ -7,3 +7,4 @@ resources:
   - ./pin-image-digests.yaml
   - ./require-pinned-images.yaml
   - ./set-helmrelease-defaults.yaml
+  - ./verify-homelab-images.yaml
