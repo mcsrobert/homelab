@@ -201,6 +201,10 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
 - Fill in every section of the PR template. Under "Upstream docs", link the
   upstream documentation for any application behavior the PR configures or
   changes, such as an OIDC integration, a chart value or a feature flag.
+- Write "Manual steps" as a task list (`- [ ]`) with one checkbox per action,
+  under **Before merging** and **After merging** headings, in the order they
+  must happen. Put commands in a code block under their step. Rollback
+  instructions are not tasks; keep them as text below the list.
 - When a PR resolves a tracked issue, create a formal GitHub link to the issue
   through the Development sidebar or a closing keyword such as `Closes #123`
   in the PR description. This also applies to existing Renovate PRs that fix

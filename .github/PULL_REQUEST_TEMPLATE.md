@@ -7,9 +7,18 @@ log line or metric that shows the problem. -->
 
 ## Manual steps
 
-<!-- Anything Flux will not do by itself, and whether it must happen before or
-after merging: OpenBao secrets to create (path and keys), data migrations,
-Ansible playbooks to run. Write "None" if there are none. -->
+<!-- Anything Flux will not do by itself, as a checklist with one box per
+action, in order: OpenBao secrets to create (path and keys), data migrations,
+Ansible playbooks to run. Write "None" if there are none.
+
+**Before merging:**
+
+- [ ] ...
+
+**After merging:**
+
+- [ ] ...
+-->
 
 ## Upstream docs
 
