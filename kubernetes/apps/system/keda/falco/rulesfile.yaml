@@ -7,7 +7,8 @@ spec:
   # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # KEDA manages and validates scaling resources.
+    # KEDA manages and validates scaling resources. Its metrics API server
+    # reads the aggregation layer's authentication configuration.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: keda_core_api_clients
@@ -29,6 +30,11 @@ spec:
               - ghcr.io/kedacore/keda-admission-webhooks
               - keda-admission-webhooks
               - /keda-admission-webhooks
+            - - system
+              - keda-operator-metrics-apiserver-
+              - ghcr.io/kedacore/keda-metrics-apiserver
+              - keda-operator-metrics-apiserver
+              - /keda-adapter
       override:
         exceptions: append
     # HTTP add-on components watch routing and scaling resources.
