@@ -24,8 +24,8 @@
       addLabels: ['renovate/automerge'],
     },
     {
-      description: 'Merge the T3 Code image without a soak',
-      matchPackageNames: ['ghcr.io/mcsrobert/t3-code'],
+      description: 'Merge my own images without a soak',
+      matchPackageNames: ['ghcr.io/mcsrobert/**'],
       schedule: ['at any time'],
       addLabels: ['renovate/skip-soak'],
     },
