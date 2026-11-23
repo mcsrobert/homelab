@@ -10,3 +10,13 @@ instance:
     url: https://github.com/mcsrobert/homelab
     ref: refs/heads/main
     path: /kubernetes/cluster
+  # Matches limit-revision-history for the controllers flux-operator deploys.
+  kustomize:
+    patches:
+      - target:
+          group: apps
+          kind: Deployment
+        patch: |-
+          - op: add
+            path: /spec/revisionHistoryLimit
+            value: 2
