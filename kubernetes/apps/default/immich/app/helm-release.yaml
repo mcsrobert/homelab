@@ -60,6 +60,9 @@ spec:
                   name: immich-dragonfly-auth
                   key: password
               UPLOAD_LOCATION: &uploadPath /usr/src/app/upload
+              # v3.4.2's metrics exporter rejects requests with the default IPv6 bind address.
+              # Remove after upgrading to a release that fixes https://github.com/immich-app/immich/issues/33466.
+              IMMICH_HOST: "0.0.0.0"
               IMMICH_TELEMETRY_INCLUDE: all
             envFrom: &envFrom
               - secretRef:
