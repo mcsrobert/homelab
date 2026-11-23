@@ -12,6 +12,7 @@ metadata:
   name: readonly
 spec:
   replicaCount: 1
+  revisionHistoryLimitCount: 2
   resources:
     requests:
       cpu: 10m
