@@ -35,6 +35,17 @@ spec:
     cleanupOnFail: true
   driftDetection:
     mode: enabled
+  # Mirror limit-revision-history, which cannot mutate releases in this namespace.
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              kind: Deployment|StatefulSet|DaemonSet
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 2
   values:  # https://github.com/kyverno/kyverno/tree/main/charts/kyverno#values
 
     # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests

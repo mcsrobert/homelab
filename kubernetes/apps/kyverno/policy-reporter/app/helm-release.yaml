@@ -9,7 +9,8 @@ spec:
     kind: OCIRepository
     name: policy-reporter
   interval: 1h
-  # Kyverno excludes kyverno from its webhooks; mirror set-helmrelease-defaults here.
+  # Kyverno excludes kyverno from its webhooks; mirror set-helmrelease-defaults and
+  # limit-revision-history here.
   install:
     remediation:
       retries: 3
@@ -24,6 +25,16 @@ spec:
     cleanupOnFail: true
   driftDetection:
     mode: enabled
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              kind: Deployment|StatefulSet|DaemonSet
+            patch: |-
+              - op: add
+                path: /spec/revisionHistoryLimit
+                value: 2
   values:  # https://github.com/kyverno/policy-reporter/tree/main/charts/policy-reporter
 
     # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests

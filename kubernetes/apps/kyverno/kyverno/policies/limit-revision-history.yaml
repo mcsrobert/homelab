@@ -1,0 +1,57 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/policies.kyverno.io/mutatingpolicy_v1.json
+apiVersion: policies.kyverno.io/v1
+kind: MutatingPolicy
+metadata:
+  name: limit-revision-history
+  annotations:
+    policies.kyverno.io/title: Limit workload revision history
+    policies.kyverno.io/description: >-
+      Adds a HelmRelease post-renderer that sets spec.revisionHistoryLimit to 2
+      on every Deployment, StatefulSet and DaemonSet the chart renders. Helm
+      then applies the limit itself, so drift detection agrees with the cluster
+      and old ReplicaSets and ControllerRevisions are garbage-collected.
+      Releases that already patch revisionHistoryLimit are left alone.
+spec:
+  evaluation:
+    mutateExisting:
+      enabled: true
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["helm.toolkit.fluxcd.io"]
+        apiVersions: ["v2"]
+        resources: ["helmreleases"]
+        operations: ["CREATE", "UPDATE"]
+  matchConditions:
+    - name: no-revision-history-post-renderer
+      expression: |
+        !object.spec.?postRenderers.orValue([]).exists(r,
+          r.?kustomize.?patches.orValue([]).exists(p,
+            p.?patch.orValue("").contains("revisionHistoryLimit")
+          )
+        )
+  variables:
+    - name: postRenderer
+      expression: |
+        Object.spec.postRenderers{
+          kustomize: Object.spec.postRenderers.kustomize{
+            patches: [
+              Object.spec.postRenderers.kustomize.patches{
+                target: Object.spec.postRenderers.kustomize.patches.target{
+                  group: "apps",
+                  kind: "Deployment|StatefulSet|DaemonSet"
+                },
+                patch: "- op: add\n  path: /spec/revisionHistoryLimit\n  value: 2"
+              }
+            ]
+          }
+        }
+  mutations:
+    # postRenderers is an atomic list, so append with a JSON patch instead of
+    # replacing it with an apply configuration.
+    - patchType: JSONPatch
+      jsonPatch:
+        expression: |
+          has(object.spec.postRenderers) ?
+            [JSONPatch{op: "add", path: "/spec/postRenderers/-", value: variables.postRenderer}] :
+            [JSONPatch{op: "add", path: "/spec/postRenderers", value: [variables.postRenderer]}]
