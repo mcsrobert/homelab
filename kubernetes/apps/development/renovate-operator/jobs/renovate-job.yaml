@@ -9,9 +9,15 @@ spec:
   extraEnv:
     - name: RENOVATE_X_GITHUB_HOST_RULES
       value: "true"
+    # Renovate only caches Docker Hub tags by default; enable Valkey caching for
+    # ghcr.io too so mid-pagination 429s can fall back to the last good tag list.
+    - name: RENOVATE_CACHE_PRIVATE_PACKAGES
+      value: "true"
   provider:
     name: github
-  schedule: 0 * * * *
+  # Offset from :00 to avoid the top-of-the-hour GHCR burst on immich-app's
+  # shared 44,000 req/min rate-limit bucket.
+  schedule: 37 * * * *
   parallelism: 1
   secretRef: renovate-github-token
   resources:
