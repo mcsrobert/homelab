@@ -24,7 +24,7 @@ ARG MISE_SHA256=bb09e88b13164ca90691a5cc042726d079f0ba26ab55527344cb173c2e83c998
 ARG GH_VERSION=v2.103.3
 ARG GH_SHA256=ee32df2323c8847f5fac6cb6b4b69ca75828e9329a8f22f677021f7b3306ce63
 # Baseline tools from the repository's mise.toml, which pins their versions.
-ARG MISE_TOOLS="kubectl flux2 helm kustomize jq yq kubeconform github:home-operations/flate ripgrep"
+ARG MISE_TOOLS="kubectl flux2 helm kustomize jq yq kubeconform github:home-operations/flate"
 
 WORKDIR /download
 

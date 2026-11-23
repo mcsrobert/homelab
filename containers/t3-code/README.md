@@ -25,12 +25,13 @@ disabled; server tool updates arrive through a new image.
 ## Baseline tools
 
 [`Dockerfile`](./Dockerfile)'s `MISE_TOOLS` selects kubectl, Flux, Helm,
-Kustomize, jq, yq, kubeconform, flate and ripgrep. Their versions come only
+Kustomize, jq, yq, kubeconform and flate. Their versions come only
 from the repository's [`mise.toml`](../../mise.toml); the build writes them
 to `/etc/mise/config.toml` and installs them with shims under
 `/opt/t3-code/mise`. mise verifies downloads against its registry's checksums
 and, where supported, attestations or signatures. This repository has no
-`mise.lock`.
+`mise.lock`. ripgrep is not a baseline tool: Claude Code embeds it, and Codex
+and the server's Cursor SDK ship their own `rg`.
 
 `PATH` searches in this order:
 
