@@ -37,6 +37,23 @@ run = "pre-commit install"
 description = "Sign in to Codex in the T3 Code pod"
 run = "kubectl exec -n development -it deployment/t3-code -c t3-code -- codex login --device-auth"
 
+[tasks.openbao-login]
+description = "Sign in to OpenBao with LDAP"
+raw = true
+shell = "bash -euo pipefail -c"
+usage = 'arg "<username>"'
+run = '''
+: "${BAO_ADDR:?Set BAO_ADDR to your OpenBao server URL}"
+IFS= read -rsp 'LDAP password: ' ldap_password </dev/tty
+printf '\n' >&2
+
+token=$(printf '%s' "$ldap_password" |
+  bao write -format=json "auth/ldap/login/$usage_username" password=- |
+  jq -er '.auth.client_token | select(type == "string" and length > 0)')
+unset ldap_password
+printf '%s' "$token" | bao login -
+'''
+
 [tasks.pbkdf2]
 description = "Generate a PBKDF2-SHA512 hash (options after --)"
 run = "uv run scripts/pbkdf2_sha512.py"
