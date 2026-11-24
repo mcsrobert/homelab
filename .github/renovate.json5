@@ -48,11 +48,10 @@
         '.pre-commit-config.yaml',
         '.github/workflows/**',
       ],
-      // These groups also update deployed components.
-      matchJsonata: ['$not(groupName in ["k3s", "Flux CD", "OpenBao", "Renovate"])'],
+      // GitHub Actions already use ci, and these groups also update deployed
+      // components. Majors keep the ! from the major-update rule.
+      matchJsonata: ['$not(manager = "github-actions" or groupName in ["k3s", "Flux CD", "OpenBao", "Renovate"])'],
       semanticCommitType: 'chore',
-      // Clear the explicit breaking-change prefix from the major-update rule.
-      commitMessagePrefix: '',
       addLabels: ['kind/chore'],
     },
   ],
