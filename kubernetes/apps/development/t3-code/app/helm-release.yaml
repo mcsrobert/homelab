@@ -50,7 +50,7 @@ spec:
           t3-code:
             image:
               repository: ghcr.io/mcsrobert/t3-code
-              tag: 0.1.11.20@sha256:dc5160f9c5812509d543f7fcb280104ad8077a9d06bf05d84a48f1182914a7d7
+              tag: 0.1.11.21@sha256:b16b657a6f14a2e6491effb63bceb7c707338e26a52107ebbe78a68dbc71e879
             env:
               TZ: ${TIME_ZONE}
               CLAUDE_CODE_OAUTH_TOKEN:
