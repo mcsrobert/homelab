@@ -18,6 +18,11 @@ jobs:
       contents: read
     uses: ./.github/workflows/lint.yaml
 
+  test:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/test.yaml
+
   flate:
     permissions:
       contents: read
@@ -37,7 +42,7 @@ jobs:
 
   ci:
     if: ${{ always() }}
-    needs: ["lint", "flate", "security", "t3-code-image"]
+    needs: ["lint", "test", "flate", "security", "t3-code-image"]
     runs-on: ubuntu-26.04
     steps:
       - name: Check results

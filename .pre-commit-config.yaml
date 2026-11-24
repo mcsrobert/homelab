@@ -57,6 +57,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: longhorn-restore-tests
+        name: Longhorn restore tests
+        entry: python3 -m unittest discover -s scripts -p test_longhorn_restore.py
+        language: system
+        files: ^scripts/(test_)?longhorn_restore\.py$
+        pass_filenames: false
+
       - id: gitleaks
         name: gitleaks
         entry: gitleaks git --pre-commit --staged --redact --no-banner

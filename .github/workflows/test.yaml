@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Test
+on: workflow_call
+
+permissions:
+  contents: read
+
+jobs:
+  longhorn-restore:
+    runs-on: ubuntu-26.04
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test restore planning and execution
+        run: python3 -m unittest discover -s scripts -p test_longhorn_restore.py

@@ -59,7 +59,13 @@ spec:
                   - ALL
     persistence:
       config:
-        existingClaim: bazarr-config
+        type: persistentVolumeClaim
+        forceRename: &configVolume bazarr-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 1Gi
+        volumeName: *configVolume
       media:
         type: nfs
         server: ${NAS_IP}

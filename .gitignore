@@ -11,3 +11,4 @@ kubeconfig
 config-example.conf
 
 .ansible
+__pycache__/
