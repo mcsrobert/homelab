@@ -19,6 +19,8 @@ was chosen.
   content, or the values behind an `ExternalSecret`.
 - Do not bump image, chart or GitHub Action versions by hand unless asked.
   Renovate manages them.
+- Default to no comments. Add a brief comment only when surprising behavior
+  would otherwise be easy to misread. Keep tool directives.
 
 ## Repository layout
 
