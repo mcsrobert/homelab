@@ -64,7 +64,7 @@ RUN --mount=type=secret,id=github_token \
 # npm ci checks every package against the integrity hashes in the lockfile,
 # and npm audit checks their registry signatures. Lifecycle scripts are
 # skipped: Claude's postinstall only copies the native binary over a
-# placeholder, so the final stage links the binary directly instead.
+# placeholder, so the claude launcher runs the binary directly instead.
 WORKDIR /opt/t3-code/npm
 COPY containers/t3-code/package.json containers/t3-code/package-lock.json ./
 RUN npm ci --ignore-scripts --no-audit --no-fund --no-update-notifier \
@@ -91,6 +91,7 @@ COPY --from=build /opt/t3-code/server /opt/t3-code/server
 COPY --from=build /opt/t3-code/bin/mise /opt/t3-code/bin/mise
 COPY --from=build /opt/t3-code/npm/node_modules/@openai /opt/t3-code/npm/node_modules/@openai
 COPY --from=build /opt/t3-code/npm/node_modules/@anthropic-ai /opt/t3-code/npm/node_modules/@anthropic-ai
+COPY --chmod=0755 containers/t3-code/claude.sh /opt/t3-code/bin/claude
 COPY --chmod=0755 containers/t3-code/codex.sh /opt/t3-code/bin/codex
 COPY --chmod=0755 containers/t3-code/entrypoint.sh /opt/t3-code/entrypoint.sh
 COPY --chmod=0644 containers/t3-code/kubeconfig.yaml /opt/t3-code/kubeconfig.yaml
@@ -120,11 +121,10 @@ ENV HOME=/home/node \
     DISABLE_AUTOUPDATER=1 \
     LANG=C.UTF-8
 
-# Link the server and Claude's native binary into bin. /etc/profile resets
-# PATH for login shells, so restore it from profile.d, written from the PATH
-# above so the two cannot drift apart.
+# Link the server into bin. /etc/profile resets PATH for login shells, so
+# restore it from profile.d, written from the PATH above so the two cannot
+# drift apart.
 RUN ln -s ../server/t3 /opt/t3-code/bin/t3 \
-    && ln -s ../npm/node_modules/@anthropic-ai/claude-code-linux-arm64/claude /opt/t3-code/bin/claude \
     && printf 'export PATH="%s"\n' "$PATH" > /etc/profile.d/t3-code.sh
 
 USER 1000:1000

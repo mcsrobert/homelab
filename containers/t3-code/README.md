@@ -59,6 +59,14 @@ installed by `mise install` in the checkout.
 - `MISE_TRUSTED_CONFIG_PATHS` trusts `/home/node/homelab` and
   `/home/node/.t3/worktrees`, including future worktrees. Other locations
   retain mise's normal trust checks.
+- The `claude` launcher reads the OAuth token from
+  `/etc/claude-auth/CLAUDE_CODE_OAUTH_TOKEN` when the deployment mounts it,
+  so the server and the other agents it starts, such as Codex, do not inherit
+  the token. Claude Code keeps it out of its own Bash commands. Without the
+  file, the environment passes through unchanged.
+- `CLAUDE_CODE_SUBPROCESS_ENV_SCRUB` stays unset. It requires bubblewrap,
+  which needs user namespaces the hardened pod cannot create, and it forces
+  every session into the `default` permission mode.
 - `KUBECONFIG` lists `~/.kube/config` before the baked
   [`kubeconfig.yaml`](./kubeconfig.yaml), which supplies the pod service
   account's `homelab` context. The user config takes precedence.
@@ -91,7 +99,8 @@ context, and a read-only GitHub token is supplied as a build secret.
 [`smoke-test.sh`](./smoke-test.sh) runs as uid 1000 with an empty home, a
 read-only root filesystem and no capabilities. It checks tool resolution and
 versions, login-shell PATH, layer timestamps, project version overrides, mise
-trust boundaries, GitHub credentials and URL rewrites, and server health.
+trust boundaries, GitHub credentials and URL rewrites, Claude's token file,
+and server health.
 
 Tools have separate image layers to keep updates small. `SOURCE_DATE_EPOCH=0`
 and the exporters' `rewrite-timestamp=true` preserve unchanged layer digests;

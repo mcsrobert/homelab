@@ -20,8 +20,10 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
 # Without a network, each server tool must resolve to its baked copy, and each
 # baseline tool to its baked shim and the mise.toml version in the baked
 # installs, not one installed in the home.
+# The writable /etc/claude-auth stands in for the deployment's Secret mount.
 # shellcheck disable=SC2016 # the script expands inside the container
 "${run[@]}" --rm --network none --env BASELINE="$baseline" --env EPOCH="$epoch" --env MISE_OFFLINE=1 \
+  --tmpfs /etc/claude-auth:rw,uid=1000,gid=1000,mode=0700,size=1m \
   --entrypoint /bin/bash "$image" -euo pipefail -c '
   fail() { echo "$*" >&2; exit 1; }
   # BuildKit only logs a warning when it cannot rewrite a layer, and the layer
@@ -87,6 +89,15 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
     [[ $rewritten == https://github.com/owner/repo.git ]] || fail "Git did not rewrite $url to HTTPS"
   done
   echo "mise trust and GitHub defaults work without Helm configuration"
+
+  # claude auth status exits 0 only with a credential. The launcher must take
+  # a dummy token from the mounted file, which the environment lacks.
+  if claude auth status > /dev/null; then
+    fail "claude reports a credential without a token file"
+  fi
+  printf smoke-test-token > /etc/claude-auth/CLAUDE_CODE_OAUTH_TOKEN
+  claude auth status > /dev/null || fail "claude did not load the token file"
+  echo "claude loads its OAuth token from /etc/claude-auth"
 '
 
 # A project that pins another version gets it from the writable home, while
