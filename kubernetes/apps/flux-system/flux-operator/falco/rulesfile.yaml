@@ -39,5 +39,10 @@ spec:
               - ghcr.io/fluxcd/source-controller
               - *container
               - /usr/local/bin/source-controller
+            - - *namespace
+              - flux-operator-
+              - ghcr.io/controlplaneio-fluxcd/flux-operator
+              - *container
+              - /flux-operator
       override:
         exceptions: append
