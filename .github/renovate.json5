@@ -40,5 +40,20 @@
       matchDatasources: ['docker'],
       pinDigests: true,
     },
+    {
+      description: 'Classify development tooling updates as chores',
+      matchFileNames: [
+        'mise.toml',
+        'ansible/requirements.{txt,yml,yaml}',
+        '.pre-commit-config.yaml',
+        '.github/workflows/**',
+      ],
+      // These groups also update deployed components.
+      matchJsonata: ['$not(groupName in ["k3s", "Flux CD", "OpenBao", "Renovate"])'],
+      semanticCommitType: 'chore',
+      // Clear the explicit breaking-change prefix from the major-update rule.
+      commitMessagePrefix: '',
+      addLabels: ['kind/chore'],
+    },
   ],
 }
