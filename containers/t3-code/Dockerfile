@@ -9,20 +9,20 @@
 # one build to the next. It also sets the image config's created date.
 ARG SOURCE_DATE_EPOCH=0
 
-FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725 AS build
+FROM docker.io/library/node:26.13.1@sha256:d604e162935102ed79547f0465846f4938df702a19f0eaef3fe28903e41ec0db AS build
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # Renovate updates each version together with the SHA-256 of its asset.
 # renovate: datasource=github-release-attachments depName=pingdotgg/t3code
-ARG T3CODE_VERSION=v0.1.9
-ARG T3CODE_SHA256=52023bc5728a4dee4de361ad6fef7c236f1efb2742ff25e29d5c55e2fb662eea
+ARG T3CODE_VERSION=v0.1.11
+ARG T3CODE_SHA256=7d90a5af032fe0988a616403e0f51a6cb68eff7ed7a84bc40999cc3997dffd71
 # renovate: datasource=github-release-attachments depName=jdx/mise
-ARG MISE_VERSION=v2026.10.25
-ARG MISE_SHA256=bb09e88b13164ca90691a5cc042726d079f0ba26ab55527344cb173c2e83c998
+ARG MISE_VERSION=v2026.11.13
+ARG MISE_SHA256=1d87e6bc2a069869d7f5fe4a6353429b83cd8cb9c12fea0782dae5f30b2a3683
 # renovate: datasource=github-release-attachments depName=cli/cli
-ARG GH_VERSION=v2.103.3
-ARG GH_SHA256=ee32df2323c8847f5fac6cb6b4b69ca75828e9329a8f22f677021f7b3306ce63
+ARG GH_VERSION=v2.105.0
+ARG GH_SHA256=b1278c75107423d818f1937fd92cafc9e5e9b606631568f68d7fb816f5885a02
 # Baseline tools from the repository's mise.toml, which pins their versions.
 ARG MISE_TOOLS="kubectl flux2 helm kustomize jq yq kubeconform github:home-operations/flate"
 
@@ -77,7 +77,7 @@ RUN stray=$(find node_modules -mindepth 1 -maxdepth 1 ! -name @openai ! -name @a
 
 RUN chmod -R a+rX,go-w /opt/t3-code /etc/mise
 
-FROM docker.io/library/node:26.13.0@sha256:438603bbb5cda404b9416f0b5c8026f61501ab911760d861ec28c36b5d675725
+FROM docker.io/library/node:26.13.1@sha256:d604e162935102ed79547f0465846f4938df702a19f0eaef3fe28903e41ec0db
 
 # One layer per tool, or per group of tools for the baseline, so an update
 # only downloads the layers it changes. Layers are pulled by digest, so their
