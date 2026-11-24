@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: traefik-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Traefik watches Gateway API and other routing resources.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: traefik_api_clients

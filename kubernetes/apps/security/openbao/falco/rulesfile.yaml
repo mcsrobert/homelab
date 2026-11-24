@@ -4,7 +4,6 @@ kind: Rulesfile
 metadata:
   name: openbao-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
     # OpenBao validates Kubernetes auth; the injector watches webhook configuration.

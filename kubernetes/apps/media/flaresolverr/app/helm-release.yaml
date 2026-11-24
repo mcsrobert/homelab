@@ -94,8 +94,7 @@ spec:
                       app.kubernetes.io/name: vmagent
               ports:
                 - port: *metricsPort
-          # FlareSolverr opens untrusted sites in Chromium, so it only reaches DNS
-          # and the internet, not the cluster or the LAN.
+          # Chromium opens untrusted sites. Keep it isolated from the LAN and cluster.
           egress:
             - to:
                 - namespaceSelector:

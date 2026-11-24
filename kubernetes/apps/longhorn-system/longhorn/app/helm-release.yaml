@@ -17,7 +17,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values: # https://github.com/longhorn/longhorn/blob/master/chart/values.yaml
+  values:
     csi:
       attacherReplicaCount: 1
       provisionerReplicaCount: 1

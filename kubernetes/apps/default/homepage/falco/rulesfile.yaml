@@ -4,13 +4,11 @@ kind: Rulesfile
 metadata:
   name: homepage-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Homepage (default) reads pods, nodes, ingresses and HTTPRoutes for its widgets.
     - rule: Contact K8S API Server From Container
       exceptions:
-        # PR #1251; retained Nov 5-6 events report the truncated Next.js process name.
+        # Falco reports a truncated Next.js process name (PR #1251).
         - name: homepage_api_clients
           fields:
             - k8s.ns.name
@@ -27,7 +25,6 @@ spec:
               - homepage
               - "next-server (v"
               - /usr/local/bin/node
-        # Nov 19 API events report the Homepage server as node server.js.
         - name: homepage_node_server_api_client
           fields:
             - k8s.ns.name

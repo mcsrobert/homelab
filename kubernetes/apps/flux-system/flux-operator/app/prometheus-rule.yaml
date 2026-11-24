@@ -8,11 +8,8 @@ spec:
   groups:
     - name: flux.operator
       rules:
-        # Reconciliation failures are reported as they happen by the Flux notification controller
-        # (see notifications/). This catches what events miss: a resource that stays not Ready
-        # without emitting a new error event.
-        # flux_resource_info is exported by the Flux Operator for every Flux resource and is only
-        # refreshed with the FluxReport (every 5 minutes by default).
+        # Catches resources that stay unready without new error events.
+        # flux_resource_info refreshes only when the FluxReport does.
         - alert: FluxResourceNotReady
           expr: |
             max by (kind, exported_namespace, name) (

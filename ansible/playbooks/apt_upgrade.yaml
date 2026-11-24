@@ -1,6 +1,5 @@
 ---
-# A separate play without serial, so every host is checked before the first
-# one is upgraded.
+# Keep preflight outside the serial play so every node is checked before any upgrade.
 - name: Validate the controller before upgrading any host
   hosts: k3s_cluster
   gather_facts: false
@@ -39,8 +38,6 @@
   hosts: k3s_cluster
   become: true
   serial: 1
-  # Drain and uncordon run on the controller with the kubeconfig context that
-  # k3s.orchestration.site sets up there.
   module_defaults: *kubernetes_defaults
 
   pre_tasks:
@@ -57,8 +54,7 @@
         autoremove: true
         autoclean: true
 
-    # Compare install times rather than uname -r: Armbian ships kernel
-    # rebuilds under the same version (6.1.115-vendor-rk35xx).
+    # Armbian can rebuild the kernel without changing uname -r.
     - name: Find kernel packages installed since the last boot
       ansible.builtin.shell: >-
         find /var/lib/dpkg/info -maxdepth 1
@@ -76,8 +72,6 @@
       when: *reboot_due
       ansible.builtin.include_tasks: tasks/wait_for_workloads.yaml
 
-    # An unmarked cordon belongs to the operator; a marked one may be
-    # left over from an interrupted run and must be released by this play.
     - name: Read the node before upgrading it
       delegate_to: localhost
       become: false
@@ -91,6 +85,7 @@
       ansible.builtin.set_fact:
         node_before_upgrade: "{{ current_node.resources | first }}"
 
+    # The marker distinguishes an interrupted run from an operator cordon.
     - name: Remember whether the node was cordoned before the upgrade
       when: *reboot_due
       ansible.builtin.set_fact:
@@ -125,23 +120,18 @@
                   homelab/apt-upgrade-cordon: "true"
           when: not node_was_cordoned
 
-        # Retry the drain and pod check together: k8s_drain can return
-        # successfully even when pods outlive wait_timeout. Budget at most
-        # ~13.5 minutes: 4 attempts of 180s plus 3 delays of 30s, excluding
-        # API request overhead.
         - name: Reset drain attempts
           ansible.builtin.set_fact:
             node_drain_attempt: 0
 
+        # k8s_drain can succeed with pods still running after wait_timeout.
         - name: Drain node before reboot
           ansible.builtin.include_tasks: tasks/drain_node.yaml
           vars:
             node_drain_retries: 3
             node_drain_delay: 30
 
-        # An unreachable host skips rescue and always, which would leave the
-        # node drained. ignore_unreachable turns that into a result the next
-        # task can fail on, so the rescue runs.
+        # An unreachable host skips rescue. Ignore that status and fail explicitly to run rescue.
         - name: Reboot node
           ansible.builtin.reboot:
             msg: Reboot initiated by Ansible after package upgrades
@@ -238,8 +228,6 @@
                  | selectattr('type', 'eq', 'Ready')
                  | selectattr('status', 'eq', 'True') | list | length > 0 }}
 
-        # Put a partly drained node back into service, then stop before the
-        # next node is touched.
         - name: Uncordon node after a failed drain or reboot
           delegate_to: localhost
           become: false
@@ -269,8 +257,7 @@
               and the node was {{ 'uncordoned' if not node_was_cordoned and rescue_node_ready else 'left cordoned' }}:
               {{ ansible_failed_result.msg | default('see the output above') }}
 
-    # A run interrupted after reboot leaves no pending kernel update, but
-    # its owned cordon still needs recovery. Do not drain or reboot again.
+    # An interrupted reboot can leave the marker after the new kernel is already running.
     - name: Recover the playbook cordon after an interrupted reboot
       when:
         - new_kernel_packages.stdout | length == 0
@@ -321,8 +308,7 @@
     - name: Wait for Longhorn before the next node
       ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
 
-    # Evicted pods can pass readiness once and then fail under load on their
-    # new node, so give them time before checking.
+    # Evicted pods can pass readiness once and then fail under load on their new node.
     - name: Let workloads settle after the reboot
       when:
         - *reboot_due

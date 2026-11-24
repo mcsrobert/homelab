@@ -1,13 +1,10 @@
 ---
-# Kubernetes API server audit policy. Rules are evaluated in order and the
-# first match wins. Nothing here records request or response bodies, so
-# Secret contents and tokens never reach the log.
+# First match wins. Keep request and response bodies out of the audit log.
 apiVersion: audit.k8s.io/v1
 kind: Policy
 omitStages:
   - RequestReceived
 rules:
-  # Kubelets and the control plane components are chatty and trusted.
   - level: None
     userGroups: ["system:nodes"]
   - level: None
@@ -16,17 +13,14 @@ rules:
       - system:kube-proxy
       - system:kube-scheduler
 
-  # Interactive access to a running container is always worth a record.
   - level: Metadata
     resources:
       - group: ""
         resources: ["pods/exec", "pods/attach", "pods/portforward"]
 
-  # Health, readiness and metrics endpoints.
   - level: None
     nonResourceURLs: ["/healthz*", "/livez*", "/readyz*", "/version", "/metrics"]
 
-  # Objects that controllers rewrite constantly.
   - level: None
     resources:
       - group: ""
@@ -36,16 +30,14 @@ rules:
       - group: discovery.k8s.io
         resources: ["endpointslices"]
 
-  # Who touched a Secret, including reads.
+  # Audit Secret reads before the general read exclusion.
   - level: Metadata
     resources:
       - group: ""
         resources: ["secrets"]
 
-  # Reads of everything else are too frequent to keep.
   - level: None
     verbs: ["get", "list", "watch"]
 
-  # Every other change: who did what and when. This level also carries the
-  # Pod Security Admission audit annotations.
+  # Metadata captures Pod Security Admission audit annotations.
   - level: Metadata

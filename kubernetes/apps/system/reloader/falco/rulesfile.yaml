@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: reloader-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Reloader watches ConfigMaps and Secrets and updates workloads.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: reloader_api_clients

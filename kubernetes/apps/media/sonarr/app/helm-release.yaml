@@ -29,7 +29,7 @@ spec:
             image:
               repository: ghcr.io/home-operations/sonarr
               tag: 5.0.0.2941@sha256:93b0923dd12afd43247739e19dac59d74c52a15ea12e036b7ced264cffb42574
-            env:  # See: https://wiki.servarr.com/sonarr/environment-variables
+            env:
               TZ: ${TIME_ZONE}
               SONARR__APP__INSTANCENAME: "{{ .Release.Name }}"
               SONARR__APP__THEME: dark
@@ -99,7 +99,6 @@ spec:
           - Ingress
         rules:
           ingress:
-            # Web clients and media app integrations use the Traefik route.
             - from:
                 - namespaceSelector:
                     matchLabels:

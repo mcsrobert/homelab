@@ -1,19 +1,13 @@
-# Trash
 .DS_Store
 Thumbs.db
 
-# Editors
 .vscode
 
-# Kubernetes
 kubeconfig
 
-# Sops
 .decrypted~*
 *.agekey
 
-# Armbian
 config-example.conf
 
-# Ansible
 .ansible

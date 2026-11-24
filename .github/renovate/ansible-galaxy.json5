@@ -1,6 +1,6 @@
 {
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  // This works around and issue with Github references
+  // The built-in manager mishandles GitHub collection references.
   // https://github.com/renovatebot/renovate/discussions/35239
   'ansible-galaxy': {
     enabled: false,

@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: authelia
-      # Downtime is left to TargetDown, KubePodNotReady and
-      # KubeDeploymentReplicasMismatch from the k8s stack.
       rules:
         - alert: AutheliaHighErrorRate
           expr: |

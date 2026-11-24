@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: renovate-operator-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Renovate operator schedules and manages Renovate jobs.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: renovate_operator_api_clients
@@ -26,7 +24,7 @@ spec:
               - /app/renovate-operator
       override:
         exceptions: append
-    # The chart's pre-install/pre-upgrade hook applies its CRDs to the API server.
+    # The chart installs its CRDs through a Helm hook.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: renovate_operator_crd_install_api
@@ -47,9 +45,7 @@ spec:
               - apply --server-side --force-conflicts -f /crd
       override:
         exceptions: append
-    # The homelab Renovate job installs Node and npm through Containerbase
-    # before regenerating the T3 Code lockfile. Allow the Node and npm version
-    # segments to change when Renovate updates the toolchains.
+    # Containerbase installs Node and npm into versioned paths for lockfile regeneration.
     - rule: Drop and execute new binary in container
       exceptions:
         - name: renovate_homelab_npm

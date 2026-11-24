@@ -4,11 +4,9 @@ kind: Rulesfile
 metadata:
   name: keda-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # KEDA manages and validates scaling resources. Its metrics API server
-    # reads the aggregation layer's authentication configuration.
+    # The metrics API server reads the aggregation layer's authentication configuration.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: keda_core_api_clients
@@ -37,7 +35,6 @@ spec:
               - /keda-adapter
       override:
         exceptions: append
-    # HTTP add-on components watch routing and scaling resources.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: keda_api_clients

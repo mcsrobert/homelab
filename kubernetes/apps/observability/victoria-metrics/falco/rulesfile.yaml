@@ -4,11 +4,8 @@ kind: Rulesfile
 metadata:
   name: victoria-metrics-operator-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # The operator reconciles resources; its generated config sidecars read secrets.
-    # The sync job provisions dashboard ConfigMaps and VMRules through the API.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: victoria_metrics_operator_and_sync_api

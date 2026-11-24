@@ -1,11 +1,5 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/operator.victoriametrics.com/vmauth_v1beta1.json
-# Read-only front door for Victoria Metrics and Victoria Logs. Backends accept
-# writes and admin calls on the same port as queries, so only the query
-# endpoints listed below are proxied and unmatched paths are rejected. Paths are
-# anchored regexes; they avoid `.*` so that `..` cannot reach other endpoints.
-# Reachable in-cluster at http://vmauth-readonly.observability.svc:8427 and only
-# from pods whose NetworkPolicy allows it (currently t3-code).
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAuth
 metadata:
@@ -19,6 +13,7 @@ spec:
     limits:
       memory: 64Mi
   unauthorizedUserAccessSpec:
+    # Backends share query and admin ports. Keep path regexes narrow to block traversal to write endpoints.
     targetRefs:
       - static:
           url: http://vmsingle-victoria-metrics:8428

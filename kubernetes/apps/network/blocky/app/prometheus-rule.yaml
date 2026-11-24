@@ -7,8 +7,6 @@ metadata:
 spec:
   groups:
     - name: blocky
-      # Downtime is left to TargetDown, KubePodNotReady and
-      # KubeDeploymentReplicasMismatch from the k8s stack.
       rules:
         - alert: BlockyHighErrorRate
           expr: |

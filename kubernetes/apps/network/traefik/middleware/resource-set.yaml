@@ -1,8 +1,7 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/fluxcd.controlplane.io/resourceset_v1.json
-# NOTE: we need to create this in each namespace for the Gateway API :(
-# I've opened an idea that perhaps a ReferenceGrant can be used for this
-# See: https://github.com/kubernetes-sigs/gateway-api/discussions/4340
+# HTTPRoute ExtensionRefs require a copy of the middleware in each namespace.
+# https://github.com/kubernetes-sigs/gateway-api/discussions/4340
 apiVersion: fluxcd.controlplane.io/v1
 kind: ResourceSet
 metadata:

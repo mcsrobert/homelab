@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: immich-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # The CloudNativePG instance manager maintains database instance state.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: immich_api_clients
@@ -26,8 +24,7 @@ spec:
               - /controller/manager
       override:
         exceptions: append
-    # PostgreSQL invokes restore_command through a shell during standby recovery.
-    # Only allow the CNPG helper with hex WAL/history names and fixed destinations.
+    # Standby recovery runs PostgreSQL's restore_command through a shell.
     - rule: Run shell untrusted
       exceptions:
         - name: immich_cnpg_wal_restore

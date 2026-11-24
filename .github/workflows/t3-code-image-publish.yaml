@@ -1,9 +1,5 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-# Builds, smoke tests and publishes the T3 Code image from main to GHCR.
-# Pull requests build it through ci.yaml and t3-code-image.yaml instead.
-# Each run publishes an immutable <T3 Code version>.<run number> tag, such as
-# 0.1.9.4, so Renovate can order the builds of one T3 Code release.
 name: T3 Code Image Publish
 on:
   push:
@@ -26,8 +22,6 @@ env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/t3-code
 
 jobs:
-  # The path filter above catches every mise.toml change. Only build when one
-  # changes a baseline tool, or on a manual run.
   changes:
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-26.04
@@ -80,7 +74,6 @@ jobs:
         run: |
           arg() { sed -n "s/^ARG $1=v//p" "$DIR/Dockerfile"; }
           dependency() { jq -er --arg name "$1" '.dependencies[$name]' "$DIR/package.json"; }
-          # kubectl 1.37.2, flux2 2.10.0 and so on
           baseline=$(python3 -I "$DIR/baseline-tools.py")
           baseline=$(sed 's/=/ /g; s/ \([^ ]*\) / \1, /g' <<< "$baseline")
           t3code=$(arg T3CODE_VERSION)
@@ -118,9 +111,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # A re-run keeps its run number. Never re-point a published version;
-      # start a new run instead. Only a missing tag counts as new, so a
-      # registry error cannot let the run overwrite one.
+      # Reruns reuse the run number. Only an explicit not-found permits publishing the tag.
       - name: Check that the version is new
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -133,9 +124,7 @@ jobs:
             exit 1
           fi
 
-      # Push by digest only, then smoke test and attest that digest before
-      # tagging it, so published versions are both tested and signed. Recompress
-      # the base layers too: zstd level 9 reduces transfer and decoding costs.
+      # Defer tagging until the pushed digest passes smoke tests and is attested.
       - name: Build
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -144,9 +133,6 @@ jobs:
           file: ${{ env.DIR }}/Dockerfile
           platforms: linux/arm64
           secrets: github_token=${{ github.token }}
-          # Rewritten timestamps, from the Dockerfile's SOURCE_DATE_EPOCH, keep
-          # each unchanged layer byte-identical, so nodes only pull the layers
-          # an update changes.
           outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true,compression=zstd,compression-level=9,force-compression=true,rewrite-timestamp=true
           provenance: mode=max
           sbom: true
@@ -166,8 +152,7 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
-      # With a single source and no new annotations, imagetools copies the
-      # index as is, so every tag keeps the tested digest.
+      # One source and no new annotations preserve the tested index digest.
       - name: Tag
         env:
           DIGEST: ${{ steps.build.outputs.digest }}

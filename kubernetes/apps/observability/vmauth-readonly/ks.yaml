@@ -7,7 +7,6 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    # Provides the VMAuth CRD.
     - name: victoria-metrics
   path: /kubernetes/apps/observability/vmauth-readonly/app
   sourceRef:

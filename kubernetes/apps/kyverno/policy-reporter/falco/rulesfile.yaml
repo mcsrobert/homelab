@@ -4,7 +4,6 @@ kind: Rulesfile
 metadata:
   name: policy-reporter-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
     # Reporter watches policy reports; the UI starts a Kubernetes controller manager.

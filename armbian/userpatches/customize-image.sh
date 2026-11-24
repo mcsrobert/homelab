@@ -1,16 +1,6 @@
 #!/bin/bash
 
-# arguments: $RELEASE $LINUXFAMILY $BOARD $BUILD_DESKTOP
-#
-# This is the image customization script
-
-# NOTE: It is copied to /tmp directory inside the image
-# and executed there inside chroot environment
-# so don't reference any files that are not already installed
-
-# NOTE: If you want to transfer files between chroot and host
-# userpatches/overlay directory on host is bind-mounted to /tmp/overlay in chroot
-# The sd card's root path is accessible via $SDCARD variable.
+# Armbian runs this hook inside the image chroot and bind-mounts userpatches/overlay at /tmp/overlay.
 
 RELEASE="$1"
 LINUXFAMILY="$2"

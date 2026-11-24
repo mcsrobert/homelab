@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: kyverno-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Kyverno's admission controller watches and manages Kubernetes resources.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: kyverno_api_clients
@@ -26,7 +24,6 @@ spec:
               - /ko-app/kyverno
       override:
         exceptions: append
-    # These controllers watch and reconcile resources through the Kubernetes API.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: kyverno_controller_api_clients
@@ -57,7 +54,6 @@ spec:
               - controller
               - reports-control
               - /ko-app/reports-controller
-        # The admission init container checks Kubernetes resources at startup.
         - name: kyverno_init_api
           fields:
             - k8s.ns.name

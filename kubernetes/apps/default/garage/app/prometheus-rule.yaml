@@ -7,9 +7,7 @@ metadata:
 spec:
   groups:
     - name: garage
-      # Downtime is left to TargetDown, KubePodNotReady and
-      # KubeDeploymentReplicasMismatch, and failing S3 writes to the CNPG and
-      # Longhorn backup alerts.
+      # CNPG and Longhorn backup alerts cover failed S3 writes.
       rules:
         - alert: GarageBlockResyncErrors
           expr: block_resync_errored_blocks > 0

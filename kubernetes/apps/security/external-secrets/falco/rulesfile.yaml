@@ -4,12 +4,10 @@ kind: Rulesfile
 metadata:
   name: external-secrets-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
     - rule: Contact K8S API Server From Container
       exceptions:
-        # The main controller watches ExternalSecrets and reconciles Kubernetes Secrets.
         - name: external_secrets_controller_api
           fields:
             - k8s.ns.name
@@ -28,7 +26,6 @@ spec:
               - external-secret
               - /usr/bin/external-secrets
               - "external-secret --concurrent=1 --metrics-addr=:8080 --loglevel=info --zap-time-encoding=epoch"
-        # cert-controller manages webhook TLS and CA bundles via the API.
         - name: external_secrets_cert_controller_api
           fields:
             - k8s.ns.name

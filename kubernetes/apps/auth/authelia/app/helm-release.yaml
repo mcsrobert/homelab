@@ -110,8 +110,6 @@ spec:
           - Ingress
         rules:
           ingress:
-            # Traefik forwards requests, including forwardAuth checks from the
-            # auth-chain middleware.
             - from:
                 - namespaceSelector:
                     matchLabels:

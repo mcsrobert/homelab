@@ -24,8 +24,6 @@
           - app!=csi-provisioner
           - longhorn.io/component!=instance-manager
 
-    # An omitted namespace queries all namespaces. Keep the same exclusions
-    # as the drain, including pods it deliberately leaves running.
     - name: List pods still assigned to the node
       delegate_to: localhost
       become: false
@@ -38,7 +36,6 @@
       register: node_drain_pods
 
     - name: Fail if evictable pods remain on the node
-      # Check mode only simulates eviction, so pods are expected to remain.
       when: not ansible_check_mode
       ansible.builtin.assert:
         that:

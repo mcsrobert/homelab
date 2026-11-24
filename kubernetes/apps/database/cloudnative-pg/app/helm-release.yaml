@@ -13,7 +13,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values: # https://github.com/cloudnative-pg/charts/tree/main/charts/cloudnative-pg#values
+  values:
     crds:
       create: true
     scratchData:

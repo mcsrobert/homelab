@@ -1,7 +1,5 @@
 ---
-# Run through `mise run ansible-rotate-token`. It writes the new token to the
-# SOPS file, passes the previous one in K3S_OLD_TOKEN and afterwards runs
-# site.yaml to restart every node with the new token.
+# Run via mise run ansible-rotate-token to persist the token before rotation and restart all nodes.
 - name: Validate fixed k3s token
   import_playbook: ./validate-token.yaml
 
@@ -26,7 +24,7 @@
           - token.split('::server:') | first == old_token.split('::server:') | first
         fail_msg: Run this playbook through `mise run ansible-rotate-token`.
 
-    # --new-token takes the passphrase; the stored token keeps the CA hash prefix.
+    # --new-token takes only the passphrase. The stored token includes the CA hash prefix.
     - name: Rotate the server token
       no_log: true
       ansible.builtin.command:

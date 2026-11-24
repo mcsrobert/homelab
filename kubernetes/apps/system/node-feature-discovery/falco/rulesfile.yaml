@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: node-feature-discovery-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # The worker publishes node features.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: node_feature_discovery_worker_api
@@ -26,7 +24,6 @@ spec:
               - /usr/bin/nfd-worker
       override:
         exceptions: append
-    # The master publishes labels; GC removes stale feature resources.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: node_feature_discovery_api_clients

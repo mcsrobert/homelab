@@ -9,7 +9,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: reloader
-  values: # https://github.com/stakater/Reloader/blob/master/deployments/kubernetes/chart/reloader/README.md#parameters
+  values:
     fullnameOverride: reloader
     reloader:
       reloadStrategy: annotations

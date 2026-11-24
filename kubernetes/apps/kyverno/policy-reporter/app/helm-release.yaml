@@ -24,11 +24,9 @@ spec:
     cleanupOnFail: true
   driftDetection:
     mode: enabled
-  values:  # https://github.com/kyverno/policy-reporter/tree/main/charts/policy-reporter
+  values:
 
-    # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests
-    # cannot pin these pods. The images are pinned here instead, and Renovate
-    # groups them with the chart (.github/renovate/groups.json5).
+    # The pin-image-digests webhook skips this namespace.
     image:
       registry: ghcr.io
       repository: kyverno/policy-reporter

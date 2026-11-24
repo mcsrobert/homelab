@@ -9,10 +9,9 @@ spec:
     kind: OCIRepository
     name: kyverno
   interval: 1h
-  # Kyverno's namespace bypasses admission; keep defaults explicit for policy reporting.
-  # CRD/storage migrations need deliberate recovery rather than automatic rollback.
+  # CRD migrations require manual recovery. RetryOnFailure bypasses remediation,
+  # which is kept explicit for reporting in Kyverno's webhook-exempt namespace.
   # https://kyverno.io/docs/installation/upgrading/
-  # RetryOnFailure bypasses the remediation fields retained for policy reporting.
   install:
     crds: CreateReplace
     strategy:
@@ -35,11 +34,9 @@ spec:
     cleanupOnFail: true
   driftDetection:
     mode: enabled
-  values:  # https://github.com/kyverno/kyverno/tree/main/charts/kyverno#values
+  values:
 
-    # Kyverno keeps its own namespace out of its webhooks, so pin-image-digests
-    # cannot pin these pods. The images are pinned here instead, and Renovate
-    # groups them with the chart (.github/renovate/groups.json5).
+    # The pin-image-digests webhook skips this namespace.
     crds:
       migration:
         image: &cliImage

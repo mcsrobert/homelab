@@ -17,7 +17,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:  # https://github.com/kedacore/charts/tree/main/http-add-on#configuration
+  values:
     interceptor:
       replicas:
         min: 1
