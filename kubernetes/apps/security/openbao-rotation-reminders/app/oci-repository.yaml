@@ -8,7 +8,7 @@ spec:
   interval: 24h
   url: oci://ghcr.io/mcsrobert/charts/openbao-rotation-reminders
   ref:
-    tag: 1.0.0
+    tag: 1.0.1
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
