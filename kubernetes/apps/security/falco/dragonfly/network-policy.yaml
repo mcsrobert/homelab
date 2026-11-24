@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.2-standalone-strict/networkpolicy.json
-# NOTE: The wait-redis container for falcosidekick-ui cannot handle auth, so we use a policy to restrict access.
+# Falcosidekick UI's wait-redis container cannot authenticate.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

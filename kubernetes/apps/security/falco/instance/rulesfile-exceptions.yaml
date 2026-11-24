@@ -4,19 +4,11 @@ kind: Rulesfile
 metadata:
   name: falco-rules-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
+  # Exception Rulesfiles load after the upstream rules at priority 50.
   priority: 60
-  # Keep only host-level exceptions here (including host-managed static pods).
-  # App-specific exceptions belong in that app's falco/rulesfile.yaml, applied
-  # by its own <app>-falco Flux Kustomization targeting security and depending
-  # on falco-operator. See system/keda/falco for an example.
-  # Scope exceptions to namespace, image repository and container, adding a
-  # stable workload pod prefix for shared sidecars (see dragonfly-operator/falco).
-  # Match the expected process/executable and event fields where available;
-  # verify ownership from manifests or events, not just comments or location.
+  # App exception Kustomizations target security and depend on falco-operator.
   inlineRules:
-    # Armbian's ramlog postrotate job runs on the RK1 host (not in a container)
-    # and truncates /var/log, which the stock log-clearing rule would flag.
+    # Armbian's host ramlog job truncates logs after rotation.
     - rule: Clear Log Activities
       exceptions:
         - name: armbian_ramlog_postrotate
@@ -39,8 +31,7 @@ spec:
               - /var/log
       override:
         exceptions: append
-    # kube-vip opens a packet socket to send gratuitous ARP for the control-plane
-    # VIP, which is how it fails over between nodes.
+    # kube-vip sends gratuitous ARP for the control-plane VIP during failover.
     - rule: Packet socket created in container
       exceptions:
         - name: kube_vip_arp

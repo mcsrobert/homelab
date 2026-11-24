@@ -5,7 +5,7 @@
 
   tasks:
 
-    # Optional: only controllers with Ghostty have this terminfo entry.
+    # The controller only has this terminfo entry if Ghostty is installed.
     - name: Get Ghostty terminfo
       ansible.builtin.command: infocmp -x xterm-ghostty
       register: ghostty_terminfo
@@ -110,8 +110,7 @@
       when: inventory_hostname in groups['server']
       block:
 
-        # The log lives under /var/lib, not /var/log: Armbian keeps /var/log
-        # in a small ramlog.
+        # Armbian keeps /var/log in a small ramlog.
         - name: Ensure the audit log directory exists
           ansible.builtin.file:
             path: /var/lib/rancher/k3s/server/logs

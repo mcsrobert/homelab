@@ -22,10 +22,8 @@ kind: Certificate
 metadata:
   name: openbao-internal-cert
 spec:
-  # For the in-cluster listener. External Secrets reads the Cloudflare token
-  # through it, so it cannot wait for Let's Encrypt.
+  # External Secrets needs this private CA certificate to fetch the Cloudflare token for Let's Encrypt.
   secretName: openbao-internal-tls
-  # The Service names, and BAO_ADDR inside the pod.
   dnsNames:
     - localhost
     - openbao
@@ -45,11 +43,8 @@ kind: Certificate
 metadata:
   name: openbao-cert
   annotations:
-    # Writes a self-signed placeholder until Let's Encrypt issues, so OpenBao
-    # can start on a new cluster before it has handed out the Cloudflare token.
-    # cert-manager reports the placeholder as Ready. If the order fails, it
-    # only tries again at the placeholder's renewal time, 60 days later;
-    # `cmctl renew` retries right away.
+    # The placeholder lets OpenBao start and supply the Cloudflare token.
+    # cert-manager reports it as Ready. Use cmctl renew to retry failed issuance early.
     cert-manager.io/issue-temporary-certificate: "true"
 spec:
   secretName: openbao-tls

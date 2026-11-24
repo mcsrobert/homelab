@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Offline render inputs only. Keep dummy Secrets outside the deployed manifests
-# and never read SOPS keys or OpenBao values when validating the repository.
+# Supply dummy Secrets so local renders need no SOPS or OpenBao access.
 # https://github.com/home-operations/flate#supply-objects-from-outside-git
-# Match the Gateway API capability for Helm renders in every validation path.
 exec flate "$@" --api-versions gateway.networking.k8s.io/v1/HTTPRoute --supply - <<'EOF'
 apiVersion: v1
 kind: Secret

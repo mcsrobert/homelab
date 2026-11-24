@@ -10,7 +10,6 @@ spec:
     matchLabels:
       app: immich-dragonfly
   ingress:
-    # The only client.
     - from:
         - podSelector:
             matchLabels:
@@ -18,7 +17,6 @@ spec:
               app.kubernetes.io/controller: server
       ports:
         - port: 6379
-    # Replication between Dragonfly pods.
     - from:
         - podSelector:
             matchLabels:

@@ -4,10 +4,9 @@ kind: Rulesfile
 metadata:
   name: flaresolverr-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # FlareSolverr patches and runs its bundled ChromeDriver to start Chromium.
+    # FlareSolverr patches ChromeDriver in place before executing it.
     - rule: Drop and execute new binary in container
       exceptions:
         - name: flaresolverr_chromedriver

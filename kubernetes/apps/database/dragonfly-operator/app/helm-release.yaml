@@ -13,7 +13,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values: # https://github.com/dragonflydb/dragonfly-operator/blob/main/charts/dragonfly-operator/values.yaml
+  values:
     manager:
       extraArgs:
         # See: https://github.com/dragonflydb/dragonfly-operator/issues/258

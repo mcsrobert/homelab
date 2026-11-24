@@ -1,10 +1,9 @@
 ---
-# One server at a time, so the VIP always has a kube-vip left to hold it.
 - name: Install kube-vip
   hosts: server
   become: true
   gather_facts: true
-  serial: 1
+  serial: 1  # Keep an active kube-vip instance during updates.
 
   tasks:
 
@@ -26,14 +25,13 @@
 
   handlers:
 
-    # site.yaml installs kube-vip before k3s, so on a fresh node there is no
-    # API server behind the VIP yet and nothing to wait for. The delay gives
-    # kubelet time to pick up the new manifest and restart the pod.
+    # On fresh nodes, site.yaml installs kube-vip before the API server exists.
     - name: Wait for the API server VIP
       ansible.builtin.wait_for:
         host: "{{ api_endpoint }}"
         port: "{{ api_port }}"
         state: started
+        # Let kubelet pick up the new static pod manifest before probing the VIP.
         delay: 30
         timeout: 300
       when: ansible_facts.services['k3s.service'].state | default('') == 'running'

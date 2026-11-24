@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: longhorn-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Longhorn (longhorn-system) manager, CSI plugin, CSI attacher, provisioner, resizer and snapshotter, and recurring-job pods reconcile its CRDs and volumes.
     - rule: Contact K8S API Server From Container
       exceptions:
         # PR #1263 and retained Nov 5-6 events; PR #1283 captured attacher/snapshotter paths.
@@ -71,8 +69,7 @@ spec:
               - /usr/local/sbin/longhorn-manager
       override:
         exceptions: append
-    # The instance manager's engine runs iscsiadm to attach volumes, and iscsiadm
-    # loads the iSCSI kernel modules (finit_module) while discovering targets.
+    # iscsiadm loads kernel modules during target discovery for volume attachment.
     - rule: Linux Kernel Module Injection Detected
       exceptions:
         - name: longhorn_iscsi_modules

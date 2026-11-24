@@ -1,13 +1,7 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-# Sets the "soak" commit status, a required check, on every pull request.
-# Renovate pull requests soak for SOAK_DAYS unless they have the
-# renovate/skip-soak label, other pull requests pass right away. The soak
-# counts from the first push of the current update: a rebase adds the same
-# lines and keeps the start time, a newer version adds different lines and
-# starts the soak again. A soaked status only turns green on a weekday
-# between 09:00 and 18:00, so GitHub auto-merge merges soaked updates in that
-# window.
+# A rebase preserves the soak start when the added lines match.
+# A completed soak turns green during the merge window so GitHub can auto-merge it.
 name: Renovate Soak
 on:
   pull_request:
@@ -41,9 +35,7 @@ jobs:
       - name: Set soak status
         shell: bash
         run: |
-          # Hash of the lines a commit adds, which a rebase does not change. A
-          # file without a patch (binary or too large) hashes as the commit
-          # itself, so that commit never matches another one.
+          # Missing patches fall back to the commit SHA, so a rebase resets their soak.
           # shellcheck disable=SC2016 # $sha is a jq variable
           fingerprint() {
             gh api "repos/${GH_REPO}/commits/$1" --jq '[.sha as $sha | .files[] | .filename,
@@ -51,9 +43,6 @@ jobs:
               | join("\n")' | sha256sum
           }
 
-          # Prints the time of the earliest push in the run of pushes that ends
-          # at the head and adds the same lines as the head. When no push
-          # matches, such as a head that is not in the history yet, it is now.
           soak_start() {
             local sha=$1 head push start i
             local -a history
@@ -70,10 +59,6 @@ jobs:
             echo "${start}"
           }
 
-          # One line per PR: number, head, "<sha>@<time>" for every head the PR
-          # has had (oldest first), whether it is a Renovate branch, whether it
-          # has the renovate/skip-soak label, and the head's soak state and
-          # description.
           # shellcheck disable=SC2016 # GraphQL and jq variables
           prs=$(gh api graphql -f owner="${GH_REPO%/*}" -f name="${GH_REPO#*/}" -f query='
             query($owner: String!, $name: String!) {

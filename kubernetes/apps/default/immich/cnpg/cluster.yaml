@@ -5,14 +5,12 @@ kind: Cluster
 metadata:
   name: immich-cnpg
 spec:
-  # NOTE: When upgrading, the following must be done:
-  #
+  # Update the extension and rebuild its indexes after a VectorChord upgrade.
   # $ kubectl cnpg psql immich-cnpg -d app
   # > ALTER EXTENSION vchord UPDATE;
   # > REINDEX INDEX face_index;
   # > REINDEX INDEX clip_index;
-  #
-  # See: https://docs.immich.app/administration/postgres-standalone#updating-vectorchord
+  # https://docs.immich.app/administration/postgres-standalone#updating-vectorchord
   imageName: ghcr.io/tensorchord/cloudnative-vectorchord:18.6-1.1.1@sha256:c7672bc011351a587cc292a94aac7eeebb593ed2e120077bd9c9944c9467db93
   primaryUpdateStrategy: unsupervised
   instances: 2

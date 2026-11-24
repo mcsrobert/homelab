@@ -4,10 +4,9 @@ kind: Rulesfile
 metadata:
   name: dragonfly-operator-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Dragonfly kube-rbac-proxy (database) runs TokenReview/SubjectAccessReview for metrics auth.
+    # Metrics authentication triggers TokenReview and SubjectAccessReview calls.
     - rule: Contact K8S API Server From Container
       exceptions:
         # PR #1251; retained Nov 5-6 API events identify this proxy executable.
@@ -29,7 +28,6 @@ spec:
               - /usr/local/bin/kube-rbac-proxy
       override:
         exceptions: append
-    # The operator manager watches Dragonfly resources and maintains its leader lease.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: dragonfly_manager_api

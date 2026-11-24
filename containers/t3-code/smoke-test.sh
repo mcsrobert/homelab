@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Smoke test a built image the way the pod runs it: as uid 1000 with a
-# read-only root filesystem, no capabilities and an empty, writable home.
 set -euo pipefail
 
 image=$1
@@ -11,21 +9,15 @@ run=(docker run --read-only --user 1000:1000 --cap-drop ALL
   --tmpfs /tmp:rw,exec,size=1g
   --tmpfs /home/node:rw,exec,uid=1000,gid=1000,mode=0700,size=2g)
 
-# kubectl=1.37.2 and so on, from the Dockerfile and mise.toml, not the image.
 baseline=$(python3 -I "$dir/baseline-tools.py")
-# The Dockerfile's SOURCE_DATE_EPOCH, which every file in its layers is clamped to.
 epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
 [[ $epoch =~ ^[0-9]+$ ]] || { echo "Dockerfile has no numeric SOURCE_DATE_EPOCH default" >&2; exit 1; }
 
-# Without a network, each server tool must resolve to its baked copy, and each
-# baseline tool to its baked shim and the mise.toml version in the baked
-# installs, not one installed in the home.
 # shellcheck disable=SC2016 # the script expands inside the container
 "${run[@]}" --rm --network none --env BASELINE="$baseline" --env EPOCH="$epoch" --env MISE_OFFLINE=1 \
   --entrypoint /bin/bash "$image" -euo pipefail -c '
   fail() { echo "$*" >&2; exit 1; }
-  # BuildKit only logs a warning when it cannot rewrite a layer, and the layer
-  # then gets a new digest with every build.
+  # BuildKit warns instead of failing when it cannot rewrite layer timestamps.
   newer=$(find /opt/t3-code /etc/mise /etc/gitconfig /etc/profile.d/t3-code.sh -newermt "@$EPOCH" | head -n 5)
   [[ -z $newer ]] || fail "files newer than SOURCE_DATE_EPOCH $EPOCH, so layer digests change with every build: $newer"
   for tool in t3 mise gh claude codex; do
@@ -59,8 +51,6 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
   [[ $login_path == "$PATH" ]] || fail "login shell PATH is $login_path, not $PATH"
   [[ -r ${KUBECONFIG##*:} ]] || fail "default kubeconfig ${KUBECONFIG##*:} is missing"
 
-  # No Helm environment overrides or saved trust state: new configs under the
-  # image defaults must load, and a config outside them must still need trust.
   for project in "$HOME/homelab" "$HOME/.t3/worktrees/smoke"; do
     mkdir -p "$project"
     printf "[env]\nT3_CODE_SMOKE_TRUST = \"trusted\"\n" > "$project/mise.toml"
@@ -73,7 +63,6 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
     fail "mise trusted a config outside the default directories"
   fi
 
-  # Exercise the credential protocol with a dummy token only, without a network.
   credentials=$(printf "protocol=https\nhost=github.com\n\n" | GH_TOKEN=smoke-test-token git credential fill)
   [[ $credentials == *"username=x-access-token"* && $credentials == *"password=smoke-test-token"* ]] || fail "GitHub helper did not use the runtime token"
   if printf "protocol=https\nhost=example.invalid\n\n" | GH_TOKEN=smoke-test-token GIT_TERMINAL_PROMPT=0 git credential fill > /dev/null 2>&1; then
@@ -89,10 +78,6 @@ epoch=$(sed -n 's/^ARG SOURCE_DATE_EPOCH=//p' "$dir/Dockerfile")
   echo "mise trust and GitHub defaults work without Helm configuration"
 '
 
-# A project that pins another version gets it from the writable home, while
-# the baseline stays the default everywhere else.
-# MISE_GITHUB_TOKEN, when set, keeps the jq download clear of GitHub's
-# unauthenticated rate limit.
 jq_baseline=$(tr ' ' '\n' <<< "$baseline" | sed -n 's/^jq=//p')
 # shellcheck disable=SC2016 # the script expands inside the container
 "${run[@]}" --rm --env JQ_BASELINE="$jq_baseline" --env MISE_GITHUB_TOKEN --entrypoint /bin/bash "$image" -euo pipefail -c '
@@ -113,9 +98,6 @@ jq_baseline=$(tr ' ' '\n' <<< "$baseline" | sed -n 's/^jq=//p')
 name=t3-code-smoke-$$
 "${run[@]}" --detach --name "$name" "$image" > /dev/null
 trap 'docker rm --force "$name" > /dev/null' EXIT
-# The entrypoint discards stdout because it holds the pairing token, so the
-# logs only show stderr. Report the container state too, and stop waiting as
-# soon as the server exits.
 fail() {
   echo "t3 serve $1" >&2
   docker inspect --format 'state={{.State.Status}} exit={{.State.ExitCode}} error={{.State.Error}}' "$name" >&2

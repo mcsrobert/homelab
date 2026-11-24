@@ -4,13 +4,11 @@ kind: Rulesfile
 metadata:
   name: habitica-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # MongoDB agent readinessprobe (default) talks to the API from the operator's probe script.
     - rule: Contact K8S API Server From Container
       exceptions:
-        # PR #1251 investigation captured this probe executable in Falco events.
+        # The MongoDB agent readiness probe calls the API (PR #1251).
         - name: habitica_api_clients
           fields:
             - k8s.ns.name

@@ -4,11 +4,9 @@ kind: Rulesfile
 metadata:
   name: vmauth-readonly-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Config sidecars read/watch the generated configuration Secret via the API.
-    # Falco events on 2026-11-16 verified /app for both config containers.
+    # Both config sidecars report /app as the executable in Falco events.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: vmauth_readonly_api_clients

@@ -93,7 +93,6 @@ spec:
           - Ingress
         rules:
           ingress:
-            # Web clients and media app integrations use the Traefik route.
             - from:
                 - namespaceSelector:
                     matchLabels:

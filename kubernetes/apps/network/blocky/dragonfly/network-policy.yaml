@@ -10,14 +10,12 @@ spec:
     matchLabels:
       app: blocky-dragonfly
   ingress:
-    # The only client.
     - from:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: blocky
       ports:
         - port: 6379
-    # Replication between Dragonfly pods.
     - from:
         - podSelector:
             matchLabels:

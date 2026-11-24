@@ -4,7 +4,6 @@ kind: Rulesfile
 metadata:
   name: tailscale-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
     # TS_KUBE_SECRET makes containerboot and tailscaled manage Kubernetes state.

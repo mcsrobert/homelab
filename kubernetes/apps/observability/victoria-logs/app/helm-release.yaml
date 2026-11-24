@@ -9,7 +9,7 @@ spec:
     kind: OCIRepository
     name: victoria-logs-single
   interval: 30m
-  values: # https://docs.victoriametrics.com/helm/victoria-logs-single/#parameters
+  values:
     fullnameOverride: victoria-logs
     server:
       retentionPeriod: 10d

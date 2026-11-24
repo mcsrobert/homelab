@@ -19,8 +19,7 @@
       changed_when: true
 
   tasks:
-    # force: true downloads the file on every run and replaces it only when the
-    # content differs, so a rknn_version bump reaches the nodes.
+    # The destination stays the same across versions, so get_url must re-download it.
     - name: Install RKNN runtime library
       ansible.builtin.get_url:
         url: https://github.com/airockchip/rknn-toolkit2/raw/refs/tags/{{ rknn_version }}/rknpu2/runtime/Linux/librknn_api/aarch64/librknnrt.so

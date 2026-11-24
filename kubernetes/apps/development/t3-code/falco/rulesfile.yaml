@@ -4,12 +4,9 @@ kind: Rulesfile
 metadata:
   name: t3-code-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # The read-only service account supports cluster inspection with the bundled
-    # kubectl, Flux and Helm clients. Match only their image-installed paths;
-    # allow the version directory to change when Renovate updates the image.
+    # The globs cover version directories of image-baked tools only.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: t3_code_api_clients

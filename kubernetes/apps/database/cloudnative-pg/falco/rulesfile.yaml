@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: cloudnative-pg-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # CloudNativePG operator (database) reconciles Cluster resources.
     - rule: Contact K8S API Server From Container
       exceptions:
         # PR #1253; retained Nov 6 API event identifies the ARM64 operator executable.
@@ -27,7 +25,6 @@ spec:
               - manager
               - manager
               - /operator/manager_arm64
-        # Observed Nov 17 after the Barman update: the operator watches K8s resources.
         - name: barman_operator_api_client
           fields:
             - k8s.ns.name
@@ -46,7 +43,6 @@ spec:
               - manager
               - /manager
               - 10001
-        # Barman's instance sidecar contacts the API at startup.
         - name: barman_instance_api_client
           fields:
             - container.image.repository

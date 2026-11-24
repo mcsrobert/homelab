@@ -17,5 +17,5 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values:  # https://github.com/kedacore/charts/tree/main/keda#configuration
+  values:
     enableServiceLinks: false

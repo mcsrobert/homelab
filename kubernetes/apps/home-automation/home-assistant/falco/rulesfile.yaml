@@ -4,12 +4,9 @@ kind: Rulesfile
 metadata:
   name: home-assistant-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # DHCP discovery opens a Scapy packet socket after HA starts. Non-root HA
-    # lacks CAP_NET_RAW, so this fails with EPERM and the watcher stops quietly.
-    # Keep successful sockets and other processes or socket parameters visible.
+    # Scapy's DHCP watcher hits EPERM because Home Assistant lacks CAP_NET_RAW.
     - rule: Packet socket created in container
       exceptions:
         - name: home_assistant_denied_dhcp_socket

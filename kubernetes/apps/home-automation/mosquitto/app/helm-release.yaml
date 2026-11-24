@@ -82,7 +82,6 @@ spec:
           - Ingress
         rules:
           ingress:
-            # The four users in mosquitto-passwd, all in this namespace.
             - from:
                 - podSelector:
                     matchLabels:

@@ -9,7 +9,7 @@ spec:
     kind: OCIRepository
     name: openbao
   interval: 30m
-  values: # https://github.com/openbao/openbao-helm/blob/main/charts/openbao/values.yaml
+  values:
     global:
       tlsDisable: false
     server:

@@ -42,12 +42,8 @@ spec:
               EMAIL_SERVER_URL: maddy.default.svc.cluster.local
               EMAIL_SERVER_PORT: 2525
             probes:
-              # Mongoose does not retry a failed initial connection, so a pod that starts before
-              # MongoDB or cluster DNS answers (as after a cluster-wide reboot) never reaches the
-              # database until it restarts. /api/v4/ready answers 503 while Mongoose is not
-              # connected: the startup probe restarts such a pod and readiness keeps traffic off
-              # it. Liveness uses /api/v4/status, which does not check MongoDB, because once
-              # connected Mongoose reconnects by itself and a restart would not help.
+              # Mongoose needs a restart after a failed initial connection.
+              # After connecting once, it reconnects itself, so liveness skips the DB check.
               startup:
                 enabled: true
                 custom: true
@@ -55,8 +51,7 @@ spec:
                   httpGet: &readyCheck
                     port: &habiticaPort 3000
                     path: /api/v4/ready
-                    # forceSSL redirects plain HTTP to BASE_URL and the kubelet counts a redirect
-                    # as success, so act as the TLS-terminating proxy.
+                    # forceSSL otherwise returns a redirect, which kubelet counts as success.
                     httpHeaders: &httpHeaders
                       - name: X-Forwarded-Proto
                         value: https
@@ -85,9 +80,10 @@ spec:
               limits:
                 memory: 512Mi
             securityContext:
-              runAsUser: 0  # cannot create /etc/environment
+              # Creating /etc/environment requires root and a writable root filesystem.
+              runAsUser: 0
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false  # cannot create /etc/environment
+              readOnlyRootFilesystem: false
               capabilities:
                 drop:
                   - ALL

@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: falco-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # The artifact operator reconciles rules and other artifacts.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: falco_api_clients

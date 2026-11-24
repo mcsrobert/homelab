@@ -30,10 +30,7 @@ spec:
             runAsUser: 7000
             runAsGroup: &nfsGroup 65538
             fsGroup: *nfsGroup
-          # This is avoid 132 exit code crashes on the RPI4
-          # TODO: figure out what CPU instructions are needed
-          # and create NFD rule OR wait until RPI4 is retired
-          # remove this entirely.
+          # Garage crashes with exit code 132 on the Raspberry Pi 4.
           affinity:
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
@@ -180,7 +177,6 @@ spec:
           - Ingress
         rules:
           ingress:
-            # S3: the barman-cloud sidecar of the immich-cnpg pods, and the webui.
             - from:
                 - podSelector:
                     matchLabels:
@@ -191,7 +187,6 @@ spec:
                       app.kubernetes.io/controller: webui
               ports:
                 - port: 3900
-            # Garage nodes communicate over the RPC port.
             - from:
                 - podSelector:
                     matchLabels:
@@ -199,7 +194,6 @@ spec:
                       app.kubernetes.io/controller: garage
               ports:
                 - port: 3901
-            # Admin API and metrics.
             - from:
                 - podSelector:
                     matchLabels:

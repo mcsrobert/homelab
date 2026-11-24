@@ -23,7 +23,7 @@ spec:
           persistentVolumeClaimRetentionPolicy:
             whenDeleted: Retain
             whenScaled: Retain
-          # Each replica owns its queue; two processes must not share one queue directory.
+          # Maddy replicas cannot share a mail queue.
           volumeClaimTemplates:
             - name: state
               accessMode: ReadWriteOnce

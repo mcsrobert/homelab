@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: victoria-logs-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # Victoria Logs collector vlagent (observability) watches pods to label log streams.
     - rule: Contact K8S API Server From Container
       exceptions:
         # PR #1253; retained Nov 5-6 API events identify the collector executable.

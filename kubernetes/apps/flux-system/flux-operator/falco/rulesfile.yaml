@@ -4,10 +4,8 @@ kind: Rulesfile
 metadata:
   name: flux-controllers-api-exceptions
 spec:
-  # Load after the upstream falco-rules (priority 50).
   priority: 60
   inlineRules:
-    # These Flux controllers use the Kubernetes API to watch and reconcile resources.
     - rule: Contact K8S API Server From Container
       exceptions:
         - name: flux_controller_api_clients

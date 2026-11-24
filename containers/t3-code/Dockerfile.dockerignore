@@ -1,4 +1,3 @@
-# The image builds from the repository root for mise.toml; send only its inputs.
 *
 !mise.toml
 !containers/t3-code/

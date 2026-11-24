@@ -13,7 +13,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values: # https://github.com/mongodb/mongodb-kubernetes/blob/master/helm_chart/values.yaml
+  values:
     operator:
       name: mongodb-operator
       watchNamespace: "*"

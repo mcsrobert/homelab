@@ -13,7 +13,7 @@ spec:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
-  values: # https://github.com/mogenius/renovate-operator/blob/main/charts/renovate-operator/values.yaml
+  values:
     fullnameOverride: renovate-operator
     webhook:
       enabled: true
