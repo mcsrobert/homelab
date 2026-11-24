@@ -37,7 +37,7 @@ spec:
           git-sync:
             image:
               repository: ghcr.io/mcsrobert/ha-git-sync
-              tag: 0.3.1@sha256:c2d7dc47fd15579c07308e34132d9778ad81733805878f0144e600082a9b8e35
+              tag: 0.4.0@sha256:26698fb4fae71878190f14139e6860fc9934233a953a7979bf0ab19026907cde
             restartPolicy: Always
             env:
               GITSYNC_REPO: https://github.com/mcsrobert/home-assistant-config.git
