@@ -9,16 +9,12 @@ log line or metric that shows the problem. -->
 
 <!-- Anything Flux will not do by itself, as a checklist with one box per
 action, in order: OpenBao secrets to create (path and keys), data migrations,
-Ansible playbooks to run. Write "None" if there are none.
+Ansible playbooks to run. Replace "None" if there are manual steps. Include
+**Before merging** and **After merging** headings only when they have steps.
+Put commands in a code block under their step. Keep rollback instructions as
+text below the checklist. -->
 
-**Before merging:**
-
-- [ ] ...
-
-**After merging:**
-
-- [ ] ...
--->
+None
 
 ## Upstream docs
 
