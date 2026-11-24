@@ -92,15 +92,6 @@ spec:
         allowVolumeExpansion: true
         parameters:
           numberOfReplicas: "1"
-      - apiVersion: storage.k8s.io/v1
-        kind: StorageClass
-        metadata:
-          name: longhorn-victoria-metrics
-        provisioner: driver.longhorn.io
-        allowVolumeExpansion: true
-        parameters:
-          numberOfReplicas: "1"
-          recurringJobSelector: *backupJobGroup
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:
