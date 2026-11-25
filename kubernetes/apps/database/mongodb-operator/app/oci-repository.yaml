@@ -8,7 +8,7 @@ spec:
   interval: 1h
   url: oci://quay.io/mongodb/helm-charts/mongodb-kubernetes
   ref:
-    tag: 1.15.0
+    tag: 1.16.0
   layerSelector:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
