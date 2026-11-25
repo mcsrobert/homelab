@@ -62,20 +62,27 @@ spec:
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
+          name: longhorn-no-backup
+        provisioner: driver.longhorn.io
+        allowVolumeExpansion: true
+        parameters: &classParameters
+          numberOfReplicas: "3"
+          staleReplicaTimeout: "30"
+          disableRevisionCounter: "true"
+          dataLocality: disabled
+          unmapMarkSnapChainRemoved: ignored
+          dataEngine: v1
+          fsType: ext4
+      - apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
           name: longhorn-backup
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
         parameters:
+          !!merge <<: *classParameters
           numberOfReplicas: "3"
           recurringJobSelector: *backupJobGroup
-      - apiVersion: storage.k8s.io/v1
-        kind: StorageClass
-        metadata:
-          name: longhorn-no-backup
-        provisioner: driver.longhorn.io
-        allowVolumeExpansion: true
-        parameters:
-          numberOfReplicas: "3"
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
@@ -83,6 +90,7 @@ spec:
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
         parameters:
+          !!merge <<: *classParameters
           numberOfReplicas: "1"
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
@@ -91,6 +99,7 @@ spec:
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
         parameters:
+          !!merge <<: *classParameters
           numberOfReplicas: "1"
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
