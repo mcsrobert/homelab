@@ -21,6 +21,8 @@ was chosen.
   Renovate manages them.
 - Default to no comments. Add a brief comment only when surprising behavior
   would otherwise be easy to misread. Keep tool directives.
+- Create documentation only when the user asks for it. A `README.md` in a new
+  repository is the exception.
 
 ## Repository layout
 
@@ -200,13 +202,7 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
   usually the app. The `commit-msg` hook rejects anything else.
 - Squash minor follow-up edits into the commit they amend. Distinct changes,
   such as a fix and a small feature, can stay separate commits in one PR.
-- Fill in every section of the PR template. Under "Upstream docs", link the
-  upstream documentation for any application behavior the PR configures or
-  changes, such as an OIDC integration, a chart value or a feature flag.
-- Write "Manual steps" as a task list (`- [ ]`) with one checkbox per action,
-  under **Before merging** and **After merging** headings, in the order they
-  must happen. Put commands in a code block under their step. Rollback
-  instructions are not tasks; keep them as text below the list.
+- Follow the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
 - When a PR resolves a tracked issue, create a formal GitHub link to the issue
   through the Development sidebar or a closing keyword such as `Closes #123`
   in the PR description. This also applies to existing Renovate PRs that fix
