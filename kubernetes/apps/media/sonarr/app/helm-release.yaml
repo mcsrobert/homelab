@@ -62,7 +62,13 @@ spec:
                   - ALL
     persistence:
       config:
-        existingClaim: sonarr-config
+        type: persistentVolumeClaim
+        forceRename: &configVolume sonarr-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 4Gi
+        volumeName: *configVolume
       media:
         type: nfs
         server: ${NAS_IP}

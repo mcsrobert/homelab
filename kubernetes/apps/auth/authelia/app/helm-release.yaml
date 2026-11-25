@@ -54,7 +54,13 @@ spec:
                   - ALL
     persistence:
       data:
-        existingClaim: authelia-data
+        type: persistentVolumeClaim
+        forceRename: &dataVolume authelia-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 1Gi
+        volumeName: *dataVolume
       config:
         type: configMap
         name: authelia-config

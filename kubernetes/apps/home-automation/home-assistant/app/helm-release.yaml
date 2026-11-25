@@ -105,8 +105,14 @@ spec:
                 drop:
                   - ALL
     persistence:
-      home-assistant-config:
-        existingClaim: home-assistant-config
+      data:
+        type: persistentVolumeClaim
+        forceRename: &dataVolume home-assistant-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 8Gi
+        volumeName: *dataVolume
         advancedMounts:
           home-assistant:
             home-assistant:

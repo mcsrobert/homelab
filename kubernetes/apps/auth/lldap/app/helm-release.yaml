@@ -57,7 +57,13 @@ spec:
                   - ALL
     persistence:
       data:
-        existingClaim: lldap-data
+        type: persistentVolumeClaim
+        forceRename: &dataVolume lldap-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 1Gi
+        volumeName: *dataVolume
     service:
       lldap:
         ports:
