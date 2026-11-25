@@ -57,7 +57,7 @@ def resources():
     data["storageclass"] = [{
         "metadata": {"name": name}, "provisioner": "driver.longhorn.io",
         "parameters": {"numberOfReplicas": "3"},
-    } for name in ("longhorn", "longhorn-backup")]
+    } for name in ("longhorn", "longhorn-no-backup")]
     add_source(data, "bazarr-config")
     return data
 
@@ -343,7 +343,7 @@ class RestoreTests(unittest.TestCase):
 
     def test_mismatched_pv_capacity_class_and_access_are_rejected(self):
         for key, value in (("capacity", {"storage": "2Gi"}),
-                           ("storageClassName", "longhorn-backup"),
+                           ("storageClassName", "longhorn-no-backup"),
                            ("accessModes", ["ReadWriteMany"]), ("volumeMode", "Block")):
             with self.subTest(key=key):
                 data = deepcopy(self.data)
@@ -358,7 +358,7 @@ class RestoreTests(unittest.TestCase):
             self.plan()
 
     def test_second_invalid_volume_leaves_no_partial_plan(self):
-        add_source(self.data, "prowlarr-config", "longhorn-backup")
+        add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         self.data["backups.longhorn.io"] = self.data["backups.longhorn.io"][:1]
         with self.assertRaisesRegex(restore.RestoreError, "prowlarr-config: no completed backup"):
             self.plan(pv=["bazarr-config", "prowlarr-config"])
@@ -396,7 +396,7 @@ class RestoreTests(unittest.TestCase):
         self.data["volumes.longhorn.io"] = [{"metadata": {"name": "bazarr-config"},
                                              "spec": {"encrypted": True}}]
         with self.assertRaisesRegex(restore.RestoreError, "source volume is encrypted"):
-            self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-backup")
+            self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-no-backup")
         self.assertFalse(self.path.exists())
         self.cluster.run.assert_not_called()
 
@@ -405,14 +405,14 @@ class RestoreTests(unittest.TestCase):
         self.data["backupvolumes.longhorn.io"][0]["status"]["storageClassName"] = "longhorn"
         self.data["storageclass"][0]["parameters"]["encrypted"] = "true"
         with self.assertRaisesRegex(restore.RestoreError, "source StorageClass is encrypted"):
-            self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-backup")
+            self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-no-backup")
         self.assertFalse(self.path.exists())
         self.cluster.run.assert_not_called()
 
     def test_legacy_source_pv_class_is_checked_without_recorded_backup_class(self):
         self.data["storageclass"][0]["parameters"]["encrypted"] = "true"
         with self.assertRaisesRegex(restore.RestoreError, "source StorageClass is encrypted"):
-            self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-backup")
+            self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-no-backup")
 
     def test_raw_block_source_is_rejected_for_renamed_filesystem_copy(self):
         self.data["pv"][0]["spec"]["volumeMode"] = "Block"
@@ -461,7 +461,7 @@ class RestoreTests(unittest.TestCase):
         self.assertEqual(calls[1].kwargs["document"], plan["volumes"][0]["manifest"])
 
     def test_apply_validates_entire_batch_before_any_admission_or_write(self):
-        add_source(self.data, "prowlarr-config", "longhorn-backup")
+        add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         self.plan(pv=["bazarr-config", "prowlarr-config"])
         self.data["backups.longhorn.io"] = self.data["backups.longhorn.io"][:1]
         with self.assertRaisesRegex(restore.RestoreError, "no completed backup"):
@@ -469,14 +469,14 @@ class RestoreTests(unittest.TestCase):
         self.cluster.run.assert_not_called()
 
     def test_server_admission_checks_entire_batch_before_creating_anything(self):
-        add_source(self.data, "prowlarr-config", "longhorn-backup")
+        add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         self.plan(pv=["bazarr-config", "prowlarr-config"])
         self.apply()
         calls = self.cluster.run.call_args_list
         self.assertEqual([call.args[1] for call in calls], ["--dry-run=server", "--dry-run=server", "-f", "-f"])
 
     def test_failed_admission_never_creates_a_volume(self):
-        add_source(self.data, "prowlarr-config", "longhorn-backup")
+        add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         plan = self.plan(pv=["bazarr-config", "prowlarr-config"])
         self.cluster.run.side_effect = [json.dumps(plan["volumes"][0]["manifest"]),
                                         restore.RestoreError("admission denied")]
@@ -485,7 +485,7 @@ class RestoreTests(unittest.TestCase):
         self.assertTrue(all("--dry-run=server" in call.args for call in self.cluster.run.call_args_list))
 
     def test_admission_mutating_planned_fields_or_labels_prevents_all_writes(self):
-        add_source(self.data, "prowlarr-config", "longhorn-backup")
+        add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         plan = self.plan(pv=["bazarr-config", "prowlarr-config"])
         changes = [("spec", "frontend", "iscsi"), ("spec", "backupTargetName", "other"),
                    ("spec", "fromBackup", "nfs://other/backup"), ("spec", "size", str(2**31)),
@@ -520,7 +520,7 @@ class RestoreTests(unittest.TestCase):
         self.assertEqual(self.cluster.run.call_args_list[-1].args, ("create", "-f", "-", "-o", "json"))
 
     def test_changed_real_create_response_stops_remaining_batch(self):
-        add_source(self.data, "prowlarr-config", "longhorn-backup")
+        add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         plan = self.plan(pv=["bazarr-config", "prowlarr-config"])
         first, second = [item["manifest"] for item in plan["volumes"]]
         changed = deepcopy(first)
