@@ -65,7 +65,7 @@ spec:
         forceRename: &configVolume prowlarr-config
         retain: true
         accessMode: ReadWriteOnce
-        storageClass: longhorn-backup
+        storageClass: longhorn
         size: 1Gi
         volumeName: *configVolume
       tmp:

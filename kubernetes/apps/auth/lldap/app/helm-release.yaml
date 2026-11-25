@@ -61,7 +61,7 @@ spec:
         forceRename: &dataVolume lldap-data
         retain: true
         accessMode: ReadWriteOnce
-        storageClass: longhorn-backup
+        storageClass: longhorn
         size: 1Gi
         volumeName: *dataVolume
     service:

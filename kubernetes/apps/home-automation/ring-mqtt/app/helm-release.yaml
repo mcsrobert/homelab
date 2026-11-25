@@ -58,7 +58,7 @@ spec:
         forceRename: &dataVolume ring-mqtt-data
         retain: true
         accessMode: ReadWriteOnce
-        storageClass: longhorn-backup
+        storageClass: longhorn
         size: 256Mi
         volumeName: *dataVolume
         globalMounts:

@@ -524,15 +524,11 @@ def main(argv=None):
     }
     examples = {
         "plan": """Examples:
-  Restore an independent test copy while the production volume stays in use:
+  Restore independent test copies while the production volumes stay in use:
     python3 scripts/longhorn_restore.py plan --context homelab \\
       --volume bazarr-config=bazarr-restore-test \\
-      --storage-class longhorn --output /tmp/bazarr-restore.json
-
-  Prowlarr uses a different StorageClass, so plan it separately:
-    python3 scripts/longhorn_restore.py plan --context homelab \\
       --volume prowlarr-config=prowlarr-restore-test \\
-      --storage-class longhorn-backup --output /tmp/prowlarr-restore.json
+      --storage-class longhorn --output /tmp/restore-test.json
 
   Recover missing volumes using existing PV definitions:
     python3 scripts/longhorn_restore.py plan --context homelab \\
@@ -545,6 +541,8 @@ Selection:
   its original volume name from Longhorn backup metadata and use --volume
   SOURCE[=DESTINATION] with an explicit --storage-class. Repeat --volume for
   sources sharing that class. Omit =DESTINATION to retain the source name.
+  Backups made before the longhorn-backup class was removed still record it;
+  restore those with --storage-class longhorn.
   --backup-target selects another synced target (default: default).
 
 Legacy backups may omit encryption labels. The planner also checks the source
@@ -574,7 +572,7 @@ health or data; an empty plan does not demonstrate a successful recovery.
 """,
         "apply": """Example (after reviewing the JSON plan):
   python3 scripts/longhorn_restore.py apply --context homelab \\
-    /tmp/bazarr-restore.json
+    /tmp/restore-test.json
 
 The context, namespace and destination cluster identity must match the plan.
 All pinned backups and server admission responses are checked before the
