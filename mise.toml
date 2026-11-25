@@ -57,6 +57,14 @@ printf '%s' "$token" | bao login -
 description = "Generate a PBKDF2-SHA512 hash (options after --)"
 run = "uv run scripts/pbkdf2_sha512.py"
 
+[tasks.restore-longhorn-volumes]
+description = "Plan or execute a reviewed Longhorn restore (options after --)"
+run = "uv run scripts/longhorn_restore.py"
+
+[tasks.test-longhorn-restore]
+description = "Test Longhorn restore safety checks without a cluster"
+run = "python3 -m unittest discover -s scripts -p test_longhorn_restore.py"
+
 [tasks.install-ansible-collections]
 description = "Install Ansible dependencies and collections"
 dir = "{{ config_root }}/ansible"

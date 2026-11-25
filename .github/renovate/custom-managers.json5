@@ -30,6 +30,13 @@
       datasourceTemplate: 'docker',
     },
     {
+      description: 'Update the Longhorn restore inspection image',
+      customType: 'regex',
+      managerFilePatterns: ['/scripts\\/longhorn_restore\\.py$/'],
+      matchStrings: ['INSPECT_IMAGE = "(?<depName>[^\\s:@"]+):(?<currentValue>[^@\\s"]+)@(?<currentDigest>sha256:[a-f0-9]{64})"'],
+      datasourceTemplate: 'docker',
+    },
+    {
       description: 'Update YAML schema for helm releases with app-template chart',
       customType: 'regex',
       managerFilePatterns: ['/helm-?release\\.ya?ml$/'],
