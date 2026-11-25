@@ -5,6 +5,10 @@ from copy import deepcopy
 import io
 import json
 from pathlib import Path
+import shutil
+import sqlite3
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -631,6 +635,128 @@ class RestoreTests(unittest.TestCase):
                         restore.main(args)
                     self.assertEqual(error.exception.code, 2)
                     cluster.assert_not_called()
+
+
+class InspectTests(unittest.TestCase):
+    def setUp(self):
+        self.volume = {
+            "metadata": {"name": "bazarr-restore-test"},
+            "spec": {"fromBackup": "nfs://nas/longhorn?backup=b&volume=bazarr-config",
+                     "size": str(2**30), "encrypted": False, "Standby": False},
+            "status": {"restoreInitiated": True, "restoreRequired": False, "state": "detached"},
+        }
+        self.pvs = []
+        self.job_status = {"succeeded": 1}
+        self.calls = []
+        self.cluster = Mock(spec=restore.Cluster)
+        self.cluster.items.side_effect = lambda key: deepcopy(
+            [self.volume] if key == "volumes.longhorn.io" else self.pvs)
+        self.cluster.run.side_effect = self.kubectl
+        self.addCleanup(patch.stopall)
+        patch.object(restore.time, "sleep").start()
+        patch("sys.stdout", new=io.StringIO()).start()
+        patch("sys.stderr", new=io.StringIO()).start()
+
+    def kubectl(self, *args, document=None):
+        self.calls.append((args, document))
+        if args[:2] == ("get", "job") and "json" in args:
+            return json.dumps({"status": self.job_status})
+        if args[0] == "logs":
+            return "SQLITE bazarr.db: ok\n"
+        return ""
+
+    def inspect(self):
+        restore.inspect(argparse.Namespace(volume="bazarr-restore-test", pod_namespace="default", timeout=60),
+                        self.cluster)
+
+    def created(self):
+        return [document for args, document in self.calls if args[0] == "create"]
+
+    def deleted(self):
+        return [args[1] for args, _ in self.calls if args[0] == "delete"]
+
+    def test_creates_read_only_retained_inspection_and_always_cleans_up(self):
+        self.inspect()
+        pv, pvc, job = self.created()
+        self.assertEqual(pv["spec"]["csi"]["volumeHandle"], "bazarr-restore-test")
+        self.assertEqual(pv["spec"]["persistentVolumeReclaimPolicy"], "Retain")
+        self.assertEqual(pvc["spec"]["volumeName"], pv["metadata"]["name"])
+        pod = job["spec"]["template"]["spec"]
+        self.assertTrue(pod["volumes"][0]["persistentVolumeClaim"]["readOnly"])
+        self.assertTrue(pod["containers"][0]["volumeMounts"][0]["readOnly"])
+        self.assertFalse(pod["automountServiceAccountToken"])
+        self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
+
+    def test_failed_or_stuck_inspection_still_cleans_up(self):
+        self.job_status = {"failed": 1}
+        with self.assertRaisesRegex(restore.RestoreError, "inspection failed"):
+            self.inspect()
+        self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
+        self.calls.clear()
+        self.job_status = {}
+        with patch.object(restore.time, "monotonic", side_effect=[0, 0, 100, 100, 100, 100]):
+            with self.assertRaisesRegex(restore.RestoreError, "no result"):
+                self.inspect()
+        self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
+
+    def test_only_completed_detached_restores_are_inspected(self):
+        for field, value in (("spec", {"fromBackup": ""}), ("spec", {"encrypted": True}),
+                             ("status", {"restoreRequired": True}), ("status", {"state": "attached"})):
+            with self.subTest(field=field, value=value):
+                original = deepcopy(self.volume)
+                self.volume[field].update(value)
+                with self.assertRaises(restore.RestoreError):
+                    self.inspect()
+                self.volume = original
+        self.assertEqual(self.created(), [])
+
+    def test_volume_already_used_by_a_pv_is_never_attached(self):
+        self.pvs = [{"metadata": {"name": "bazarr-config"},
+                     "spec": {"csi": {"driver": "driver.longhorn.io", "volumeHandle": "bazarr-restore-test"}}}]
+        with self.assertRaisesRegex(restore.RestoreError, "already uses"):
+            self.inspect()
+        self.assertEqual(self.created(), [])
+        self.assertEqual(self.deleted(), [])
+
+
+class InspectScriptTests(unittest.TestCase):
+    def check(self, populate):
+        with tempfile.TemporaryDirectory() as volume, tempfile.TemporaryDirectory() as scratch:
+            populate(Path(volume))
+            script = restore.INSPECT_SCRIPT.replace('"/volume"', repr(volume)).replace('"/scratch"', repr(scratch))
+            result = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True)
+            return result.returncode, result.stdout
+
+    def test_wal_database_passes_and_corruption_or_empty_volume_fails(self):
+        def healthy(root):
+            (root / "config").mkdir()
+            connection = sqlite3.connect(root / "config" / "app.db")
+            connection.execute("PRAGMA journal_mode=WAL")
+            connection.execute("CREATE TABLE t (v)")
+            connection.execute("INSERT INTO t VALUES (1)")
+            connection.commit()
+            shutil.copytree(root / "config", root / "snapshot")
+            connection.close()
+            shutil.rmtree(root / "config")
+            (root / "snapshot").rename(root / "config")
+
+        code, output = self.check(healthy)
+        self.assertEqual(code, 0, output)
+        self.assertIn("SQLITE config/app.db: ok", output)
+
+        def corrupt(root):
+            healthy(root)
+            database = root / "config" / "app.db"
+            (root / "config" / "app.db-wal").unlink()
+            data = bytearray(database.read_bytes())
+            data[100:4096] = b"\xff" * (4096 - 100)
+            database.write_bytes(bytes(data))
+
+        code, output = self.check(corrupt)
+        self.assertEqual(code, 1, output)
+        code, output = self.check(lambda root: None)
+        self.assertEqual(code, 1, output)
+        self.assertIn("no files", output)
 
 
 class CapacityTests(unittest.TestCase):

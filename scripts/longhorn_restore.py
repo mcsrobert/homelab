@@ -2,20 +2,20 @@
 # /// script
 # dependencies = []
 # ///
-"""Restore Longhorn volumes from backup in two steps: plan, then apply.
+"""Restore Longhorn volumes from backup: plan, apply, then inspect.
 
 1. Run plan to save the latest completed backups in a new local JSON file.
 2. Review the sources, destinations, snapshot times, sizes and backup labels.
 3. Run apply with that file and the same destination context and namespace.
-4. Verify restore status and restored data before using the volumes.
+4. Run inspect on each restored volume once its restore has completed.
 
 Requires kubectl access to Longhorn and an available, synced backup target.
 Supports unencrypted Longhorn v1, filesystem, ReadWriteOnce volumes without
-backing images. Creates Volume objects only; PVs, PVCs, workload startup and
-application verification are separate steps.
+backing images. apply creates Volume objects only; inspect briefly attaches a
+restored volume read-only. Production PVs, PVCs and workloads are separate.
 
-Use plan --help for restore examples and apply --help for verification and
-retry instructions. Also available as: mise run restore-longhorn-volumes --
+Use plan --help for restore examples, apply --help for retries and
+inspect --help for verification. Also available as: mise run restore-longhorn-volumes --
 Offline tests: mise run test-longhorn-restore
 """
 
@@ -27,6 +27,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 from urllib.parse import parse_qs, urlsplit
 
 
@@ -365,6 +366,152 @@ def apply(args, cluster):
         print(f"CREATED {manifest['metadata']['name']}; restore is asynchronous")
 
 
+INSPECT_IMAGE = "docker.io/library/python:3.14.10-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67"
+
+INSPECT_SCRIPT = r"""
+import os, shutil, sqlite3, sys
+root, scratch = "/volume", "/scratch"
+sizes, databases, failed = {}, [], 0
+for directory, subdirectories, files in os.walk(root):
+    subdirectories.sort()
+    for file in sorted(files):
+        path = os.path.join(directory, file)
+        relative = os.path.relpath(path, root)
+        top = relative.split(os.sep)[0]
+        count, total = sizes.get(top, (0, 0))
+        sizes[top] = (count + 1, total + os.lstat(path).st_size)
+        if os.path.isfile(path) and not os.path.islink(path):
+            with open(path, "rb") as handle:
+                if handle.read(16) == b"SQLite format 3\0":
+                    databases.append(relative)
+for top, (count, total) in sorted(sizes.items()):
+    print(f"FILES {top}: {count} file(s), {total} bytes")
+for index, relative in enumerate(databases):
+    copy = os.path.join(scratch, str(index))
+    os.makedirs(copy)
+    for suffix in ("", "-wal", "-journal"):
+        if os.path.exists(os.path.join(root, relative + suffix)):
+            shutil.copy(os.path.join(root, relative + suffix), os.path.join(copy, "db" + suffix))
+    try:
+        result = [row[0] for row in sqlite3.connect(os.path.join(copy, "db")).execute("PRAGMA integrity_check")]
+    except sqlite3.Error as error:
+        result = [str(error)]
+    failed += result != ["ok"]
+    print(f"SQLITE {relative}: {'; '.join(result[:5])}")
+    shutil.rmtree(copy)
+if not sizes:
+    print("ERROR: volume contains no files")
+sys.exit(1 if failed or not sizes else 0)
+"""
+
+
+def inspect_manifests(volume, size, pod_namespace):
+    object_name = f"{volume}-inspect"
+    labels = {"app.kubernetes.io/name": "longhorn-restore-inspect", "app.kubernetes.io/instance": volume}
+    pv = {
+        "apiVersion": "v1", "kind": "PersistentVolume",
+        "metadata": {"name": object_name, "labels": labels},
+        "spec": {
+            "capacity": {"storage": str(size)}, "accessModes": ["ReadWriteOnce"],
+            "persistentVolumeReclaimPolicy": "Retain", "storageClassName": "",
+            "volumeMode": "Filesystem",
+            "claimRef": {"namespace": pod_namespace, "name": object_name},
+            "csi": {"driver": "driver.longhorn.io", "fsType": "ext4", "volumeHandle": volume},
+        },
+    }
+    pvc = {
+        "apiVersion": "v1", "kind": "PersistentVolumeClaim",
+        "metadata": {"name": object_name, "namespace": pod_namespace, "labels": labels},
+        "spec": {
+            "accessModes": ["ReadWriteOnce"], "storageClassName": "", "volumeName": object_name,
+            "volumeMode": "Filesystem", "resources": {"requests": {"storage": str(size)}},
+        },
+    }
+    job = {
+        "apiVersion": "batch/v1", "kind": "Job",
+        "metadata": {"name": object_name, "namespace": pod_namespace, "labels": labels},
+        "spec": {
+            "backoffLimit": 0,
+            "template": {
+                "metadata": {"labels": labels},
+                "spec": {
+                    "restartPolicy": "Never", "automountServiceAccountToken": False,
+                    "enableServiceLinks": False,
+                    "securityContext": {"seccompProfile": {"type": "RuntimeDefault"}},
+                    "containers": [{
+                        "name": "inspect", "image": INSPECT_IMAGE,
+                        "command": ["python3", "-c", INSPECT_SCRIPT],
+                        "env": [{"name": "SQLITE_TMPDIR", "value": "/scratch"}],
+                        "resources": {"requests": {"cpu": "10m", "memory": "64Mi"},
+                                      "limits": {"memory": "1Gi"}},
+                        # Root with DAC_OVERRIDE reads files owned by any app user; the volume is mounted read-only.
+                        "securityContext": {
+                            "runAsUser": 0, "runAsNonRoot": False, "readOnlyRootFilesystem": True,
+                            "allowPrivilegeEscalation": False,
+                            "capabilities": {"drop": ["ALL"], "add": ["DAC_OVERRIDE"]},
+                        },
+                        "volumeMounts": [{"name": "volume", "mountPath": "/volume", "readOnly": True},
+                                         {"name": "scratch", "mountPath": "/scratch"}],
+                    }],
+                    "volumes": [
+                        {"name": "volume", "persistentVolumeClaim": {"claimName": object_name, "readOnly": True}},
+                        {"name": "scratch", "emptyDir": {"sizeLimit": str(size)}},
+                    ],
+                },
+            },
+        },
+    }
+    return pv, pvc, job
+
+
+def inspect(args, cluster):
+    volume_name = name(args.volume)
+    object_name = f"{volume_name}-inspect"
+    volumes = [v for v in cluster.items("volumes.longhorn.io") if v["metadata"]["name"] == volume_name]
+    if len(volumes) != 1:
+        raise RestoreError(f"{volume_name}: Longhorn volume not found")
+    volume = volumes[0]
+    spec, status = volume.get("spec", {}), volume.get("status", {})
+    if not spec.get("fromBackup") or spec.get("encrypted") or spec.get("Standby"):
+        raise RestoreError(f"{volume_name}: only unencrypted restored volumes can be inspected")
+    if (volume["metadata"].get("deletionTimestamp") or status.get("restoreInitiated") is not True
+            or status.get("restoreRequired") is not False or status.get("state") != "detached"):
+        raise RestoreError(f"{volume_name}: wait until the restore completed and the volume is detached")
+    for pv in cluster.items("pv"):
+        csi = pv["spec"].get("csi", {})
+        if pv["metadata"]["name"] == object_name or (
+                csi.get("driver") == "driver.longhorn.io" and csi.get("volumeHandle") == volume_name):
+            raise RestoreError(f"{volume_name}: a PV already uses this volume or name {object_name}")
+    for kind in ("pvc", "job"):
+        if cluster.run("get", kind, object_name, "-n", args.pod_namespace, "--ignore-not-found", "-o", "name").strip():
+            raise RestoreError(f"{object_name}: {kind} already exists in {args.pod_namespace}")
+    manifests = inspect_manifests(volume_name, int(spec["size"]), args.pod_namespace)
+    try:
+        for manifest in manifests:
+            cluster.run("create", "-f", "-", "-o", "name", document=manifest)
+        deadline = time.monotonic() + args.timeout
+        while True:
+            job_status = json.loads(cluster.run("get", "job", object_name, "-n", args.pod_namespace, "-o", "json")).get("status", {})
+            if job_status.get("succeeded") or job_status.get("failed"):
+                break
+            if time.monotonic() > deadline:
+                raise RestoreError(f"{object_name}: no result after {args.timeout}s; check pod events before retrying")
+            time.sleep(5)
+        print(cluster.run("logs", f"job/{object_name}", "-n", args.pod_namespace), end="")
+        if not job_status.get("succeeded"):
+            raise RestoreError(f"{volume_name}: inspection failed; see the output above")
+        print(f"PASSED {volume_name}: files listed and every SQLite database passed integrity_check")
+    finally:
+        for kind, scope in (("job", ["-n", args.pod_namespace]), ("pvc", ["-n", args.pod_namespace]), ("pv", [])):
+            cluster.run("delete", kind, object_name, *scope, "--ignore-not-found", "--wait=false", "--cascade=foreground")
+            deadline = time.monotonic() + 300
+            while cluster.run("get", kind, object_name, *scope, "--ignore-not-found", "-o", "name").strip():
+                if time.monotonic() > deadline:
+                    raise RestoreError(f"{object_name}: {kind} was not removed; delete it manually")
+                time.sleep(2)
+        print(f"Removed {object_name} job, PVC and PV; {volume_name} is kept", file=sys.stderr)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -373,6 +520,7 @@ def main(argv=None):
     descriptions = {
         "plan": "Read cluster metadata and save a restore plan; never changes the cluster.",
         "apply": "Create missing volumes from a reviewed plan; changes the cluster.",
+        "inspect": "Check the files and SQLite databases of a restored volume; creates and removes a temporary Job.",
     }
     examples = {
         "plan": """Examples:
@@ -442,20 +590,31 @@ Creation is asynchronous. Check the destination volume, for example:
   kubectl --context homelab -n longhorn-system get volumes.longhorn.io \\
     bazarr-restore-test -o yaml
 
-Before attaching the inspection workload, confirm restoreInitiated=true,
-restoreRequired=false, state detached, and no restore errors. Robustness can
-normally be unknown while detached; after attachment, check that it is healthy.
-Verify expected files and database integrity through an isolated read-only
-mount. Use distinct test PV/PVC names, the test volume's CSI handle and reclaim
-policy Retain. Do not start a copied production app or expose restored
-configuration/credentials.
+Then verify the data with inspect once the restore has completed. Do not
+start a copied production app or expose restored configuration/credentials.
 
-This command does not create PVs/PVCs, rebind claims, stop workloads, wait for
-completion or clean up test resources. Remove only verified, unreferenced
-test resources after data checks; preserve production volumes and backups.
+This command does not create PVs/PVCs, rebind claims, stop workloads or wait
+for completion. Preserve production volumes and source backups.
+""",
+        "inspect": """Example (after the restore of a test copy completed):
+  python3 scripts/longhorn_restore.py inspect --context homelab \\
+    --volume bazarr-restore-test
+
+Only an unencrypted volume restored from backup can be inspected, once Longhorn
+reports restoreInitiated=true, restoreRequired=false and state detached, and
+no PV uses it yet. inspect creates a PV, PVC and Job named <volume>-inspect in
+--pod-namespace. The Job mounts the volume read-only, prints file counts and
+sizes per top-level entry and runs PRAGMA integrity_check on a copy of every
+SQLite database, including its WAL. It fails on an empty volume or any
+integrity error. Mounting may replay the ext4 journal on the restored copy.
+
+The Job, PVC and PV are always deleted afterwards; the PV uses Retain, so the
+Longhorn volume is kept. Check the printed files against the source app before
+treating the restore as verified. Delete test volumes separately once no
+longer needed.
 """,
     }
-    for command in ("plan", "apply"):
+    for command in ("plan", "apply", "inspect"):
         sub = commands.add_parser(
             command, help=descriptions[command], description=descriptions[command],
             epilog=examples[command], formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -470,14 +629,18 @@ test resources after data checks; preserve production volumes and backups.
             sub.add_argument("--storage-class", help="required with --volume")
             sub.add_argument("--backup-target", default="default", help="Longhorn backup target name (default: default)")
             sub.add_argument("--output", type=Path, required=True, help="new JSON plan file; never overwrites")
-        else:
+        elif command == "apply":
             sub.add_argument("plan", type=Path, help="reviewed JSON plan produced by plan")
+        else:
+            sub.add_argument("--volume", required=True, help="restored Longhorn volume to inspect")
+            sub.add_argument("--pod-namespace", default="default", help="namespace for the temporary PVC and Job (default: default)")
+            sub.add_argument("--timeout", type=int, default=600, help="seconds to wait for the Job (default: 600)")
     args = parser.parse_args(argv)
     if not args.context.strip():
         parser.error("destination context must not be empty")
     try:
         cluster = Cluster(args.context, args.namespace)
-        (plan if args.command == "plan" else apply)(args, cluster)
+        {"plan": plan, "apply": apply, "inspect": inspect}[args.command](args, cluster)
     except (RestoreError, OSError, ValueError, KeyError, TypeError, AttributeError) as error:
         parser.exit(1, f"ERROR: {error}\n")
 
