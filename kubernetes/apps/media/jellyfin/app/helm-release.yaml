@@ -57,7 +57,13 @@ spec:
               privileged: true
     persistence:
       config:
-        existingClaim: jellyfin-config
+        type: persistentVolumeClaim
+        forceRename: &configVolume jellyfin-config
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 8Gi
+        volumeName: *configVolume
         globalMounts:
           - path: /config
       media:

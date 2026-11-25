@@ -54,7 +54,13 @@ spec:
                   - ALL
     persistence:
       data:
-        existingClaim: ring-mqtt-data
+        type: persistentVolumeClaim
+        forceRename: &dataVolume ring-mqtt-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn-backup
+        size: 256Mi
+        volumeName: *dataVolume
         globalMounts:
           - path: /data
       config:

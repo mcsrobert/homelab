@@ -52,7 +52,13 @@ spec:
                   - ALL
     persistence:
       cache:
-        existingClaim: mosquitto-data
+        type: persistentVolumeClaim
+        forceRename: &cacheVolume mosquitto-data
+        retain: true
+        accessMode: ReadWriteOnce
+        storageClass: longhorn
+        size: 512Mi
+        volumeName: *cacheVolume
         globalMounts:
           - path: /mosquitto/data
       config:

@@ -6,6 +6,7 @@ resources:
   - ./certificate.yaml
   - ./external-secret.yaml
   - ./helm-release.yaml
+  - ./persistent-volume.yaml
   - ./prometheus-rule.yaml
 configMapGenerator:
   - name: authelia-config
