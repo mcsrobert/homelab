@@ -211,7 +211,7 @@ kubeconform against the rendered manifests, zizmor and gitleaks, and posts a
   closing link only when merging the PR should close the issue; otherwise,
   cross-reference it and explain what work remains.
 - Label the PR with the existing labels that match: `kind/bug` for fixes,
-  `kind/enhancement` for features and `kind/chore` for maintenance and cleanup.
+  `kind/feat` for features and `kind/chore` for maintenance and cleanup.
   The labeler workflow adds `kind/documentation`, `area/ansible`, `area/ci`,
   `area/network`, `area/observability`, `area/security` and `area/storage`
   from the changed paths. Add an existing area label manually when the

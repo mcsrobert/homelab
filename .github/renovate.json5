@@ -23,6 +23,9 @@
   commitBodyTable: true,
   rebaseWhen: 'conflicted',
   platformCommit: 'enabled',
+  addLabels: [
+    '{{#if (or (equals semanticCommitType "feat") (equals semanticCommitType "feat!"))}}kind/feat{{else if (equals semanticCommitType "fix")}}kind/bug{{/if}}',
+  ],
   suppressNotifications: [
     'prEditedNotification',
     'prIgnoreNotification',
