@@ -30,6 +30,12 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus-blackbox-exporter
+        - namespaceSelector:
+            matchLabels:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
