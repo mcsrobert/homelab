@@ -74,6 +74,11 @@ structure. Good references:
 - The main workload lives in `app/`. Each other part that needs its own Flux
   Kustomization gets a sibling directory named after what it is: `cnpg/`,
   `dragonfly/`, `mongodb/`, `jobs/`, `policies/`, `issuers/`, `stores/`.
+- Keep everything that exists only for one app in that app's directory, even
+  when a shared component uses it: its `ServiceMonitor` or `Probe`, alert
+  rules, NetworkPolicies and Falco exceptions. Deleting the directory and its
+  line in the namespace `kustomization.yaml` should leave nothing behind.
+  Shared components hold only what all their users need.
 - Start each manifest with a `# yaml-language-server: $schema=...` line when
   a schema exists. Copy the schema URL from another file of the same kind.
 - Do not set `metadata.namespace` on namespaced resources. The Flux
