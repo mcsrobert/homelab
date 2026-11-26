@@ -50,6 +50,7 @@
         'ansible/requirements.{txt,yml,yaml}',
         '.pre-commit-config.yaml',
         '.github/workflows/**',
+        'scripts/**',
       ],
       // These groups also update deployed components.
       matchJsonata: ['$not(manager = "github-actions" or groupName in ["k3s", "Flux CD", "OpenBao", "Renovate"])'],
