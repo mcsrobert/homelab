@@ -8,4 +8,5 @@ resources:
   - ./issuer.yaml
   - ./network-policy.yaml
   - ./oci-repository.yaml
+  - ./probe.yaml
   - ./secret.sops.yaml

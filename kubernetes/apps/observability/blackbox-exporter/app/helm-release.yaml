@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: blackbox-exporter
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: prometheus-blackbox-exporter
+  interval: 30m
+  values:
+    fullnameOverride: blackbox-exporter
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    image:
+      registry: quay.io
+      repository: prometheus/blackbox-exporter
+      tag: "v0.29.1@sha256:ea1c7aa3ef3f307cd03e85f34abb604478ccb90b567fc690da0cd9776da76b13"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 64Mi
+    config:
+      modules:
+        # Without fallback, each probe tests one address family of the dual-stack LoadBalancers.
+        tls_connect_ipv4:
+          prober: tcp
+          timeout: 5s
+          tcp:
+            tls: true
+            preferred_ip_protocol: ip4
+            ip_protocol_fallback: false
+        tls_connect_ipv6:
+          prober: tcp
+          timeout: 5s
+          tcp:
+            tls: true
+            preferred_ip_protocol: ip6
+            ip_protocol_fallback: false

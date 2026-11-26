@@ -307,6 +307,20 @@ spec:
                 OpenBao {{ $labels.pod }} failed to write {{ $value | humanize }} audit log
                 requests in the last 10 minutes. OpenBao rejects requests when no audit device
                 accepts them.
+          - alert: OpenBaoPublicCertificateProbeFailed
+            expr: probe_success{job=~"openbao-public-ipv[46]"} == 0
+            for: 15m
+            labels:
+              severity: critical
+            annotations:
+              summary: >-
+                OpenBao's public endpoint fails TLS verification ({{ $labels.job }})
+              description: >-
+                The blackbox exporter has not completed a verified TLS handshake with
+                {{ $labels.instance }} for 15 minutes. Either the listener is unreachable, or it
+                serves a certificate that does not verify, such as cert-manager's temporary
+                placeholder after Let's Encrypt issuance failed. Check the openbao-cert Certificate
+                and its Order, then retry issuance with `cmctl renew openbao-cert -n security`.
       grafanaDashboard:
         enabled: true
         extraAnnotations:

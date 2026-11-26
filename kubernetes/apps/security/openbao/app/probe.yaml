@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/probe_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: openbao-public-ipv4
+spec:
+  jobName: openbao-public-ipv4
+  prober:
+    url: blackbox-exporter.observability.svc:9115
+  module: tls_connect_ipv4
+  interval: 60s
+  scrapeTimeout: 10s
+  targets:
+    staticConfig:
+      static:
+        - bao.${CLUSTER_DOMAIN}:443
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/monitoring.coreos.com/probe_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: openbao-public-ipv6
+spec:
+  jobName: openbao-public-ipv6
+  prober:
+    url: blackbox-exporter.observability.svc:9115
+  module: tls_connect_ipv6
+  interval: 60s
+  scrapeTimeout: 10s
+  targets:
+    staticConfig:
+      static:
+        - bao.${CLUSTER_DOMAIN}:443
