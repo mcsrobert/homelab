@@ -20,23 +20,103 @@ Offline tests: mise run test-longhorn-restore
 """
 
 import argparse
-from datetime import datetime, timezone
-from decimal import Decimal, DecimalException, ROUND_CEILING
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
 import time
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from decimal import ROUND_CEILING, Decimal, DecimalException
+from pathlib import Path
+from typing import NamedTuple
 from urllib.parse import parse_qs, urlsplit
+
+INSPECT_IMAGE = "docker.io/library/python:3.14.10-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67"
+INSPECT_SCRIPT = Path(__file__).resolve().with_name("longhorn_restore_inspect.py")
+
+PLAN_VERSION = 1
+LONGHORN_DRIVER = "driver.longhorn.io"
+ENCRYPTION_LABELS = ("volume-encrypted", "longhorn.io/volume-encrypted")
+RECURRING_JOB_PREFIXES = ("recurring-job.longhorn.io/", "recurring-job-group.longhorn.io/")
+DEFAULT_GROUP_DISABLED = {"recurring-job-group.longhorn.io/default": "disabled"}
+
+VOLUME_NAME = re.compile(r"[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?")
+DYNAMIC_VOLUME_NAME = re.compile(r"pvc-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}", re.IGNORECASE)
+QUANTITY = re.compile(
+    r"([+-]?(?:\d+(?:\.\d*)?|\.\d+))(Ki|Mi|Gi|Ti|Pi|Ei|[numkMGTPE]|[eE][+-]?\d+)?"
+)
+BINARY_EXPONENTS = {"Ki": 1, "Mi": 2, "Gi": 3, "Ti": 4, "Pi": 5, "Ei": 6}
+DECIMAL_EXPONENTS = {
+    "n": -9,
+    "u": -6,
+    "m": -3,
+    "": 0,
+    "k": 3,
+    "M": 6,
+    "G": 9,
+    "T": 12,
+    "P": 15,
+    "E": 18,
+}
+
+STORAGE_CLASS_PARAMETERS = {
+    "numberOfReplicas",
+    "dataEngine",
+    "encrypted",
+    "backingImage",
+    "staleReplicaTimeout",
+    "dataLocality",
+    "disableRevisionCounter",
+    "unmapMarkSnapChainRemoved",
+    "backupTargetName",
+    "fsType",
+    "recurringJobSelector",
+    "fromBackup",
+}
+INTEGER_PARAMETERS = {  # name: (default, minimum, maximum)
+    "numberOfReplicas": (None, 1, 20),
+    "staleReplicaTimeout": ("2880", 1, 2**31 - 1),
+}
+CHOICE_PARAMETERS = {
+    "dataEngine": {"v1"},
+    "dataLocality": {"disabled", "best-effort", "strict-local"},
+    "unmapMarkSnapChainRemoved": {"ignored", "disabled", "enabled"},
+}
 
 
 class RestoreError(Exception):
     pass
 
 
+class Selection(NamedTuple):
+    source: str
+    target: str
+    storage_class: str
+
+    @classmethod
+    def checked(cls, source, target, storage_class):
+        return cls(valid_volume_name(source), valid_volume_name(target), storage_class)
+
+
+@dataclass
+class Inventory:
+    """Cluster objects that a restore plan is derived from and checked against."""
+
+    volumes: list = field(default_factory=list)
+    backups: list = field(default_factory=list)
+    backup_volumes: list = field(default_factory=list)
+    backup_targets: list = field(default_factory=list)
+    storage_classes: list = field(default_factory=list)
+    pvs: list = field(default_factory=list)
+
+    def pvs_using(self, volume):
+        return [pv for pv in self.pvs if longhorn_handle(pv) == volume]
+
+
 class Cluster:
     def __init__(self, context, namespace):
+        # kubectl would fall back to the current context.
         if not context or not context.strip():
             raise RestoreError("destination context must not be empty")
         self.context = context
@@ -45,30 +125,103 @@ class Cluster:
     def run(self, *args, document=None):
         result = subprocess.run(
             ["kubectl", "--context", self.context, "--request-timeout=30s", *args],
-            input=json.dumps(document) if document is not None else None,
-            capture_output=True, text=True,
+            input=None if document is None else json.dumps(document),
+            capture_output=True,
+            text=True,
+            check=False,
         )
         if result.returncode:
             raise RestoreError(f"kubectl {' '.join(args)} failed: {result.stderr.strip()}")
         return result.stdout
 
     def identity(self):
-        return self.run("get", "namespace", "kube-system", "-o", "jsonpath={.metadata.uid}").strip()
+        uid = self.run("get", "namespace", "kube-system", "-o", "jsonpath={.metadata.uid}").strip()
+        if not uid:
+            raise RestoreError("could not identify destination cluster")
+        return uid
 
-    def items(self, resource):
-        args = ["get", resource, "-o", "json"]
-        if resource.endswith(".longhorn.io"):
-            args += ["-n", self.namespace]
-        return json.loads(self.run(*args))["items"]
+    def items(self, resource, namespace=None):
+        output = self.run("get", resource, *namespace_args(namespace), "-o", "json")
+        return json.loads(output)["items"]
+
+    def inventory(self):
+        def longhorn(kind):
+            return self.items(f"{kind}.longhorn.io", self.namespace)
+
+        return Inventory(
+            volumes=longhorn("volumes"),
+            backups=longhorn("backups"),
+            backup_volumes=longhorn("backupvolumes"),
+            backup_targets=longhorn("backuptargets"),
+            storage_classes=self.items("storageclass"),
+            pvs=self.items("pv"),
+        )
+
+    def exists(self, kind, name, namespace=None):
+        found = self.run(
+            "get", kind, name, *namespace_args(namespace), "--ignore-not-found", "-o", "name"
+        )
+        return bool(found.strip())
+
+    def delete(self, kind, name, namespace=None):
+        """Delete an object if it exists and wait until it is gone."""
+        flags = ("--ignore-not-found", "--wait=false", "--cascade=foreground")
+        self.run("delete", kind, name, *namespace_args(namespace), *flags)
+        wait_until(
+            lambda: not self.exists(kind, name, namespace),
+            timeout=300,
+            interval=2,
+            error=f"{name}: {kind} was not removed; delete it manually",
+        )
 
 
-def name(value):
-    if not isinstance(value, str) or not re.fullmatch(r"[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?", value):
+def namespace_args(namespace):
+    return ["-n", namespace] if namespace else []
+
+
+def wait_until(check, *, timeout, interval, error):
+    """Call check until it returns a true value, and return that value."""
+    deadline = time.monotonic() + timeout
+    while not (result := check()):
+        if time.monotonic() > deadline:
+            raise RestoreError(error)
+        time.sleep(interval)
+    return result
+
+
+def log(message):
+    print(message, file=sys.stderr)
+
+
+def status(obj):
+    return obj.get("status") or {}
+
+
+def is_deleting(obj):
+    return bool((obj.get("metadata") or {}).get("deletionTimestamp"))
+
+
+def longhorn_handle(pv):
+    csi = pv["spec"].get("csi") or {}
+    return csi.get("volumeHandle") if csi.get("driver") == LONGHORN_DRIVER else None
+
+
+def is_rwo_filesystem(pv_spec):
+    filesystem = pv_spec.get("volumeMode", "Filesystem") == "Filesystem"
+    return filesystem and pv_spec.get("accessModes") == ["ReadWriteOnce"]
+
+
+def is_encrypted(storage_class):
+    return (storage_class.get("parameters") or {}).get("encrypted", "false") != "false"
+
+
+def valid_volume_name(value):
+    if not isinstance(value, str) or not VOLUME_NAME.fullmatch(value):
         raise RestoreError(f"invalid Longhorn volume name (maximum 40 characters): {value!r}")
     return value
 
 
-def timestamp(value):
+def parse_timestamp(value):
     result = datetime.fromisoformat(value.replace("Z", "+00:00"))
     if result.tzinfo is None:
         raise RestoreError(f"snapshot timestamp has no timezone: {value}")
@@ -76,385 +229,512 @@ def timestamp(value):
 
 
 def to_bytes(quantity):
-    match = re.fullmatch(r"([+-]?(?:\d+(?:\.\d*)?|\.\d+))(Ki|Mi|Gi|Ti|Pi|Ei|[numkMGTPE]|[eE][+-]?\d+)?", quantity)
+    """Convert a Kubernetes quantity to bytes, rounding a fraction up."""
+    match = QUANTITY.fullmatch(quantity)
     if not match:
         raise RestoreError(f"unsupported PV capacity: {quantity!r}")
-    suffix = match[2] or ""
+    number, suffix = match[1], match[2] or ""
     try:
-        if suffix.endswith("i"):
-            scale = Decimal(1024) ** ("KMGTPE".index(suffix[0]) + 1)
-        elif len(suffix) > 1 and suffix[0] in "eE":
-            scale = Decimal(10) ** int(suffix[1:])
+        if suffix in BINARY_EXPONENTS:
+            scale = Decimal(1024) ** BINARY_EXPONENTS[suffix]
+        elif suffix in DECIMAL_EXPONENTS:
+            scale = Decimal(10) ** DECIMAL_EXPONENTS[suffix]
         else:
-            scale = Decimal(10) ** {"n": -9, "u": -6, "m": -3, "": 0, "k": 3,
-                                   "M": 6, "G": 9, "T": 12, "P": 15, "E": 18}[suffix]
-        value = Decimal(match[1]) * scale
-        if not 0 < value <= 2**63 - 1:
-            raise RestoreError(f"PV capacity is outside the positive int64 range: {quantity!r}")
-        return int(value.to_integral_value(rounding=ROUND_CEILING))
+            scale = Decimal(10) ** int(suffix[1:])
+        value = Decimal(number) * scale
     except DecimalException as error:
         raise RestoreError(f"unsupported PV capacity: {quantity!r}") from error
+    if not 0 < value <= 2**63 - 1:
+        raise RestoreError(f"PV capacity is outside the positive int64 range: {quantity!r}")
+    return int(value.to_integral_value(rounding=ROUND_CEILING))
 
 
-def inventory(cluster):
-    return {resource: cluster.items(resource) for resource in (
-        "volumes.longhorn.io", "backups.longhorn.io", "backupvolumes.longhorn.io",
-        "backuptargets.longhorn.io", "storageclass", "pv",
-    )}
+def select_volumes(args, inventory):
+    if args.volume:
+        return mapped_selections(args.volume, args.storage_class)
+    return pv_selections(inventory.pvs, args.pv, args.all_static)
 
 
-def recurring_job_labels(backup_volume):
-    raw = (backup_volume.get("status", {}).get("labels") or {}).get("VolumeRecurringJobInfo")
-    if raw is None:
-        raise RestoreError("backup volume lacks VolumeRecurringJobInfo; verify its backup policy first")
-    info = json.loads(raw)
-    labels = {}
-    for job_name, job in info.items():
-        for group in job.get("fromGroup") or []:
-            labels[f"recurring-job-group.longhorn.io/{group}"] = "enabled"
-        if job.get("fromJob"):
-            labels[f"recurring-job.longhorn.io/{job_name}"] = "enabled"
-    return labels or {"recurring-job-group.longhorn.io/default": "disabled"}
+def mapped_selections(mappings, storage_class):
+    if not storage_class:
+        raise RestoreError("--volume requires --storage-class (also for dynamic pvc-UUID backups)")
+    selections = []
+    for mapping in mappings:
+        source, separator, target = mapping.partition("=")
+        selections.append(Selection.checked(source, target if separator else source, storage_class))
+    return selections
+
+
+def pv_selections(pvs, names, all_static):
+    selections, found = [], set()
+    for pv in pvs:
+        handle = longhorn_handle(pv)
+        if handle is None or (names and pv["metadata"]["name"] not in names):
+            continue
+        if all_static and DYNAMIC_VOLUME_NAME.fullmatch(handle):
+            continue
+        found.add(pv["metadata"]["name"])
+        selections.append(Selection.checked(handle, handle, pv["spec"]["storageClassName"]))
+    if missing := set(names or ()) - found:
+        raise RestoreError(f"Longhorn PVs not found: {', '.join(sorted(missing))}")
+    if not selections:
+        raise RestoreError("no Longhorn PVs selected; use --volume when PVs do not exist yet")
+    return selections
+
+
+def check_unique_targets(selections):
+    targets = set()
+    for selection in selections:
+        if selection.target in targets:
+            raise RestoreError(f"duplicate destination: {selection.target}")
+        targets.add(selection.target)
+
+
+def available_backup_target(inventory, name):
+    targets = [
+        target
+        for target in inventory.backup_targets
+        if target["metadata"]["name"] == name
+        and status(target).get("available") is True
+        and not is_deleting(target)
+    ]
+    if len(targets) != 1:
+        raise RestoreError(f"backup target {name!r} is not available")
+    return targets[0]
+
+
+def synced_backup_volume(inventory, source, backup_target):
+    backup_volumes = [
+        backup_volume
+        for backup_volume in inventory.backup_volumes
+        if backup_volume["spec"].get("volumeName") == source
+        and backup_volume["spec"].get("backupTargetName") == backup_target
+        and not is_deleting(backup_volume)
+    ]
+    if len(backup_volumes) != 1:
+        raise RestoreError(f"{source}: expected one synced backup volume on {backup_target}")
+    return backup_volumes[0]
+
+
+def completed_backup(inventory, source, backup_target, backup_name=None):
+    """The named backup, or else the newest completed backup of the source."""
+    backups = [
+        backup
+        for backup in inventory.backups
+        if status(backup).get("volumeName") == source
+        and status(backup).get("backupTargetName") == backup_target
+        and status(backup).get("state") == "Completed"
+        and not status(backup).get("error")
+        and not is_deleting(backup)
+        and (backup_name is None or backup["metadata"]["name"] == backup_name)
+    ]
+    if not backups:
+        raise RestoreError(f"{source}: no completed backup on {backup_target}")
+    return max(
+        backups,
+        key=lambda backup: (
+            parse_timestamp(status(backup)["snapshotCreatedAt"]),
+            backup["metadata"]["name"],
+        ),
+    )
+
+
+def check_source(inventory, source, target, backup_volume):
+    """Reject encrypted sources, even without backup labels, and non-RWO copy sources."""
+    if any(
+        volume["metadata"]["name"] == source and (volume.get("spec") or {}).get("encrypted")
+        for volume in inventory.volumes
+    ):
+        raise RestoreError(
+            f"{source}: source volume is encrypted, including legacy backups without labels"
+        )
+    source_pvs = inventory.pvs_using(source)
+    if source != target and not all(is_rwo_filesystem(pv["spec"]) for pv in source_pvs):
+        raise RestoreError(f"{source}: source PV must use Filesystem and ReadWriteOnce")
+    source_classes = {status(backup_volume).get("storageClassName")}
+    source_classes.update(pv["spec"].get("storageClassName") for pv in source_pvs)
+    if any(
+        storage_class["metadata"]["name"] in source_classes and is_encrypted(storage_class)
+        for storage_class in inventory.storage_classes
+    ):
+        raise RestoreError(
+            f"{source}: source StorageClass is encrypted, including legacy backups without labels"
+        )
+
+
+def check_backup(source, backup, backup_volume, size, target_url):
+    recorded_size = status(backup_volume).get("size")
+    if recorded_size and int(recorded_size) != size:
+        raise RestoreError(
+            f"{source}: backup volume size differs from snapshot size; choose a compatible backup"
+        )
+    for labels in (
+        status(backup).get("labels") or {},
+        status(backup_volume).get("labels") or {},
+    ):
+        if (
+            any(labels.get(key, "disabled") != "disabled" for key in ENCRYPTION_LABELS)
+            or labels.get("longhorn.io/volume-access-mode", "rwo") != "rwo"
+        ):
+            raise RestoreError(
+                f"{source}: encrypted or non-RWO backups are outside this restore procedure"
+            )
+    url = urlsplit(status(backup)["url"])
+    query = parse_qs(url.query)
+    if (
+        size <= 0
+        or not url.scheme
+        or not url.netloc
+        or location(url) != location(urlsplit(target_url))
+        or query.get("volume") != [source]
+        or query.get("backup") != [backup["metadata"]["name"]]
+    ):
+        raise RestoreError(f"{source}: invalid backup URL or size")
+    if status(backup).get("volumeBackingImageName"):
+        raise RestoreError(f"{source}: backing-image volumes require a separate restore procedure")
+
+
+def location(url):
+    return url.scheme, url.netloc, url.path.rstrip("/")
+
+
+def longhorn_storage_class(inventory, source, name):
+    classes = [
+        storage_class
+        for storage_class in inventory.storage_classes
+        if storage_class["metadata"]["name"] == name
+    ]
+    if len(classes) != 1 or classes[0].get("provisioner") != LONGHORN_DRIVER:
+        raise RestoreError(f"{source}: missing Longhorn StorageClass {name!r}")
+    return classes[0]
 
 
 def storage_class_spec(storage_class):
-    class_name = storage_class["metadata"]["name"]
-    parameters = storage_class.get("parameters", {})
-    if parameters.get("encrypted", "false") != "false" or parameters.get("backingImage"):
-        raise RestoreError(f"StorageClass {class_name}: encrypted or backing-image StorageClasses are unsupported")
-    supported = {
-        "numberOfReplicas", "dataEngine", "encrypted", "backingImage",
-        "staleReplicaTimeout", "dataLocality", "disableRevisionCounter",
-        "unmapMarkSnapChainRemoved", "backupTargetName", "fsType",
-        "recurringJobSelector", "fromBackup",
-    }
-    unknown = set(parameters) - supported
-    if unknown:
-        raise RestoreError(f"StorageClass {class_name}: unsupported parameters: {', '.join(sorted(unknown))}")
+    """Volume spec fields that Longhorn CSI would derive from the StorageClass."""
+    parameters = storage_class.get("parameters") or {}
 
-    result = {"dataEngine": "v1"}
-    for key, default, minimum, maximum in (
-        ("numberOfReplicas", None, 1, 20),
-        ("staleReplicaTimeout", "2880", 1, 2**31 - 1),
-    ):
+    def invalid(problem):
+        return RestoreError(f"StorageClass {storage_class['metadata']['name']}: {problem}")
+
+    if is_encrypted(storage_class) or parameters.get("backingImage"):
+        raise invalid("encrypted or backing-image StorageClasses are unsupported")
+    if unknown := set(parameters) - STORAGE_CLASS_PARAMETERS:
+        raise invalid(f"unsupported parameters: {', '.join(sorted(unknown))}")
+    spec = {"dataEngine": "v1"}
+    for key, (default, minimum, maximum) in INTEGER_PARAMETERS.items():
         value = parameters.get(key, default)
-        if (not isinstance(value, str) or not re.fullmatch(r"\d+", value)
-                or not minimum <= int(value) <= maximum):
-            raise RestoreError(f"StorageClass {class_name}: {key} must be an explicit integer from {minimum} to {maximum}")
-        result[key] = int(value)
+        if not (isinstance(value, str) and value.isdecimal() and minimum <= int(value) <= maximum):
+            raise invalid(f"{key} must be an explicit integer from {minimum} to {maximum}")
+        spec[key] = int(value)
     revision_counter = parameters.get("disableRevisionCounter", "true")
     if revision_counter not in ("true", "false"):
-        raise RestoreError(f"StorageClass {class_name}: invalid disableRevisionCounter; use true or false")
-    result["revisionCounterDisabled"] = revision_counter == "true"
-    for key, values in (
-        ("dataEngine", {"v1"}),
-        ("dataLocality", {"disabled", "best-effort", "strict-local"}),
-        ("unmapMarkSnapChainRemoved", {"ignored", "disabled", "enabled"}),
-    ):
+        raise invalid("invalid disableRevisionCounter; use true or false")
+    spec["revisionCounterDisabled"] = revision_counter == "true"
+    for key, choices in CHOICE_PARAMETERS.items():
         if key in parameters:
-            if parameters[key] not in values:
-                raise RestoreError(f"StorageClass {class_name}: unsupported {key} value {parameters[key]!r}")
-            result[key] = parameters[key]
-    return result
+            if parameters[key] not in choices:
+                raise invalid(f"unsupported {key} value {parameters[key]!r}")
+            spec[key] = parameters[key]
+    return spec
 
 
-def check_source(data, source, target, backup_volume):
-    source_classes = {backup_volume.get("status", {}).get("storageClassName")}
-    for volume in data["volumes.longhorn.io"]:
-        if volume["metadata"]["name"] == source and volume.get("spec", {}).get("encrypted"):
-            raise RestoreError(f"{source}: source volume is encrypted, including legacy backups without labels")
-    for pv in data["pv"]:
+def check_destination_pv(inventory, target, storage_class, size):
+    for pv in inventory.pvs_using(target):
         spec = pv["spec"]
-        csi = spec.get("csi", {})
-        if csi.get("driver") == "driver.longhorn.io" and csi.get("volumeHandle") == source:
-            source_classes.add(spec.get("storageClassName"))
-            if source != target and (spec.get("volumeMode", "Filesystem") != "Filesystem"
-                                     or spec.get("accessModes") != ["ReadWriteOnce"]):
-                raise RestoreError(f"{source}: source PV must use Filesystem and ReadWriteOnce")
-    for storage_class in data["storageclass"]:
-        if (storage_class["metadata"]["name"] in source_classes
-                and storage_class.get("parameters", {}).get("encrypted", "false") != "false"):
-            raise RestoreError(f"{source}: source StorageClass is encrypted, including legacy backups without labels")
+        if (
+            to_bytes(spec["capacity"]["storage"]) != size
+            or spec.get("storageClassName") != storage_class
+            or not is_rwo_filesystem(spec)
+        ):
+            raise RestoreError(f"{target}: PV capacity, class or access mode differs from restore")
 
 
-def entry(data, source, target, storage_class, backup_target, namespace, backup_name=None):
-    name(source)
-    name(target)
-    targets = [t for t in data["backuptargets.longhorn.io"]
-               if t["metadata"]["name"] == backup_target and t.get("status", {}).get("available") is True
-               and not t["metadata"].get("deletionTimestamp")]
-    if len(targets) != 1:
-        raise RestoreError(f"backup target {backup_target!r} is not available")
-    backup_volumes = [v for v in data["backupvolumes.longhorn.io"]
-                      if v["spec"].get("volumeName") == source
-                      and v["spec"].get("backupTargetName") == backup_target
-                      and not v.get("metadata", {}).get("deletionTimestamp")]
-    if len(backup_volumes) != 1:
-        raise RestoreError(f"{source}: expected one synced backup volume on {backup_target}")
-    backups = [b for b in data["backups.longhorn.io"]
-               if b.get("status", {}).get("volumeName") == source
-               and b.get("status", {}).get("backupTargetName") == backup_target
-               and b.get("status", {}).get("state") == "Completed"
-               and not b["status"].get("error")
-               and not b.get("metadata", {}).get("deletionTimestamp")
-               and (backup_name is None or b["metadata"]["name"] == backup_name)]
-    if not backups:
-        raise RestoreError(f"{source}: no completed backup on {backup_target}")
-    backup = max(backups, key=lambda b: (timestamp(b["status"]["snapshotCreatedAt"]), b["metadata"]["name"]))
-    status = backup["status"]
-    size = int(status["volumeSize"])
-    backup_volume = backup_volumes[0]
-    check_source(data, source, target, backup_volume)
-    volume_size = backup_volume.get("status", {}).get("size")
-    if volume_size and int(volume_size) != size:
-        raise RestoreError(f"{source}: backup volume size differs from snapshot size; choose a compatible backup")
-    for metadata in (status, backup_volume.get("status", {})):
-        labels = metadata.get("labels") or {}
-        if (any(labels.get(key, "disabled") != "disabled"
-                for key in ("volume-encrypted", "longhorn.io/volume-encrypted"))
-                or labels.get("longhorn.io/volume-access-mode", "rwo") != "rwo"):
-            raise RestoreError(f"{source}: encrypted or non-RWO backups are outside this restore procedure")
-    url = urlsplit(status["url"])
-    query = parse_qs(url.query)
-    target_url = urlsplit(targets[0]["spec"]["backupTargetURL"])
-    if (size <= 0 or not url.scheme or not url.netloc
-            or (url.scheme, url.netloc, url.path.rstrip("/")) !=
-               (target_url.scheme, target_url.netloc, target_url.path.rstrip("/"))
-            or query.get("volume") != [source] or query.get("backup") != [backup["metadata"]["name"]]):
-        raise RestoreError(f"{source}: invalid backup URL or size")
-    if status.get("volumeBackingImageName"):
-        raise RestoreError(f"{source}: backing-image volumes require a separate restore procedure")
-    classes = [s for s in data["storageclass"] if s["metadata"]["name"] == storage_class]
-    if len(classes) != 1 or classes[0].get("provisioner") != "driver.longhorn.io":
-        raise RestoreError(f"{source}: missing Longhorn StorageClass {storage_class!r}")
-    volume_spec = storage_class_spec(classes[0])
-    for pv in data["pv"]:
-        spec = pv["spec"]
-        csi = spec.get("csi", {})
-        if csi.get("driver") == "driver.longhorn.io" and csi.get("volumeHandle") == target:
-            if (to_bytes(spec["capacity"]["storage"]) != size
-                    or spec.get("storageClassName") != storage_class
-                    or spec.get("accessModes") != ["ReadWriteOnce"]
-                    or spec.get("volumeMode", "Filesystem") != "Filesystem"):
-                raise RestoreError(f"{target}: PV capacity, class or access mode differs from restore")
-    job_labels = (recurring_job_labels(backup_volume) if source == target
-                  else {"recurring-job-group.longhorn.io/default": "disabled"})
+def recurring_job_labels(source, target, backup_volume):
+    """Keep the backed-up recurring jobs in place; a renamed copy gets none."""
+    if source != target:
+        return dict(DEFAULT_GROUP_DISABLED)
+    labels = status(backup_volume).get("labels") or {}
+    if "VolumeRecurringJobInfo" not in labels:
+        raise RestoreError(
+            "backup volume lacks VolumeRecurringJobInfo; verify its backup policy first"
+        )
+    jobs = {}
+    for job_name, job in json.loads(labels["VolumeRecurringJobInfo"]).items():
+        for group in job.get("fromGroup") or []:
+            jobs[f"recurring-job-group.longhorn.io/{group}"] = "enabled"
+        if job.get("fromJob"):
+            jobs[f"recurring-job.longhorn.io/{job_name}"] = "enabled"
+    return jobs or dict(DEFAULT_GROUP_DISABLED)
+
+
+def plan_entry(inventory, selection, backup_target, namespace, backup_name=None):
+    """Check one restore and describe the Volume that apply would create for it."""
+    source, target, storage_class = selection
+    target_url = available_backup_target(inventory, backup_target)["spec"]["backupTargetURL"]
+    backup_volume = synced_backup_volume(inventory, source, backup_target)
+    backup = completed_backup(inventory, source, backup_target, backup_name)
+    size = int(status(backup)["volumeSize"])
+    check_source(inventory, source, target, backup_volume)
+    check_backup(source, backup, backup_volume, size, target_url)
+    volume_spec = storage_class_spec(longhorn_storage_class(inventory, source, storage_class))
+    check_destination_pv(inventory, target, storage_class, size)
     return {
-        "source": source, "target": target, "storageClass": storage_class,
-        "backupTarget": backup_target, "backupName": backup["metadata"]["name"],
-        "snapshotCreatedAt": status["snapshotCreatedAt"],
+        "source": source,
+        "target": target,
+        "storageClass": storage_class,
+        "backupTarget": backup_target,
+        "backupName": backup["metadata"]["name"],
+        "snapshotCreatedAt": status(backup)["snapshotCreatedAt"],
         "manifest": {
-            "apiVersion": "longhorn.io/v1beta2", "kind": "Volume",
-            "metadata": {"name": target, "namespace": namespace,
-                         "labels": job_labels},
-            "spec": {**volume_spec, "size": str(size),
-                     "accessMode": "rwo", "frontend": "blockdev",
-                     "encrypted": False,
-                     "Standby": False,
-                     "restoreVolumeRecurringJob": "disabled",
-                     "backupTargetName": backup_target, "fromBackup": status["url"]},
+            "apiVersion": "longhorn.io/v1beta2",
+            "kind": "Volume",
+            "metadata": {
+                "name": target,
+                "namespace": namespace,
+                "labels": recurring_job_labels(source, target, backup_volume),
+            },
+            "spec": {
+                **volume_spec,
+                "size": str(size),
+                "accessMode": "rwo",
+                "frontend": "blockdev",
+                "encrypted": False,
+                "Standby": False,
+                "restoreVolumeRecurringJob": "disabled",
+                "backupTargetName": backup_target,
+                "fromBackup": status(backup)["url"],
+            },
         },
     }
-
-
-def selections(args, data):
-    if args.volume:
-        if not args.storage_class:
-            raise RestoreError("--volume requires --storage-class (also for dynamic pvc-UUID backups)")
-        result = []
-        for value in args.volume:
-            source, separator, target = value.partition("=")
-            result.append((source, target if separator else source, args.storage_class))
-        return result
-    result = []
-    found = set()
-    for pv in data["pv"]:
-        spec = pv["spec"]
-        csi = spec.get("csi", {})
-        if csi.get("driver") != "driver.longhorn.io":
-            continue
-        handle = csi["volumeHandle"]
-        pv_name = pv["metadata"]["name"]
-        if args.pv and pv_name not in args.pv:
-            continue
-        if args.all_static and re.fullmatch(r"pvc-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}", handle, re.IGNORECASE):
-            continue
-        found.add(pv_name)
-        result.append((handle, handle, spec["storageClassName"]))
-    if args.pv and set(args.pv) != found:
-        raise RestoreError(f"Longhorn PVs not found: {', '.join(sorted(set(args.pv) - found))}")
-    if not result:
-        raise RestoreError("no Longhorn PVs selected; use --volume when PVs do not exist yet")
-    return result
 
 
 def plan(args, cluster):
     identity = cluster.identity()
-    data = inventory(cluster)
-    existing = {v["metadata"]["name"] for v in data["volumes.longhorn.io"]}
+    inventory = cluster.inventory()
+    selections = select_volumes(args, inventory)
+    check_unique_targets(selections)
+    existing = {volume["metadata"]["name"] for volume in inventory.volumes}
     entries = []
-    seen = set()
-    for source, target, storage_class in selections(args, data):
-        name(source)
-        name(target)
-        if target in seen:
-            raise RestoreError(f"duplicate destination: {target}")
-        seen.add(target)
-        if target in existing:
-            print(f"SKIP {target}: already exists; health and data have not been checked", file=sys.stderr)
+    for selection in selections:
+        if selection.target in existing:
+            log(f"SKIP {selection.target}: already exists; health and data have not been checked")
             continue
-        item = entry(data, source, target, storage_class, args.backup_target, cluster.namespace)
-        entries.append(item)
-        print(f"RESTORE {source} -> {target}: {item['backupName']} ({item['snapshotCreatedAt']})", file=sys.stderr)
-    document = {"version": 1, "context": cluster.context, "clusterUID": identity,
-                "namespace": cluster.namespace, "createdAt": datetime.now(timezone.utc).isoformat(),
-                "volumes": entries}
-    if not identity:
-        raise RestoreError("could not identify destination cluster")
+        entry = plan_entry(inventory, selection, args.backup_target, cluster.namespace)
+        entries.append(entry)
+        log(
+            f"RESTORE {selection.source} -> {selection.target}: "
+            f"{entry['backupName']} ({entry['snapshotCreatedAt']})"
+        )
+    document = {
+        "version": PLAN_VERSION,
+        "context": cluster.context,
+        "clusterUID": identity,
+        "namespace": cluster.namespace,
+        "createdAt": datetime.now(timezone.utc).isoformat(),
+        "volumes": entries,
+    }
     with args.output.open("x") as output:
         output.write(json.dumps(document, indent=2) + "\n")
-    print(f"Plan saved to {args.output}; {len(entries)} volume(s). No changes made.", file=sys.stderr)
+    log(f"Plan saved to {args.output}; {len(entries)} volume(s). No changes made.")
 
 
 def matches_manifest(volume, manifest):
-    metadata = volume.get("metadata", {})
-    return (not metadata.get("deletionTimestamp")
-            and all(metadata.get(key) == manifest["metadata"][key] for key in ("name", "namespace"))
-            and all(volume.get("spec", {}).get(key) == value for key, value in manifest["spec"].items())
-            and all(metadata.get("labels", {}).get(key) == value
-                    for key, value in manifest["metadata"]["labels"].items())
-            and all(key in manifest["metadata"]["labels"]
-                    for key, value in (metadata.get("labels") or {}).items()
-                    if value == "enabled" and key.startswith(("recurring-job.longhorn.io/", "recurring-job-group.longhorn.io/"))))
+    """Whether a Volume keeps every planned field and enables no other recurring job."""
+    metadata = volume.get("metadata") or {}
+    labels = metadata.get("labels") or {}
+    planned = manifest["metadata"]
+    enabled_jobs = {
+        key
+        for key, value in labels.items()
+        if value == "enabled" and key.startswith(RECURRING_JOB_PREFIXES)
+    }
+    return (
+        not metadata.get("deletionTimestamp")
+        and metadata.get("name") == planned["name"]
+        and metadata.get("namespace") == planned["namespace"]
+        and contains(volume.get("spec") or {}, manifest["spec"])
+        and contains(labels, planned["labels"])
+        and enabled_jobs <= planned["labels"].keys()
+    )
+
+
+def contains(actual, expected):
+    return all(actual.get(key) == value for key, value in expected.items())
+
+
+def check_plan_destination(document, cluster):
+    if (
+        document["version"] != PLAN_VERSION
+        or document["context"] != cluster.context
+        or document["namespace"] != cluster.namespace
+        or not document["clusterUID"]
+        or document["clusterUID"] != cluster.identity()
+    ):
+        raise RestoreError(
+            "plan version, context, namespace or cluster identity differs; make a new plan"
+        )
+
+
+def pending_manifests(entries, inventory, namespace):
+    """Recheck every planned restore; return the Volumes that do not exist yet."""
+    selections = [
+        Selection.checked(entry["source"], entry["target"], entry["storageClass"])
+        for entry in entries
+    ]
+    check_unique_targets(selections)
+    existing = {volume["metadata"]["name"]: volume for volume in inventory.volumes}
+    pending = []
+    for entry, selection in zip(entries, selections):
+        target = selection.target
+        expected = plan_entry(
+            inventory, selection, entry["backupTarget"], namespace, entry["backupName"]
+        )
+        if expected != entry:
+            raise RestoreError(
+                f"{target}: backup, StorageClass, labels or plan changed; make a new plan"
+            )
+        if target not in existing:
+            pending.append(entry["manifest"])
+        elif matches_manifest(existing[target], entry["manifest"]):
+            print(f"SKIP {target}: matching restore exists; check restore status separately")
+        else:
+            raise RestoreError(f"{target}: destination exists and does not match this restore plan")
+    return pending
+
+
+def create_volumes(cluster, manifests):
+    # Validate every admission before the first write. Creation is still not atomic.
+    for manifest in manifests:
+        admitted = json.loads(
+            cluster.run("create", "--dry-run=server", "-f", "-", "-o", "json", document=manifest)
+        )
+        if not matches_manifest(admitted, manifest):
+            raise RestoreError(
+                f"{manifest['metadata']['name']}: admission changed planned restore fields"
+            )
+    for manifest in manifests:
+        created = json.loads(cluster.run("create", "-f", "-", "-o", "json", document=manifest))
+        if not matches_manifest(created, manifest):
+            raise RestoreError(
+                f"{manifest['metadata']['name']}: created volume differs from plan; "
+                "stop and inspect it before retrying"
+            )
+        print(f"CREATED {manifest['metadata']['name']}; restore is asynchronous")
 
 
 def apply(args, cluster):
     document = json.loads(args.plan.read_text())
-    if (document["version"] != 1 or document["context"] != cluster.context
-            or document["namespace"] != cluster.namespace
-            or not document["clusterUID"] or document["clusterUID"] != cluster.identity()):
-        raise RestoreError("plan version, context, namespace or cluster identity differs; make a new plan")
-    data = inventory(cluster)
-    existing = {v["metadata"]["name"]: v for v in data["volumes.longhorn.io"]}
-    pending = []
-    seen = set()
-    for item in document["volumes"]:
-        target = name(item["target"])
-        if target in seen:
-            raise RestoreError(f"duplicate destination: {target}")
-        seen.add(target)
-        expected = entry(data, item["source"], target, item["storageClass"],
-                         item["backupTarget"], cluster.namespace, item["backupName"])
-        if expected != item:
-            raise RestoreError(f"{target}: backup, StorageClass, labels or plan changed; make a new plan")
-        if target in existing:
-            volume = existing[target]
-            if not matches_manifest(volume, item["manifest"]):
-                raise RestoreError(f"{target}: destination exists and does not match this restore plan")
-            print(f"SKIP {target}: matching restore exists; check restore status separately")
-        else:
-            pending.append(item["manifest"])
-    # Validate every admission before the first write. Creation is still not atomic.
-    for manifest in pending:
-        admitted = json.loads(cluster.run("create", "--dry-run=server", "-f", "-", "-o", "json", document=manifest))
-        if not matches_manifest(admitted, manifest):
-            raise RestoreError(f"{manifest['metadata']['name']}: admission changed planned restore fields")
-    for manifest in pending:
-        created = json.loads(cluster.run("create", "-f", "-", "-o", "json", document=manifest))
-        if not matches_manifest(created, manifest):
-            raise RestoreError(f"{manifest['metadata']['name']}: created volume differs from plan; stop and inspect it before retrying")
-        print(f"CREATED {manifest['metadata']['name']}; restore is asynchronous")
+    check_plan_destination(document, cluster)
+    inventory = cluster.inventory()
+    create_volumes(cluster, pending_manifests(document["volumes"], inventory, cluster.namespace))
 
 
-INSPECT_IMAGE = "docker.io/library/python:3.14.10-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67"
+def restored_volume(cluster, name):
+    volumes = [
+        volume
+        for volume in cluster.items("volumes.longhorn.io", cluster.namespace)
+        if volume["metadata"]["name"] == name
+    ]
+    if len(volumes) != 1:
+        raise RestoreError(f"{name}: Longhorn volume not found")
+    volume = volumes[0]
+    spec, state = volume.get("spec") or {}, status(volume)
+    if not spec.get("fromBackup") or spec.get("encrypted") or spec.get("Standby"):
+        raise RestoreError(f"{name}: only unencrypted restored volumes can be inspected")
+    if (
+        is_deleting(volume)
+        or state.get("restoreInitiated") is not True
+        or state.get("restoreRequired") is not False
+        or state.get("state") != "detached"
+    ):
+        raise RestoreError(f"{name}: wait until the restore completed and the volume is detached")
+    return volume
 
-INSPECT_SCRIPT = r"""
-import os, shutil, sqlite3, sys
-root, scratch = "/volume", "/scratch"
-sizes, databases, failed = {}, [], 0
-for directory, subdirectories, files in os.walk(root):
-    subdirectories.sort()
-    for file in sorted(files):
-        path = os.path.join(directory, file)
-        relative = os.path.relpath(path, root)
-        top = relative.split(os.sep)[0]
-        count, total = sizes.get(top, (0, 0))
-        sizes[top] = (count + 1, total + os.lstat(path).st_size)
-        if os.path.isfile(path) and not os.path.islink(path):
-            with open(path, "rb") as handle:
-                if handle.read(16) == b"SQLite format 3\0":
-                    databases.append(relative)
-for top, (count, total) in sorted(sizes.items()):
-    print(f"FILES {top}: {count} file(s), {total} bytes")
-for index, relative in enumerate(databases):
-    copy = os.path.join(scratch, str(index))
-    os.makedirs(copy)
-    for suffix in ("", "-wal", "-journal"):
-        if os.path.exists(os.path.join(root, relative + suffix)):
-            shutil.copy(os.path.join(root, relative + suffix), os.path.join(copy, "db" + suffix))
-    try:
-        result = [row[0] for row in sqlite3.connect(os.path.join(copy, "db")).execute("PRAGMA integrity_check")]
-    except sqlite3.Error as error:
-        result = [str(error)]
-    failed += result != ["ok"]
-    print(f"SQLITE {relative}: {'; '.join(result[:5])}")
-    shutil.rmtree(copy)
-if not sizes:
-    print("ERROR: volume contains no files")
-sys.exit(1 if failed or not sizes else 0)
-"""
+
+def check_inspection_conflicts(cluster, volume_name, object_name, pod_namespace):
+    for pv in cluster.items("pv"):
+        if pv["metadata"]["name"] == object_name or longhorn_handle(pv) == volume_name:
+            raise RestoreError(
+                f"{volume_name}: a PV already uses this volume or name {object_name}"
+            )
+    for kind in ("pvc", "job"):
+        if cluster.exists(kind, object_name, pod_namespace):
+            raise RestoreError(f"{object_name}: {kind} already exists in {pod_namespace}")
 
 
 def inspect_manifests(volume, size, pod_namespace):
-    object_name = f"{volume}-inspect"
-    labels = {"app.kubernetes.io/name": "longhorn-restore-inspect", "app.kubernetes.io/instance": volume}
+    name = f"{volume}-inspect"
+    labels = {
+        "app.kubernetes.io/name": "longhorn-restore-inspect",
+        "app.kubernetes.io/instance": volume,
+    }
     pv = {
-        "apiVersion": "v1", "kind": "PersistentVolume",
-        "metadata": {"name": object_name, "labels": labels},
+        "apiVersion": "v1",
+        "kind": "PersistentVolume",
+        "metadata": {"name": name, "labels": labels},
         "spec": {
-            "capacity": {"storage": str(size)}, "accessModes": ["ReadWriteOnce"],
-            "persistentVolumeReclaimPolicy": "Retain", "storageClassName": "",
+            "capacity": {"storage": str(size)},
+            "accessModes": ["ReadWriteOnce"],
+            "persistentVolumeReclaimPolicy": "Retain",
+            "storageClassName": "",
             "volumeMode": "Filesystem",
-            "claimRef": {"namespace": pod_namespace, "name": object_name},
-            "csi": {"driver": "driver.longhorn.io", "fsType": "ext4", "volumeHandle": volume},
+            "claimRef": {"namespace": pod_namespace, "name": name},
+            "csi": {"driver": LONGHORN_DRIVER, "fsType": "ext4", "volumeHandle": volume},
         },
     }
     pvc = {
-        "apiVersion": "v1", "kind": "PersistentVolumeClaim",
-        "metadata": {"name": object_name, "namespace": pod_namespace, "labels": labels},
+        "apiVersion": "v1",
+        "kind": "PersistentVolumeClaim",
+        "metadata": {"name": name, "namespace": pod_namespace, "labels": labels},
         "spec": {
-            "accessModes": ["ReadWriteOnce"], "storageClassName": "", "volumeName": object_name,
-            "volumeMode": "Filesystem", "resources": {"requests": {"storage": str(size)}},
+            "accessModes": ["ReadWriteOnce"],
+            "storageClassName": "",
+            "volumeName": name,
+            "volumeMode": "Filesystem",
+            "resources": {"requests": {"storage": str(size)}},
         },
     }
+    container = {
+        "name": "inspect",
+        "image": INSPECT_IMAGE,
+        "command": ["python3", "-c", INSPECT_SCRIPT.read_text(), "/volume", "/scratch"],
+        "env": [{"name": "SQLITE_TMPDIR", "value": "/scratch"}],
+        "resources": {
+            "requests": {"cpu": "10m", "memory": "64Mi"},
+            "limits": {"memory": "1Gi"},
+        },
+        # Root with DAC_OVERRIDE reads files owned by any app user; the volume is mounted read-only.
+        "securityContext": {
+            "runAsUser": 0,
+            "runAsNonRoot": False,
+            "readOnlyRootFilesystem": True,
+            "allowPrivilegeEscalation": False,
+            "capabilities": {"drop": ["ALL"], "add": ["DAC_OVERRIDE"]},
+        },
+        "volumeMounts": [
+            {"name": "volume", "mountPath": "/volume", "readOnly": True},
+            {"name": "scratch", "mountPath": "/scratch"},
+        ],
+    }
     job = {
-        "apiVersion": "batch/v1", "kind": "Job",
-        "metadata": {"name": object_name, "namespace": pod_namespace, "labels": labels},
+        "apiVersion": "batch/v1",
+        "kind": "Job",
+        "metadata": {"name": name, "namespace": pod_namespace, "labels": labels},
         "spec": {
             "backoffLimit": 0,
             "template": {
                 "metadata": {"labels": labels},
                 "spec": {
-                    "restartPolicy": "Never", "automountServiceAccountToken": False,
+                    "restartPolicy": "Never",
+                    "automountServiceAccountToken": False,
                     "enableServiceLinks": False,
                     "securityContext": {"seccompProfile": {"type": "RuntimeDefault"}},
-                    "containers": [{
-                        "name": "inspect", "image": INSPECT_IMAGE,
-                        "command": ["python3", "-c", INSPECT_SCRIPT],
-                        "env": [{"name": "SQLITE_TMPDIR", "value": "/scratch"}],
-                        "resources": {"requests": {"cpu": "10m", "memory": "64Mi"},
-                                      "limits": {"memory": "1Gi"}},
-                        # Root with DAC_OVERRIDE reads files owned by any app user; the volume is mounted read-only.
-                        "securityContext": {
-                            "runAsUser": 0, "runAsNonRoot": False, "readOnlyRootFilesystem": True,
-                            "allowPrivilegeEscalation": False,
-                            "capabilities": {"drop": ["ALL"], "add": ["DAC_OVERRIDE"]},
-                        },
-                        "volumeMounts": [{"name": "volume", "mountPath": "/volume", "readOnly": True},
-                                         {"name": "scratch", "mountPath": "/scratch"}],
-                    }],
+                    "containers": [container],
                     "volumes": [
-                        {"name": "volume", "persistentVolumeClaim": {"claimName": object_name, "readOnly": True}},
+                        {
+                            "name": "volume",
+                            "persistentVolumeClaim": {"claimName": name, "readOnly": True},
+                        },
                         {"name": "scratch", "emptyDir": {"sizeLimit": str(size)}},
                     ],
                 },
@@ -464,66 +744,47 @@ def inspect_manifests(volume, size, pod_namespace):
     return pv, pvc, job
 
 
+def wait_for_job(cluster, name, namespace, timeout):
+    """Wait until the Job finishes and return whether it succeeded."""
+
+    def finished():
+        job = json.loads(cluster.run("get", "job", name, "-n", namespace, "-o", "json"))
+        job_status = status(job)
+        return job_status if job_status.get("succeeded") or job_status.get("failed") else None
+
+    job_status = wait_until(
+        finished,
+        timeout=timeout,
+        interval=5,
+        error=f"{name}: no result after {timeout}s; check pod events before retrying",
+    )
+    return bool(job_status.get("succeeded"))
+
+
 def inspect(args, cluster):
-    volume_name = name(args.volume)
+    volume_name = valid_volume_name(args.volume)
     object_name = f"{volume_name}-inspect"
-    volumes = [v for v in cluster.items("volumes.longhorn.io") if v["metadata"]["name"] == volume_name]
-    if len(volumes) != 1:
-        raise RestoreError(f"{volume_name}: Longhorn volume not found")
-    volume = volumes[0]
-    spec, status = volume.get("spec", {}), volume.get("status", {})
-    if not spec.get("fromBackup") or spec.get("encrypted") or spec.get("Standby"):
-        raise RestoreError(f"{volume_name}: only unencrypted restored volumes can be inspected")
-    if (volume["metadata"].get("deletionTimestamp") or status.get("restoreInitiated") is not True
-            or status.get("restoreRequired") is not False or status.get("state") != "detached"):
-        raise RestoreError(f"{volume_name}: wait until the restore completed and the volume is detached")
-    for pv in cluster.items("pv"):
-        csi = pv["spec"].get("csi", {})
-        if pv["metadata"]["name"] == object_name or (
-                csi.get("driver") == "driver.longhorn.io" and csi.get("volumeHandle") == volume_name):
-            raise RestoreError(f"{volume_name}: a PV already uses this volume or name {object_name}")
-    for kind in ("pvc", "job"):
-        if cluster.run("get", kind, object_name, "-n", args.pod_namespace, "--ignore-not-found", "-o", "name").strip():
-            raise RestoreError(f"{object_name}: {kind} already exists in {args.pod_namespace}")
-    manifests = inspect_manifests(volume_name, int(spec["size"]), args.pod_namespace)
+    volume = restored_volume(cluster, volume_name)
+    check_inspection_conflicts(cluster, volume_name, object_name, args.pod_namespace)
+    manifests = inspect_manifests(volume_name, int(volume["spec"]["size"]), args.pod_namespace)
     try:
         for manifest in manifests:
             cluster.run("create", "-f", "-", "-o", "name", document=manifest)
-        deadline = time.monotonic() + args.timeout
-        while True:
-            job_status = json.loads(cluster.run("get", "job", object_name, "-n", args.pod_namespace, "-o", "json")).get("status", {})
-            if job_status.get("succeeded") or job_status.get("failed"):
-                break
-            if time.monotonic() > deadline:
-                raise RestoreError(f"{object_name}: no result after {args.timeout}s; check pod events before retrying")
-            time.sleep(5)
+        succeeded = wait_for_job(cluster, object_name, args.pod_namespace, args.timeout)
         print(cluster.run("logs", f"job/{object_name}", "-n", args.pod_namespace), end="")
-        if not job_status.get("succeeded"):
+        if not succeeded:
             raise RestoreError(f"{volume_name}: inspection failed; see the output above")
-        print(f"PASSED {volume_name}: files listed and every SQLite database passed integrity_check")
+        print(
+            f"PASSED {volume_name}: files listed and every SQLite database passed integrity_check"
+        )
     finally:
-        for kind, scope in (("job", ["-n", args.pod_namespace]), ("pvc", ["-n", args.pod_namespace]), ("pv", [])):
-            cluster.run("delete", kind, object_name, *scope, "--ignore-not-found", "--wait=false", "--cascade=foreground")
-            deadline = time.monotonic() + 300
-            while cluster.run("get", kind, object_name, *scope, "--ignore-not-found", "-o", "name").strip():
-                if time.monotonic() > deadline:
-                    raise RestoreError(f"{object_name}: {kind} was not removed; delete it manually")
-                time.sleep(2)
-        print(f"Removed {object_name} job, PVC and PV; {volume_name} is kept", file=sys.stderr)
+        cluster.delete("job", object_name, args.pod_namespace)
+        cluster.delete("pvc", object_name, args.pod_namespace)
+        cluster.delete("pv", object_name)
+        log(f"Removed {object_name} job, PVC and PV; {volume_name} is kept")
 
 
-def main(argv=None):
-    parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    commands = parser.add_subparsers(dest="command", required=True)
-    descriptions = {
-        "plan": "Read cluster metadata and save a restore plan; never changes the cluster.",
-        "apply": "Create missing volumes from a reviewed plan; changes the cluster.",
-        "inspect": "Check the files and SQLite databases of a restored volume; creates and removes a temporary Job.",
-    }
-    examples = {
-        "plan": """Examples:
+PLAN_EPILOG = """Examples:
   Restore independent test copies while the production volumes stay in use:
     python3 scripts/longhorn_restore.py plan --context homelab \\
       --volume bazarr-config=bazarr-restore-test \\
@@ -569,8 +830,9 @@ Review the saved JSON before apply. It pins each backup URL and snapshot time
 to this destination cluster's identity. Keep plans local; use a new filename
 for a new plan. Existing destinations are skipped without checking their
 health or data; an empty plan does not demonstrate a successful recovery.
-""",
-        "apply": """Example (after reviewing the JSON plan):
+"""
+
+APPLY_EPILOG = """Example (after reviewing the JSON plan):
   python3 scripts/longhorn_restore.py apply --context homelab \\
     /tmp/restore-test.json
 
@@ -593,8 +855,9 @@ start a copied production app or expose restored configuration/credentials.
 
 This command does not create PVs/PVCs, rebind claims, stop workloads or wait
 for completion. Preserve production volumes and source backups.
-""",
-        "inspect": """Example (after the restore of a test copy completed):
+"""
+
+INSPECT_EPILOG = """Example (after the restore of a test copy completed):
   python3 scripts/longhorn_restore.py inspect --context homelab \\
     --volume bazarr-restore-test
 
@@ -610,35 +873,108 @@ The Job, PVC and PV are always deleted afterwards; the PV uses Retain, so the
 Longhorn volume is kept. Check the printed files against the source app before
 treating the restore as verified. Delete test volumes separately once no
 longer needed.
-""",
-    }
-    for command in ("plan", "apply", "inspect"):
-        sub = commands.add_parser(
-            command, help=descriptions[command], description=descriptions[command],
-            epilog=examples[command], formatter_class=argparse.RawDescriptionHelpFormatter,
+"""
+
+
+def kube_context(value):
+    if not value.strip():
+        raise argparse.ArgumentTypeError("destination context must not be empty")
+    return value
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    def add_command(name, handler, summary, epilog):
+        command = commands.add_parser(
+            name,
+            help=summary,
+            description=summary,
+            epilog=epilog,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
         )
-        sub.add_argument("--context", required=True, help="explicit destination kube context")
-        sub.add_argument("--namespace", default="longhorn-system", help="Longhorn namespace (default: longhorn-system)")
-        if command == "plan":
-            selection = sub.add_mutually_exclusive_group(required=True)
-            selection.add_argument("--pv", action="append", help="restore the volume of this PV; repeatable")
-            selection.add_argument("--all-static", action="store_true", help="all live Longhorn PVs except pvc-UUID volumes")
-            selection.add_argument("--volume", action="append", help="SOURCE[=DESTINATION]; repeatable, including pvc-UUID sources")
-            sub.add_argument("--storage-class", help="required with --volume")
-            sub.add_argument("--backup-target", default="default", help="Longhorn backup target name (default: default)")
-            sub.add_argument("--output", type=Path, required=True, help="new JSON plan file; never overwrites")
-        elif command == "apply":
-            sub.add_argument("plan", type=Path, help="reviewed JSON plan produced by plan")
-        else:
-            sub.add_argument("--volume", required=True, help="restored Longhorn volume to inspect")
-            sub.add_argument("--pod-namespace", default="default", help="namespace for the temporary PVC and Job (default: default)")
-            sub.add_argument("--timeout", type=int, default=600, help="seconds to wait for the Job (default: 600)")
+        command.set_defaults(handler=handler)
+        command.add_argument(
+            "--context",
+            required=True,
+            type=kube_context,
+            help="explicit destination kube context",
+        )
+        command.add_argument(
+            "--namespace",
+            default="longhorn-system",
+            help="Longhorn namespace (default: longhorn-system)",
+        )
+        return command
+
+    plan_command = add_command(
+        "plan",
+        plan,
+        "Read cluster metadata and save a restore plan; never changes the cluster.",
+        PLAN_EPILOG,
+    )
+    selection = plan_command.add_mutually_exclusive_group(required=True)
+    selection.add_argument(
+        "--pv", action="append", help="restore the volume of this PV; repeatable"
+    )
+    selection.add_argument(
+        "--all-static",
+        action="store_true",
+        help="all live Longhorn PVs except pvc-UUID volumes",
+    )
+    selection.add_argument(
+        "--volume",
+        action="append",
+        help="SOURCE[=DESTINATION]; repeatable, including pvc-UUID sources",
+    )
+    plan_command.add_argument("--storage-class", help="required with --volume")
+    plan_command.add_argument(
+        "--backup-target",
+        default="default",
+        help="Longhorn backup target name (default: default)",
+    )
+    plan_command.add_argument(
+        "--output", type=Path, required=True, help="new JSON plan file; never overwrites"
+    )
+
+    apply_command = add_command(
+        "apply",
+        apply,
+        "Create missing volumes from a reviewed plan; changes the cluster.",
+        APPLY_EPILOG,
+    )
+    apply_command.add_argument("plan", type=Path, help="reviewed JSON plan produced by plan")
+
+    inspect_command = add_command(
+        "inspect",
+        inspect,
+        "Check the files and SQLite databases of a restored volume; "
+        "creates and removes a temporary Job.",
+        INSPECT_EPILOG,
+    )
+    inspect_command.add_argument(
+        "--volume", required=True, help="restored Longhorn volume to inspect"
+    )
+    inspect_command.add_argument(
+        "--pod-namespace",
+        default="default",
+        help="namespace for the temporary PVC and Job (default: default)",
+    )
+    inspect_command.add_argument(
+        "--timeout", type=int, default=600, help="seconds to wait for the Job (default: 600)"
+    )
+    return parser
+
+
+def main(argv=None):
+    parser = build_parser()
     args = parser.parse_args(argv)
-    if not args.context.strip():
-        parser.error("destination context must not be empty")
+    # Malformed plans and cluster objects raise built-in errors; report them the same way.
     try:
-        cluster = Cluster(args.context, args.namespace)
-        {"plan": plan, "apply": apply, "inspect": inspect}[args.command](args, cluster)
+        args.handler(args, Cluster(args.context, args.namespace))
     except (RestoreError, OSError, ValueError, KeyError, TypeError, AttributeError) as error:
         parser.exit(1, f"ERROR: {error}\n")
 

@@ -2,6 +2,7 @@
 
 import argparse
 from copy import deepcopy
+import importlib.util
 import io
 import json
 from pathlib import Path
@@ -28,14 +29,14 @@ def backup(source="bazarr-config", backup_name="backup-old", when="2026-11-22T00
 
 
 def add_source(data, source, storage_class="longhorn"):
-    data["backups.longhorn.io"].append(backup(source))
-    data["backupvolumes.longhorn.io"].append({
+    data.backups.append(backup(source))
+    data.backup_volumes.append({
         "spec": {"volumeName": source, "backupTargetName": "default"},
         "status": {"size": str(2**30), "labels": {"VolumeRecurringJobInfo": json.dumps({
             "nightly": {"fromGroup": ["backup"], "fromJob": True},
         })}},
     })
-    data["pv"].append({
+    data.pvs.append({
         "metadata": {"name": source},
         "spec": {
             "csi": {"driver": "driver.longhorn.io", "volumeHandle": source},
@@ -46,18 +47,16 @@ def add_source(data, source, storage_class="longhorn"):
 
 
 def resources():
-    data = {key: [] for key in (
-        "volumes.longhorn.io", "backups.longhorn.io", "backupvolumes.longhorn.io",
-        "backuptargets.longhorn.io", "storageclass", "pv",
-    )}
-    data["backuptargets.longhorn.io"] = [{
-        "metadata": {"name": "default"}, "spec": {"backupTargetURL": "nfs://nas/longhorn"},
-        "status": {"available": True},
-    }]
-    data["storageclass"] = [{
-        "metadata": {"name": name}, "provisioner": "driver.longhorn.io",
-        "parameters": {"numberOfReplicas": "3"},
-    } for name in ("longhorn", "longhorn-no-backup")]
+    data = restore.Inventory(
+        backup_targets=[{
+            "metadata": {"name": "default"}, "spec": {"backupTargetURL": "nfs://nas/longhorn"},
+            "status": {"available": True},
+        }],
+        storage_classes=[{
+            "metadata": {"name": name}, "provisioner": "driver.longhorn.io",
+            "parameters": {"numberOfReplicas": "3"},
+        } for name in ("longhorn", "longhorn-no-backup")],
+    )
     add_source(data, "bazarr-config")
     return data
 
@@ -72,7 +71,7 @@ class RestoreTests(unittest.TestCase):
         self.cluster.context = "homelab"
         self.cluster.namespace = "longhorn-system"
         self.cluster.identity.return_value = "cluster-uid"
-        self.cluster.items.side_effect = lambda key: deepcopy(self.data[key])
+        self.cluster.inventory.side_effect = lambda: deepcopy(self.data)
         self.cluster.run.side_effect = lambda *args, document=None: json.dumps(document)
         self.addCleanup(patch.stopall)
         patch("sys.stdout", new=io.StringIO()).start()
@@ -88,11 +87,9 @@ class RestoreTests(unittest.TestCase):
     def apply(self):
         restore.apply(argparse.Namespace(plan=self.path), self.cluster)
 
-    def entry(self, **options):
-        args = dict(source="bazarr-config", target="bazarr-config", storage_class="longhorn",
-                    backup_target="default", namespace="longhorn-system")
-        args.update(options)
-        return restore.entry(self.data, **args)
+    def entry(self, target="bazarr-config"):
+        selection = restore.Selection("bazarr-config", target, "longhorn")
+        return restore.plan_entry(self.data, selection, "default", "longhorn-system")
 
     def test_plan_only_reads_and_preserves_backup_policy(self):
         plan = self.plan()
@@ -109,7 +106,7 @@ class RestoreTests(unittest.TestCase):
         self.assertEqual(manifest["spec"]["restoreVolumeRecurringJob"], "disabled")
 
     def test_clone_uses_existing_source_but_new_destination(self):
-        self.data["volumes.longhorn.io"] = [{"metadata": {"name": "bazarr-config"}}]
+        self.data.volumes = [{"metadata": {"name": "bazarr-config"}}]
         plan = self.plan(volume=["bazarr-config=bazarr-restore-test"], pv=None,
                          storage_class="longhorn")
         item = plan["volumes"][0]
@@ -123,7 +120,7 @@ class RestoreTests(unittest.TestCase):
         self.cluster.run.assert_not_called()
 
     def test_empty_recovery_job_policy_disables_default_recurring_group(self):
-        self.data["backupvolumes.longhorn.io"][0]["status"]["labels"]["VolumeRecurringJobInfo"] = "{}"
+        self.data.backup_volumes[0]["status"]["labels"]["VolumeRecurringJobInfo"] = "{}"
         item = self.entry()
         self.assertEqual(item["manifest"]["metadata"]["labels"], {
             "recurring-job-group.longhorn.io/default": "disabled",
@@ -133,7 +130,7 @@ class RestoreTests(unittest.TestCase):
     def test_clone_does_not_require_or_copy_recurring_job_metadata(self):
         for metadata in ({}, {"VolumeRecurringJobInfo": "invalid-json"}):
             with self.subTest(metadata=metadata):
-                self.data["backupvolumes.longhorn.io"][0]["status"]["labels"] = metadata
+                self.data.backup_volumes[0]["status"]["labels"] = metadata
                 item = self.entry(target="bazarr-restore-test")
                 self.assertEqual(item["manifest"]["metadata"]["labels"], {
                     "recurring-job-group.longhorn.io/default": "disabled",
@@ -181,7 +178,7 @@ class RestoreTests(unittest.TestCase):
             with self.subTest(label=label):
                 volume = deepcopy(plan["volumes"][0]["manifest"])
                 volume["metadata"]["labels"][label] = "enabled"
-                self.data["volumes.longhorn.io"] = [volume]
+                self.data.volumes = [volume]
                 with self.assertRaisesRegex(restore.RestoreError, "destination exists"):
                     self.apply()
                 self.cluster.run.assert_not_called()
@@ -189,49 +186,54 @@ class RestoreTests(unittest.TestCase):
     def test_dynamic_source_can_restore_without_live_pv(self):
         source = "pvc-12345678-1234-1234-1234-123456789abc"
         add_source(self.data, source)
-        self.data["pv"] = []
+        self.data.pvs = []
         plan = self.plan(volume=[f"{source}=openbao-recovered"], pv=None, storage_class="longhorn")
         self.assertEqual(plan["volumes"][0]["source"], source)
 
     def test_existing_destinations_are_skipped_without_claiming_health(self):
-        self.data["volumes.longhorn.io"] = [{"metadata": {"name": "bazarr-config"}}]
+        self.data.volumes = [{"metadata": {"name": "bazarr-config"}}]
         self.assertEqual(self.plan()["volumes"], [])
         self.assertIn("health and data have not been checked", restore.sys.stderr.getvalue())
         self.cluster.run.assert_not_called()
 
     def test_statusless_and_incomplete_backups_do_not_hide_completed_backup(self):
-        self.data["backups.longhorn.io"] += [
+        self.data.backups += [
             {"spec": {}}, {"status": {}},
             {"status": {"volumeName": "bazarr-config", "backupTargetName": "default", "state": "InProgress"}},
         ]
         self.assertEqual(self.plan()["volumes"][0]["backupName"], "backup-old")
 
     def test_no_completed_backup_produces_no_plan(self):
-        self.data["backups.longhorn.io"] = [{"spec": {}}]
+        self.data.backups = [{"spec": {}}]
         with self.assertRaisesRegex(restore.RestoreError, "no completed backup"):
             self.plan()
         self.assertFalse(self.path.exists())
         self.cluster.run.assert_not_called()
 
     def test_newest_backup_is_chosen_by_instant_instead_of_lexical_order(self):
-        self.data["backups.longhorn.io"] = [
+        self.data.backups = [
             backup(backup_name="newer", when="2026-11-22T01:00:00+00:00"),
             backup(backup_name="older", when="2026-11-22T02:00:00+02:00"),
         ]
         self.assertEqual(self.plan()["volumes"][0]["backupName"], "newer")
 
     def test_other_backup_targets_are_never_selected(self):
-        self.data["backups.longhorn.io"].append(
+        self.data.backups.append(
             backup(backup_name="newer-elsewhere", when="2026-11-24T00:00:00Z", target="other"))
-        self.data["backupvolumes.longhorn.io"].append({
+        self.data.backup_volumes.append({
             "spec": {"volumeName": "bazarr-config", "backupTargetName": "other"},
         })
         self.assertEqual(self.plan()["volumes"][0]["backupName"], "backup-old")
 
-    def test_unavailable_backup_target_is_rejected(self):
-        self.data["backuptargets.longhorn.io"][0]["status"]["available"] = False
-        with self.assertRaisesRegex(restore.RestoreError, "not available"):
-            self.plan()
+    def test_unavailable_or_deleting_backup_target_is_rejected(self):
+        original = deepcopy(self.data)
+        for section, key, value in (("status", "available", False),
+                                    ("metadata", "deletionTimestamp", "2026-11-25T00:00:00Z")):
+            with self.subTest(key=key):
+                self.data = deepcopy(original)
+                self.data.backup_targets[0][section][key] = value
+                with self.assertRaisesRegex(restore.RestoreError, "not available"):
+                    self.plan()
 
     def test_wrong_backup_url_is_rejected(self):
         for url in ("nfs://other/longhorn?backup=x&volume=bazarr-config",
@@ -240,25 +242,25 @@ class RestoreTests(unittest.TestCase):
                     "nfs://nas/longhorn?volume=bazarr-config",
                     "nfs://nas/longhorn?backup=other-backup&volume=bazarr-config"):
             with self.subTest(url=url):
-                self.data["backups.longhorn.io"][0]["status"]["url"] = url
+                self.data.backups[0]["status"]["url"] = url
                 with self.assertRaisesRegex(restore.RestoreError, "invalid backup URL"):
                     self.entry()
 
     def test_missing_storage_class_never_defaults_replicas(self):
-        self.data["storageclass"] = []
+        self.data.storage_classes = []
         with self.assertRaisesRegex(restore.RestoreError, "missing Longhorn StorageClass"):
             self.plan()
         self.cluster.run.assert_not_called()
 
     def test_storage_class_missing_replica_count_reports_class_and_parameter(self):
-        del self.data["storageclass"][0]["parameters"]["numberOfReplicas"]
+        del self.data.storage_classes[0]["parameters"]["numberOfReplicas"]
         with self.assertRaisesRegex(restore.RestoreError, r"longhorn.*numberOfReplicas|numberOfReplicas.*longhorn"):
             self.plan()
         self.assertFalse(self.path.exists())
         self.cluster.run.assert_not_called()
 
     def test_supported_storage_class_settings_are_preserved_with_volume_types(self):
-        self.data["storageclass"][0]["parameters"].update({
+        self.data.storage_classes[0]["parameters"].update({
             "staleReplicaTimeout": "30", "disableRevisionCounter": "true",
             "dataLocality": "best-effort", "unmapMarkSnapChainRemoved": "enabled",
         })
@@ -268,33 +270,33 @@ class RestoreTests(unittest.TestCase):
         self.assertIs(spec["revisionCounterDisabled"], True)
         self.assertEqual(spec["dataLocality"], "best-effort")
         self.assertEqual(spec["unmapMarkSnapChainRemoved"], "enabled")
-        self.data["storageclass"][0]["parameters"]["disableRevisionCounter"] = "false"
+        self.data.storage_classes[0]["parameters"]["disableRevisionCounter"] = "false"
         self.assertIs(self.entry()["manifest"]["spec"]["revisionCounterDisabled"], False)
 
     def test_malformed_or_unsupported_storage_class_settings_are_rejected(self):
-        original = deepcopy(self.data["storageclass"][0]["parameters"])
+        original = deepcopy(self.data.storage_classes[0]["parameters"])
         for key, value in (("staleReplicaTimeout", "thirty"),
                            ("disableRevisionCounter", "maybe"),
                            ("dataLocality", "nonsense"),
                            ("unmapMarkSnapChainRemoved", "nonsense"),
                            ("unsupportedParameter", "true")):
             with self.subTest(key=key):
-                self.data["storageclass"][0]["parameters"] = dict(original, **{key: value})
+                self.data.storage_classes[0]["parameters"] = dict(original, **{key: value})
                 with self.assertRaises(restore.RestoreError):
                     self.plan()
                 self.assertFalse(self.path.exists())
                 self.cluster.run.assert_not_called()
 
     def test_apply_rejects_supported_storage_class_setting_drift_before_any_write(self):
-        self.data["storageclass"][0]["parameters"]["staleReplicaTimeout"] = "30"
+        self.data.storage_classes[0]["parameters"]["staleReplicaTimeout"] = "30"
         self.plan()
-        self.data["storageclass"][0]["parameters"]["staleReplicaTimeout"] = "60"
+        self.data.storage_classes[0]["parameters"]["staleReplicaTimeout"] = "60"
         with self.assertRaisesRegex(restore.RestoreError, "plan changed"):
             self.apply()
         self.cluster.run.assert_not_called()
 
     def test_backup_volume_and_snapshot_size_must_match(self):
-        self.data["backupvolumes.longhorn.io"][0]["status"]["size"] = str(2**31)
+        self.data.backup_volumes[0]["status"]["size"] = str(2**31)
         with self.assertRaisesRegex(restore.RestoreError, "backup volume size differs"):
             self.plan()
         self.assertFalse(self.path.exists())
@@ -304,7 +306,7 @@ class RestoreTests(unittest.TestCase):
         for key, value in (("longhorn.io/volume-encrypted", "enabled"),
                            ("longhorn.io/volume-access-mode", "rwx")):
             with self.subTest(key=key):
-                self.data["backups.longhorn.io"][0]["status"]["labels"] = {key: value}
+                self.data.backups[0]["status"]["labels"] = {key: value}
                 with self.assertRaisesRegex(restore.RestoreError, "encrypted or non-RWO backups"):
                     self.plan()
                 self.assertFalse(self.path.exists())
@@ -312,11 +314,11 @@ class RestoreTests(unittest.TestCase):
 
     def test_encryption_label_on_snapshot_or_backup_volume_is_rejected(self):
         original = deepcopy(self.data)
-        for resource in ("backups.longhorn.io", "backupvolumes.longhorn.io"):
+        for resource in ("backups", "backup_volumes"):
             for key in ("volume-encrypted", "longhorn.io/volume-encrypted"):
                 with self.subTest(resource=resource, key=key):
                     self.data = deepcopy(original)
-                    self.data[resource][0]["status"].setdefault("labels", {})[key] = "enabled"
+                    getattr(self.data, resource)[0]["status"].setdefault("labels", {})[key] = "enabled"
                     with self.assertRaisesRegex(restore.RestoreError, "encrypted"):
                         self.plan()
                     self.assertFalse(self.path.exists())
@@ -325,17 +327,17 @@ class RestoreTests(unittest.TestCase):
     def test_missing_and_disabled_encryption_labels_allow_restore(self):
         original = deepcopy(self.data)
         self.assertIs(self.entry()["manifest"]["spec"]["encrypted"], False)
-        for resource in ("backups.longhorn.io", "backupvolumes.longhorn.io"):
+        for resource in ("backups", "backup_volumes"):
             for key in ("volume-encrypted", "longhorn.io/volume-encrypted"):
                 with self.subTest(resource=resource, key=key):
                     self.data = deepcopy(original)
-                    self.data[resource][0]["status"].setdefault("labels", {})[key] = "disabled"
+                    getattr(self.data, resource)[0]["status"].setdefault("labels", {})[key] = "disabled"
                     self.assertIs(self.entry()["manifest"]["spec"]["encrypted"], False)
 
     def test_encrypted_and_backing_image_storage_classes_are_rejected(self):
         for key, value in (("encrypted", "true"), ("backingImage", "special-image")):
             with self.subTest(key=key):
-                self.data["storageclass"][0]["parameters"] = {"numberOfReplicas": "3", key: value}
+                self.data.storage_classes[0]["parameters"] = {"numberOfReplicas": "3", key: value}
                 with self.assertRaisesRegex(restore.RestoreError, "encrypted|backing-image"):
                     self.plan()
                 self.assertFalse(self.path.exists())
@@ -347,19 +349,19 @@ class RestoreTests(unittest.TestCase):
                            ("accessModes", ["ReadWriteMany"]), ("volumeMode", "Block")):
             with self.subTest(key=key):
                 data = deepcopy(self.data)
-                self.data["pv"][0]["spec"][key] = value
+                self.data.pvs[0]["spec"][key] = value
                 with self.assertRaisesRegex(restore.RestoreError, "PV capacity, class or access mode"):
                     self.entry()
                 self.data = data
 
     def test_missing_recurring_job_metadata_requires_operator_attention(self):
-        self.data["backupvolumes.longhorn.io"][0]["status"]["labels"] = {}
+        self.data.backup_volumes[0]["status"]["labels"] = {}
         with self.assertRaisesRegex(restore.RestoreError, "backup policy"):
             self.plan()
 
     def test_second_invalid_volume_leaves_no_partial_plan(self):
         add_source(self.data, "prowlarr-config", "longhorn-no-backup")
-        self.data["backups.longhorn.io"] = self.data["backups.longhorn.io"][:1]
+        self.data.backups = self.data.backups[:1]
         with self.assertRaisesRegex(restore.RestoreError, "prowlarr-config: no completed backup"):
             self.plan(pv=["bazarr-config", "prowlarr-config"])
         self.assertFalse(self.path.exists())
@@ -377,13 +379,26 @@ class RestoreTests(unittest.TestCase):
                       storage_class="longhorn")
         self.assertFalse(self.path.exists())
 
+    def test_empty_destination_is_never_read_as_in_place_restore(self):
+        with self.assertRaisesRegex(restore.RestoreError, "invalid Longhorn volume name"):
+            self.plan(volume=["bazarr-config="], pv=None, storage_class="longhorn")
+        self.assertFalse(self.path.exists())
+
+    def test_duplicate_plan_destinations_stop_apply_before_any_write(self):
+        document = self.plan()
+        document["volumes"].append(deepcopy(document["volumes"][0]))
+        self.path.write_text(json.dumps(document))
+        with self.assertRaisesRegex(restore.RestoreError, "duplicate destination"):
+            self.apply()
+        self.cluster.run.assert_not_called()
+
     def test_unknown_pv_is_rejected(self):
         with self.assertRaisesRegex(restore.RestoreError, "Longhorn PVs not found"):
             self.plan(pv=["missing"])
 
     def test_all_static_omits_dynamic_and_non_longhorn_pvs(self):
         add_source(self.data, "pvc-12345678-1234-1234-1234-123456789abc")
-        self.data["pv"].append({"metadata": {"name": "nfs"}, "spec": {"nfs": {}}})
+        self.data.pvs.append({"metadata": {"name": "nfs"}, "spec": {"nfs": {}}})
         self.assertEqual(len(self.plan(pv=None, all_static=True)["volumes"]), 1)
 
     def test_all_static_keeps_human_named_pvc_prefix(self):
@@ -393,29 +408,29 @@ class RestoreTests(unittest.TestCase):
         self.assertEqual({item["source"] for item in plan["volumes"]}, {"bazarr-config", "pvc-appdata"})
 
     def test_legacy_encrypted_source_volume_is_rejected_for_unencrypted_copy(self):
-        self.data["volumes.longhorn.io"] = [{"metadata": {"name": "bazarr-config"},
-                                             "spec": {"encrypted": True}}]
+        self.data.volumes = [{"metadata": {"name": "bazarr-config"},
+                              "spec": {"encrypted": True}}]
         with self.assertRaisesRegex(restore.RestoreError, "source volume is encrypted"):
             self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-no-backup")
         self.assertFalse(self.path.exists())
         self.cluster.run.assert_not_called()
 
     def test_legacy_encrypted_source_class_is_rejected_when_volume_is_lost(self):
-        self.data["pv"] = []
-        self.data["backupvolumes.longhorn.io"][0]["status"]["storageClassName"] = "longhorn"
-        self.data["storageclass"][0]["parameters"]["encrypted"] = "true"
+        self.data.pvs = []
+        self.data.backup_volumes[0]["status"]["storageClassName"] = "longhorn"
+        self.data.storage_classes[0]["parameters"]["encrypted"] = "true"
         with self.assertRaisesRegex(restore.RestoreError, "source StorageClass is encrypted"):
             self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-no-backup")
         self.assertFalse(self.path.exists())
         self.cluster.run.assert_not_called()
 
     def test_legacy_source_pv_class_is_checked_without_recorded_backup_class(self):
-        self.data["storageclass"][0]["parameters"]["encrypted"] = "true"
+        self.data.storage_classes[0]["parameters"]["encrypted"] = "true"
         with self.assertRaisesRegex(restore.RestoreError, "source StorageClass is encrypted"):
             self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn-no-backup")
 
     def test_raw_block_source_is_rejected_for_renamed_filesystem_copy(self):
-        self.data["pv"][0]["spec"]["volumeMode"] = "Block"
+        self.data.pvs[0]["spec"]["volumeMode"] = "Block"
         with self.assertRaisesRegex(restore.RestoreError, "source PV must use Filesystem"):
             self.plan(volume=["bazarr-config=test-copy"], pv=None, storage_class="longhorn")
         self.assertFalse(self.path.exists())
@@ -423,14 +438,14 @@ class RestoreTests(unittest.TestCase):
     def test_deleting_newer_backup_is_excluded_from_selection(self):
         deleting = backup(backup_name="deleting", when="2026-11-24T00:00:00Z")
         deleting["metadata"]["deletionTimestamp"] = "2026-11-25T00:00:00Z"
-        self.data["backups.longhorn.io"].append(deleting)
+        self.data.backups.append(deleting)
         self.assertEqual(self.plan()["volumes"][0]["backupName"], "backup-old")
 
     def test_deleting_pinned_backup_or_backup_volume_stops_apply(self):
         self.plan()
-        for resource in ("backups.longhorn.io", "backupvolumes.longhorn.io"):
+        for resource in ("backups", "backup_volumes"):
             with self.subTest(resource=resource):
-                metadata = self.data[resource][0].setdefault("metadata", {})
+                metadata = getattr(self.data, resource)[0].setdefault("metadata", {})
                 metadata["deletionTimestamp"] = "2026-11-25T00:00:00Z"
                 with self.assertRaises(restore.RestoreError):
                     self.apply()
@@ -438,20 +453,20 @@ class RestoreTests(unittest.TestCase):
                 del metadata["deletionTimestamp"]
 
     def test_deleting_backup_volume_prevents_planning(self):
-        self.data["backupvolumes.longhorn.io"][0]["metadata"] = {"deletionTimestamp": "2026-11-25T00:00:00Z"}
+        self.data.backup_volumes[0]["metadata"] = {"deletionTimestamp": "2026-11-25T00:00:00Z"}
         with self.assertRaisesRegex(restore.RestoreError, "expected one synced backup volume"):
             self.plan()
         self.assertFalse(self.path.exists())
 
     def test_decimal_pv_capacity_matches_exact_backup_bytes(self):
-        self.data["pv"][0]["spec"]["capacity"]["storage"] = "32768M"
-        self.data["backups.longhorn.io"][0]["status"]["volumeSize"] = "32768000000"
-        self.data["backupvolumes.longhorn.io"][0]["status"]["size"] = "32768000000"
+        self.data.pvs[0]["spec"]["capacity"]["storage"] = "32768M"
+        self.data.backups[0]["status"]["volumeSize"] = "32768000000"
+        self.data.backup_volumes[0]["status"]["size"] = "32768000000"
         self.assertEqual(self.plan()["volumes"][0]["manifest"]["spec"]["size"], "32768000000")
 
     def test_apply_uses_pinned_backup_even_when_newer_backup_appears(self):
         plan = self.plan()
-        self.data["backups.longhorn.io"].append(
+        self.data.backups.append(
             backup(backup_name="newer", when="2026-11-24T00:00:00Z"))
         self.apply()
         calls = self.cluster.run.call_args_list
@@ -463,7 +478,7 @@ class RestoreTests(unittest.TestCase):
     def test_apply_validates_entire_batch_before_any_admission_or_write(self):
         add_source(self.data, "prowlarr-config", "longhorn-no-backup")
         self.plan(pv=["bazarr-config", "prowlarr-config"])
-        self.data["backups.longhorn.io"] = self.data["backups.longhorn.io"][:1]
+        self.data.backups = self.data.backups[:1]
         with self.assertRaisesRegex(restore.RestoreError, "no completed backup"):
             self.apply()
         self.cluster.run.assert_not_called()
@@ -546,21 +561,21 @@ class RestoreTests(unittest.TestCase):
         self.cluster.run.assert_called_once()
         self.assertIn("--dry-run=server", self.cluster.run.call_args.args)
         self.cluster.run.reset_mock()
-        self.data["volumes.longhorn.io"] = [standby]
+        self.data.volumes = [standby]
         with self.assertRaisesRegex(restore.RestoreError, "destination exists"):
             self.apply()
         self.cluster.run.assert_not_called()
 
     def test_destination_appearing_after_plan_is_never_overwritten(self):
         self.plan()
-        self.data["volumes.longhorn.io"] = [{"metadata": {"name": "bazarr-config"}, "spec": {}}]
+        self.data.volumes = [{"metadata": {"name": "bazarr-config"}, "spec": {}}]
         with self.assertRaisesRegex(restore.RestoreError, "destination exists"):
             self.apply()
         self.cluster.run.assert_not_called()
 
     def test_matching_restore_is_skipped_on_retry(self):
         plan = self.plan()
-        self.data["volumes.longhorn.io"] = [deepcopy(plan["volumes"][0]["manifest"])]
+        self.data.volumes = [deepcopy(plan["volumes"][0]["manifest"])]
         self.apply()
         self.cluster.run.assert_not_called()
 
@@ -573,7 +588,7 @@ class RestoreTests(unittest.TestCase):
             with self.subTest(key=key):
                 volume = deepcopy(plan["volumes"][0]["manifest"])
                 volume[section][key] = value
-                self.data["volumes.longhorn.io"] = [volume]
+                self.data.volumes = [volume]
                 with self.assertRaisesRegex(restore.RestoreError, "destination exists|source volume is encrypted"):
                     self.apply()
                 self.cluster.run.assert_not_called()
@@ -582,7 +597,7 @@ class RestoreTests(unittest.TestCase):
         plan = self.plan()
         volume = deepcopy(plan["volumes"][0]["manifest"])
         volume["metadata"]["deletionTimestamp"] = "2026-11-24T00:00:00Z"
-        self.data["volumes.longhorn.io"] = [volume]
+        self.data.volumes = [volume]
         with self.assertRaisesRegex(restore.RestoreError, "destination exists"):
             self.apply()
         self.cluster.run.assert_not_called()
@@ -609,32 +624,23 @@ class RestoreTests(unittest.TestCase):
         with self.assertRaisesRegex(restore.RestoreError, "plan changed"):
             self.apply()
         self.path.write_text(json.dumps(original))
-        self.data["storageclass"][0]["parameters"]["numberOfReplicas"] = "2"
+        self.data.storage_classes[0]["parameters"]["numberOfReplicas"] = "2"
         with self.assertRaisesRegex(restore.RestoreError, "plan changed"):
             self.apply()
         self.cluster.run.assert_not_called()
 
-    def test_cli_requires_selection_and_context_without_cluster_access(self):
-        for args in ([], ["plan", "--context", "homelab", "--output", str(self.path)],
-                     ["plan", "--pv", "bazarr-config", "--output", str(self.path)],
-                     ["apply", str(self.path)]):
-            with self.subTest(args=args), patch.object(restore, "Cluster") as cluster:
-                with self.assertRaises(SystemExit) as error:
-                    restore.main(args)
-                self.assertEqual(error.exception.code, 2)
-                cluster.assert_not_called()
 
-    def test_empty_context_is_rejected_before_constructing_cluster(self):
-        for command in ("plan", "apply"):
-            for context in ("", "  "):
-                args = [command, "--context", context]
-                args += (["--pv", "bazarr-config", "--output", str(self.path)]
-                         if command == "plan" else [str(self.path)])
-                with self.subTest(command=command, context=context), patch.object(restore, "Cluster") as cluster:
-                    with self.assertRaises(SystemExit) as error:
-                        restore.main(args)
-                    self.assertEqual(error.exception.code, 2)
-                    cluster.assert_not_called()
+class FakeClock:
+    """Stands in for the time module; sleeping advances the clock instantly."""
+
+    def __init__(self):
+        self.now = 0.0
+
+    def monotonic(self):
+        return self.now
+
+    def sleep(self, seconds):
+        self.now += seconds
 
 
 class InspectTests(unittest.TestCase):
@@ -647,21 +653,26 @@ class InspectTests(unittest.TestCase):
         }
         self.pvs = []
         self.job_status = {"succeeded": 1}
+        self.leftover = None
         self.calls = []
-        self.cluster = Mock(spec=restore.Cluster)
-        self.cluster.items.side_effect = lambda key: deepcopy(
-            [self.volume] if key == "volumes.longhorn.io" else self.pvs)
-        self.cluster.run.side_effect = self.kubectl
+        self.cluster = restore.Cluster("homelab", "longhorn-system")
         self.addCleanup(patch.stopall)
-        patch.object(restore.time, "sleep").start()
+        patch.object(self.cluster, "run", side_effect=self.kubectl).start()
+        patch.object(restore, "time", FakeClock()).start()
         patch("sys.stdout", new=io.StringIO()).start()
         patch("sys.stderr", new=io.StringIO()).start()
 
     def kubectl(self, *args, document=None):
         self.calls.append((args, document))
-        if args[:2] == ("get", "job") and "json" in args:
-            return json.dumps({"status": self.job_status})
-        if args[0] == "logs":
+        verb, resource = args[:2]
+        if verb == "get" and args[-1] == "json":
+            if resource == "job":
+                return json.dumps({"status": self.job_status})
+            items = [self.volume] if resource == "volumes.longhorn.io" else self.pvs
+            return json.dumps({"items": items})
+        if verb == "get" and resource == self.leftover:
+            return f"{resource}/{args[2]}\n"
+        if verb == "logs":
             return "SQLITE bazarr.db: ok\n"
         return ""
 
@@ -682,22 +693,38 @@ class InspectTests(unittest.TestCase):
         self.assertEqual(pv["spec"]["persistentVolumeReclaimPolicy"], "Retain")
         self.assertEqual(pvc["spec"]["volumeName"], pv["metadata"]["name"])
         pod = job["spec"]["template"]["spec"]
+        container = pod["containers"][0]
         self.assertTrue(pod["volumes"][0]["persistentVolumeClaim"]["readOnly"])
-        self.assertTrue(pod["containers"][0]["volumeMounts"][0]["readOnly"])
+        self.assertTrue(container["volumeMounts"][0]["readOnly"])
         self.assertFalse(pod["automountServiceAccountToken"])
+        mounts = [mount["mountPath"] for mount in container["volumeMounts"]]
+        self.assertEqual(container["command"], ["python3", "-c", restore.INSPECT_SCRIPT.read_text(), *mounts])
         self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
 
     def test_failed_or_stuck_inspection_still_cleans_up(self):
-        self.job_status = {"failed": 1}
-        with self.assertRaisesRegex(restore.RestoreError, "inspection failed"):
+        for job_status, error in (({"failed": 1}, "inspection failed"), ({}, "no result after 60s")):
+            with self.subTest(job_status=job_status):
+                self.calls.clear()
+                self.job_status = job_status
+                with self.assertRaisesRegex(restore.RestoreError, error):
+                    self.inspect()
+                self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
+
+    def test_stuck_cleanup_names_the_object_to_delete_manually(self):
+        self.leftover = "pv"
+        with self.assertRaisesRegex(restore.RestoreError, "bazarr-restore-test-inspect: pv was not removed"):
             self.inspect()
         self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
-        self.calls.clear()
-        self.job_status = {}
-        with patch.object(restore.time, "monotonic", side_effect=[0, 0, 100, 100, 100, 100]):
-            with self.assertRaisesRegex(restore.RestoreError, "no result"):
-                self.inspect()
-        self.assertEqual(self.deleted(), ["job", "pvc", "pv"])
+
+    def test_leftover_inspection_claim_or_job_is_never_reused(self):
+        for kind in ("pvc", "job"):
+            with self.subTest(kind=kind):
+                self.calls.clear()
+                self.leftover = kind
+                with self.assertRaisesRegex(restore.RestoreError, f"{kind} already exists in default"):
+                    self.inspect()
+                self.assertEqual(self.created(), [])
+                self.assertEqual(self.deleted(), [])
 
     def test_only_completed_detached_restores_are_inspected(self):
         for field, value in (("spec", {"fromBackup": ""}), ("spec", {"encrypted": True}),
@@ -720,11 +747,22 @@ class InspectTests(unittest.TestCase):
 
 
 class InspectScriptTests(unittest.TestCase):
+    def test_script_is_found_when_the_cli_is_symlinked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            link = Path(directory) / "longhorn_restore.py"
+            link.symlink_to(Path(restore.__file__).resolve())
+            spec = importlib.util.spec_from_file_location("linked_longhorn_restore", link)
+            linked = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(linked)
+        self.assertEqual(linked.INSPECT_SCRIPT, restore.INSPECT_SCRIPT)
+        self.assertTrue(linked.INSPECT_SCRIPT.is_file())
+
     def check(self, populate):
         with tempfile.TemporaryDirectory() as volume, tempfile.TemporaryDirectory() as scratch:
             populate(Path(volume))
-            script = restore.INSPECT_SCRIPT.replace('"/volume"', repr(volume)).replace('"/scratch"', repr(scratch))
-            result = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True)
+            script = restore.INSPECT_SCRIPT.read_text()
+            result = subprocess.run([sys.executable, "-I", "-c", script, volume, scratch],
+                                    capture_output=True, text=True, check=False)
             return result.returncode, result.stdout
 
     def test_wal_database_passes_and_corruption_or_empty_volume_fails(self):
@@ -785,8 +823,7 @@ class KubectlTests(unittest.TestCase):
     @patch.object(restore.subprocess, "run")
     def test_reads_use_explicit_context_and_only_query_safe_resources(self, run):
         run.return_value = Mock(returncode=0, stdout='{"items": []}', stderr="")
-        cluster = restore.Cluster("homelab", "longhorn-system")
-        restore.inventory(cluster)
+        restore.Cluster("homelab", "longhorn-system").inventory()
         queried = []
         for call in run.call_args_list:
             command = call.args[0]
@@ -796,6 +833,77 @@ class KubectlTests(unittest.TestCase):
         self.assertNotIn("secret", queried)
         self.assertNotIn("externalsecret", queried)
         self.assertIn("backups.longhorn.io", queried)
+
+    @patch.object(restore.subprocess, "run")
+    def test_inventory_fills_each_field_from_its_own_query(self, run):
+        def kubectl(command, **_):
+            query = command[5:-2]
+            return Mock(returncode=0, stdout=json.dumps({"items": [query]}), stderr="")
+
+        run.side_effect = kubectl
+        longhorn = ["-n", "longhorn-system"]
+        self.assertEqual(restore.Cluster("homelab", "longhorn-system").inventory(), restore.Inventory(
+            volumes=[["volumes.longhorn.io", *longhorn]],
+            backups=[["backups.longhorn.io", *longhorn]],
+            backup_volumes=[["backupvolumes.longhorn.io", *longhorn]],
+            backup_targets=[["backuptargets.longhorn.io", *longhorn]],
+            storage_classes=[["storageclass"]],
+            pvs=[["pv"]],
+        ))
+
+    @patch.object(restore.subprocess, "run")
+    def test_unidentified_cluster_is_rejected(self, run):
+        run.return_value = Mock(returncode=0, stdout="\n", stderr="")
+        with self.assertRaisesRegex(restore.RestoreError, "could not identify destination cluster"):
+            restore.Cluster("homelab", "longhorn-system").identity()
+
+
+class CommandLineTests(unittest.TestCase):
+    ARGS = {
+        "plan": ["--pv", "bazarr-config", "--output", "plan.json"],
+        "apply": ["plan.json"],
+        "inspect": ["--volume", "bazarr-restore-test"],
+    }
+
+    def setUp(self):
+        self.addCleanup(patch.stopall)
+        self.stderr = patch("sys.stderr", new=io.StringIO()).start()
+        self.cluster = patch.object(restore, "Cluster").start()
+
+    def test_cli_requires_selection_and_context_without_cluster_access(self):
+        for args in ([], ["plan", "--context", "homelab", "--output", "plan.json"],
+                     ["plan", "--pv", "bazarr-config", "--output", "plan.json"],
+                     ["apply", "plan.json"]):
+            with self.subTest(args=args):
+                with self.assertRaises(SystemExit) as error:
+                    restore.main(args)
+                self.assertEqual(error.exception.code, 2)
+                self.cluster.assert_not_called()
+
+    def test_empty_context_is_rejected_before_constructing_cluster(self):
+        for command, args in self.ARGS.items():
+            for context in ("", "  "):
+                with self.subTest(command=command, context=context):
+                    with self.assertRaises(SystemExit) as error:
+                        restore.main([command, "--context", context, *args])
+                    self.assertEqual(error.exception.code, 2)
+                    self.cluster.assert_not_called()
+
+    def test_each_command_runs_against_the_named_context(self):
+        for command, args in self.ARGS.items():
+            with self.subTest(command=command), patch.object(restore, command) as handler:
+                self.cluster.reset_mock()
+                restore.main([command, "--context", "homelab", *args])
+                self.cluster.assert_called_once_with("homelab", "longhorn-system")
+                handler.assert_called_once()
+                self.assertIs(handler.call_args.args[1], self.cluster.return_value)
+
+    def test_restore_errors_exit_with_a_message_instead_of_a_traceback(self):
+        with patch.object(restore, "apply", side_effect=restore.RestoreError("plan changed")):
+            with self.assertRaises(SystemExit) as error:
+                restore.main(["apply", "--context", "homelab", "plan.json"])
+        self.assertEqual(error.exception.code, 1)
+        self.assertEqual(self.stderr.getvalue(), "ERROR: plan changed\n")
 
 
 if __name__ == "__main__":
