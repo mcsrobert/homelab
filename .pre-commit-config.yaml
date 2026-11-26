@@ -61,7 +61,7 @@ repos:
         name: Longhorn restore tests
         entry: python3 -m unittest discover -s scripts -p test_longhorn_restore.py
         language: system
-        files: ^scripts/(test_)?longhorn_restore\.py$
+        files: ^scripts/(test_)?longhorn_restore(_inspect)?\.py$
         pass_filenames: false
 
       - id: gitleaks
