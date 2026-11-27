@@ -46,6 +46,7 @@
       group: {commitMessageTopic: '{{{groupName}}} group'},
       matchFileNames: ['containers/t3-code/**'],
       schedule: ['on friday after 02:00 and before 04:00'],
+      updateNotScheduled: false,
     },
     {
       groupName: 'Renovate',
@@ -55,6 +56,7 @@
         'renovatebot/pre-commit-hooks',
       ],
       schedule: ['on friday after 02:00 and before 04:00'],
+      updateNotScheduled: false,
     },
   ]
 }

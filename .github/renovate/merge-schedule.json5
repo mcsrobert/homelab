@@ -5,11 +5,6 @@
   ],
   packageRules: [
     {
-      description: 'Keep separate minor release streams for selected fast-moving packages',
-      matchPackageNames: ['ghcr.io/grafana-community/helm-charts/grafana'],
-      separateMultipleMinor: true,
-    },
-    {
       description: 'Automatically schedule and merge releases',
       matchUpdateTypes: ['minor', 'patch', 'digest', 'pin'],
       matchPackageNames: [
@@ -28,6 +23,11 @@
       matchPackageNames: ['ghcr.io/mcsrobert/**'],
       schedule: ['at any time'],
       addLabels: ['renovate/skip-soak'],
+    },
+    {
+      description: 'Keep separate minor release streams for selected fast-moving packages',
+      matchPackageNames: ['ghcr.io/grafana-community/helm-charts/grafana'],
+      separateMultipleMinor: true,
     },
   ],
 }
