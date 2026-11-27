@@ -113,6 +113,16 @@ spec:
           resources:
             requests:
               storage: 50Gi
+        # Longhorn cannot place strict-local replicas on the Raspberry Pi.
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: NotIn
+                      values:
+                        - raspberrypi
         extraArgs:
           maxLabelsPerTimeseries: "100"
         resources:

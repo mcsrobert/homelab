@@ -29,9 +29,12 @@ spec:
       logLevel: Error
       orphanResourceAutoDeletion: replica-data;instance
       allowCollectingLonghornUsageMetrics: false
+      disableRevisionCounter: '{"v1":"false"}'
+      nodeDrainPolicy: allow-if-replica-is-stopped
     defaultBackupStore:
       backupTarget: "nfs://${NAS_IP}:/volume1/longhorn"
     persistence:
+      disableRevisionCounter: "false"
       recurringJobSelector:
         enable: true
         jobList: '[{"name": "backup", "isGroup": true}]'
@@ -58,8 +61,8 @@ spec:
         allowVolumeExpansion: true
         parameters: &classParameters
           numberOfReplicas: "3"
-          staleReplicaTimeout: "30"
-          disableRevisionCounter: "true"
+          staleReplicaTimeout: "2880"
+          disableRevisionCounter: "false"
           dataLocality: disabled
           unmapMarkSnapChainRemoved: ignored
           dataEngine: v1
@@ -70,18 +73,19 @@ spec:
           name: longhorn-no-backup-single-replication
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
-        parameters:
+        parameters: &singleReplicaParameters
           !!merge <<: *classParameters
           numberOfReplicas: "1"
+          dataLocality: strict-local
+          # Longhorn always disables the revision counter for strict-local volumes.
+          disableRevisionCounter: "true"
       - apiVersion: storage.k8s.io/v1
         kind: StorageClass
         metadata:
           name: longhorn-cnpg
         provisioner: driver.longhorn.io
         allowVolumeExpansion: true
-        parameters:
-          !!merge <<: *classParameters
-          numberOfReplicas: "1"
+        parameters: *singleReplicaParameters
       - apiVersion: gateway.networking.k8s.io/v1
         kind: HTTPRoute
         metadata:
