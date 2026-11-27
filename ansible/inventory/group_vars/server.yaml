@@ -23,7 +23,7 @@ server_config_yaml: |
     - local-storage  # Longhorn provides persistent storage.
 
   flannel-backend: wireguard-native
-  flannel-ipv6-masq: false
+  flannel-ipv6-masq: true
 
   embedded-registry: true
 
