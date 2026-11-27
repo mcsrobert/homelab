@@ -12,6 +12,7 @@ metadata:
 stringData:
   CLUSTER_DOMAIN: example.invalid
   ADMIN_EMAIL: admin@example.invalid
+  ISP_CIDRv6: 3fff::/20
 ---
 apiVersion: v1
 kind: Secret
