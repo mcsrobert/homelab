@@ -130,3 +130,16 @@ spec:
                 description: >-
                   {{ $value | humanizePercentage }} of the requests to
                   {{ $labels.exported_service }} failed with a 5xx status over the last 10 minutes.
+            - alert: TraefikWildcardCertificateProbeFailed
+              expr: avg_over_time(probe_success{job=~"traefik-wildcard-ipv[46]"}[15m]) < 0.75
+              for: 5m
+              labels:
+                severity: critical
+              annotations:
+                summary: >-
+                  Traefik's wildcard certificate fails TLS verification ({{ $labels.job }})
+                description: >-
+                  Only {{ $value | humanizePercentage }} of the TLS handshakes with
+                  {{ $labels.instance }} verified in the last 15 minutes. Around 50% means one
+                  Traefik replica is affected. Check the websecure listener's ResolvedRefs
+                  condition and the ${CLUSTER_DOMAIN/./-}-cert Certificate.

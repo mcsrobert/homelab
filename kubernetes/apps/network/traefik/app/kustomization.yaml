@@ -6,3 +6,4 @@ resources:
   - ./certificate.yaml
   - ./helm-release.yaml
   - ./oci-repository.yaml
+  - ./probe.yaml
