@@ -1,19 +1,19 @@
 # The exporter uses this epoch with rewrite-timestamp to keep unchanged layer digests stable.
 ARG SOURCE_DATE_EPOCH=0
 
-FROM docker.io/library/node:26.13.1@sha256:d604e162935102ed79547f0465846f4938df702a19f0eaef3fe28903e41ec0db AS build
+FROM docker.io/library/node:26.13.1@sha256:f8e5d4bb28fa55c74f1345166a082a10b7c68f22304350c1ce0d18358ae94996 AS build
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # renovate: datasource=github-release-attachments depName=pingdotgg/t3code
-ARG T3CODE_VERSION=v0.1.11
-ARG T3CODE_SHA256=7d90a5af032fe0988a616403e0f51a6cb68eff7ed7a84bc40999cc3997dffd71
+ARG T3CODE_VERSION=v0.1.13
+ARG T3CODE_SHA256=c553c17db07030d032808989427db5022bf04027ebcec2218c69fb1a5fa1377f
 # renovate: datasource=github-release-attachments depName=jdx/mise
-ARG MISE_VERSION=v2026.11.13
-ARG MISE_SHA256=1d87e6bc2a069869d7f5fe4a6353429b83cd8cb9c12fea0782dae5f30b2a3683
+ARG MISE_VERSION=v2026.11.14
+ARG MISE_SHA256=7bd3b2d5ffff077a7662ba186c09600e5b40c1eee9df0c264ed67642ce0a8698
 # renovate: datasource=github-release-attachments depName=cli/cli
-ARG GH_VERSION=v2.105.0
-ARG GH_SHA256=b1278c75107423d818f1937fd92cafc9e5e9b606631568f68d7fb816f5885a02
+ARG GH_VERSION=v2.106.0
+ARG GH_SHA256=5e8a0c51e1a8345f36bd0b8bb88604b6a5388df16f3ab3e3b9b6d794fa223a67
 ARG MISE_TOOLS="kubectl flux2 helm kustomize jq yq kubeconform github:home-operations/flate"
 
 WORKDIR /download
@@ -57,7 +57,7 @@ RUN stray=$(find node_modules -mindepth 1 -maxdepth 1 ! -name @openai ! -name @a
 
 RUN chmod -R a+rX,go-w /opt/t3-code /etc/mise
 
-FROM docker.io/library/node:26.13.1@sha256:d604e162935102ed79547f0465846f4938df702a19f0eaef3fe28903e41ec0db
+FROM docker.io/library/node:26.13.1@sha256:f8e5d4bb28fa55c74f1345166a082a10b7c68f22304350c1ce0d18358ae94996
 
 # Keep frequently updated tools in later layers to reduce unpacking after an update.
 COPY --from=build /opt/t3-code/bin/gh /opt/t3-code/bin/gh
