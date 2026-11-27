@@ -287,6 +287,14 @@ class RestoreTests(unittest.TestCase):
                 self.assertFalse(self.path.exists())
                 self.cluster.run.assert_not_called()
 
+    def test_strict_local_storage_class_is_rejected(self):
+        self.data.storage_classes[0]["parameters"].update(
+            {"numberOfReplicas": "1", "dataLocality": "strict-local"})
+        with self.assertRaisesRegex(restore.RestoreError, "strict-local"):
+            self.plan()
+        self.assertFalse(self.path.exists())
+        self.cluster.run.assert_not_called()
+
     def test_apply_rejects_supported_storage_class_setting_drift_before_any_write(self):
         self.data.storage_classes[0]["parameters"]["staleReplicaTimeout"] = "30"
         self.plan()
@@ -735,6 +743,12 @@ class InspectTests(unittest.TestCase):
                 with self.assertRaises(restore.RestoreError):
                     self.inspect()
                 self.volume = original
+        self.assertEqual(self.created(), [])
+
+    def test_strict_local_volume_is_never_attached(self):
+        self.volume["spec"]["dataLocality"] = "strict-local"
+        with self.assertRaisesRegex(restore.RestoreError, "strict-local"):
+            self.inspect()
         self.assertEqual(self.created(), [])
 
     def test_volume_already_used_by_a_pv_is_never_attached(self):

@@ -80,9 +80,16 @@ INTEGER_PARAMETERS = {  # name: (default, minimum, maximum)
 }
 CHOICE_PARAMETERS = {
     "dataEngine": {"v1"},
-    "dataLocality": {"disabled", "best-effort", "strict-local"},
+    "dataLocality": {"disabled", "best-effort"},
     "unmapMarkSnapChainRemoved": {"ignored", "disabled", "enabled"},
 }
+
+
+# Inspection attaches through a PV without node affinity, which strict-local
+# volumes reject on any node but the one that holds their only replica.
+STRICT_LOCAL_UNSUPPORTED = (
+    "strict-local data locality is unsupported; restore into a class without it"
+)
 
 
 class RestoreError(Exception):
@@ -426,6 +433,8 @@ def storage_class_spec(storage_class):
         if not (isinstance(value, str) and value.isdecimal() and minimum <= int(value) <= maximum):
             raise invalid(f"{key} must be an explicit integer from {minimum} to {maximum}")
         spec[key] = int(value)
+    if parameters.get("dataLocality") == "strict-local":
+        raise invalid(STRICT_LOCAL_UNSUPPORTED)
     revision_counter = parameters.get("disableRevisionCounter", "true")
     if revision_counter not in ("true", "false"):
         raise invalid("invalid disableRevisionCounter; use true or false")
@@ -641,6 +650,8 @@ def restored_volume(cluster, name):
     spec, state = volume.get("spec") or {}, status(volume)
     if not spec.get("fromBackup") or spec.get("encrypted") or spec.get("Standby"):
         raise RestoreError(f"{name}: only unencrypted restored volumes can be inspected")
+    if spec.get("dataLocality") == "strict-local":
+        raise RestoreError(f"{name}: {STRICT_LOCAL_UNSUPPORTED}")
     if (
         is_deleting(volume)
         or state.get("restoreInitiated") is not True
