@@ -17,6 +17,17 @@ spec:
   storage:
     size: 10Gi
     storageClass: longhorn-cnpg
+  affinity:
+    podAntiAffinityType: required
+    # Longhorn cannot place strict-local replicas on the Raspberry Pi.
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                  - raspberrypi
   #   bootstrap:
   #     recovery:
   #       source: garage-backups

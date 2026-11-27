@@ -17,6 +17,16 @@ spec:
         enabled: true
         storageClassName: longhorn-no-backup-single-replication
         size: 20Gi
+      # Longhorn cannot place strict-local replicas on the Raspberry Pi.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - raspberrypi
       resources:
         requests:
           cpu: 100m
