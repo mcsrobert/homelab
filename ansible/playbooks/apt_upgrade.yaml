@@ -33,6 +33,76 @@
           or has no node named {{ inventory_hostname }}:
           {{ preflight_node.msg | default('node not found') }}
 
+    # Pods pinned to a node an interrupted run left cordoned cannot become ready, so
+    # the readiness checks would time out on another node before reaching it.
+    - name: Recover nodes left cordoned by an interrupted run
+      run_once: true  # noqa: run-once[task]
+      delegate_to: localhost
+      vars:
+        marked_nodes: >-
+          {{ marked_nodes_status.resources | default([])
+             | map(attribute='metadata') | selectattr('annotations', 'defined')
+             | selectattr('annotations.homelab/apt-upgrade-cordon', 'defined')
+             | selectattr('annotations.homelab/apt-upgrade-cordon', 'eq', 'true')
+             | map(attribute='name') | list }}
+        marked_nodes_not_ready: >-
+          {%- set not_ready = namespace(names=[]) %}
+          {%- for node in marked_nodes_status.resources | default([]) %}
+          {%- if node.metadata.name in marked_nodes
+                and node.status.conditions | default([])
+                    | selectattr('type', 'eq', 'Ready')
+                    | selectattr('status', 'eq', 'True') | list | length == 0 %}
+          {%- set not_ready.names = not_ready.names + [node.metadata.name] %}
+          {%- endif %}
+          {%- endfor %}
+          {{- not_ready.names -}}
+      block:
+
+        - name: Wait for nodes left cordoned by an interrupted run to be Ready
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Node
+          register: marked_nodes_status
+          failed_when: false
+          until: &marked_nodes_ready marked_nodes_status.resources is defined and marked_nodes_not_ready | length == 0
+          retries: 30
+          delay: 10
+
+        - name: Fail if a node left cordoned by an interrupted run is not Ready
+          ansible.builtin.assert:
+            that: *marked_nodes_ready
+            fail_msg: >-
+              Nodes left cordoned by an interrupted upgrade are not Ready:
+              {{ marked_nodes_not_ready | join(', ') }}. Bring them back, or remove their
+              homelab/apt-upgrade-cordon annotation to keep them cordoned, then rerun.
+              {{ marked_nodes_status.msg | default('') }}
+
+        - name: Uncordon nodes left cordoned by an interrupted run
+          kubernetes.core.k8s_drain:
+            name: "{{ item }}"
+            state: uncordon
+          loop: "{{ marked_nodes }}"
+          register: marked_nodes_uncordon
+          until: marked_nodes_uncordon is not failed
+          retries: 5
+          delay: 10
+
+        - name: Remove the playbook cordon marker from the recovered nodes
+          kubernetes.core.k8s:
+            state: patched
+            merge_type: merge
+            definition:
+              apiVersion: v1
+              kind: Node
+              metadata:
+                name: "{{ item }}"
+                annotations:
+                  homelab/apt-upgrade-cordon: null
+          loop: "{{ marked_nodes }}"
+          register: marked_nodes_clear_marker
+          until: marked_nodes_clear_marker is not failed
+          retries: 5
+          delay: 10
 
 - name: Upgrade remote host
   hosts: k3s_cluster
@@ -64,15 +134,8 @@
       changed_when: false
       check_mode: false
 
-    - name: Wait for Longhorn before draining
-      when: &reboot_due new_kernel_packages.stdout | length > 0
-      ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
-
-    - name: Wait for workloads before draining
-      when: *reboot_due
-      ansible.builtin.include_tasks: tasks/wait_for_workloads.yaml
-
     - name: Read the node before upgrading it
+      when: &reboot_due new_kernel_packages.stdout | length > 0
       delegate_to: localhost
       become: false
       kubernetes.core.k8s_info:
@@ -81,18 +144,101 @@
         name: "{{ inventory_hostname }}"
       register: current_node
 
-    - name: Remember the node before upgrading it
-      ansible.builtin.set_fact:
-        node_before_upgrade: "{{ current_node.resources | first }}"
-
-    # The marker distinguishes an interrupted run from an operator cordon.
+    # The marker is only still present in check mode, where preflight cannot remove it.
     - name: Remember whether the node was cordoned before the upgrade
       when: *reboot_due
       ansible.builtin.set_fact:
         node_was_cordoned: >-
-          {{ node_before_upgrade.spec.unschedulable | default(false)
-             and (node_before_upgrade.metadata.annotations | default({}))
+          {{ (current_node.resources | first).spec.unschedulable | default(false)
+             and ((current_node.resources | first).metadata.annotations | default({}))
                  .get('homelab/apt-upgrade-cordon') != 'true' }}
+
+    # A drain keeps the operator cordon, so pods whose volumes pin them to this node
+    # could not be scheduled anywhere and the checks after the reboot would never pass.
+    - name: Check for workloads pinned to the operator-cordoned node
+      when:
+        - *reboot_due
+        - node_was_cordoned
+      delegate_to: localhost
+      become: false
+      block:
+
+        - name: List pods on the operator-cordoned node
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Pod
+            field_selectors:
+              - "spec.nodeName={{ inventory_hostname }}"
+          register: cordoned_node_pods
+
+        - name: List PersistentVolumeClaims
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: PersistentVolumeClaim
+          register: cordoned_node_claims
+
+        - name: List PersistentVolumes
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: PersistentVolume
+          register: cordoned_node_volumes
+
+        - name: List Longhorn volumes
+          kubernetes.core.k8s_info:
+            api_version: longhorn.io/v1beta2
+            kind: Volume
+            namespace: longhorn-system
+          register: cordoned_node_longhorn_volumes
+
+        - name: Fail if draining would strand workloads pinned to the node
+          ansible.builtin.assert:
+            that:
+              - pinned_workloads | length == 0
+            fail_msg: >-
+              {{ inventory_hostname }} was cordoned by the operator and runs pods whose
+              volumes pin them to it: {{ pinned_workloads | join(', ') }}. Draining would
+              leave them unschedulable while the node stays cordoned. Uncordon the node so
+              the upgrade manages its cordon, or move or stop these workloads, then rerun.
+          vars:
+            pinned_workloads: >-
+              {%- set strict_local = cordoned_node_longhorn_volumes.resources | default([])
+                  | selectattr('spec.dataLocality', 'defined')
+                  | selectattr('spec.dataLocality', 'eq', 'strict-local')
+                  | map(attribute='metadata.name') | list %}
+              {%- set pinned = namespace(names=[]) %}
+              {%- for pod in cordoned_node_pods.resources | default([]) %}
+              {%- set owners = pod.metadata.ownerReferences | default([]) | map(attribute='kind') | list %}
+              {%- if 'DaemonSet' not in owners
+                    and 'kubernetes.io/config.mirror' not in (pod.metadata.annotations | default({}))
+                    and pod.status.phase | default('') not in ['Succeeded', 'Failed'] %}
+              {%- for volume in pod.spec.volumes | default([]) | selectattr('persistentVolumeClaim', 'defined') %}
+              {%- set claim = cordoned_node_claims.resources | default([])
+                  | selectattr('metadata.namespace', 'eq', pod.metadata.namespace)
+                  | selectattr('metadata.name', 'eq', volume.persistentVolumeClaim.claimName)
+                  | first | default({}) %}
+              {%- set volume_spec = (cordoned_node_volumes.resources | default([])
+                  | selectattr('metadata.name', 'eq', (claim.spec | default({})).volumeName | default(''))
+                  | first | default({})).spec | default({}) %}
+              {%- set csi = volume_spec.csi | default({}) %}
+              {%- if volume_spec.nodeAffinity is defined
+                    or (csi.driver | default('') == 'driver.longhorn.io'
+                        and csi.volumeHandle | default('') in strict_local) %}
+              {%- set pinned.names = pinned.names
+                  + [pod.metadata.namespace ~ '/' ~ pod.metadata.name
+                     ~ ' (' ~ volume.persistentVolumeClaim.claimName ~ ')'] %}
+              {%- endif %}
+              {%- endfor %}
+              {%- endif %}
+              {%- endfor %}
+              {{- pinned.names -}}
+
+    - name: Wait for Longhorn before draining
+      when: *reboot_due
+      ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml
+
+    - name: Wait for workloads before draining
+      when: *reboot_due
+      ansible.builtin.include_tasks: tasks/wait_for_workloads.yaml
 
     - name: Drain and reboot the node
       when: *reboot_due
@@ -256,54 +402,6 @@
               "{{ ansible_failed_task.name }}" failed on {{ inventory_hostname }}
               and the node was {{ 'uncordoned' if not node_was_cordoned and rescue_node_ready else 'left cordoned' }}:
               {{ ansible_failed_result.msg | default('see the output above') }}
-
-    # An interrupted reboot can leave the marker after the new kernel is already running.
-    - name: Recover the playbook cordon after an interrupted reboot
-      when:
-        - new_kernel_packages.stdout | length == 0
-        - >-
-          (node_before_upgrade.metadata.annotations | default({}))
-          .get('homelab/apt-upgrade-cordon') == 'true'
-      block:
-
-        - name: Wait for the recovered node to be Ready
-          delegate_to: localhost
-          become: false
-          kubernetes.core.k8s_info:
-            api_version: v1
-            kind: Node
-            name: "{{ inventory_hostname }}"
-            wait: true
-            wait_condition:
-              type: Ready
-              status: "True"
-            wait_timeout: 300
-          register: recovered_node
-          until: >-
-            recovered_node is not failed
-            and recovered_node.resources | default([]) | length > 0
-          retries: 2
-          delay: 10
-
-        - name: Uncordon the recovered node
-          delegate_to: localhost
-          become: false
-          kubernetes.core.k8s_drain:
-            name: "{{ inventory_hostname }}"
-            state: uncordon
-          register: recovered_uncordon
-          until: recovered_uncordon is not failed
-          retries: 5
-          delay: 10
-
-        - name: Remove the recovered playbook cordon marker
-          delegate_to: localhost
-          become: false
-          kubernetes.core.k8s: *clear_cordon_marker
-          register: recovered_clear_cordon_marker
-          until: recovered_clear_cordon_marker is not failed
-          retries: 5
-          delay: 10
 
     - name: Wait for Longhorn before the next node
       ansible.builtin.include_tasks: tasks/wait_for_longhorn.yaml

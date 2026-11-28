@@ -6,23 +6,40 @@
       ansible.builtin.set_fact:
         node_drain_attempt: "{{ node_drain_attempt | int + 1 }}"
 
-    - name: Drain node
+    # k8s_drain stops at the first eviction a PDB refuses, and Longhorn refuses to
+    # evict an instance manager until the volumes attached to its node detach.
+    - name: Drain workloads from the node
       delegate_to: localhost
       become: false
       kubernetes.core.k8s_drain:
         name: "{{ inventory_hostname }}"
         state: drain
-        delete_options:
+        delete_options: &delete_options
           delete_emptydir_data: true
           ignore_daemonsets: true
           force: true
           terminate_grace_period: 60
           wait_timeout: 180
           wait_sleep: 15
-        pod_selectors: &pod_selectors
+        pod_selectors:
           - app!=csi-attacher
           - app!=csi-provisioner
           - longhorn.io/component!=instance-manager
+
+    - name: Drain Longhorn instance managers from the node
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_drain:
+        name: "{{ inventory_hostname }}"
+        state: drain
+        delete_options: *delete_options
+        pod_selectors: &pod_selectors
+          - app!=csi-attacher
+          - app!=csi-provisioner
+      register: node_drain_instance_managers
+      until: node_drain_instance_managers is not failed
+      retries: 10
+      delay: 15
 
     - name: List pods still assigned to the node
       delegate_to: localhost

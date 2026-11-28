@@ -48,3 +48,33 @@
     fail_msg: >-
       StatefulSets not ready: {{ workloads_not_ready | join(', ') }}
       {{ workload_status.msg | default('') }}
+
+- name: Wait for CloudNativePG clusters to be ready
+  delegate_to: localhost
+  become: false
+  kubernetes.core.k8s_info:
+    api_version: postgresql.cnpg.io/v1
+    kind: Cluster
+  register: database_status
+  vars: &databases_not_ready
+    databases_not_ready: >-
+      {%- set not_ready = namespace(names=[]) %}
+      {%- for database in database_status.resources | default([]) %}
+      {%- if database.status.readyInstances | default(0) < database.spec.instances | default(1) %}
+      {%- set not_ready.names = not_ready.names + [database.metadata.namespace ~ '/' ~ database.metadata.name] %}
+      {%- endif %}
+      {%- endfor %}
+      {{- not_ready.names -}}
+  failed_when: false
+  until: &databases_ready database_status.api_found | default(false) and databases_not_ready | length == 0
+  retries: 40
+  delay: 15
+
+- name: Fail if CloudNativePG clusters are not ready
+  vars: *databases_not_ready
+  ansible.builtin.assert:
+    that: *databases_ready
+    fail_msg: >-
+      CloudNativePG clusters not ready: {{ databases_not_ready | join(', ') }}
+      {{ '' if database_status.api_found | default(false) else 'Cluster API not found.' }}
+      {{ database_status.msg | default('') }}
