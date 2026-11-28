@@ -11,17 +11,12 @@ spec:
   interval: 1h
   # Kyverno excludes kyverno from its webhooks; mirror set-helmrelease-defaults here.
   install:
-    remediation:
-      retries: 3
-      remediateLastFailure: true
+    strategy:
+      name: RetryOnFailure
   upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
-      remediateLastFailure: true
-  rollback:
-    cleanupOnFail: true
+    strategy:
+      name: RetryOnFailure
+    cleanupOnFail: false
   driftDetection:
     mode: enabled
   values:

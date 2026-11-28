@@ -10,15 +10,6 @@ spec:
     name: app-template
     namespace: flux-system
   interval: 30m
-  # ha-git-sync moves the configuration it replaces to *.pre-git, which rolling back the Helm release does not undo.
-  # https://github.com/mcsrobert/ha-git-sync/blob/v0.3.1/README.md#what-gets-written-where
-  install:
-    strategy:
-      name: RetryOnFailure
-  upgrade:
-    strategy:
-      name: RetryOnFailure
-    cleanupOnFail: false
   values:
     controllers:
       home-assistant:
