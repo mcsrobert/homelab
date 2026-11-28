@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/persistentvolume-v1.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.2-standalone-strict/persistentvolume-v1.json
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -22,7 +22,7 @@ spec:
     fsType: ext4
     volumeHandle: *name
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.1-standalone-strict/persistentvolume-v1.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/v1.37.2-standalone-strict/persistentvolume-v1.json
 apiVersion: v1
 kind: PersistentVolume
 metadata:
