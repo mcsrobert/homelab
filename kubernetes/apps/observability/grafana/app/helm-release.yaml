@@ -36,7 +36,7 @@ spec:
         token_url: https://authelia.${CLUSTER_DOMAIN}/api/oidc/token
         api_url: https://authelia.${CLUSTER_DOMAIN}/api/oidc/userinfo
         use_pkce: true
-        role_attribute_path: contains(groups[*], 'id_admin') && 'Admin' || 'Viewer'
+        role_attribute_path: contains(groups[*], 'id_admin') && 'Admin'
         role_attribute_strict: true
         auth_style: InHeader
       date_formats:
