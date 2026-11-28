@@ -84,10 +84,20 @@ spec:
           gethomepage.dev/description: Subtitle manager
           gethomepage.dev/group: Media
           gethomepage.dev/widget.type: bazarr
-          gethomepage.dev/widget.url: https://{{ .Release.Name }}.${CLUSTER_DOMAIN}
+          # auth-chain requires an Authelia login, so the widget calls the Service directly.
+          gethomepage.dev/widget.url: http://{{ .Release.Name }}.{{ .Release.Namespace }}.svc.cluster.local:6767
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_BAZARR_API_KEY}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${CLUSTER_DOMAIN}"
+        rules:
+          - filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: traefik.io
+                  kind: Middleware
+                  name: auth-chain
+            backendRefs:
+              - identifier: bazarr
         parentRefs:
           - name: traefik-gateway
             namespace: network
@@ -106,5 +116,11 @@ spec:
                   podSelector:
                     matchLabels:
                       app.kubernetes.io/name: traefik
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: default
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: homepage
               ports:
                 - port: *port
