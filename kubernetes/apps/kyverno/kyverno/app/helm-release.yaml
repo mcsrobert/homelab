@@ -9,29 +9,16 @@ spec:
     kind: OCIRepository
     name: kyverno
   interval: 1h
-  # CRD migrations require manual recovery. RetryOnFailure bypasses remediation,
-  # which is kept explicit for reporting in Kyverno's webhook-exempt namespace.
-  # https://kyverno.io/docs/installation/upgrading/
+  # Kyverno excludes kyverno from its webhooks; mirror set-helmrelease-defaults here.
   install:
     crds: CreateReplace
     strategy:
       name: RetryOnFailure
-      retryInterval: 5m
-    remediation:
-      retries: 3
-      remediateLastFailure: true
   upgrade:
     crds: CreateReplace
     strategy:
       name: RetryOnFailure
-      retryInterval: 5m
     cleanupOnFail: false
-    remediation:
-      strategy: rollback
-      retries: 3
-      remediateLastFailure: true
-  rollback:
-    cleanupOnFail: true
   driftDetection:
     mode: enabled
   values:

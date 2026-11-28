@@ -124,14 +124,17 @@ structure. Good references:
 - Prefer an `OCIRepository` over an HTTP `HelmRepository` when the project
   publishes official OCI charts.
 - Put values inline under `spec.values` in `helm-release.yaml`.
-- Leave out install/upgrade remediation, rollback and drift detection
-  settings by default. The Kyverno policy `set-helmrelease-defaults` fills them
-  in. When upstream requires data restoration or manual schema changes before
-  a downgrade, explicitly set both `install.strategy.name` and
-  `upgrade.strategy.name` to `RetryOnFailure`, and `upgrade.cleanupOnFail` to
-  `false`. This retries in place without automatic rollback, uninstall or
-  deletion of newly created resources on failure. Link the upstream reason in
-  a comment; see Immich and Jellyfin.
+- Leave out install/upgrade strategy, remediation, cleanup and drift
+  detection settings by default. The Kyverno policy `set-helmrelease-defaults`
+  sets `install.strategy.name` and `upgrade.strategy.name` to
+  `RetryOnFailure`, `upgrade.cleanupOnFail` to `false` and
+  `driftDetection.mode` to `enabled`, so a failed release retries in place
+  without automatic rollback, uninstall or deletion of newly created
+  resources. Opt into `RemediateOnFailure` only for stateless releases that
+  can safely roll back, and then set its `remediation` explicitly.
+- Kyverno's webhooks skip the `kyverno` and `kube-system` namespaces. Spell
+  out the `set-helmrelease-defaults` values in HelmReleases there; see
+  `kube-system/coredns/` and `kyverno/policy-reporter/`.
 - Pin images as `tag@sha256:<digest>`. Renovate updates both.
 - Give every container, including init containers, CPU and memory requests
   and a memory limit. Do not set CPU limits.

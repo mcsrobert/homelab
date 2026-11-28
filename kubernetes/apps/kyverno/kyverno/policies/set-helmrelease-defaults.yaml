@@ -7,7 +7,8 @@ metadata:
   annotations:
     policies.kyverno.io/title: HelmRelease defaults
     policies.kyverno.io/description: >-
-      Applies Flux HelmRelease remediation and drift detection defaults when
+      Retries failed Flux HelmRelease installs and upgrades in place, without
+      rollback, uninstall or cleanup, and enables drift detection, when these
       fields are not set in the manifest.
 spec:
   evaluation:
@@ -21,8 +22,6 @@ spec:
         resources: ["helmreleases"]
         operations: ["CREATE", "UPDATE"]
   mutations:
-    # RetryOnFailure strategies are set per release and bypass remediation.
-    # With zero retries, do not add a final rollback/uninstall unless requested.
     - patchType: ApplyConfiguration
       applyConfiguration:
         expression: |
@@ -32,25 +31,15 @@ spec:
                 mode: object.?spec.?driftDetection.?mode.orValue("enabled")
               },
               install: Object.spec.install{
-                remediation: Object.spec.install.remediation{
-                  retries: object.?spec.?install.?remediation.?retries.orValue(3),
-                  remediateLastFailure: object.?spec.?install.?remediation.?remediateLastFailure.orValue(
-                    object.?spec.?install.?remediation.?retries.orValue(3) > 0
-                  )
+                strategy: Object.spec.install.strategy{
+                  name: object.?spec.?install.?strategy.?name.orValue("RetryOnFailure")
                 }
               },
               upgrade: Object.spec.upgrade{
-                cleanupOnFail: object.?spec.?upgrade.?cleanupOnFail.orValue(true),
-                remediation: Object.spec.upgrade.remediation{
-                  strategy: object.?spec.?upgrade.?remediation.?strategy.orValue("rollback"),
-                  retries: object.?spec.?upgrade.?remediation.?retries.orValue(3),
-                  remediateLastFailure: object.?spec.?upgrade.?remediation.?remediateLastFailure.orValue(
-                    object.?spec.?upgrade.?remediation.?retries.orValue(3) > 0
-                  )
+                cleanupOnFail: object.?spec.?upgrade.?cleanupOnFail.orValue(false),
+                strategy: Object.spec.upgrade.strategy{
+                  name: object.?spec.?upgrade.?strategy.?name.orValue("RetryOnFailure")
                 }
-              },
-              rollback: Object.spec.rollback{
-                cleanupOnFail: object.?spec.?rollback.?cleanupOnFail.orValue(true)
               }
             }
           }
