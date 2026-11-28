@@ -71,9 +71,8 @@ spec:
           - path: /app/config.yml
             subPath: config.yaml
       list-cache:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteMany
-        size: 2Gi
+        type: emptyDir
+        sizeLimit: 256Mi
         globalMounts:
           - path: /var/cache/blocky/lists
     service:
