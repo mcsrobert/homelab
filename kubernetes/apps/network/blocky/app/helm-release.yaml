@@ -43,6 +43,15 @@ spec:
                 spec:
                   tcpSocket:
                     port: &dnsPort 1053
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command:
+                      - /app/blocky
+                      - healthcheck
+                  timeoutSeconds: 3
               startup:
                 enabled: true
                 custom: true
