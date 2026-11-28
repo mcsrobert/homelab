@@ -56,15 +56,23 @@ spec:
               - secretRef:
                   name: qbittorrent-gluetun-secret
             probes:
+              # Kubernetes starts qbittorrent only after this passes, once the tunnel is up
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  exec: &gluetunHealthcheck
+                    command:
+                      - /gluetun-entrypoint
+                      - healthcheck
+                  periodSeconds: 2
+                  timeoutSeconds: 5
+                  failureThreshold: 150
               liveness: &gluetunProbe
                 enabled: true
                 custom: true
                 spec:
-                  exec:
-                    command:
-                      - /gluetun-entrypoint
-                      - healthcheck
-                  initialDelaySeconds: 15
+                  exec: *gluetunHealthcheck
                   periodSeconds: 60
                   timeoutSeconds: 5
                   failureThreshold: 10
@@ -87,7 +95,6 @@ spec:
                 add:
                   - NET_ADMIN
                   - NET_RAW
-                  - SYS_MODULE  # Kernel space Wireguard
         containers:
           qbittorrent:
             image:
@@ -157,16 +164,6 @@ spec:
           qbittorrent:
             gluetun:
               - path: /tmp/gluetun
-      # See: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/wireguard.md
-      modules:
-        type: hostPath
-        hostPath: /lib/modules
-        hostPathType: Directory
-        advancedMounts:
-          qbittorrent:
-            gluetun:
-              - path: /lib/modules
-                readOnly: true
     service:
       qbittorrent:
         ports:
