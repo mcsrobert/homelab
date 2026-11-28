@@ -111,3 +111,42 @@ spec:
           identifier: maddy
         endpoints:
           - port: metrics
+    networkpolicies:
+      maddy:
+        controller: maddy
+        policyTypes:
+          - Ingress
+        rules:
+          ingress:
+            - from:
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: habitica
+                # Immich's SMTP settings live in its admin UI, not in Git.
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/instance: immich
+                      app.kubernetes.io/controller: server
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: mealie
+                - podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vaultwarden
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: auth
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: authelia
+              ports:
+                - port: *port
+            - from:
+                - namespaceSelector:
+                    matchLabels:
+                      kubernetes.io/metadata.name: observability
+                  podSelector:
+                    matchLabels:
+                      app.kubernetes.io/name: vmagent
+              ports:
+                - port: *metricsPort
