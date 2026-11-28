@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import NamedTuple
 from urllib.parse import parse_qs, urlsplit
 
-INSPECT_IMAGE = "docker.io/library/python:3.14.10-alpine@sha256:5862d971d1f0ae26b258cefa4e893556b1d3aba81bd2ff30888704ad378bab67"
+INSPECT_IMAGE = "docker.io/library/python:3.15.2-alpine@sha256:0f9552bb28711333da16915ec146f5e6bb44a7fdac9ced15dc17c2e0206346dd"
 INSPECT_SCRIPT = Path(__file__).resolve().with_name("longhorn_restore_inspect.py")
 
 PLAN_VERSION = 1
